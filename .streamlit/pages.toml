@@ -1,0 +1,19 @@
+#[[pages]]
+#path = "pages/APP.py"
+#name = "Home"
+#
+#[[pages]]
+#path = "pages/DataSet.py"
+#name = "Example One"
+#
+#[[pages]]
+#name = "pages/FeatureExtraction.py"
+#is_section = true
+#
+#[[pages]]
+#path = "pages/ModelingApproach.py"
+#name = "Example Four"
+#
+#[[pages]]
+#path = "pages/ModelEvaluation.py"
+#name = "Example Two"
