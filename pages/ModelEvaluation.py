@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from st_pages import add_page_title
+from streamlit_tree_select import tree_select
+
 
 # add_page_title()
 st.header('模型评估')
@@ -11,9 +13,9 @@ with tab1:
     # with :
     oa = col2.metric("OA", "0.36", "+8%")
     pa = col3.metric("Kappa", "0.5", "-8%")
-# with col3:
-#     col1.metric("Temperature", "70 °F", "1.2 °F")
-#     col2.metric("Wind", "9 mph", "-8%")
+    # with col3:
+    #     col1.metric("Temperature", "70 °F", "1.2 °F")
+    #     col2.metric("Wind", "9 mph", "-8%")
     chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
 
     st.line_chart(chart_data)

@@ -17,37 +17,11 @@ from streamlit_tree_select import tree_select
 #     else:
 #         return ''
 
-nodes = [
-    {"label": "气象数据", "value": "folder_a"},
-    {
-        "label": "植保数据",
-        "value": "folder_b",
-        "children": [
-            {"label": "feature1", "value": "sub_a"},
-            {"label": "feature2", "value": "sub_b"},
-            {"label": "feature3", "value": "sub_c"},
-        ],
-    },
-    {
-        "label": "农学数据",
-        "value": "folder_c",
-        "children": [
-            {"label": "晚稻移栽期", "value": "sub_d"},
-            {
-                "label": "预测峰值",
-                "value": "sub_e",
-                "children": [
-                    {"label": "测报站点", "value": "sub_sub_a"},
-                    {"label": "生化指标", "value": "sub_sub_b"},
-                ],
-            },
-            {"label": "生化指标", "value": "sub_f"},
-        ],
-    },
-]
 
 st.header('数据预处理')
 # tab1, tab2 = st.columns(2)
+st.sidebar.button('运行')
+
 tab1, tab2, tab3, tab4 = st.tabs(["气象数据", "植保数据", "农学数据", "遥感数据"])
 with tab1:
     st.markdown("##### 字段")
@@ -130,7 +104,7 @@ with tab4:
 #     st.header("An owl")
 #     st.image("https://static.streamlit.io/examples/owl.jpg")
 st.markdown('---')
-st.subheader('针对该数据处理展示处理前与处理后的图表')
+st.subheader('展示数据处理前与处理后的图表')
 t1, t2 = st.columns(2)
 with t1:
     st.image('resource/image/0.png')
