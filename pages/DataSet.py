@@ -5,12 +5,6 @@ import streamlit as st
 
 from pages_utils import multiselect_all
 
-# st.write(st.session_state["shared"])
-# add_page_title()
-
-# if agree:
-#     st.write('Great!')
-
 st.sidebar.info("注意:按照数据集模板内容填写")
 
 
@@ -21,7 +15,16 @@ def convert_df(df):
 
 
 st.header('数据集')
-st.subheader('模板下载')
+
+st.subheader('数据上传')
+uploaded_files = st.file_uploader("上传数据集", accept_multiple_files=True, label_visibility='collapsed')
+for uploaded_file in uploaded_files:
+    bytes_data = uploaded_file.read()
+    st.write("filename:", uploaded_file.name)
+    st.write(bytes_data)
+st.markdown("---")
+
+st.markdown("##### 模板下载")
 template_list = ['气象数据', '农学数据', '植保数据']
 selected_options = multiselect_all(st, template_list, "Select one or more options:")
 csv = convert_df(pd.read_csv('resource/房价数据.csv'))
@@ -38,10 +41,3 @@ st.sidebar.download_button(
     file_name='large_df.csv',
     mime='text/csv',
 )
-st.markdown("---")
-st.subheader('数据上传')
-uploaded_files = st.file_uploader("上传数据集", accept_multiple_files=True, label_visibility='collapsed')
-for uploaded_file in uploaded_files:
-    bytes_data = uploaded_file.read()
-    st.write("filename:", uploaded_file.name)
-    st.write(bytes_data)

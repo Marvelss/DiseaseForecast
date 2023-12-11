@@ -12,8 +12,8 @@ show_pages(
         Page("pages/App.py", "主页"),
         Page("pages/DataSet.py", "数据集"),
         Page("pages/DataPreparation.py", "数据预处理"),
-        Page("pages/FeatureExtraction.py", "特征提取"),
-        # Page("pages/FeatureOptimization.py", "特征优选"),
+        Page("pages/FeatureCalculation.py", "特征计算"),
+        Page("pages/FeatureOptimization.py", "特征优选"),
         Page("pages/ModelingApproach.py", "建模方法"),
         Page("pages/ModelEvaluation.py", "模型评估")
         # Page("pages/demo.py", 'demo'),

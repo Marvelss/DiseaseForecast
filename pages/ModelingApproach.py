@@ -6,39 +6,13 @@ from streamlit_tree_select import tree_select
 
 # add_page_title()
 st.header('建模方法')
-nodes = [
-    {"label": "气象数据", "value": "folder_a"},
-    {
-        "label": "植保数据",
-        "value": "folder_b",
-        "children": [
-            {"label": "feature1", "value": "sub_a"},
-            {"label": "feature2", "value": "sub_b"},
-            {"label": "feature3", "value": "sub_c"},
-        ],
-    },
-    {
-        "label": "农学数据",
-        "value": "folder_c",
-        "children": [
-            {"label": "晚稻移栽期", "value": "sub_d"},
-            {
-                "label": "预测峰值",
-                "value": "sub_e",
-                "children": [
-                    {"label": "测报站点", "value": "sub_sub_a"},
-                    {"label": "生化指标", "value": "sub_sub_b"},
-                ],
-            },
-            {"label": "生化指标", "value": "sub_f"},
-        ],
-    },
-]
+
 
 st.markdown("##### 数据集关联")
 col1, col2 = st.columns(2)
 with col1:
-    tree_select(nodes)
+    # tree_select(nodes)
+    pass
 with col2:
     tab1, tab5 = st.tabs(["可视化", "数据"])
 
