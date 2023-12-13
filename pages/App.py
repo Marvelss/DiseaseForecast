@@ -14,7 +14,7 @@ show_pages(
         Page("pages/DataPreparation.py", "数据预处理"),
         Page("pages/FeatureCalculation.py", "特征计算"),
         Page("pages/FeatureOptimization.py", "特征优选"),
-        Page("pages/ModelingApproach.py", "建模方法"),
+        Page("pages/ModelBuilding.py", "模型构建"),
         Page("pages/ModelEvaluation.py", "模型评估")
         # Page("pages/demo.py", 'demo'),
         # Page("pages/zdemo.py", 'demo3'),

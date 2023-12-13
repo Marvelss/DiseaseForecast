@@ -5,7 +5,7 @@ import streamlit as st
 
 from pages_utils import multiselect_all
 
-st.sidebar.info("注意:按照数据集模板内容填写")
+# st.sidebar.info("注意:按照数据集模板内容填写")
 
 
 @st.cache_data
@@ -35,9 +35,9 @@ temperature = np.random.randint(low=0, high=40, size=1000)
 # st.dataframe(df)
 df = pd.read_excel('resource/农学数据.xlsx', header=1)
 st.data_editor(df)
-st.sidebar.download_button(
-    label="下载",
-    data=csv,
-    file_name='large_df.csv',
-    mime='text/csv',
-)
+# st.sidebar.download_button(
+#     label="下载",
+#     data=csv,
+#     file_name='large_df.csv',
+#     mime='text/csv',
+# )
