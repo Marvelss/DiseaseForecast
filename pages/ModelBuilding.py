@@ -35,7 +35,7 @@ nodes = [
     },
 ]
 
-modelACV, modelACM, modelACR = st.columns([0.3, 0.7, 0.6])
+modelACV, modelACM, modelACR = st.columns([0.3, 0.7, 0.7])
 with modelACV:
     st.markdown("##### 变量")
     tree_select(nodes)
@@ -66,9 +66,9 @@ with modelACM:
     if agree:
         st.data_editor(['a', 'b'])
     st.button('开始模型训练')
-    with modelACR:
-        tabb1, tabb2 = st.tabs(['可视化', '数据'])
-    with tabb1:
-        st.markdown('展示字段整体数据情况')
-    with tabb2:
-        st.markdown('数据表格')
+with modelACR:
+    tabb1, tabb2 = st.tabs(['可视化', '数据'])
+with tabb1:
+    st.markdown('展示字段整体数据情况')
+with tabb2:
+    st.markdown('数据表格')

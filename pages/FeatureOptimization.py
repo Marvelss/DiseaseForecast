@@ -9,7 +9,7 @@ st.header('特征优选')
 
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
-dataPCV, dataPCM, dataPCR = st.columns([0.3, 0.7, 0.6])
+dataPCV, dataPCM, dataPCR = st.columns([0.3, 0.7, 0.7])
 nodes = [
     {"label": "气象数据", "value": "folder_a"},
     {
