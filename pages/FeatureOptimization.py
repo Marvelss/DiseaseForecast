@@ -76,6 +76,12 @@ with dataPCR:
     tabb1, tabb2 = st.tabs(['结果', '可视化'])
     with tabb1:
         st.markdown('运行结果')
+        st.json(({
+            '气象数据': 'List (2个元素)',
+            '气温 List (2个特征)': [
+                '20.5',
+                '30.5',
+            ]}))
     with tabb2:
         st.subheader('展示数据处理前与处理后的图表')
         t1, t2 = st.columns(2)
