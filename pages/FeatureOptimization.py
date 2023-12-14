@@ -6,7 +6,7 @@ from streamlit_tree_select import tree_select
 from pages_utils import multiselect_all
 
 st.header('特征优选')
-
+st.markdown('---')
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
 dataPCV, dataPCM, dataPCR = st.columns([0.3, 0.7, 0.7])
@@ -40,7 +40,7 @@ nodes = [
 ]
 with dataPCV:
     st.markdown("##### 变量")
-    tree_select(nodes)
+    return_select = tree_select(nodes, disabled=True)
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
     with tab1:

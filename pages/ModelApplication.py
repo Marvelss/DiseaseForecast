@@ -7,6 +7,7 @@ from st_pages import add_page_title
 
 # add_page_title()
 st.header('模型应用')
+st.markdown('---')
 uploaded_model = st.file_uploader("加载模型")
 
 uploaded_parameter = st.file_uploader("加载输入参数")

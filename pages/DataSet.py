@@ -15,7 +15,7 @@ def convert_df(df):
 
 
 st.header('数据集')
-
+st.markdown('---')
 st.subheader('数据上传')
 uploaded_files = st.file_uploader("上传数据集", accept_multiple_files=True, label_visibility='collapsed')
 for uploaded_file in uploaded_files:

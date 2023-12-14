@@ -33,7 +33,7 @@ nodes = [
 ]
 
 st.header('数据预处理')
-
+st.markdown('---')
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
 dataPCV, dataPCM, dataPCR = st.columns([0.3, 0.7, 0.7])

@@ -31,8 +31,7 @@ nodes = [
     },
 ]
 st.header('特征计算')
-
-# st
+st.markdown('---')
 featureCCV, featureCCM, featureCCR = st.columns([0.3, 0.7, 0.7])
 with featureCCV:
     st.markdown("##### 变量")

@@ -6,7 +6,7 @@ from streamlit_tree_select import tree_select
 
 # add_page_title()
 st.header('模型评估')
-
+st.markdown('---')
 nodes = [
     {"label": "机器学习", "value": "folder_a",
      "children": [{"label": "SVM", "value": "folder_b", },
@@ -31,7 +31,7 @@ with modelECM:
         with colOption1:
             agree = st.checkbox('展示模型结果')
         with colOption2:
-            agree2 = st.checkbox('比较模型')
+            agree2 = st.checkbox('比较模型性能')
         with colOption3:
             pass
     with tab2:

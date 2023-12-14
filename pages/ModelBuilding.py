@@ -6,6 +6,7 @@ from streamlit_tree_select import tree_select
 
 # add_page_title()
 st.header('模型构建')
+st.markdown('---')
 nodes = [
     {"label": "气象数据", "value": "folder_a"},
     {
@@ -67,7 +68,7 @@ with modelACM:
         st.data_editor(['a', 'b'])
     st.button('开始模型训练')
 with modelACR:
-    tabb1, tabb2 = st.tabs(['可视化', '数据'])
+    tabb1, tabb2 = st.tabs(['数据', '可视化'])
 with tabb1:
     st.markdown('展示字段整体数据情况')
 with tabb2:
