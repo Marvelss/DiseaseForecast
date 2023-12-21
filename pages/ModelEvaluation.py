@@ -43,7 +43,7 @@ with modelECM:
         st.data_editor(['a', 'b'])
     st.button('运行')
 with modelECR:
-    tabb1, tabb2 = st.tabs(['指标', '可视化'])
+    tabb1, tabb2 = st.tabs(['评价指标', '可视化'])
     with tabb1:
         col2, col3 = st.columns(2)
         oa = col2.metric("OA", "0.36", "+8%")

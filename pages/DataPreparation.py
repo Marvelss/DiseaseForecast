@@ -59,7 +59,7 @@ with dataPCM:
         agree2 = st.checkbox('剔除数据2')
         agree3 = st.checkbox('剔除数据3')
     st.markdown('---')
-    st.subheader('参数设置')
+    st.markdown("##### 参数设置")
     if agree10:
         option = st.selectbox(
             '插补方法',
@@ -70,9 +70,60 @@ with dataPCM:
     st.button('运行')
 
 with dataPCR:
-    tabb1, tabb2 = st.tabs(['结果', '可视化'])
+    tabb0, tabb1, tabb2 = st.tabs(['数据', '结果', '可视化'])
+    with tabb0:
+        st.header('展示表格数据')
     with tabb1:
-        st.markdown('运行结果')
+        col111, col222 = st.columns(2)
+        with col111:
+            st.markdown('处理前')
+            st.json(({
+                '气象数据': {
+
+                    'type': 'feature',
+                    'count': '2',
+                    '气温': {
+                        'type': 'float',
+                        'count': '2',
+                        'value': [
+                            '20.5',
+                            '30.5',
+                        ]
+                    },
+                    '降水': {
+                        'type': 'float',
+                        'count': '3',
+                        'value': [
+                            '0.01',
+                            '0.02',
+                            '0.3'
+                        ]
+                    }
+                }}))
+        with col222:
+            st.markdown('处理后')
+            st.json(({
+                '气象数据': {
+                    'type': 'feature',
+                    'count': '2',
+                    '气温': {
+                        'type': 'float',
+                        'count': '2',
+                        'value': [
+                            '11.5',
+                            '29.5',
+                        ]
+                    },
+                    '降水': {
+                        'type': 'float',
+                        'count': '3',
+                        'value': [
+                            '0.9',
+                            '0.08',
+                            '0.3'
+                        ]
+                    }
+                }}))
     with tabb2:
         st.subheader('展示数据处理前与处理后的图表')
         t1, t2 = st.columns(2)

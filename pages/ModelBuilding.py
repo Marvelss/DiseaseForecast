@@ -65,11 +65,29 @@ with modelACM:
     st.markdown('---')
     st.markdown("##### 参数设置")
     if agree:
-        st.data_editor(['a', 'b'])
+        df = pd.DataFrame(
+            [
+                {"参数名": "a", "参数值": 4},
+                {"参数名": "b", "参数值": 4},
+                {"参数名": "c", "参数值": 6},
+                {"参数名": "d", "参数值": 5},
+            ]
+        )
+        st.data_editor(df)
     st.button('开始模型训练')
 with modelACR:
     tabb1, tabb2 = st.tabs(['数据', '可视化'])
 with tabb1:
-    st.markdown('展示字段整体数据情况')
+    st.text('类型:double' + '\n' +
+            '唯一值:50' + '\n' +
+            '有重复值:True' + '\n' +
+            '缺少计数:0' + '\n' +
+            '最小值:50' + '\n' +
+            '最大值:100' + '\n' +
+            '均值:60' + '\n' +
+            '中位数:50' + '\n' +
+            '众数:60' + '\n' +
+            '标准差:0.3' + '\n'
+            )
 with tabb2:
     st.markdown('数据表格')
