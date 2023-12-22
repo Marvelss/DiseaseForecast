@@ -42,31 +42,36 @@ with dataPCV:
     st.markdown("##### 变量")
     tree_select(nodes)
 with dataPCM:
-    tab1, tab2, tab3, tab4 = st.tabs(["气象数据", "植保数据", "农学数据", "遥感数据"])
-    with tab1:
-        col1, col2 = st.columns(2)
-        # st.dataframe(df.style.highlight_null(null_color='yellow'))
-        with col1:
-            agree = st.checkbox('剔除数据')
-            agree5 = st.checkbox('剔除数据5')
-        with col2:
-            agree10 = st.checkbox("缺失值插补")
-    with tab2:
-        agree1 = st.checkbox('标记不连续数据')
-    with tab3:
-        agree4 = st.checkbox('剔除数据4')
-    with tab4:
-        agree2 = st.checkbox('剔除数据2')
-        agree3 = st.checkbox('剔除数据3')
+    # 当选择一类数据集后,其他数据集禁选
+    st.markdown("##### 预处理方法")
+    # with tab1:
+    col1, col2 = st.columns(2)
+    # st.dataframe(df.style.highlight_null(null_color='yellow'))
+    with col1:
+        agree = st.checkbox('剔除数据')
+        # agree5 = st.checkbox('剔除数据5')
+    with col2:
+        agree10 = st.checkbox("缺失值插补")
+    # with tab2:
+    # agree1 = st.checkbox('标记不连续数据')
+    # # with tab3:
+    # agree4 = st.checkbox('剔除数据4')
+    # # with tab4:
+    # agree2 = st.checkbox('剔除数据2')
+    # agree3 = st.checkbox('剔除数据3')
     st.markdown('---')
-    st.markdown("##### 参数设置")
+    st.markdown("###### 缺失值插补")
+
     if agree10:
+        option33 = st.selectbox(
+            '选择表变量',
+            options=('feature1', 'feature2'))
+
         option = st.selectbox(
             '插补方法',
             options=('线性插值', '自定义'))
         if option == '自定义':
-            st.text_input('温度')
-            st.text_input('降水')
+            st.text_input('输入数值')
     st.button('运行')
 
 with dataPCR:

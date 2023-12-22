@@ -37,16 +37,23 @@ with featureCCV:
     st.markdown("##### 变量")
     tree_select(nodes)
 with featureCCM:
-    tab3, tab4 = st.tabs(["气象", "其他"])
-    with tab3:
-        # st.subheader('气象')
+    # tab3, tab4 = st.tabs(["气象", "其他"])
+    # with tab3:
+    # st.subheader('气象')
+    st.markdown("##### 特征计算方法")
+    col1, col2 = st.columns(2)
+    # st.dataframe(df.style.highlight_null(null_color='yellow'))
+    with col1:
         option14 = st.checkbox('时间(温度)分辨率转换')
         option15 = st.checkbox('降雨日数计算')
         option16 = st.checkbox('降水累积量计算')
-    with tab4:
-        # st.subheader('其他')
+    with col2:
         option17 = st.checkbox('基于活动积温的生育期计算')
         option18 = st.checkbox('时空抽取')
+
+    # with tab4:
+    # st.subheader('其他')
+
     st.markdown('---')
     st.markdown("##### 参数设置")
     if option14:
