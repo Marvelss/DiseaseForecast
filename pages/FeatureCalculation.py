@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 
 from streamlit_tree_select import tree_select
@@ -55,8 +56,11 @@ with featureCCM:
     # st.subheader('其他')
 
     st.markdown('---')
-    st.markdown("##### 参数设置")
+    st.markdown("##### 方法参数设置")
     if option14:
+        option33 = st.selectbox(
+            '选择表变量',
+            options=('feature1', 'feature2'))
         option1 = st.selectbox(
             '分辨率转换',
             ('日值温度', '旬平均温度', '月平均温度'))
@@ -118,30 +122,26 @@ with featureCCM:
         d4 = st.date_input("结束日期", value=None)
         number1 = st.number_input("步长(天)", value=1, min_value=1)
     st.button('运行')
+
 with featureCCR:
     tabb1, tabb2 = st.tabs(['结果', '可视化'])
     with tabb1:
-        st.json(({
-            '气象数据': {
-                'type': 'feature',
-                'count': '2',
-                '降雨日数': {
-                    'type': 'int',
-                    'count': '1',
-                    'value': 10
-                },
-                '月累积降水量': {
-                    'type': 'int',
-                    'count': '5',
-                    'value': [
-                        '10',
-                        '100',
-                        '110',
-                        '120',
-                        '120'
-                    ]
+        st.markdown('##### 数据摘要')
+        col111, col222 = st.columns(2)
+
+        with col111:
+
+            st.markdown('特征名称:温度')
+            st.markdown('类型:整数')
+            st.markdown('个数:19')
+            st.markdown('最小值:50')
+            st.markdown('最大值:100')
+        with col222:
+            st.data_editor(pd.DataFrame(
+                data={
+                    "温度": [1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4],
                 }
-            }}))
+            ), height=190)
     with tabb2:
         st.subheader('展示数据处理前与处理后的图表')
         t1, t2 = st.columns(2)
@@ -149,3 +149,5 @@ with featureCCR:
             st.image('resource/image/0.png')
         with t2:
             st.image('resource/image/1.png')
+    st.button('下载方法参数值')
+    st.button('添加特征')

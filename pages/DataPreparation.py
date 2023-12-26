@@ -4,10 +4,10 @@ import pandas as pd
 from streamlit_tree_select import tree_select
 
 nodes = [
-    {"label": "气象数据", "value": "folder_a"},
+    {"label": "气象数据", "value": "气象数据"},
     {
         "label": "植保数据",
-        "value": "folder_b",
+        "value": "植保数据",
         "children": [
             {"label": "feature1", "value": "sub_a"},
             {"label": "feature2", "value": "sub_b"},
@@ -40,27 +40,37 @@ dataPCV, dataPCM, dataPCR = st.columns([0.3, 0.7, 0.7])
 
 with dataPCV:
     st.markdown("##### 变量")
-    tree_select(nodes)
+    temp = tree_select(nodes)
 with dataPCM:
     # 当选择一类数据集后,其他数据集禁选
     st.markdown("##### 预处理方法")
+
+    dataFlag = temp.get('checked')
     # with tab1:
     col1, col2 = st.columns(2)
     # st.dataframe(df.style.highlight_null(null_color='yellow'))
+
     with col1:
         agree = st.checkbox('剔除数据')
         # agree5 = st.checkbox('剔除数据5')
     with col2:
         agree10 = st.checkbox("缺失值插补")
+    # st.markdown(dataFlag)
+    # if '植保数据' in dataFlag:
+    #     with col1:
+    #         agree111 = st.checkbox('剔除数据1')
+    #         # agree5 = st.checkbox('剔除数据5')
+    #     with col2:
+    #         agree101 = st.checkbox("标记不连续数据")
     # with tab2:
-    # agree1 = st.checkbox('标记不连续数据')
+    # agree1 = st.checkbox('')
     # # with tab3:
     # agree4 = st.checkbox('剔除数据4')
     # # with tab4:
     # agree2 = st.checkbox('剔除数据2')
     # agree3 = st.checkbox('剔除数据3')
     st.markdown('---')
-    st.markdown("###### 缺失值插补")
+    st.markdown("##### 方法参数设置")
 
     if agree10:
         option33 = st.selectbox(
@@ -77,58 +87,31 @@ with dataPCM:
 with dataPCR:
     tabb0, tabb1, tabb2 = st.tabs(['数据', '结果', '可视化'])
     with tabb0:
-        st.header('展示表格数据')
+        st.data_editor(pd.DataFrame(
+            data={
+                "温度": [1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4],
+            }
+        ), height=210)
+
     with tabb1:
+        st.markdown('##### 数据摘要')
         col111, col222 = st.columns(2)
         with col111:
-            st.markdown('处理前')
-            st.json(({
-                '气象数据': {
+            st.markdown('###### 处理前')
+            st.markdown('特征名称:温度')
+            st.markdown('个数:2')
+            st.markdown('类型:整数')
+            st.markdown('数值:[5,6]')
 
-                    'type': 'feature',
-                    'count': '2',
-                    '气温': {
-                        'type': 'float',
-                        'count': '2',
-                        'value': [
-                            '20.5',
-                            '30.5',
-                        ]
-                    },
-                    '降水': {
-                        'type': 'float',
-                        'count': '3',
-                        'value': [
-                            '0.01',
-                            '0.02',
-                            '0.3'
-                        ]
-                    }
-                }}))
         with col222:
-            st.markdown('处理后')
-            st.json(({
-                '气象数据': {
-                    'type': 'feature',
-                    'count': '2',
-                    '气温': {
-                        'type': 'float',
-                        'count': '2',
-                        'value': [
-                            '11.5',
-                            '29.5',
-                        ]
-                    },
-                    '降水': {
-                        'type': 'float',
-                        'count': '3',
-                        'value': [
-                            '0.9',
-                            '0.08',
-                            '0.3'
-                        ]
-                    }
-                }}))
+            st.markdown('###### 处理后')
+            st.markdown('特征名称:温度')
+            st.markdown('个数:5')
+            st.markdown('数据类型:整数')
+            st.markdown('数值:[5,2,3,3,2]')
+        st.button('下载结果数据')
+        st.button('下载方法参数值')
+        st.button('保存修改')
     with tabb2:
         st.subheader('展示数据处理前与处理后的图表')
         t1, t2 = st.columns(2)

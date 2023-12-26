@@ -25,18 +25,19 @@ with modelECV:
     st.markdown("##### 模型")
     tree_select(nodes)
 with modelECM:
-    tab1, tab2 = st.tabs(["处理", " "])
-    with tab1:
-        colOption1, colOption2, colOption3 = st.columns(3)
-        with colOption1:
-            agree = st.checkbox('展示模型结果')
-        with colOption2:
-            agree2 = st.checkbox('比较模型性能')
-        with colOption3:
-            pass
-    with tab2:
-        agree6 = st.checkbox('OA')
-        agree7 = st.checkbox('Kappa')
+    # tab1, tab2 = st.tabs(["处理", " "])
+    st.markdown("##### 模型评估展示")
+    # with tab1:
+    colOption1, colOption2, colOption3 = st.columns(3)
+    with colOption1:
+        agree = st.checkbox('展示模型精度')
+    with colOption2:
+        agree2 = st.checkbox('比较模型精度')
+    with colOption3:
+        pass
+    # with tab2:
+    #     agree6 = st.checkbox('OA')
+    #     agree7 = st.checkbox('Kappa')
     st.markdown('---')
     st.markdown("##### 参数设置")
     if agree:
@@ -48,10 +49,9 @@ with modelECR:
         col2, col3 = st.columns(2)
         oa = col2.metric("OA", "0.36", "+8%")
         pa = col3.metric("Kappa", "0.5", "-8%")
-        st.button("保存模型训练结果")
-        st.button("保存模型结构和参数")
-        st.button("保存模型输入参数")
+        st.button("下载模型训练结果")
+        st.button("下载模型结构和参数")
+        st.button("下载模型输入参数格式")
     with tabb2:
         chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
         st.line_chart(chart_data)
-

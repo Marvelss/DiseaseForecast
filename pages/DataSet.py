@@ -27,7 +27,7 @@ with dataSCM:
         st.write("filename:", uploaded_file.name)
         st.write(bytes_data)
 
-    st.markdown("###### 模板下载")
+    st.markdown("##### 模板下载")
     col1, col2, col3 = st.columns(3)
     with col1:
         option14 = st.checkbox('模板1')
@@ -36,11 +36,13 @@ with dataSCM:
     with col3:
         option16 = st.checkbox('模板3')
 with dataSCR:
-    tab3, tab4 = st.tabs(["模板预览", "其他"])
-    with tab3:
-        csv = convert_df(pd.read_csv('resource/房价数据.csv'))
-        temperature = np.random.randint(low=0, high=40, size=1000)
-        df = pd.read_excel('resource/农学数据.xlsx', header=1)
-        st.data_editor(df)
-    with tab4:
-        st.markdown('其他')
+    st.markdown("##### 模板预览")
+    st.markdown('---')
+    # tab3, tab4 = st.tabs(["", "其他"])
+    # with tab3:
+    csv = convert_df(pd.read_csv('resource/房价数据.csv'))
+    temperature = np.random.randint(low=0, high=40, size=1000)
+    df = pd.read_excel('resource/农学数据.xlsx', header=1)
+    st.data_editor(df)
+    # with tab4:
+    #     st.markdown('其他')

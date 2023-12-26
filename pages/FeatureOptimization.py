@@ -52,8 +52,11 @@ with dataPCM:
     with tab2:
         genre3 = st.checkbox("Relief-F互相关分析")
     st.markdown('---')
-    st.markdown("##### 参数设置")
+    st.markdown("##### 方法参数设置")
     if genre1:
+        option33 = st.selectbox(
+            '选择表变量',
+            options=('feature1', 'feature2'))
         st.markdown('提取条件')
         genre2 = st.radio(
             label='',
@@ -75,28 +78,11 @@ with dataPCM:
 with dataPCR:
     tabb1, tabb2 = st.tabs(['结果', '可视化'])
     with tabb1:
-        st.json(({
-            '气象数据': {
-                'type': 'feature',
-                'count': '2',
-                '气温': {
-                    'type': 'float',
-                    'count': '2',
-                    'value': [
-                        '11.5',
-                        '29.5',
-                    ]
-                },
-                '降水': {
-                    'type': 'float',
-                    'count': '3',
-                    'value': [
-                        '0.9',
-                        '0.08',
-                        '0.3'
-                    ]
-                }
-            }}))
+        st.markdown('##### 数据摘要')
+        st.markdown('特征名称:温度')
+        st.markdown('个数:2')
+        st.markdown('类型:整数')
+        st.markdown('数值:[5,6]')
     with tabb2:
         st.subheader('展示数据处理前与处理后的图表')
         t1, t2 = st.columns(2)
@@ -117,3 +103,6 @@ with dataPCR:
             # st.image('resource/image/0.png')
         with t2:
             pass
+    st.button('下载方法参数')
+    st.button('下载结果数据')
+    st.button('添加特征')

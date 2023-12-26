@@ -63,7 +63,7 @@ with modelACM:
         )
 
     st.markdown('---')
-    st.markdown("##### 参数设置")
+    st.markdown("##### 模型参数设置")
     if agree:
         df = pd.DataFrame(
             [
@@ -74,20 +74,18 @@ with modelACM:
             ]
         )
         st.data_editor(df)
+    st.button('下载模型参数')
     st.button('开始模型训练')
 with modelACR:
     tabb1, tabb2 = st.tabs(['数据', '可视化'])
 with tabb1:
-    st.text('类型:double' + '\n' +
-            '唯一值:50' + '\n' +
-            '有重复值:True' + '\n' +
-            '缺少计数:0' + '\n' +
-            '最小值:50' + '\n' +
-            '最大值:100' + '\n' +
-            '均值:60' + '\n' +
-            '中位数:50' + '\n' +
-            '众数:60' + '\n' +
-            '标准差:0.3' + '\n'
-            )
+    st.markdown('##### 数据摘要')
+    st.markdown('特征名称:温度')
+    st.markdown('类型:整数')
+    st.markdown('个数:50')
+    st.markdown('缺失值数目:0')
+    st.markdown('最小值:50')
+    st.markdown('最大值:100')
+    st.markdown('均值:60')
 with tabb2:
     st.markdown('数据表格')
