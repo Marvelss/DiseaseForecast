@@ -85,7 +85,7 @@ with dataPCM:
     st.button('运行')
 
 with dataPCR:
-    tabb0, tabb1, tabb2 = st.tabs(['数据', '结果', '可视化'])
+    tabb0, tabb1, tabb2, tabb3 = st.tabs(['数据', '结果', '可视化', '工作区'])
     with tabb0:
         st.data_editor(pd.DataFrame(
             data={
@@ -109,9 +109,6 @@ with dataPCR:
             st.markdown('个数:5')
             st.markdown('数据类型:整数')
             st.markdown('数值:[5,2,3,3,2]')
-        st.button('下载结果数据')
-        st.button('下载方法参数值')
-        st.button('保存修改')
     with tabb2:
         st.subheader('展示数据处理前与处理后的图表')
         t1, t2 = st.columns(2)
@@ -119,7 +116,18 @@ with dataPCR:
             st.image('resource/image/0.png')
         with t2:
             st.image('resource/image/1.png')
-
+    with tabb3:
+        df = pd.DataFrame(
+            {
+                "名称": ["温度", "降水", "生育期"],
+                "大小": ["1*3", "1*6", "1*5"],
+                '处理方法': ['缺失值插补', '缺失值插补', '缺失值插补'],
+                "是否保存修改": [False, False, False],
+            }
+        )
+        edited_df = st.data_editor(df)
+        st.button('保存修改')
+        st.button('下载方法参数值')
 # with tab2:
 #     st.subheader('植保数据')
 # df = pd.read_excel('resource/植保数据 - 副本.xlsx')

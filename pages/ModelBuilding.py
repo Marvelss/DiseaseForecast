@@ -74,10 +74,10 @@ with modelACM:
             ]
         )
         st.data_editor(df)
-    st.button('下载模型参数')
+
     st.button('开始模型训练')
 with modelACR:
-    tabb1, tabb2 = st.tabs(['数据', '可视化'])
+    tabb1, tabb2, tabb3 = st.tabs(['数据', '可视化', '工作区'])
 with tabb1:
     st.markdown('##### 数据摘要')
     st.markdown('特征名称:温度')
@@ -89,3 +89,5 @@ with tabb1:
     st.markdown('均值:60')
 with tabb2:
     st.markdown('数据表格')
+with tabb3:
+    st.button('下载模型参数')

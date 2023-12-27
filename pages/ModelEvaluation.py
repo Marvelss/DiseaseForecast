@@ -44,14 +44,16 @@ with modelECM:
         st.data_editor(['a', 'b'])
     st.button('运行')
 with modelECR:
-    tabb1, tabb2 = st.tabs(['评价指标', '可视化'])
+    tabb1, tabb2, tabb3 = st.tabs(['评价指标', '可视化', '工作区'])
     with tabb1:
         col2, col3 = st.columns(2)
         oa = col2.metric("OA", "0.36", "+8%")
         pa = col3.metric("Kappa", "0.5", "-8%")
-        st.button("下载模型训练结果")
-        st.button("下载模型结构和参数")
-        st.button("下载模型输入参数格式")
+
     with tabb2:
         chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
         st.line_chart(chart_data)
+    with tabb3:
+        st.button("下载模型训练结果")
+        st.button("下载模型结构和参数")
+        st.button("下载模型输入参数格式")

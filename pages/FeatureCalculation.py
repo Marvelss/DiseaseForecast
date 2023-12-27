@@ -124,13 +124,12 @@ with featureCCM:
     st.button('运行')
 
 with featureCCR:
-    tabb1, tabb2 = st.tabs(['结果', '可视化'])
+    tabb1, tabb2, tabb3 = st.tabs(['结果', '可视化', '工作区'])
     with tabb1:
         st.markdown('##### 数据摘要')
         col111, col222 = st.columns(2)
 
         with col111:
-
             st.markdown('特征名称:温度')
             st.markdown('类型:整数')
             st.markdown('个数:19')
@@ -149,5 +148,15 @@ with featureCCR:
             st.image('resource/image/0.png')
         with t2:
             st.image('resource/image/1.png')
-    st.button('下载方法参数值')
-    st.button('添加特征')
+    with tabb3:
+        df = pd.DataFrame(
+            {
+                "名称": ["温度", "降雨日数", "降水"],
+                "大小": ["1*3", "1*6", "1*5"],
+                '处理方法': ['时间分辨率转换', '降雨日数计算', '降水累积量计算'],
+                "是否添加特征": [False, False, False],
+            }
+        )
+        edited_df = st.data_editor(df)
+        st.button('添加特征')
+        st.button('下载方法参数值')

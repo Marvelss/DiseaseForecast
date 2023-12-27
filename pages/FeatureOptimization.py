@@ -76,7 +76,7 @@ with dataPCM:
     st.button('运行')
 
 with dataPCR:
-    tabb1, tabb2 = st.tabs(['结果', '可视化'])
+    tabb1, tabb2, tabb3 = st.tabs(['结果', '可视化', '工作区'])
     with tabb1:
         st.markdown('##### 数据摘要')
         st.markdown('特征名称:温度')
@@ -103,6 +103,15 @@ with dataPCR:
             # st.image('resource/image/0.png')
         with t2:
             pass
-    st.button('下载方法参数')
-    st.button('下载结果数据')
-    st.button('添加特征')
+        with tabb3:
+            df = pd.DataFrame(
+                {
+                    "名称": ["温度", "降雨日数", "降水"],
+                    "大小": ["1*3", "1*6", "1*5"],
+                    '处理方法': ['时间分辨率转换', '降雨日数计算', '降水累积量计算'],
+                    "是否添加特征": [False, False, False],
+                }
+            )
+            edited_df = st.data_editor(df)
+            st.button('添加特征')
+            st.button('下载方法参数值')
