@@ -5,8 +5,8 @@ from st_pages import add_page_title
 from streamlit_tree_select import tree_select
 
 # add_page_title()
-st.header('模型评估')
-st.markdown('---')
+# st.header('模型评估')
+# st.markdown('---')
 nodes = [
     {"label": "机器学习", "value": "folder_a",
      "children": [{"label": "SVM", "value": "folder_b", },
@@ -54,6 +54,15 @@ with modelECR:
         chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
         st.line_chart(chart_data)
     with tabb3:
+        df = pd.DataFrame(
+            {
+                "名称": ["SVM", "KNN", "RF"],
+                "下载模型训练结果": [True, True, True],
+                "下载模型结构和参数": [True, True, True],
+                "下载模型输入参数格式": [True, True, True],
+            }
+        )
+        edited_df = st.data_editor(df)
         st.button("下载模型训练结果")
         st.button("下载模型结构和参数")
         st.button("下载模型输入参数格式")

@@ -5,8 +5,8 @@ from st_pages import add_page_title
 from streamlit_tree_select import tree_select
 
 # add_page_title()
-st.header('模型构建')
-st.markdown('---')
+# st.header('模型构建')
+# st.markdown('---')
 nodes = [
     {"label": "气象数据", "value": "folder_a"},
     {
@@ -90,4 +90,12 @@ with tabb1:
 with tabb2:
     st.markdown('数据表格')
 with tabb3:
-    st.button('下载模型参数')
+    df = pd.DataFrame(
+        {
+            "名称": ["SVM", "KNN", "RF"],
+            '参数数量': ['5', '6', '5'],
+            "下载参数": [True, True, True],
+        }
+    )
+    edited_df = st.data_editor(df)
+    st.button('下载')

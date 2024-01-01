@@ -4,10 +4,10 @@ import streamlit as st
 from streamlit_tree_select import tree_select
 
 nodes = [
-    {"label": "气象数据", "value": "folder_a"},
+    {"label": "气象数据", "value": "气象数据"},
     {
         "label": "植保数据",
-        "value": "folder_b",
+        "value": "植保数据",
         "children": [
             {"label": "feature1", "value": "sub_a"},
             {"label": "feature2", "value": "sub_b"},
@@ -31,12 +31,75 @@ nodes = [
         ],
     },
 ]
-st.header('特征计算')
-st.markdown('---')
+nodes1 = [
+    {"label": "气象数据", "value": "气象数据"},
+    {
+        "label": "植保数据",
+        "value": "植保数据",
+        "children": [
+            {"label": "feature1", "value": "sub_a"},
+            {"label": "feature2", "value": "sub_b"},
+            {"label": "feature3", "value": "sub_c"},
+        ],
+    },
+    {
+        "label": "农学数据",
+        "value": "folder_c",
+        "children": [
+            {"label": "晚稻移栽期", "value": "sub_d"},
+            {
+                "label": "预测峰值",
+                "value": "sub_e",
+                "children": [
+                    {"label": "测报站点", "value": "sub_sub4"},
+                    {"label": "生化指标", "value": "sub_s5"},
+                ],
+            },
+            {"label": "生化指标", "value": "sub_f"},
+        ],
+    },
+]
+nodes2 = [
+    {"label": "气象数据", "value": "气象数据"},
+    {
+        "label": "植保数据",
+        "value": "植保数据",
+        "children": [
+            {"label": "feature1", "value": "sub_4"},
+            {"label": "feature2", "value": "sub_3"},
+            {"label": "feature3", "value": "sub_2"},
+        ],
+    },
+    {
+        "label": "农学数据",
+        "value": "folder_c",
+        "children": [
+            {"label": "晚稻移栽期", "value": "sub_d"},
+            {
+                "label": "预测峰值",
+                "value": "sub_e",
+                "children": [
+                    {"label": "测报站点", "value": "sub_sub_a"},
+                    {"label": "生化指标", "value": "sub_sub_b"},
+                ],
+            },
+            {"label": "生化指标", "value": "sub_f"},
+        ],
+    },
+]
+# st.header('特征计算')
+# st.markdown('---')
 featureCCV, featureCCM, featureCCR = st.columns([0.3, 0.7, 0.7])
 with featureCCV:
-    st.markdown("##### 变量")
-    tree_select(nodes)
+    st.markdown("##### 数据与特征")
+    st.markdown("###### 原始数据")
+    temp = tree_select(nodes)
+    st.markdown('---')
+    st.markdown("###### 预处理数据")
+    temp1 = tree_select(nodes1)
+    st.markdown('---')
+    st.markdown("###### 特征")
+    temp2 = tree_select(nodes2)
 with featureCCM:
     # tab3, tab4 = st.tabs(["气象", "其他"])
     # with tab3:
@@ -154,7 +217,7 @@ with featureCCR:
                 "名称": ["温度", "降雨日数", "降水"],
                 "大小": ["1*3", "1*6", "1*5"],
                 '处理方法': ['时间分辨率转换', '降雨日数计算', '降水累积量计算'],
-                "是否添加特征": [False, False, False],
+                "添加特征": [False, False, False],
             }
         )
         edited_df = st.data_editor(df)
