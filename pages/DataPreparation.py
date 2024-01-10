@@ -133,12 +133,10 @@ with dataPCM:
     # agree2 = st.checkbox('剔除数据2')
     # agree3 = st.checkbox('剔除数据3')
     st.markdown('---')
-    st.markdown("##### 方法参数设置")
+    # st.markdown("##### 方法参数设置")
 
     if agree10:
-        option33 = st.selectbox(
-            '选择表变量',
-            options=('feature1', 'feature2'))
+
 
         option = st.selectbox(
             '插补方法',
@@ -152,7 +150,8 @@ with dataPCM:
 
         number2 = st.text_input("剔除大于", value=0.1)
         number3 = st.text_input("剔除小于", value=0.1)
-    st.button('运行')
+    interval_col1, interval_col2 = st.columns([5, 1])
+    interval_col2.button('运行')
 
 with dataPCR:
     tabb0, tabb1, tabb2, tabb3 = st.tabs(['数据', '结果', '可视化', '工作区'])

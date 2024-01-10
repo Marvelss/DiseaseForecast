@@ -44,6 +44,7 @@ with dataSCR:
     temperature = np.random.randint(low=0, high=40, size=1000)
     df = pd.read_excel('resource/农学数据.xlsx', header=1)
     st.data_editor(df)
-    st.button('下载')
+    interval_col1, interval_col2 = st.columns([5, 1])
+    interval_col2.button('下载')
     # with tab4:
     #     st.markdown('其他')

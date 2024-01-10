@@ -119,11 +119,8 @@ with featureCCM:
     # st.subheader('其他')
 
     st.markdown('---')
-    st.markdown("##### 方法参数设置")
+    # st.markdown("##### 方法参数设置")
     if option14:
-        option33 = st.selectbox(
-            '选择表变量',
-            options=('feature1', 'feature2'))
         option1 = st.selectbox(
             '分辨率转换',
             ('日值温度', '旬平均温度', '月平均温度'))
@@ -184,7 +181,8 @@ with featureCCM:
             pass
         d4 = st.date_input("结束日期", value=None)
         number1 = st.number_input("步长(天)", value=1, min_value=1)
-    st.button('运行')
+    interval_col1, interval_col2 = st.columns([5, 1])
+    interval_col2.button('运行')
 
 with featureCCR:
     tabb1, tabb2, tabb3 = st.tabs(['结果', '可视化', '工作区'])

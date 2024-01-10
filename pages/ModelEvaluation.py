@@ -42,7 +42,8 @@ with modelECM:
     st.markdown("##### 参数设置")
     if agree:
         st.data_editor(['a', 'b'])
-    st.button('运行')
+    col1333, col2333 = st.columns([5, 1])
+    col2333.button('运行')
 with modelECR:
     tabb1, tabb2, tabb3 = st.tabs(['评价指标', '可视化', '工作区'])
     with tabb1:
@@ -66,3 +67,5 @@ with modelECR:
         st.button("下载模型训练结果")
         st.button("下载模型结构和参数")
         st.button("下载模型输入参数格式")
+
+

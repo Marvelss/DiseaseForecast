@@ -115,11 +115,9 @@ with dataPCM:
     with tab2:
         genre3 = st.checkbox("Relief-F互相关分析")
     st.markdown('---')
-    st.markdown("##### 方法参数设置")
+    # st.markdown("##### 方法参数设置")
     if genre1:
-        option33 = st.selectbox(
-            '选择表变量',
-            options=('feature1', 'feature2'))
+
         st.markdown('提取条件')
         genre2 = st.radio(
             label='',
@@ -136,7 +134,8 @@ with dataPCM:
             number1 = st.number_input("TOP(%)", value=5, min_value=5, step=5)
         if option == '按权重值计算':
             number2 = st.number_input("权重阈值", value=10, min_value=10)
-    st.button('运行')
+    interval_col1, interval_col2 = st.columns([5, 1])
+    interval_col2.button('运行')
 
 with dataPCR:
     tabb1, tabb2, tabb3 = st.tabs(['结果', '可视化', '工作区'])
