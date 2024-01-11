@@ -127,6 +127,7 @@ with featureCCM:
     # option2 = st.selectbox(
     #     '雨日数计算',
     #     ('月雨日数', '年雨日数'))
+        st.markdown('---')
     if option15:
         d1 = st.date_input("开始时间", value=None)
         d2 = st.date_input("结束时间", value=None)
@@ -139,10 +140,12 @@ with featureCCM:
             number2 = st.text_input("单日降水量数值(mm)", value=0.1)
         number1 = st.number_input("连续降雨日数时长(天数)", value=1, min_value=1)
         # option2 = st.sidebar
+        st.markdown('---')
     if option16:
         option3 = st.selectbox(
             '降水累积量计算',
             ('日累积降水量', '旬累积降水量', '月累积降水量'))
+        st.markdown('---')
     if option17:
         # option5 = st.sidebar.selectbox(
         #     '地区',
@@ -160,6 +163,7 @@ with featureCCM:
             number = st.number_input(
                 "积温阈值温度(50-300℃)", value=100, step=50,
                 min_value=50, max_value=300)
+        st.markdown('---')
 
     if option18:
         # st.sidebar.
@@ -181,27 +185,28 @@ with featureCCM:
             pass
         d4 = st.date_input("结束日期", value=None)
         number1 = st.number_input("步长(天)", value=1, min_value=1)
+        st.markdown('---')
     interval_col1, interval_col2 = st.columns([5, 1])
     interval_col2.button('运行')
 
 with featureCCR:
-    tabb1, tabb2, tabb3 = st.tabs(['结果', '可视化', '工作区'])
-    with tabb1:
-        st.markdown('##### 数据摘要')
-        col111, col222 = st.columns(2)
-
-        with col111:
-            st.markdown('特征名称:温度')
-            st.markdown('类型:整数')
-            st.markdown('个数:19')
-            st.markdown('最小值:50')
-            st.markdown('最大值:100')
-        with col222:
-            st.data_editor(pd.DataFrame(
-                data={
-                    "温度": [1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4],
-                }
-            ), height=190)
+    tabb2, tabb3 = st.tabs(['可视化', '历史记录及数据下载'])
+    # with tabb1:
+    #     st.markdown('##### 数据摘要')
+    #     col111, col222 = st.columns(2)
+    #
+    #     with col111:
+    #         st.markdown('特征名称:温度')
+    #         st.markdown('类型:整数')
+    #         st.markdown('个数:19')
+    #         st.markdown('最小值:50')
+    #         st.markdown('最大值:100')
+    #     with col222:
+    #         st.data_editor(pd.DataFrame(
+    #             data={
+    #                 "温度": [1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4],
+    #             }
+    #         ), height=190)
     with tabb2:
         st.subheader('展示数据处理前与处理后的图表')
         t1, t2 = st.columns(2)

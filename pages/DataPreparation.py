@@ -134,50 +134,45 @@ with dataPCM:
     # agree3 = st.checkbox('剔除数据3')
     st.markdown('---')
     # st.markdown("##### 方法参数设置")
-
     if agree10:
-
-
         option = st.selectbox(
             '插补方法',
             options=('线性插值', '自定义'))
         if option == '自定义':
             st.text_input('输入数值')
+        st.markdown('---')
     if agree:
-        option334 = st.selectbox(
-            '选择表变量',
-            options=('feature1', 'feature2'))
-
         number2 = st.text_input("剔除大于", value=0.1)
         number3 = st.text_input("剔除小于", value=0.1)
+        st.markdown('---')
     interval_col1, interval_col2 = st.columns([5, 1])
     interval_col2.button('运行')
 
 with dataPCR:
-    tabb0, tabb1, tabb2, tabb3 = st.tabs(['数据', '结果', '可视化', '工作区'])
-    with tabb0:
-        st.data_editor(pd.DataFrame(
-            data={
-                "温度": [1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4],
-            }
-        ), height=210)
-
-    with tabb1:
-        st.markdown('##### 数据摘要')
-        col111, col222 = st.columns(2)
-        with col111:
-            st.markdown('###### 处理前')
-            st.markdown('特征名称:温度')
-            st.markdown('个数:2')
-            st.markdown('类型:整数')
-            st.markdown('数值:[5,6]')
-
-        with col222:
-            st.markdown('###### 处理后')
-            st.markdown('特征名称:温度')
-            st.markdown('个数:5')
-            st.markdown('数据类型:整数')
-            st.markdown('数值:[5,2,3,3,2]')
+    tabb2, tabb3 = st.tabs([ '可视化', '历史记录及数据下载'])
+    # with tabb0:
+    #     st.data_editor(pd.DataFrame(
+    #         data={
+    #             "温度": [1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4],
+    #         }
+    #     ), height=210)
+    #
+    # with tabb1:
+    #     st.markdown('##### 数据摘要')
+    #     col111, col222 = st.columns(2)
+    #     with col111:
+    #         st.markdown('###### 处理前')
+    #         st.markdown('特征名称:温度')
+    #         st.markdown('个数:2')
+    #         st.markdown('类型:整数')
+    #         st.markdown('数值:[5,6]')
+    #
+    #     with col222:
+    #         st.markdown('###### 处理后')
+    #         st.markdown('特征名称:温度')
+    #         st.markdown('个数:5')
+    #         st.markdown('数据类型:整数')
+    #         st.markdown('数值:[5,2,3,3,2]')
     with tabb2:
         st.subheader('展示数据处理前与处理后的图表')
         t1, t2 = st.columns(2)

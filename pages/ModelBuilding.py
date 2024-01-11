@@ -140,6 +140,7 @@ with modelACM:
                     ]
                 )
                 st.data_editor(df)
+                st.markdown('---')
             interval_col1, interval_col2 = st.columns([4, 1])
             interval_col2.button("下一步", on_click=nextPage)
             # st.button()
@@ -165,7 +166,7 @@ with modelACM:
             interval_col1.button("返回", on_click=firstPage)
             interval_col2.button("开始模型训练")
 with modelACR:
-    tabb1, tabb2, tabb3 = st.tabs(['精度', '可视化', '工作区'])
+    tabb1, tabb2, tabb3 = st.tabs(['精度', '可视化', '模型结构和结果下载'])
 with tabb1:
     col2, col3 = st.columns(2)
     oa = col2.metric("OA", "0.36", "+8%")

@@ -109,15 +109,11 @@ with dataPCM:
     with tab1:
         genre = st.checkbox("Person相关性分析")
         genre1 = st.checkbox("t检验")
-
-    # btn1 = st.button('预览')
-
     with tab2:
         genre3 = st.checkbox("Relief-F互相关分析")
     st.markdown('---')
     # st.markdown("##### 方法参数设置")
     if genre1:
-
         st.markdown('提取条件')
         genre2 = st.radio(
             label='',
@@ -125,6 +121,7 @@ with dataPCM:
             label_visibility="collapsed",
             options=['p-value<0.001', 'p-value<0.005', 'p-value<0.01']
         )
+        st.markdown('---')
     if genre3:
         # st.markdown('提取条件')
         option = st.selectbox(
@@ -134,17 +131,18 @@ with dataPCM:
             number1 = st.number_input("TOP(%)", value=5, min_value=5, step=5)
         if option == '按权重值计算':
             number2 = st.number_input("权重阈值", value=10, min_value=10)
+        st.markdown('---')
     interval_col1, interval_col2 = st.columns([5, 1])
     interval_col2.button('运行')
 
 with dataPCR:
-    tabb1, tabb2, tabb3 = st.tabs(['结果', '可视化', '工作区'])
-    with tabb1:
-        st.markdown('##### 数据摘要')
-        st.markdown('特征名称:温度')
-        st.markdown('个数:2')
-        st.markdown('类型:整数')
-        st.markdown('数值:[5,6]')
+    tabb2, tabb3 = st.tabs(['可视化', '历史记录及数据下载'])
+    # with tabb1:
+    #     st.markdown('##### 数据摘要')
+    #     st.markdown('特征名称:温度')
+    #     st.markdown('个数:2')
+    #     st.markdown('类型:整数')
+    #     st.markdown('数值:[5,6]')
     with tabb2:
         st.subheader('展示数据处理前与处理后的图表')
         t1, t2 = st.columns(2)
