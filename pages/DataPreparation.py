@@ -2,7 +2,15 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from streamlit_tree_select import tree_select
+import pages_utils
+from streamlit_autorefresh import st_autorefresh
 
+# count = st_autorefresh(interval=2000, limit=100, key="fizzbuzzcounter")
+
+# The function returns a counter for number of refreshes. This allows the
+# ability to make special requests at different intervals based on the count
+# if count == 0:
+#     st.write("Count is zero")
 nodes = [
     {"label": "气象数据", "value": "气象数据"},
     {
@@ -31,34 +39,7 @@ nodes = [
         ],
     },
 ]
-nodes1 = [
-    {"label": "气象数据", "value": "气象数据"},
-    {
-        "label": "植保数据",
-        "value": "植保数据",
-        "children": [
-            {"label": "feature1", "value": "sub_a"},
-            {"label": "feature2", "value": "sub_b"},
-            {"label": "feature3", "value": "sub_c"},
-        ],
-    },
-    {
-        "label": "农学数据",
-        "value": "folder_c",
-        "children": [
-            {"label": "晚稻移栽期", "value": "sub_d"},
-            {
-                "label": "预测峰值",
-                "value": "sub_e",
-                "children": [
-                    {"label": "测报站点", "value": "sub_sub4"},
-                    {"label": "生化指标", "value": "sub_s5"},
-                ],
-            },
-            {"label": "生化指标", "value": "sub_f"},
-        ],
-    },
-]
+
 nodes2 = [
     {"label": "气象数据", "value": "气象数据"},
     {
@@ -87,22 +68,49 @@ nodes2 = [
         ],
     },
 ]
+
+st.session_state.page = 0
+
+
+def addData(pha, rootNode):
+    rootNode.append(
+        {
+            "label": "农学数据",
+            "value": "folder_c",
+            "children": [
+                {"label": "晚稻移栽期", "value": "sub_d"},
+                {
+                    "label": "预测峰值",
+                    "value": "sub_e",
+                }]})
+    if st.session_state.page != -1:
+        st.session_state.page += 1
+        # st.write(st.session_state.page)
+        # if st.session_state.page == 1:
+        st.session_state.page += 1
+        # st.write(st.session_state.page)
+        with pha.container():
+            st.markdown("sub_a" + str(st.session_state.page))
+            # temp1 = tree_select(rootNode)
+
+
 # st.header('数据预处理')
 # st.markdown('---')
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
 dataPCV, dataPCM, dataPCR = st.columns([0.3, 0.7, 0.7])
-
 with dataPCV:
     st.markdown("##### 数据与特征")
     st.markdown("###### 原始数据")
     temp = tree_select(nodes)
     st.markdown('---')
     st.markdown("###### 预处理数据")
-    temp1 = tree_select(nodes1)
+    ph = st.empty()
+    with ph.container():
+        tree_select(pages_utils.nodes1)
     st.markdown('---')
     st.markdown("###### 特征")
-    temp2 = tree_select(nodes2)
+    temp2 = tree_select(pages_utils.nodes2)
 
 with dataPCM:
     # 当选择一类数据集后,其他数据集禁选
@@ -146,10 +154,10 @@ with dataPCM:
         number3 = st.text_input("剔除小于", value=0.1)
         st.markdown('---')
     interval_col1, interval_col2 = st.columns([5, 1])
-    interval_col2.button('运行')
-
+    interval_col2.button('运行', on_click=addData, args=(
+        ph, pages_utils.nodes1))
 with dataPCR:
-    tabb2, tabb3 = st.tabs([ '可视化', '历史记录及数据下载'])
+    tabb2, tabb3 = st.tabs(['可视化', '历史记录及数据下载'])
     # with tabb0:
     #     st.data_editor(pd.DataFrame(
     #         data={

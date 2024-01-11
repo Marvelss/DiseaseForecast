@@ -3,6 +3,16 @@ import streamlit as st
 
 from streamlit_tree_select import tree_select
 
+import pages_utils
+
+st.session_state.page = 0
+
+
+def addData1(pha, rootNode):
+    st.session_state.page += 1
+    rootNode[0]["children"].append({"label": "降雨日数", "value": "sub_d"})
+
+
 nodes = [
     {"label": "气象数据", "value": "气象数据"},
     {
@@ -96,10 +106,12 @@ with featureCCV:
     temp = tree_select(nodes)
     st.markdown('---')
     st.markdown("###### 预处理数据")
-    temp1 = tree_select(nodes1)
+    temp1 = tree_select(pages_utils.nodes1)
     st.markdown('---')
     st.markdown("###### 特征")
-    temp2 = tree_select(nodes2)
+    ph1 = st.empty()
+    with ph1.container():
+        tree_select(pages_utils.nodes2)
 with featureCCM:
     # tab3, tab4 = st.tabs(["气象", "其他"])
     # with tab3:
@@ -124,9 +136,9 @@ with featureCCM:
         option1 = st.selectbox(
             '分辨率转换',
             ('日值温度', '旬平均温度', '月平均温度'))
-    # option2 = st.selectbox(
-    #     '雨日数计算',
-    #     ('月雨日数', '年雨日数'))
+        # option2 = st.selectbox(
+        #     '雨日数计算',
+        #     ('月雨日数', '年雨日数'))
         st.markdown('---')
     if option15:
         d1 = st.date_input("开始时间", value=None)
@@ -187,7 +199,8 @@ with featureCCM:
         number1 = st.number_input("步长(天)", value=1, min_value=1)
         st.markdown('---')
     interval_col1, interval_col2 = st.columns([5, 1])
-    interval_col2.button('运行')
+    interval_col2.button('运行', on_click=addData1, args=(
+        ph1, pages_utils.nodes2))
 
 with featureCCR:
     tabb2, tabb3 = st.tabs(['可视化', '历史记录及数据下载'])
