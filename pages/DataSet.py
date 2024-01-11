@@ -43,27 +43,28 @@ with dataSCM:
     if chosen_id == '1':
         col1, col2, col3 = st.columns(3)
         with col1:
-            option14 = st.checkbox('温度')
+            option14 = st.checkbox('温度数据')
         with col2:
-            option15 = st.checkbox('降水')
-        with col3:
-            option16 = st.checkbox('')
+            option15 = st.checkbox('降水数据')
+        # with col3:
+            # option16 = st.checkbox('')
     if chosen_id == '2':
         col1, col2, col3 = st.columns(3)
         with col1:
-            option14 = st.checkbox('生育期')
+            option14 = st.checkbox('植保站数据')
         with col2:
-            option15 = st.checkbox('模板6')
-        with col3:
-            option16 = st.checkbox('模板7')
+            option15 = st.checkbox('众源数据')
+        # with col3:
+        #     option16 = st.checkbox('模板7')
     if chosen_id == '3':
         col1, col2, col3 = st.columns(3)
         with col1:
-            option14 = st.checkbox('生育期')
+            option14 = st.checkbox('预测峰值数据')
+            option17 = st.checkbox('晚稻移栽期数据')
         with col2:
-            option15 = st.checkbox('模板6')
+            option15 = st.checkbox('长势数据')
         with col3:
-            option16 = st.checkbox('模板7')
+            option16 = st.checkbox('生化指标数据')
     st.markdown('---')
     st.markdown("###### 模板预览")
     interval_col1, interval_col2 = st.columns([5, 1])
@@ -71,7 +72,14 @@ with dataSCM:
 with dataSCR:
     st.markdown("##### 文件上传状态显示")
     st.markdown("###### 气象数据")
-    st.write("文件名称:", '气温.xlsx')
+    st.data_editor(pd.DataFrame(
+        data={
+            "文件名称": ['温度数据', '降水数据'],
+            "传输状态": ['已上传', '上传出错'],
+            "上传时间": ['10:10:10', '12:10:10']
+        }
+    ), height=140, use_container_width=True)
+    # st.write("文件名称:", '气温.xlsx')
     st.markdown('---')
     for uploaded_file in uploaded_files:
         bytes_data = uploaded_file.read()
@@ -79,9 +87,24 @@ with dataSCR:
         dataframe = pd.read_excel(uploaded_file)
         st.write(dataframe)
     st.markdown("###### 植保数据")
-    col1ab, col2ab = st.columns(2)
-    col1ab.write("文件名称: 气温.xlsx")
-    col2ab.write("状态:已上传")
+    st.data_editor(pd.DataFrame(
+        data={
+            "文件名称": ['植保站数据', '众源数据'],
+            "传输状态": ['已上传', '上传出错'],
+            "上传时间": ['13:15:10', '12:16:10']
+        }
+    ), height=140, use_container_width=True)
+    # col1ab, col2ab = st.columns(2)
+    # col1ab.write("文件名称: 气温.xlsx")
+    # col1ab.write("文件名称: 降水.xlsx")
+    # col2ab.write("状态:已上传")
+    # col2ab.write("状态:上传出错")
     st.markdown('---')
     st.markdown("###### 农学数据")
-    st.write("文件名称:", '气温.xlsx')
+    st.data_editor(pd.DataFrame(
+        data={
+            "文件名称": ['预测峰值数据', '长势数据', '生化指标数据', '晚稻移栽期数据'],
+            "传输状态": ['已上传', '上传出错', '已上传', '已上传'],
+            "上传时间": ['13:15:10', '12:16:10', '13:15:10', '12:16:10']
+        }
+    ), height=140, use_container_width=True)
