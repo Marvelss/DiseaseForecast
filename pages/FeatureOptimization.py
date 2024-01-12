@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from streamlit_tree_select import tree_select
 
-from pages_utils import multiselect_all
+import pages_utils
 
 nodes = [
     {"label": "气象数据", "value": "气象数据"},
@@ -99,10 +99,10 @@ with dataPCV:
     temp = tree_select(nodes, disabled=True)
     st.markdown('---')
     st.markdown("###### 预处理数据")
-    temp1 = tree_select(nodes1)
+    temp1 = tree_select(pages_utils.nodes1)
     st.markdown('---')
     st.markdown("###### 特征")
-    temp2 = tree_select(nodes2)
+    temp2 = tree_select(pages_utils.nodes2)
 
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
@@ -164,14 +164,22 @@ with dataPCR:
         with t2:
             pass
         with tabb3:
+            st.markdown('###### 历史记录')
             df = pd.DataFrame(
                 {
-                    "名称": ["温度", "降雨日数", "降水"],
+                    "数据集": ["气象数据", "植保数据", "农学数据"],
+                    "特征": ["降雨日数", "基于活动积温的生育期", "预测峰值"],
                     "大小": ["1*3", "1*6", "1*5"],
                     '处理方法': ['t检验', 'Person相关性分析', 'Person相关性分析'],
                     "时间": ['22:10:20', '20:10:20', '21:10:20'],
                 }
             )
             edited_df = st.data_editor(df)
-            st.button('添加特征')
-            st.button('下载方法参数值')
+            st.markdown('---')
+            st.markdown('###### 数据下载')
+            option = st.selectbox(
+                '历史记录编号',
+                (1, 2, 3))
+            pages_utils.multiselect_all(st, ['气温', '降雨日数', '生育期'], '特征',"collapsed")
+            interval_col13, interval_col12 = st.columns([5, 1])
+            interval_col12.button('下载')

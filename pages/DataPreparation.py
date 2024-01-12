@@ -189,17 +189,25 @@ with dataPCR:
         with t2:
             st.image('resource/image/1.png')
     with tabb3:
+        st.markdown('###### 历史记录')
         df = pd.DataFrame(
             {
-                "名称": ["温度", "降水", "生育期"],
+                "数据集": ["气象数据", "植保数据", "农学数据"],
+                "字段": ["温度", "生育期", "预测峰值"],
                 "大小": ["1*3", "1*6", "1*5"],
                 '处理方法': ['缺失值插补', '缺失值插补', '缺失值插补'],
                 "时间": ['22:10:20', '20:10:20', '21:10:20'],
             }
         )
         edited_df = st.data_editor(df)
-        st.button('保存修改')
-        st.button('下载方法参数值')
+        st.markdown('---')
+        st.markdown('###### 数据下载')
+        option = st.selectbox(
+            '历史记录编号',
+            (1, 2, 3))
+        pages_utils.multiselect_all(st, ['气温', '降雨日数', '生育期'], '字段',"collapsed")
+        interval_col13, interval_col12 = st.columns([5, 1])
+        interval_col12.button('下载')
 # with tab2:
 #     st.subheader('植保数据')
 # df = pd.read_excel('resource/植保数据 - 副本.xlsx')

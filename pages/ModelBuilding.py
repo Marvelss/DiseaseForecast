@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from st_pages import add_page_title
 from streamlit_tree_select import tree_select
+import pages_utils
 
 # add_page_title()
 # st.header('模型构建')
@@ -108,10 +109,10 @@ with modelACV:
     temp = tree_select(nodes)
     st.markdown('---')
     st.markdown("###### 预处理数据")
-    temp1 = tree_select(nodes1)
+    temp1 = tree_select(pages_utils.nodes1)
     st.markdown('---')
     st.markdown("###### 特征")
-    temp2 = tree_select(nodes2)
+    temp2 = tree_select(pages_utils.nodes2)
 with modelACM:
     ph = st.empty()
 
@@ -166,7 +167,7 @@ with modelACM:
             interval_col1.button("返回", on_click=firstPage)
             interval_col2.button("开始模型训练")
 with modelACR:
-    tabb1, tabb2, tabb3 = st.tabs(['精度', '可视化', '模型结构和结果下载'])
+    tabb1, tabb2, tabb3 = st.tabs(['精度', '可视化', '模型训练记录及结果下载'])
 with tabb1:
     col2, col3 = st.columns(2)
     oa = col2.metric("OA", "0.36", "+8%")
@@ -175,6 +176,7 @@ with tabb2:
     chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
     st.line_chart(chart_data)
 with tabb3:
+    st.markdown('###### 模型训练记录')
     df = pd.DataFrame(
         {
             "名称": ["SVM", "KNN", "RF"],
@@ -183,4 +185,16 @@ with tabb3:
         }
     )
     edited_df = st.data_editor(df)
-    st.button('下载')
+    st.markdown('---')
+    st.markdown('###### 结果下载')
+    pages_utils.multiselect_all(st, ['SVM', 'KNN', 'RF'], '选择模型', "collapsed")
+    st.markdown('下载内容')
+    option_col1, option_col2, option_col3 = st.columns(3)
+    with option_col1:
+        st.checkbox('模型结构')
+    with option_col2:
+        st.checkbox('模型训练结果')
+    with option_col3:
+        st.checkbox('模型参数')
+    interval_col13, interval_col12 = st.columns([5, 1])
+    interval_col12.button('下载')
