@@ -102,17 +102,18 @@ import pages_utils
 featureCCV, featureCCM = st.columns([0.5, 0.7])
 with featureCCV:
     st.markdown("##### 数据与特征")
-    st.markdown("###### 原始数据")
-    df = pd.DataFrame(
+    st.markdown("###### 特征")
+    df2 = pd.DataFrame(
         {
             "数据集": ["气象数据", "植保数据", "农学数据"],
-            "字段": ["温度", "生育期", "预测峰值"],
-            "大小": ["1*3", "1*6", "1*5"],
-            '处理方法': ['缺失值插补', '缺失值插补', '缺失值插补'],
+            "特征": ["降雨日数", "基于活动积温的生育期", "预测峰值"],
+            "大小": ["1*3", "1*6", "1*6"],
+            '处理方法': ['时间分辨率转换', '降雨日数计算', '降水累积量计算'],
             "时间": ['22:10:20', '20:10:20', '21:10:20'],
         }
     )
-    edited_df = st.data_editor(df)
+    edited_df2 = st.data_editor(df2)
+
     st.markdown('---')
     st.markdown("###### 预处理数据")
     df1 = pd.DataFrame(
@@ -126,17 +127,17 @@ with featureCCV:
     )
     edited_df1 = st.data_editor(df1)
     st.markdown('---')
-    st.markdown("###### 特征")
-    df2 = pd.DataFrame(
+    st.markdown("###### 原始数据")
+    df = pd.DataFrame(
         {
             "数据集": ["气象数据", "植保数据", "农学数据"],
-            "特征": ["降雨日数", "基于活动积温的生育期", "预测峰值"],
-            "大小": ["1*3", "1*6", "1*6"],
-            '处理方法': ['时间分辨率转换', '降雨日数计算', '降水累积量计算'],
+            "字段": ["温度", "生育期", "预测峰值"],
+            "大小": ["1*3", "1*6", "1*5"],
+            '处理方法': ['缺失值插补', '缺失值插补', '缺失值插补'],
             "时间": ['22:10:20', '20:10:20', '21:10:20'],
         }
     )
-    edited_df2 = st.data_editor(df2)
+    edited_df = st.data_editor(df)
 with featureCCM:
     # tab3, tab4 = st.tabs(["气象", "其他"])
     # with tab3:
