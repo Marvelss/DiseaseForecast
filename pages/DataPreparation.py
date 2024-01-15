@@ -102,40 +102,49 @@ dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
     st.markdown("###### 原始数据")
-    df = pd.DataFrame(
-        {
-            "数据集": ["气象数据", "植保数据", "农学数据"],
-            "字段": ["温度", "生育期", "预测峰值"],
-            "大小": ["1*3", "1*6", "1*5"],
-            '处理方法': ['缺失值插补', '缺失值插补', '缺失值插补'],
-            "时间": ['22:10:20', '20:10:20', '21:10:20'],
-        }
-    )
-    edited_df = st.data_editor(df)
+    # edited_df = st.data_editor(df)
+    edited_df22 = st.data_editor(
+        pages_utils.RawDataSet,
+        column_config={
+            "选择字段": st.column_config.CheckboxColumn(
+                help="选择用于数据处理的字段",
+                default=False,
+            )
+        },
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"],
+        hide_index=True,
+        num_rows="dynamic", )
     st.markdown('---')
     st.markdown("###### 预处理数据")
-    df1 = pd.DataFrame(
-        {
-            "数据集": ["气象数据", "植保数据", "农学数据"],
-            "特征": ["降雨日数", "基于活动积温的生育期", "预测峰值"],
-            "大小": ["1*3", "1*6", "1*5"],
-            '处理方法': ['时间分辨率转换', '降雨日数计算', '降水累积量计算'],
-            "时间": ['22:10:20', '20:10:20', '21:10:20'],
-        }
-    )
-    edited_df1 = st.data_editor(df1)
+    edited_df223 = st.data_editor(
+        pages_utils.PreprocessedDataSet,
+        column_config={
+            "选择字段": st.column_config.CheckboxColumn(
+                help="选择用于数据处理的字段",
+                default=False,
+            )
+        },
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"],
+        hide_index=True,
+        num_rows="dynamic", )
+    # for index, row in edited_df223.iterrows():
+    #     st.markdown(row.get('下载数据集'))
+    #     if row.get('下载数据集'):
+    #         st.markdown('下载')
+
     st.markdown('---')
     st.markdown("###### 特征")
-    df2 = pd.DataFrame(
-        {
-            "数据集": ["气象数据", "植保数据", "农学数据"],
-            "特征": ["降雨日数", "基于活动积温的生育期", "预测峰值"],
-            "大小": ["1*3", "1*6", "1*6"],
-            '处理方法': ['时间分辨率转换', '降雨日数计算', '降水累积量计算'],
-            "时间": ['22:10:20', '20:10:20', '21:10:20'],
-        }
-    )
-    edited_df2 = st.data_editor(df2)
+    edited_df2 = st.data_editor(
+        pages_utils.FeatureDataSet,
+        column_config={
+            "选择字段": st.column_config.CheckboxColumn(
+                help="选择用于数据处理的字段",
+                default=False,
+            )
+        },
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"],
+        hide_index=True,
+        num_rows="dynamic", )
 
 with dataPCM:
     # 当选择一类数据集后,其他数据集禁选
@@ -182,57 +191,57 @@ with dataPCM:
     interval_col2.button('运行')
 # with dataPCR:
 #     tabb2, tabb3 = st.tabs(['可视化', ' '])
-    # with tabb0:
-    #     st.data_editor(pd.DataFrame(
-    #         data={
-    #             "温度": [1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4],
-    #         }
-    #     ), height=210)
-    #
-    # with tabb1:
-    #     st.markdown('##### 数据摘要')
-    #     col111, col222 = st.columns(2)
-    #     with col111:
-    #         st.markdown('###### 处理前')
-    #         st.markdown('特征名称:温度')
-    #         st.markdown('个数:2')
-    #         st.markdown('类型:整数')
-    #         st.markdown('数值:[5,6]')
-    #
-    #     with col222:
-    #         st.markdown('###### 处理后')
-    #         st.markdown('特征名称:温度')
-    #         st.markdown('个数:5')
-    #         st.markdown('数据类型:整数')
-    #         st.markdown('数值:[5,2,3,3,2]')
-    # with tabb2:
-    #     st.subheader('展示数据处理前与处理后的图表')
-    #     t1, t2 = st.columns(2)
-    #     with t1:
-    #         st.image('resource/image/0.png')
-    #     with t2:
-    #         st.image('resource/image/1.png')
-    # with tabb3:
-    #     pass
-        # st.markdown('###### 历史记录')
-        # df = pd.DataFrame(
-        #     {
-        #         "数据集": ["气象数据", "植保数据", "农学数据"],
-        #         "字段": ["温度", "生育期", "预测峰值"],
-        #         "大小": ["1*3", "1*6", "1*5"],
-        #         '处理方法': ['缺失值插补', '缺失值插补', '缺失值插补'],
-        #         "时间": ['22:10:20', '20:10:20', '21:10:20'],
-        #     }
-        # )
-        # edited_df = st.data_editor(df)
-        # st.markdown('---')
-        # st.markdown('###### 数据下载')
-        # option = st.selectbox(
-        #     '历史记录编号',
-        #     (1, 2, 3))
-        # pages_utils.multiselect_all(st, ['气温', '降雨日数', '生育期'], '字段', "collapsed")
-        # interval_col13, interval_col12 = st.columns([5, 1])
-        # interval_col12.button('下载')
+# with tabb0:
+#     st.data_editor(pd.DataFrame(
+#         data={
+#             "温度": [1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4],
+#         }
+#     ), height=210)
+#
+# with tabb1:
+#     st.markdown('##### 数据摘要')
+#     col111, col222 = st.columns(2)
+#     with col111:
+#         st.markdown('###### 处理前')
+#         st.markdown('特征名称:温度')
+#         st.markdown('个数:2')
+#         st.markdown('类型:整数')
+#         st.markdown('数值:[5,6]')
+#
+#     with col222:
+#         st.markdown('###### 处理后')
+#         st.markdown('特征名称:温度')
+#         st.markdown('个数:5')
+#         st.markdown('数据类型:整数')
+#         st.markdown('数值:[5,2,3,3,2]')
+# with tabb2:
+#     st.subheader('展示数据处理前与处理后的图表')
+#     t1, t2 = st.columns(2)
+#     with t1:
+#         st.image('resource/image/0.png')
+#     with t2:
+#         st.image('resource/image/1.png')
+# with tabb3:
+#     pass
+# st.markdown('###### 历史记录')
+# df = pd.DataFrame(
+#     {
+#         "数据集": ["气象数据", "植保数据", "农学数据"],
+#         "字段": ["温度", "生育期", "预测峰值"],
+#         "大小": ["1*3", "1*6", "1*5"],
+#         '处理方法': ['缺失值插补', '缺失值插补', '缺失值插补'],
+#         "时间": ['22:10:20', '20:10:20', '21:10:20'],
+#     }
+# )
+# edited_df = st.data_editor(df)
+# st.markdown('---')
+# st.markdown('###### 数据下载')
+# option = st.selectbox(
+#     '历史记录编号',
+#     (1, 2, 3))
+# pages_utils.multiselect_all(st, ['气温', '降雨日数', '生育期'], '字段', "collapsed")
+# interval_col13, interval_col12 = st.columns([5, 1])
+# interval_col12.button('下载')
 # with tab2:
 #     st.subheader('植保数据')
 # df = pd.read_excel('resource/植保数据 - 副本.xlsx')
