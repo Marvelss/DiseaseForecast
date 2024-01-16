@@ -192,23 +192,42 @@ with dataPCM:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
         new_data = {"数据集": "气象数据", "字段": "温度",
-                    "处理方法": "缺失值插补", "时间": '22:20:20'}
+                    "预处理方法": "缺失值插补", "时间": '22:20:20'}
         st.session_state.df.loc[len(st.session_state.df)] = new_data
         st.rerun()
     st.markdown('---')
-    st.markdown('##### 任务清单')
-    data = pd.DataFrame(columns=["数据集", "字段", "处理方法", '时间'])
+
+    data = pd.DataFrame(columns=["数据集", "字段", "预处理方法", '时间'])
     # with every interaction, the script runs from top to bottom
     # resulting in the empty dataframe
     if 'df' not in st.session_state:
         st.session_state.df = data
-
-    edited_df28 = st.data_editor(
-        st.session_state.df, height=190, width=800,
-        disabled=["数据集", "字段", "时间"],
-        hide_index=False, )
-    interval_col34, interval_col33 = st.columns([5, 1])
-    interval_col33.button('运行')
+    placeholder = st.empty()
+    with placeholder.container():
+        st.markdown('##### 任务清单')
+        edited_df28 = st.data_editor(
+            st.session_state.df, height=190, width=800,
+            disabled=["数据集", "字段", "时间"],
+            hide_index=False, )
+        interval_col34, interval_col33 = st.columns([5, 1])
+        btn2 = interval_col33.button('运行')
+    if btn2:
+        # with placeholder.container():
+        placeholder.empty()
+        st.markdown('##### 可视化')
+        chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["p-value", "月份", "图例"])
+        st.vega_lite_chart(
+            chart_data,
+            {
+                "mark": {"type": "circle", "tooltip": True},
+                "encoding": {
+                    "x": {"field": "月份", "type": "quantitative"},
+                    "y": {"field": "p-value", "type": "quantitative"},
+                    "size": {"field": "图例", "type": "quantitative"},
+                    "color": {"field": "图例", "type": "quantitative"},
+                },
+            },
+        )
 # with dataPCR:
 #     tabb2, tabb3 = st.tabs(['可视化', ' '])
 # with tabb0:

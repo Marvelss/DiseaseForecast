@@ -153,22 +153,51 @@ with dataPCM:
             number1 = st.number_input("TOP(%)", value=5, min_value=5, step=5)
         if option == '按权重值计算':
             number2 = st.number_input("权重阈值", value=10, min_value=10)
-        st.markdown('---')
-    chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["p-value", "月份", "图例"])
-    st.vega_lite_chart(
-        chart_data,
-        {
-            "mark": {"type": "circle", "tooltip": True},
-            "encoding": {
-                "x": {"field": "月份", "type": "quantitative"},
-                "y": {"field": "p-value", "type": "quantitative"},
-                "size": {"field": "图例", "type": "quantitative"},
-                "color": {"field": "图例", "type": "quantitative"},
-            },
-        },
-    )
+        # st.markdown('---')
+
     interval_col1, interval_col2 = st.columns([5, 1])
-    interval_col2.button('运行')
+    btn = interval_col2.button('保存')
+    if btn:
+        # update dataframe state
+        # st.markdown(type(st.session_state.df))
+        new_data = {"数据集": "气象数据", "字段": "降水",
+                    "特征优选方法": "t检验", "时间": '22:20:20'}
+        st.session_state.df1.loc[len(st.session_state.df1)] = new_data
+        st.rerun()
+    st.markdown('---')
+    data = pd.DataFrame(columns=["数据集", "字段", "特征优选方法", '时间'])
+
+    if 'df1' not in st.session_state:
+        st.session_state.df1 = data
+    placeholder = st.empty()
+
+    with placeholder.container():
+        st.markdown('##### 任务清单')
+        edited_df28 = st.data_editor(
+            st.session_state.df1, height=190, width=800,
+            disabled=["数据集", "字段", "时间"],
+            hide_index=False, )
+        interval_col34, interval_col33 = st.columns([5, 1])
+        btn2 = interval_col33.button('运行')
+    if btn2:
+        # with placeholder.container():
+        placeholder.empty()
+        st.markdown('##### 可视化')
+        chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["p-value", "月份", "图例"])
+        st.vega_lite_chart(
+            chart_data,
+            {
+                "mark": {"type": "circle", "tooltip": True},
+                "encoding": {
+                    "x": {"field": "月份", "type": "quantitative"},
+                    "y": {"field": "p-value", "type": "quantitative"},
+                    "size": {"field": "图例", "type": "quantitative"},
+                    "color": {"field": "图例", "type": "quantitative"},
+                },
+            },
+        )
+        # btn2 = st.button('下载')
+
 
 # with dataPCR:
 #     tabb2, tabb3 = st.tabs(['可视化', ' '])

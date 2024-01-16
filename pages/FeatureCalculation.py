@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -102,9 +103,9 @@ import pages_utils
 featureCCV, featureCCM = st.columns([0.5, 0.7])
 with featureCCV:
     st.markdown("##### 数据与特征")
-    st.markdown("###### 特征")
-    edited_df2 = st.data_editor(
-        pages_utils.FeatureDataSet,
+    st.markdown("###### 预处理数据")
+    edited_df223 = st.data_editor(
+        pages_utils.PreprocessedDataSet,
         column_config={
             "选择字段": st.column_config.CheckboxColumn(
                 help="选择用于数据处理的字段",
@@ -114,11 +115,10 @@ with featureCCV:
         disabled=["数据集", "字段", "大小", "处理方法", "时间"],
         hide_index=True,
         num_rows="dynamic", )
-
     st.markdown('---')
-    st.markdown("###### 预处理数据")
-    edited_df223 = st.data_editor(
-        pages_utils.PreprocessedDataSet,
+    st.markdown("###### 特征")
+    edited_df2 = st.data_editor(
+        pages_utils.FeatureDataSet,
         column_config={
             "选择字段": st.column_config.CheckboxColumn(
                 help="选择用于数据处理的字段",
@@ -158,7 +158,7 @@ with featureCCM:
         # option2 = st.selectbox(
         #     '雨日数计算',
         #     ('月雨日数', '年雨日数'))
-        st.markdown('---')
+        # st.markdown('---')
     if option15:
         d1 = st.date_input("开始时间", value=None)
         d2 = st.date_input("结束时间", value=None)
@@ -171,12 +171,12 @@ with featureCCM:
             number2 = st.text_input("单日降水量数值(mm)", value=0.1)
         number1 = st.number_input("连续降雨日数时长(天数)", value=1, min_value=1)
         # option2 = st.sidebar
-        st.markdown('---')
+        # st.markdown('---')
     if option16:
         option3 = st.selectbox(
             '降水累积量计算',
             ('日累积降水量', '旬累积降水量', '月累积降水量'))
-        st.markdown('---')
+        # st.markdown('---')
     if option17:
         # option5 = st.sidebar.selectbox(
         #     '地区',
@@ -194,7 +194,7 @@ with featureCCM:
             number = st.number_input(
                 "积温阈值温度(50-300℃)", value=100, step=50,
                 min_value=50, max_value=300)
-        st.markdown('---')
+        # st.markdown('---')
 
     if option18:
         # st.sidebar.
@@ -216,52 +216,90 @@ with featureCCM:
             pass
         d4 = st.date_input("结束日期", value=None)
         number1 = st.number_input("步长(天)", value=1, min_value=1)
-        st.markdown('---')
+        # st.markdown('---')
     interval_col1, interval_col2 = st.columns([5, 1])
-    interval_col2.button('运行')
-
+    btn = interval_col2.button('保存')
+    if btn:
+        # update dataframe state
+        # st.markdown(type(st.session_state.df))
+        new_data = {"数据集": "气象数据", "字段": "温度",
+                    "特征计算方法": "降雨日数计算", "时间": '22:20:20'}
+        st.session_state.df2.loc[len(st.session_state.df2)] = new_data
+        st.rerun()
+    st.markdown('---')
+    data = pd.DataFrame(columns=["数据集", "字段", "特征计算方法", '时间'])
+    # with every interaction, the script runs from top to bottom
+    # resulting in the empty dataframe
+    if 'df2' not in st.session_state:
+        st.session_state.df2 = data
+    placeholder = st.empty()
+    with placeholder.container():
+        st.markdown('##### 任务清单')
+        edited_df28 = st.data_editor(
+            st.session_state.df2, height=190, width=800,
+            disabled=["数据集", "字段", "时间"],
+            hide_index=False, )
+        interval_col34, interval_col33 = st.columns([5, 1])
+        btn2 = interval_col33.button('运行')
+    if btn2:
+        # with placeholder.container():
+        placeholder.empty()
+        st.markdown('##### 可视化')
+        chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["p-value", "月份", "图例"])
+        st.vega_lite_chart(
+            chart_data,
+            {
+                "mark": {"type": "circle", "tooltip": True},
+                "encoding": {
+                    "x": {"field": "月份", "type": "quantitative"},
+                    "y": {"field": "p-value", "type": "quantitative"},
+                    "size": {"field": "图例", "type": "quantitative"},
+                    "color": {"field": "图例", "type": "quantitative"},
+                },
+            },
+        )
 # with featureCCR:
 #     tabb2, tabb3 = st.tabs(['可视化', '历史记录及数据下载'])
-    # with tabb1:
-    #     st.markdown('##### 数据摘要')
-    #     col111, col222 = st.columns(2)
-    #
-    #     with col111:
-    #         st.markdown('特征名称:温度')
-    #         st.markdown('类型:整数')
-    #         st.markdown('个数:19')
-    #         st.markdown('最小值:50')
-    #         st.markdown('最大值:100')
-    #     with col222:
-    #         st.data_editor(pd.DataFrame(
-    #             data={
-    #                 "温度": [1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4],
-    #             }
-    #         ), height=190)
-    # with tabb2:
-    #     st.subheader('展示数据处理前与处理后的图表')
-    #     t1, t2 = st.columns(2)
-    #     with t1:
-    #         st.image('resource/image/0.png')
-    #     with t2:
-    #         st.image('resource/image/1.png')
-    # with tabb3:
-    #     st.markdown('###### 历史记录')
-    #     df = pd.DataFrame(
-    #         {
-    #             "数据集": ["气象数据", "植保数据", "农学数据"],
-    #             "特征": ["降雨日数", "基于活动积温的生育期", "预测峰值"],
-    #             "大小": ["1*3", "1*6", "1*5"],
-    #             '处理方法': ['时间分辨率转换', '降雨日数计算', '降水累积量计算'],
-    #             "时间": ['22:10:20', '20:10:20', '21:10:20'],
-    #         }
-    #     )
-    #     edited_df = st.data_editor(df)
-    #     st.markdown('---')
-    #     st.markdown('###### 数据下载')
-    #     option = st.selectbox(
-    #         '历史记录编号',
-    #         (1, 2, 3))
-    #     pages_utils.multiselect_all(st, ['气温', '降雨日数', '生育期'], '特征',"collapsed")
-    #     interval_col13, interval_col12 = st.columns([5, 1])
-    #     interval_col12.button('下载')
+# with tabb1:
+#     st.markdown('##### 数据摘要')
+#     col111, col222 = st.columns(2)
+#
+#     with col111:
+#         st.markdown('特征名称:温度')
+#         st.markdown('类型:整数')
+#         st.markdown('个数:19')
+#         st.markdown('最小值:50')
+#         st.markdown('最大值:100')
+#     with col222:
+#         st.data_editor(pd.DataFrame(
+#             data={
+#                 "温度": [1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4],
+#             }
+#         ), height=190)
+# with tabb2:
+#     st.subheader('展示数据处理前与处理后的图表')
+#     t1, t2 = st.columns(2)
+#     with t1:
+#         st.image('resource/image/0.png')
+#     with t2:
+#         st.image('resource/image/1.png')
+# with tabb3:
+#     st.markdown('###### 历史记录')
+#     df = pd.DataFrame(
+#         {
+#             "数据集": ["气象数据", "植保数据", "农学数据"],
+#             "特征": ["降雨日数", "基于活动积温的生育期", "预测峰值"],
+#             "大小": ["1*3", "1*6", "1*5"],
+#             '处理方法': ['时间分辨率转换', '降雨日数计算', '降水累积量计算'],
+#             "时间": ['22:10:20', '20:10:20', '21:10:20'],
+#         }
+#     )
+#     edited_df = st.data_editor(df)
+#     st.markdown('---')
+#     st.markdown('###### 数据下载')
+#     option = st.selectbox(
+#         '历史记录编号',
+#         (1, 2, 3))
+#     pages_utils.multiselect_all(st, ['气温', '降雨日数', '生育期'], '特征',"collapsed")
+#     interval_col13, interval_col12 = st.columns([5, 1])
+#     interval_col12.button('下载')
