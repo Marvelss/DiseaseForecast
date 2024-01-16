@@ -182,13 +182,33 @@ with dataPCM:
             options=('线性插值', '自定义'))
         if option == '自定义':
             st.text_input('输入数值')
-        st.markdown('---')
+        # st.markdown('---')
     if agree:
         number2 = st.text_input("剔除大于", value=0.1)
         number3 = st.text_input("剔除小于", value=0.1)
-        st.markdown('---')
     interval_col1, interval_col2 = st.columns([5, 1])
-    interval_col2.button('运行')
+    btn = interval_col2.button('保存')
+    if btn:
+        # update dataframe state
+        # st.markdown(type(st.session_state.df))
+        new_data = {"数据集": "气象数据", "字段": "温度",
+                    "处理方法": "缺失值插补", "时间": '22:20:20'}
+        st.session_state.df.loc[len(st.session_state.df)] = new_data
+        st.rerun()
+    st.markdown('---')
+    st.markdown('##### 任务清单')
+    data = pd.DataFrame(columns=["数据集", "字段", "处理方法", '时间'])
+    # with every interaction, the script runs from top to bottom
+    # resulting in the empty dataframe
+    if 'df' not in st.session_state:
+        st.session_state.df = data
+
+    edited_df28 = st.data_editor(
+        st.session_state.df, height=190, width=800,
+        disabled=["数据集", "字段", "时间"],
+        hide_index=False, )
+    interval_col34, interval_col33 = st.columns([5, 1])
+    interval_col33.button('运行')
 # with dataPCR:
 #     tabb2, tabb3 = st.tabs(['可视化', ' '])
 # with tabb0:
