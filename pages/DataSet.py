@@ -90,8 +90,14 @@ with dataSCM:
             option16 = st.checkbox('生化指标数据')
     st.markdown('---')
     st.markdown("###### 模板预览")
+    csv = convert_df(pd.read_csv(r'E:\a_python\program\diseaseForecastStreamlit\resource\房价数据.csv'))
     interval_col1, interval_col2 = st.columns([5, 1])
-    interval_col2.button('下载')
+    interval_col2.download_button(
+        label="下载",
+        data=csv,
+        file_name='large_df.csv',
+        mime='text/csv',
+    )
 with dataSCR:
     st.markdown("##### 文件上传状态显示")
     st.markdown("###### 气象数据")
