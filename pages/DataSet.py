@@ -1,4 +1,6 @@
 # page2.py
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -15,6 +17,16 @@ def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     return df.to_csv().encode('utf-8')
 
+
+# 用于获取上传数据集名称
+i = 0
+data = pd.DataFrame(columns=["文件名称", "传输状态", "上传时间"])
+# with every interaction, the script runs from top to bottom
+# resulting in the empty dataframe
+if 'data_df' not in st.session_state:
+    st.session_state.data_df = data
+if 'i' not in st.session_state:
+    st.session_state.i = i
 
 # st.header('数据集')
 # st.markdown('---')
@@ -38,6 +50,17 @@ with dataSCM:
             .uploadedFile {display: none}
         <style>''',
                 unsafe_allow_html=True)
+    # 用于避免点击其他数据集选项卡时出现异常提示(但这样似乎无效)
+    temp = 0
+    if uploaded_files and uploaded_files != temp:
+        # st.markdown(st.session_state.i)
+        # st.markdown(uploaded_files[st.session_state.i].name)
+        # if st.session_state.i != 0:
+        new_data = {"文件名称": uploaded_files[st.session_state.i].name, "传输状态": "已上传",
+                    "上传时间": datetime.now().strftime("%H:%M:%S")}
+        st.session_state.data_df.loc[len(st.session_state.data_df)] = new_data
+        st.session_state.i += 1
+        temp = uploaded_files
     st.markdown('---')
     st.markdown("###### 模板下载")
     if chosen_id == '1':
@@ -47,7 +70,7 @@ with dataSCM:
         with col2:
             option15 = st.checkbox('降水数据')
         # with col3:
-            # option16 = st.checkbox('')
+        # option16 = st.checkbox('')
     if chosen_id == '2':
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -72,20 +95,21 @@ with dataSCM:
 with dataSCR:
     st.markdown("##### 文件上传状态显示")
     st.markdown("###### 气象数据")
-    st.data_editor(pd.DataFrame(
-        data={
-            "文件名称": ['温度数据', '降水数据'],
-            "传输状态": ['已上传', '上传出错'],
-            "上传时间": ['10:10:10', '12:10:10']
-        }
-    ), height=140, use_container_width=True)
+
+    placeholder = st.empty()
+    with placeholder.container():
+        st.data_editor(
+            st.session_state.data_df, height=190, width=800,
+            disabled=["文件名称", "传输状态", "上传时间"],
+            hide_index=False, )
     # st.write("文件名称:", '气温.xlsx')
     st.markdown('---')
     for uploaded_file in uploaded_files:
         bytes_data = uploaded_file.read()
-        st.write("filename:", uploaded_file.name)
-        dataframe = pd.read_excel(uploaded_file)
-        st.write(dataframe)
+        # st.write("filename:", uploaded_file.name)
+        # dataframe = pd.read_excel(uploaded_file)
+        # st.write(dataframe)
+
     st.markdown("###### 植保数据")
     st.data_editor(pd.DataFrame(
         data={
