@@ -150,9 +150,7 @@ with modelACV:
                 default=False,
             )
         },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"],
-        hide_index=True,
-        num_rows="dynamic", )
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
     st.markdown('---')
     st.markdown("###### 模型")
     edited_df1 = st.data_editor(st.session_state.df15)

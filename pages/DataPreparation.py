@@ -153,8 +153,7 @@ with dataPCV:
             )
         },
         disabled=["数据集", "字段", "大小", "处理方法", "时间"],
-        hide_index=True,
-        num_rows="dynamic", )
+    )
     st.markdown('---')
     st.markdown("###### 预处理数据")
     edited_df223 = st.data_editor(
@@ -165,9 +164,7 @@ with dataPCV:
                 default=False,
             )
         },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"],
-        hide_index=True,
-        num_rows="dynamic", )
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"])
     # for index, row in edited_df223.iterrows():
     #     st.markdown(row.get('下载数据集'))
     #     if row.get('下载数据集'):
@@ -183,9 +180,7 @@ with dataPCV:
                 default=False,
             )
         },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"],
-        hide_index=True,
-        num_rows="dynamic", )
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
 
 with (dataPCM):
     # 当选择一类数据集后,其他数据集禁选
@@ -232,13 +227,13 @@ with (dataPCM):
     if btn:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
-        new_data = {"数据集": "气象数据", "字段": "温度",
+        new_data = {"数据集": "气象数据", "输入字段": "温度", "输出字段": "温度",
                     "预处理方法": "缺失值插补", "时间": '22:20:20'}
         st.session_state.df.loc[len(st.session_state.df)] = new_data
         st.rerun()
     st.markdown('---')
 
-    data = pd.DataFrame(columns=["数据集", "字段", "预处理方法", '时间'])
+    data = pd.DataFrame(columns=["数据集", "输入字段", "输出字段", "预处理方法", '时间'])
     # with every interaction, the script runs from top to bottom
     # resulting in the empty dataframe
     if 'df' not in st.session_state:
@@ -250,8 +245,7 @@ with (dataPCM):
             st.markdown('##### 任务清单')
             edited_df28 = st.data_editor(
                 st.session_state.df, height=190, width=800,
-                disabled=["数据集", "字段", "时间"],
-                hide_index=False, )
+                disabled=["数据集", "输入字段", "输出字段", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
             btn2 = interval_col33.button('运行', on_click=nextPage)
             # st.session_state.page12 += 1

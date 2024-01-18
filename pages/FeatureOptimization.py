@@ -121,9 +121,7 @@ with dataPCV:
                 default=False,
             )
         },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"],
-        hide_index=True,
-        num_rows="dynamic", )
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"],)
     st.markdown('---')
     st.markdown("###### 预处理数据")
     edited_df223 = st.data_editor(
@@ -134,9 +132,7 @@ with dataPCV:
                 default=False,
             )
         },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"],
-        hide_index=True,
-        num_rows="dynamic", )
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"],)
     st.markdown('---')
     st.markdown("###### 原始数据")
     edited_df = st.data_editor(pages_utils.RawDataSet)
@@ -193,7 +189,7 @@ with dataPCM:
             edited_df28 = st.data_editor(
                 st.session_state.df1, height=190, width=800,
                 disabled=["数据集", "字段", "时间"],
-                hide_index=False, )
+                num_rows="dynamic",)
             interval_col34, interval_col33 = st.columns([5, 1])
             btn2 = interval_col33.button('运行', on_click=nextPage)
     elif st.session_state.page14 == 1:

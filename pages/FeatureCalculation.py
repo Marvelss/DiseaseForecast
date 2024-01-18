@@ -128,9 +128,7 @@ with featureCCV:
                 default=False,
             )
         },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"],
-        hide_index=True,
-        num_rows="dynamic", )
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
     st.markdown('---')
     st.markdown("###### 特征")
     edited_df2 = st.data_editor(
@@ -141,9 +139,7 @@ with featureCCV:
                 default=False,
             )
         },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"],
-        hide_index=True,
-        num_rows="dynamic", )
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
     st.markdown('---')
     st.markdown("###### 原始数据")
     edited_df = st.data_editor(pages_utils.RawDataSet)
@@ -238,12 +234,12 @@ with featureCCM:
     if btn:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
-        new_data = {"数据集": "气象数据", "特征": "温度",
+        new_data = {"数据集": "气象数据", "输入特征": "温度", "输出特征": "温度",
                     "特征计算方法": "降雨日数计算", "时间": '22:20:20'}
         st.session_state.df2.loc[len(st.session_state.df2)] = new_data
         st.rerun()
     st.markdown('---')
-    data = pd.DataFrame(columns=["数据集", "特征", "特征计算方法", '时间'])
+    data = pd.DataFrame(columns=["数据集", "输入特征", "输出特征", "特征计算方法", '时间'])
     # with every interaction, the script runs from top to bottom
     # resulting in the empty dataframe
     if 'df2' not in st.session_state:
@@ -255,7 +251,7 @@ with featureCCM:
             edited_df28 = st.data_editor(
                 st.session_state.df2, height=190, width=800,
                 disabled=["数据集", "特征", "时间"],
-                hide_index=False, )
+                num_rows="dynamic")
             interval_col34, interval_col33 = st.columns([5, 1])
             btn2 = interval_col33.button('运行', on_click=nextPage)
     elif st.session_state.page13 == 1:
