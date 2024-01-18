@@ -1,4 +1,6 @@
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, roc_curve, precision_recall_curve
 
 
 # 带有全选的多选框
@@ -13,6 +15,21 @@ def multiselect_all(streamlit, value_list, label, temp_label_visibility):
             label,
             value_list, label_visibility=temp_label_visibility)
     return selected_options
+
+
+def plot_metrics(st, metrics_list, model, x_test, y_test, class_names):
+    if "Confusion Matrix" in metrics_list:
+        st.subheader("Confusion Matrix")
+        confusion_matrix(model, x_test, y_test, display_labels=class_names)
+        st.pyplot()
+    if "ROC Curve" in metrics_list:
+        st.subheader("ROC Curve")
+        roc_curve(model, x_test, y_test)
+        st.pyplot()
+    if "Precision-Recall Curve" in metrics_list:
+        st.subheader("Precision-Recall Curve")
+        precision_recall_curve(model, x_test, y_test)
+        st.pyplot()
 
 
 RawDataSet = pd.DataFrame(

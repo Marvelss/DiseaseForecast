@@ -13,6 +13,22 @@ import pages_utils
 #     st.session_state.page += 1
 #     rootNode[0]["children"].append({"label": "降雨日数", "value": "sub_d"})
 
+if 'page13' not in st.session_state: st.session_state.page13 = 0
+if 'df12' not in st.session_state:
+    st.session_state.df12 = pages_utils.FeatureDataSet
+
+
+def nextPage():
+    st.session_state.page13 += 1
+    data11 = {"选择字段": True, "数据集": "气象数据", "特征": "降雨日数",
+              "大小": '1*3', "处理方法": "降水累积量计算", "时间": '22:10:20',
+              "下载数据集": True}
+    data12 = {"选择字段": True, "数据集": "气象数据", "特征": "降水累积量",
+              "大小": '1*5', "处理方法": "降水累积量计算", "时间": '22:10:21',
+              "下载数据集": True}
+    st.session_state.df12.loc[len(st.session_state.df12)] = data11
+    st.session_state.df12.loc[len(st.session_state.df12)] = data12
+
 
 # nodes = [
 #     {"label": "气象数据", "value": "气象数据"},
@@ -118,7 +134,7 @@ with featureCCV:
     st.markdown('---')
     st.markdown("###### 特征")
     edited_df2 = st.data_editor(
-        pages_utils.FeatureDataSet,
+        st.session_state.df12,
         column_config={
             "选择字段": st.column_config.CheckboxColumn(
                 help="选择用于数据处理的字段",
@@ -222,42 +238,42 @@ with featureCCM:
     if btn:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
-        new_data = {"数据集": "气象数据", "字段": "温度",
+        new_data = {"数据集": "气象数据", "特征": "温度",
                     "特征计算方法": "降雨日数计算", "时间": '22:20:20'}
         st.session_state.df2.loc[len(st.session_state.df2)] = new_data
         st.rerun()
     st.markdown('---')
-    data = pd.DataFrame(columns=["数据集", "字段", "特征计算方法", '时间'])
+    data = pd.DataFrame(columns=["数据集", "特征", "特征计算方法", '时间'])
     # with every interaction, the script runs from top to bottom
     # resulting in the empty dataframe
     if 'df2' not in st.session_state:
         st.session_state.df2 = data
     placeholder = st.empty()
-    with placeholder.container():
-        st.markdown('##### 任务清单')
-        edited_df28 = st.data_editor(
-            st.session_state.df2, height=190, width=800,
-            disabled=["数据集", "字段", "时间"],
-            hide_index=False, )
-        interval_col34, interval_col33 = st.columns([5, 1])
-        btn2 = interval_col33.button('运行')
-    if btn2:
-        # with placeholder.container():
-        placeholder.empty()
-        st.markdown('##### 可视化')
-        chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["p-value", "月份", "图例"])
-        st.vega_lite_chart(
-            chart_data,
-            {
-                "mark": {"type": "circle", "tooltip": True},
-                "encoding": {
-                    "x": {"field": "月份", "type": "quantitative"},
-                    "y": {"field": "p-value", "type": "quantitative"},
-                    "size": {"field": "图例", "type": "quantitative"},
-                    "color": {"field": "图例", "type": "quantitative"},
+    if st.session_state.page13 == 0:
+        with placeholder.container():
+            st.markdown('##### 任务清单')
+            edited_df28 = st.data_editor(
+                st.session_state.df2, height=190, width=800,
+                disabled=["数据集", "特征", "时间"],
+                hide_index=False, )
+            interval_col34, interval_col33 = st.columns([5, 1])
+            btn2 = interval_col33.button('运行', on_click=nextPage)
+    elif st.session_state.page13 == 1:
+        with placeholder.container():
+            st.markdown('##### 可视化')
+            chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["p-value", "月份", "图例"])
+            st.vega_lite_chart(
+                chart_data,
+                {
+                    "mark": {"type": "circle", "tooltip": True},
+                    "encoding": {
+                        "x": {"field": "月份", "type": "quantitative"},
+                        "y": {"field": "p-value", "type": "quantitative"},
+                        "size": {"field": "图例", "type": "quantitative"},
+                        "color": {"field": "图例", "type": "quantitative"},
+                    },
                 },
-            },
-        )
+            )
 # with featureCCR:
 #     tabb2, tabb3 = st.tabs(['可视化', '历史记录及数据下载'])
 # with tabb1:

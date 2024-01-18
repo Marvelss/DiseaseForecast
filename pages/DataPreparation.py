@@ -1,10 +1,51 @@
+import datetime
+
 import streamlit as st
 import numpy as np
 import pandas as pd
 from streamlit_tree_select import tree_select
 import pages_utils
 from streamlit_autorefresh import st_autorefresh
+import seaborn as sns
+import matplotlib.pyplot as plt
 
+if 'page12' not in st.session_state: st.session_state.page12 = 0
+
+
+# 模拟24小时气温数据
+def simulate_temperature_data():
+    now = datetime.datetime.now()
+    hours = pd.date_range(start=now, periods=24, freq='H')
+    temperatures = np.random.randint(10, 30, size=24)
+    data = {'Time': hours, 'Temperature': temperatures}
+    df = pd.DataFrame(data)
+    return df
+
+
+# 模拟24小时降水数据
+def simulate_precipitation_data():
+    now = datetime.datetime.now()
+    hours = pd.date_range(start=now, periods=24, freq='H')
+    precipitation = np.random.uniform(0, 10, size=24)
+    data = {'Time': hours, 'Precipitation': precipitation}
+    df = pd.DataFrame(data)
+    return df
+
+
+def nextPage():
+    st.session_state.page12 += 1
+    data11 = {"选择字段": True, "数据集": "气象数据", "字段": "温度",
+              "大小": '1*3', "处理方法": "缺失值插补", "时间": '22:10:20',
+              "下载数据集": True}
+    data12 = {"选择字段": True, "数据集": "气象数据", "字段": "降水",
+              "大小": '1*5', "处理方法": "剔除异常值", "时间": '22:10:21',
+              "下载数据集": True}
+    st.session_state.df11.loc[len(st.session_state.df11)] = data11
+    st.session_state.df11.loc[len(st.session_state.df11)] = data12
+
+
+if 'df11' not in st.session_state:
+    st.session_state.df11 = pages_utils.PreprocessedDataSet
 # count = st_autorefresh(interval=2000, limit=100, key="fizzbuzzcounter")
 
 # The function returns a counter for number of refreshes. This allows the
@@ -117,7 +158,7 @@ with dataPCV:
     st.markdown('---')
     st.markdown("###### 预处理数据")
     edited_df223 = st.data_editor(
-        pages_utils.PreprocessedDataSet,
+        st.session_state.df11,
         column_config={
             "选择字段": st.column_config.CheckboxColumn(
                 help="选择用于数据处理的字段",
@@ -146,7 +187,7 @@ with dataPCV:
         hide_index=True,
         num_rows="dynamic", )
 
-with dataPCM:
+with (dataPCM):
     # 当选择一类数据集后,其他数据集禁选
     st.markdown("##### 预处理方法")
 
@@ -202,32 +243,38 @@ with dataPCM:
     # resulting in the empty dataframe
     if 'df' not in st.session_state:
         st.session_state.df = data
+
     placeholder = st.empty()
-    with placeholder.container():
-        st.markdown('##### 任务清单')
-        edited_df28 = st.data_editor(
-            st.session_state.df, height=190, width=800,
-            disabled=["数据集", "字段", "时间"],
-            hide_index=False, )
-        interval_col34, interval_col33 = st.columns([5, 1])
-        btn2 = interval_col33.button('运行')
-    if btn2:
-        # with placeholder.container():
-        placeholder.empty()
-        st.markdown('##### 可视化')
-        chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["p-value", "月份", "图例"])
-        st.vega_lite_chart(
-            chart_data,
-            {
-                "mark": {"type": "circle", "tooltip": True},
-                "encoding": {
-                    "x": {"field": "月份", "type": "quantitative"},
-                    "y": {"field": "p-value", "type": "quantitative"},
-                    "size": {"field": "图例", "type": "quantitative"},
-                    "color": {"field": "图例", "type": "quantitative"},
-                },
-            },
-        )
+    if st.session_state.page12 == 0:
+        with placeholder.container():
+            st.markdown('##### 任务清单')
+            edited_df28 = st.data_editor(
+                st.session_state.df, height=190, width=800,
+                disabled=["数据集", "字段", "时间"],
+                hide_index=False, )
+            interval_col34, interval_col33 = st.columns([5, 1])
+            btn2 = interval_col33.button('运行', on_click=nextPage)
+            # st.session_state.page12 += 1
+        # if btn2:
+
+    elif st.session_state.page12 == 1:
+        with placeholder.container():
+            st.markdown('##### 可视化')
+            tab1, tab2 = st.tabs(["1", "2"])
+            with tab1:
+                # 模拟气温数据
+                temperature_data = simulate_temperature_data()
+                st.line_chart(temperature_data.set_index('Time'))
+            with tab2:
+                # 模拟降水数据
+                precipitation_data = simulate_precipitation_data()
+                fig, ax = plt.subplots()
+                sns.lineplot(data=precipitation_data)
+                ax.set_xlabel('Time(hours)')
+                ax.set_ylabel('Precipitation')
+                st.pyplot(fig)
+    # st.markdown(st.session_state.page12)
+    # st.rerun()
 # with dataPCR:
 #     tabb2, tabb3 = st.tabs(['可视化', ' '])
 # with tabb0:

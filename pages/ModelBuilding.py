@@ -1,8 +1,12 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from sklearn.metrics import confusion_matrix
 from st_pages import add_page_title
 from streamlit_tree_select import tree_select
+import seaborn as sns
+
+import matplotlib.pyplot as plt
 import pages_utils
 
 # add_page_title()
@@ -20,6 +24,19 @@ def nextPage(): st.session_state.page += 1
 #
 #
 def firstPage(): st.session_state.page = 0
+
+
+# def reveal_oa():
+#     st.markdown('---')
+#     tab1, tab2 = st.tabs(["SVM", "FLDA"])
+#     with tab1:
+#         col2, col3 = st.columns(2)
+#         oa = col2.metric("OA", "0.36")
+#         pa = col3.metric("Kappa", "0.5")
+#     with tab2:
+#         col2, col3 = st.columns(2)
+#         oa1 = col2.metric("OA", "0.36")
+#         pa1 = col3.metric("Kappa", "0.5")
 
 
 # nodes = [
@@ -138,10 +155,11 @@ with modelACM:
                 agree1 = st.checkbox('RF')
             with colOption2:
                 agree2 = st.checkbox('KNN')
-                agree3 = st.checkbox('Logistic回归')
+
             with colOption3:
-                agree4 = st.checkbox('贝叶斯统计')
-                agree5 = st.checkbox('模糊综合评价')
+                agree3 = st.checkbox('FLDA')
+                # agree4 = st.checkbox('贝叶斯统计')
+                # agree5 = st.checkbox('模糊综合评价')
             st.markdown('---')
             if agree:
                 df = pd.DataFrame(
@@ -177,41 +195,77 @@ with modelACM:
             )
             interval_col1, interval_col2 = st.columns([5, 2])
             interval_col1.button("返回", on_click=firstPage)
-            interval_col2.button("开始模型训练")
-    st.markdown('---')
+            btn11 = interval_col2.button("开始模型训练")
+        if btn11:
+            st.markdown('---')
+            st.write('###### 精度评价')
+            tab1, tab2 = st.tabs(["SVM", "FLDA"])
+            with tab1:
+                # 创建模拟的混淆矩阵
+                data = {'y_Actual': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+                        'y_Predicted': [1, 1, 1, 1, 0, 0, 0, 0, 1, 1]}
+                df = pd.DataFrame(data, columns=['y_Actual', 'y_Predicted'])
 
-    col2, col3 = st.columns(2)
-    oa = col2.metric("OA", "0.36")
-    pa = col3.metric("Kappa", "0.5")
-# with modelACR:
-#     tabb1, tabb2, tabb3 = st.tabs(['精度', '可视化', '模型训练记录及结果下载'])
-# with tabb1:
-#     col2, col3 = st.columns(2)
-#     oa = col2.metric("OA", "0.36", "+8%")
-#     pa = col3.metric("Kappa", "0.5", "-8%")
-# with tabb2:
-#     chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
-#     st.line_chart(chart_data)
-# with tabb3:
-#     st.markdown('###### 模型训练记录')
-#     df = pd.DataFrame(
-#         {
-#             "名称": ["SVM", "KNN", "RF"],
-#             '参数数量': ['5', '6', '5'],
-#             "时间": ['22:10:20', '20:10:20', '21:10:20'],
-#         }
-#     )
-#     edited_df = st.data_editor(df)
-#     st.markdown('---')
-#     st.markdown('###### 结果下载')
-#     pages_utils.multiselect_all(st, ['SVM', 'KNN', 'RF'], '选择模型', "collapsed")
-#     st.markdown('下载内容')
-#     option_col1, option_col2, option_col3 = st.columns(3)
-#     with option_col1:
-#         st.checkbox('模型结构')
-#     with option_col2:
-#         st.checkbox('模型训练结果')
-#     with option_col3:
-#         st.checkbox('模型参数')
-#     interval_col13, interval_col12 = st.columns([5, 1])
-#     interval_col12.button('下载')
+                conf_matrix = confusion_matrix(df['y_Actual'], df['y_Predicted'])
+
+                # 使用 seaborn 绘制混淆矩阵图
+                fig, ax = plt.subplots()
+                sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
+                ax.set_xlabel('Predicted Label')
+                ax.set_ylabel('True Label')
+                st.pyplot(fig)
+
+                col2, col3 = st.columns(2)
+                oa = col2.metric("OA", "0.36")
+                pa = col3.metric("Kappa", "0.5")
+            with tab2:
+                # 创建模拟的混淆矩阵
+                data = {'y_Actual': [1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+                        'y_Predicted': [1, 1, 1, 1, 0, 0, 0, 0, 1, 1]}
+                df = pd.DataFrame(data, columns=['y_Actual', 'y_Predicted'])
+
+                conf_matrix = confusion_matrix(df['y_Actual'], df['y_Predicted'])
+
+                # 使用 seaborn 绘制混淆矩阵图
+                fig, ax = plt.subplots()
+                sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
+                ax.set_xlabel('Predicted Label')
+                ax.set_ylabel('True Label')
+                st.pyplot(fig)
+
+                col2, col3 = st.columns(2)
+                oa1 = col2.metric("OA", "0.37")
+                pa1 = col3.metric("Kappa", "0.8")
+
+    # with modelACR:
+    #     tabb1, tabb2, tabb3 = st.tabs(['精度', '可视化', '模型训练记录及结果下载'])
+    # with tabb1:
+    #     col2, col3 = st.columns(2)
+    #     oa = col2.metric("OA", "0.36", "+8%")
+    #     pa = col3.metric("Kappa", "0.5", "-8%")
+    # with tabb2:
+    #     chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
+    #     st.line_chart(chart_data)
+    # with tabb3:
+    #     st.markdown('###### 模型训练记录')
+    #     df = pd.DataFrame(
+    #         {
+    #             "名称": ["SVM", "KNN", "RF"],
+    #             '参数数量': ['5', '6', '5'],
+    #             "时间": ['22:10:20', '20:10:20', '21:10:20'],
+    #         }
+    #     )
+    #     edited_df = st.data_editor(df)
+    #     st.markdown('---')
+    #     st.markdown('###### 结果下载')
+    #     pages_utils.multiselect_all(st, ['SVM', 'KNN', 'RF'], '选择模型', "collapsed")
+    #     st.markdown('下载内容')
+    #     option_col1, option_col2, option_col3 = st.columns(3)
+    #     with option_col1:
+    #         st.checkbox('模型结构')
+    #     with option_col2:
+    #         st.checkbox('模型训练结果')
+    #     with option_col3:
+    #         st.checkbox('模型参数')
+    #     interval_col13, interval_col12 = st.columns([5, 1])
+    #     interval_col12.button('下载')
