@@ -14,6 +14,20 @@ import pages_utils
 # st.markdown('---')
 # Pages logic
 if 'page' not in st.session_state: st.session_state.page = 0
+if 'page15' not in st.session_state: st.session_state.page15 = 0
+if 'df15' not in st.session_state:
+    st.session_state.df15 = pages_utils.ModelSet
+
+
+def onTrain():
+    st.session_state.page = 0
+    st.session_state.page15 += 1
+    data11 = {"模型": "SVM", "时间": "22:10:20",
+              "下载模型结构、结果和参数值": True}
+    data12 = {"模型": "FLDA", "时间": "22:10:20",
+              "下载模型结构、结果和参数值": True}
+    st.session_state.df15.loc[len(st.session_state.df15)] = data11
+    st.session_state.df15.loc[len(st.session_state.df15)] = data12
 
 
 #
@@ -126,7 +140,7 @@ def firstPage(): st.session_state.page = 0
 
 modelACV, modelACM = st.columns([0.5, 0.7])
 with modelACV:
-    st.markdown("##### 数据与特征")
+    st.markdown("##### 特征与模型")
     st.markdown("###### 特征")
     edited_df2 = st.data_editor(
         pages_utils.FeatureDataSet,
@@ -141,7 +155,7 @@ with modelACV:
         num_rows="dynamic", )
     st.markdown('---')
     st.markdown("###### 模型")
-    edited_df1 = st.data_editor(pages_utils.ModelSet)
+    edited_df1 = st.data_editor(st.session_state.df15)
 with modelACM:
     ph = st.empty()
 
@@ -195,8 +209,10 @@ with modelACM:
             )
             interval_col1, interval_col2 = st.columns([5, 2])
             interval_col1.button("返回", on_click=firstPage)
-            btn11 = interval_col2.button("开始模型训练")
-        if btn11:
+            btn11 = interval_col2.button("开始模型训练", on_click=onTrain)
+    placeholder1 = st.empty()
+    if st.session_state.page15 == 1:
+        with placeholder1.container():
             st.markdown('---')
             st.write('###### 精度评价')
             tab1, tab2 = st.tabs(["SVM", "FLDA"])
