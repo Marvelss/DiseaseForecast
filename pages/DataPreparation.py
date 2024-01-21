@@ -48,6 +48,29 @@ def simulate_precipitation_data():
     return df
 
 
+def simulate_box_data():
+    # 模拟生成温度数据
+    N = 500
+    temperature1 = np.random.normal(loc=20, scale=2, size=(N,))
+    temperature2 = np.random.normal(loc=25, scale=4, size=(N,))
+    temperature3 = np.random.normal(loc=18, scale=1.5, size=(N,))
+    temperature4 = np.random.normal(loc=22, scale=3, size=(N,))
+
+    # 创建DataFrame
+    df1 = pd.DataFrame(temperature1, columns=['Temperature'])
+    df1['day'] = 'Thur'
+    df2 = pd.DataFrame(temperature2, columns=['Temperature'])
+    df2['day'] = 'Fri'
+    df3 = pd.DataFrame(temperature3, columns=['Temperature'])
+    df3['day'] = 'Sat'
+    df4 = pd.DataFrame(temperature4, columns=['Temperature'])
+    df4['day'] = 'Sun'
+
+    # 合并数据
+    df = pd.concat([df1, df2, df3, df4], axis=0)
+    return df
+
+
 def nextPage():
     st.session_state.page12 += 1
     data11 = {"选择字段": True, "数据集": "气象数据", "字段": "温度",
@@ -270,7 +293,7 @@ with (dataPCM):
     elif st.session_state.page12 == 1:
         with placeholder.container():
             st.markdown('##### 可视化')
-            tab1, tab2 = st.tabs(["1", "2"])
+            tab1, tab2, tab3 = st.tabs(["1", "2", "3"])
             with tab1:
                 # 模拟气温数据
                 temperature_data = simulate_temperature_data()
@@ -283,6 +306,26 @@ with (dataPCM):
                 ax.set_xlabel('Time(hours)')
                 ax.set_ylabel('Precipitation')
                 st.pyplot(fig)
+            with tab3:
+                df111 = simulate_box_data()
+                # 绘制箱型图
+                fig, ax = plt.subplots()
+                sns.boxplot(x='day', y='Temperature', data=df111,
+                            linewidth=2,
+                            width=0.8,
+                            fliersize=3,
+                            palette='hls',
+                            whis=1.5,
+                            notch=True,
+                            order=['Thur', 'Fri', 'Sat', 'Sun']
+                            )
+                ax.set_xlabel('Day')
+                ax.set_ylabel('Temperature')
+                plt.figure(figsize=(10, 6))
+                # sns.(x='', y='', data=df, palette='Set3')
+                plt.title('Boxplot of Temperature for Different Days')
+                st.pyplot(fig)
+
     # st.markdown(st.session_state.page12)
     # st.rerun()
 # with dataPCR:
