@@ -18,9 +18,10 @@ def clear_all():
     return
 
 
-def clear_other():
+def clear_other(key):
     for i in range(checkBoxNum):
-        st.session_state[f'checkbox{i}'] = False
+        if i != key:
+            st.session_state[f'checkbox{i}'] = False
     return
 
 
@@ -154,10 +155,10 @@ with dataPCV:
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
     with tab1:
-        genre = st.checkbox("Person相关性分析", key='checkbox0')
-        genre1 = st.checkbox("t检验", key='checkbox1')
+        genre = st.checkbox("Person相关性分析", key='checkbox0', on_change=clear_other, args=[0])
+        genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1])
     with tab2:
-        genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2')
+        genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other, args=[2])
     st.markdown('---')
     # st.markdown("##### 方法参数设置")
     if genre:

@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 if 'page12' not in st.session_state: st.session_state.page12 = 0
 
 checkBoxNum = 2
+
+
 # 模拟24小时气温数据
 def simulate_temperature_data():
     now = datetime.datetime.now()
@@ -25,6 +27,14 @@ def simulate_temperature_data():
 def clear_all():
     for i in range(checkBoxNum):
         st.session_state[f'checkbox{i}'] = False
+    return
+
+
+def clear_other(key):
+    # st.markdown(key)
+    for i in range(checkBoxNum):
+        if i != key:
+            st.session_state[f'checkbox{i}'] = False
     return
 
 
@@ -198,10 +208,10 @@ with (dataPCM):
     # st.dataframe(df.style.highlight_null(null_color='yellow'))
 
     with col1:
-        agree = st.checkbox('剔除异常值', key='checkbox0')
+        agree = st.checkbox('剔除异常值', key='checkbox0', on_change=clear_other, args=[0])
         # agree5 = st.checkbox('剔除数据5')
     with col2:
-        agree10 = st.checkbox("缺失值插补", key='checkbox1')
+        agree10 = st.checkbox("缺失值插补", key='checkbox1', on_change=clear_other, args=[1])
     # st.markdown(dataFlag)
     # if '植保数据' in dataFlag:
     #     with col1:
