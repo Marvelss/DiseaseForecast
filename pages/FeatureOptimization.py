@@ -9,6 +9,20 @@ if 'page14' not in st.session_state: st.session_state.page14 = 0
 if 'df13' not in st.session_state:
     st.session_state.df13 = pages_utils.FeatureDataSet
 
+checkBoxNum = 3
+
+
+def clear_all():
+    for i in range(checkBoxNum):
+        st.session_state[f'checkbox{i}'] = False
+    return
+
+
+def clear_other():
+    for i in range(checkBoxNum):
+        st.session_state[f'checkbox{i}'] = False
+    return
+
 
 def nextPage():
     st.session_state.page14 += 1
@@ -121,7 +135,7 @@ with dataPCV:
                 default=False,
             )
         },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"],)
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
     st.markdown('---')
     st.markdown("###### 预处理数据")
     edited_df223 = st.data_editor(
@@ -132,7 +146,7 @@ with dataPCV:
                 default=False,
             )
         },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"],)
+        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
     st.markdown('---')
     st.markdown("###### 原始数据")
     edited_df = st.data_editor(pages_utils.RawDataSet)
@@ -140,12 +154,20 @@ with dataPCV:
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
     with tab1:
-        genre = st.checkbox("Person相关性分析")
-        genre1 = st.checkbox("t检验")
+        genre = st.checkbox("Person相关性分析", key='checkbox0')
+        genre1 = st.checkbox("t检验", key='checkbox1')
     with tab2:
-        genre3 = st.checkbox("Relief-F互相关分析")
+        genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2')
     st.markdown('---')
     # st.markdown("##### 方法参数设置")
+    if genre:
+        st.markdown('提取条件')
+        genre2 = st.radio(
+            label='',
+            horizontal=True,
+            label_visibility="collapsed",
+            options=['p-value<0.001', 'p-value<0.005', 'p-value<0.01']
+        )
     if genre1:
         st.markdown('提取条件')
         genre2 = st.radio(
@@ -154,7 +176,6 @@ with dataPCM:
             label_visibility="collapsed",
             options=['p-value<0.001', 'p-value<0.005', 'p-value<0.01']
         )
-        st.markdown('---')
     # st.markdown('---')
     if genre3:
         # st.markdown('提取条件')
@@ -168,7 +189,7 @@ with dataPCM:
         # st.markdown('---')
 
     interval_col1, interval_col2 = st.columns([5, 1])
-    btn = interval_col2.button('保存')
+    btn = interval_col2.button('保存', on_click=clear_all)
     if btn:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
@@ -189,7 +210,7 @@ with dataPCM:
             edited_df28 = st.data_editor(
                 st.session_state.df1, height=190, width=800,
                 disabled=["数据集", "字段", "时间"],
-                num_rows="dynamic",)
+                num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
             btn2 = interval_col33.button('运行', on_click=nextPage)
     elif st.session_state.page14 == 1:

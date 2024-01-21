@@ -17,6 +17,14 @@ if 'page13' not in st.session_state: st.session_state.page13 = 0
 if 'df12' not in st.session_state:
     st.session_state.df12 = pages_utils.FeatureDataSet
 
+checkBoxNum = 5
+
+
+def clear_all():
+    for i in range(checkBoxNum):
+        st.session_state[f'checkbox{i}'] = False
+    return
+
 
 def nextPage():
     st.session_state.page13 += 1
@@ -151,12 +159,12 @@ with featureCCM:
     col1, col2 = st.columns(2)
     # st.dataframe(df.style.highlight_null(null_color='yellow'))
     with col1:
-        option14 = st.checkbox('时间(温度)分辨率转换')
-        option15 = st.checkbox('降雨日数计算')
-        option16 = st.checkbox('降水累积量计算')
+        option14 = st.checkbox('时间(温度)分辨率转换', key='checkbox0')
+        option15 = st.checkbox('降雨日数计算', key='checkbox1')
+        option16 = st.checkbox('降水累积量计算', key='checkbox2')
     with col2:
-        option17 = st.checkbox('基于活动积温的生育期计算')
-        option18 = st.checkbox('时空抽取')
+        option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3')
+        option18 = st.checkbox('时空抽取', key='checkbox4')
 
     # with tab4:
     # st.subheader('其他')
@@ -230,7 +238,7 @@ with featureCCM:
         number1 = st.number_input("步长(天)", value=1, min_value=1)
         # st.markdown('---')
     interval_col1, interval_col2 = st.columns([5, 1])
-    btn = interval_col2.button('保存')
+    btn = interval_col2.button('保存', on_click=clear_all)
     if btn:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
