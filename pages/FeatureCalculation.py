@@ -37,10 +37,10 @@ def clear_other(key):
 
 def nextPage():
     st.session_state.page13 += 1
-    data11 = {"选择字段": True, "数据集": "气象数据", "特征": "降雨日数",
+    data11 = {"选择特征": False, "数据集": "气象数据", "特征": "降雨日数",
               "大小": '1*3', "处理方法": "降水累积量计算", "时间": '22:10:20',
               "下载数据集": True}
-    data12 = {"选择字段": True, "数据集": "气象数据", "特征": "降水累积量",
+    data12 = {"选择特征": False, "数据集": "气象数据", "特征": "降水累积量",
               "大小": '1*5', "处理方法": "降水累积量计算", "时间": '22:10:21',
               "下载数据集": True}
     st.session_state.df12.loc[len(st.session_state.df12)] = data11
@@ -139,6 +139,7 @@ with featureCCV:
     st.markdown("###### 预处理数据")
     edited_df223 = st.data_editor(
         pages_utils.PreprocessedDataSet,
+        height=190, width=800,
         column_config={
             "选择字段": st.column_config.CheckboxColumn(
                 help="选择用于数据处理的字段",
@@ -150,16 +151,19 @@ with featureCCV:
     st.markdown("###### 特征")
     edited_df2 = st.data_editor(
         st.session_state.df12,
+
+        height=190, width=800,
         column_config={
-            "选择字段": st.column_config.CheckboxColumn(
-                help="选择用于数据处理的字段",
+            "选择特征": st.column_config.CheckboxColumn(
+                help="选择用于数据处理的特征",
                 default=False,
             )
         },
         disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
     st.markdown('---')
     st.markdown("###### 原始数据")
-    edited_df = st.data_editor(pages_utils.RawDataSet)
+    edited_df = st.data_editor(pages_utils.RawDataSet,
+                               height=190, width=800)
 with featureCCM:
     # tab3, tab4 = st.tabs(["气象", "其他"])
     # with tab3:
@@ -251,8 +255,8 @@ with featureCCM:
     if btn:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
-        new_data = {"数据集": "气象数据", "输入特征": "温度", "输出特征": "温度",
-                    "特征计算方法": "降雨日数计算", "时间": '22:20:20'}
+        new_data = {"数据集": "气象数据", "输入特征": "温度", "输出特征": "旬平均温度",
+                    "特征计算方法": "时间(温度)分辨率转换", "时间": '22:20:20'}
         st.session_state.df2.loc[len(st.session_state.df2)] = new_data
         st.rerun()
     st.markdown('---')

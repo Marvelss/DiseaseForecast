@@ -27,10 +27,10 @@ def clear_other(key):
 
 def nextPage():
     st.session_state.page14 += 1
-    data11 = {"选择字段": True, "数据集": "气象数据", "特征": "温度",
+    data11 = {"选择特征": False, "数据集": "气象数据", "特征": "温度",
               "大小": '1*3', "处理方法": "t检验", "时间": '22:10:20',
               "下载数据集": True}
-    data12 = {"选择字段": True, "数据集": "气象数据", "特征": "降水累积量",
+    data12 = {"选择特征": False, "数据集": "气象数据", "特征": "降水累积量",
               "大小": '1*5', "处理方法": "Person相关性分析", "时间": '22:10:21',
               "下载数据集": True}
     st.session_state.df13.loc[len(st.session_state.df13)] = data11
@@ -128,12 +128,13 @@ dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
     st.markdown("###### 特征")
+
     edited_df2 = st.data_editor(
         st.session_state.df13,
+        height=190, width=800,
         column_config={
-            "选择字段": st.column_config.CheckboxColumn(
-                help="选择用于数据处理的字段",
-                default=False,
+            "选择特征": st.column_config.CheckboxColumn(
+                help="选择用于数据处理的特征",
             )
         },
         disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
@@ -141,6 +142,7 @@ with dataPCV:
     st.markdown("###### 预处理数据")
     edited_df223 = st.data_editor(
         pages_utils.PreprocessedDataSet,
+        height=190, width=800,
         column_config={
             "选择字段": st.column_config.CheckboxColumn(
                 help="选择用于数据处理的字段",
@@ -150,7 +152,8 @@ with dataPCV:
         disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
     st.markdown('---')
     st.markdown("###### 原始数据")
-    edited_df = st.data_editor(pages_utils.RawDataSet)
+    edited_df = st.data_editor(pages_utils.RawDataSet,
+                               height=190, width=800)
 
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
@@ -194,8 +197,8 @@ with dataPCM:
     if btn:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
-        new_data = {"数据集": "气象数据", "输入特征": "降水",
-                    "输出特征": "降雨日数",
+        new_data = {"数据集": "气象数据", "输入特征": "温度",
+                    "输出特征": "温度",
                     "特征优选方法": "t检验", "时间": '22:20:20'}
         st.session_state.df1.loc[len(st.session_state.df1)] = new_data
         st.rerun()

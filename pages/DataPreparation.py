@@ -185,6 +185,7 @@ with dataPCV:
     # edited_df = st.data_editor(df)
     edited_df22 = st.data_editor(
         pages_utils.RawDataSet,
+        height=190, width=800,
         column_config={
             "选择字段": st.column_config.CheckboxColumn(
                 help="选择用于数据处理的字段",
@@ -197,6 +198,7 @@ with dataPCV:
     st.markdown("###### 预处理数据")
     edited_df223 = st.data_editor(
         st.session_state.df11,
+        height=190, width=800,
         column_config={
             "选择字段": st.column_config.CheckboxColumn(
                 help="选择用于数据处理的字段",
@@ -213,6 +215,7 @@ with dataPCV:
     st.markdown("###### 特征")
     edited_df2 = st.data_editor(
         pages_utils.FeatureDataSet,
+        height=190, width=800,
         column_config={
             "选择字段": st.column_config.CheckboxColumn(
                 help="选择用于数据处理的字段",

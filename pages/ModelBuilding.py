@@ -144,6 +144,8 @@ with modelACV:
     st.markdown("###### 特征")
     edited_df2 = st.data_editor(
         pages_utils.FeatureDataSet,
+        height=190, width=800,
+        column_order=["选择特征", "数据集", "特征", "时间"],
         column_config={
             "选择字段": st.column_config.CheckboxColumn(
                 help="选择用于数据处理的字段",
@@ -153,7 +155,8 @@ with modelACV:
         disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
     st.markdown('---')
     st.markdown("###### 模型")
-    edited_df1 = st.data_editor(st.session_state.df15)
+    edited_df1 = st.data_editor(st.session_state.df15,
+                                height=190, width=800)
 with modelACM:
     ph = st.empty()
 

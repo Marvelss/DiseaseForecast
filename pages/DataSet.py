@@ -123,7 +123,7 @@ with dataSCR:
             "传输状态": ['已上传', '上传出错'],
             "上传时间": ['13:15:10', '12:16:10']
         }
-    ), height=140, use_container_width=True)
+    ),height=190, width=800, use_container_width=True)
     # col1ab, col2ab = st.columns(2)
     # col1ab.write("文件名称: 气温.xlsx")
     # col1ab.write("文件名称: 降水.xlsx")
@@ -137,4 +137,4 @@ with dataSCR:
             "传输状态": ['已上传', '上传出错', '已上传', '已上传'],
             "上传时间": ['13:15:10', '12:16:10', '13:15:10', '12:16:10']
         }
-    ), height=140, use_container_width=True)
+    ), height=190, width=800, use_container_width=True)

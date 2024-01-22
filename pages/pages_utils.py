@@ -41,9 +41,12 @@ RawDataSet = pd.DataFrame(
     }
 )
 PreprocessedDataSet = pd.DataFrame(columns=["选择字段", "数据集", "字段", "大小", "处理方法", "时间", "下载数据集"])
-PreprocessedDataSet.loc[0] = [True, "气象数据", "降雨日数", "1*3", "时间分辨率转换", '22:10:20', True]
+PreprocessedDataSet.loc[0] = [False, "气象数据", "降雨日数", "1*3", "时间分辨率转换", '22:10:20', True]
 # PreprocessedDataSet.loc[1] = ["植保数据", "基于活动积温的生育期", "1*6", "降雨日数计算", '20:10:20']
 # PreprocessedDataSet.loc[2] = ["农学数据", "预测峰值", "1*6", "降水累积量计算", '21:10:20']
-FeatureDataSet = pd.DataFrame(columns=["选择字段", "数据集", "特征", "大小", "处理方法", "时间", "下载数据集"])
-FeatureDataSet.loc[0] = [True, "农学数据", "预测峰值", "1*6", "降水累积量计算", '21:10:20', False]
+FeatureDataSet = pd.DataFrame(columns=["选择特征", "数据集", "特征", "大小", "处理方法", "时间", "下载数据集"])
+FeatureDataSet.loc[0] = [False, "农学数据", "预测峰值", "1*6", "降水累积量计算", '21:10:20', False]
+FeatureDataSet.loc[1] = [False, "气象数据", "温度", "1*6", "时间(温度)分辨率转换", '21:10:20', False]
+FeatureDataSet.loc[2] = [False, "气象数据", "降水", "1*6", "降水累积量计算", '21:10:20', False]
+FeatureDataSet.loc[3] = [False, "植保数据", "预测峰值", "1*6", "生育期", '21:10:20', False]
 ModelSet = pd.DataFrame(columns=["模型", "时间", "下载模型结构、结果和参数值"])
