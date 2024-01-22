@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from streamlit_tree_select import tree_select
 
@@ -18,6 +20,20 @@ if 'df12' not in st.session_state:
     st.session_state.df12 = pages_utils.FeatureDataSet
 
 checkBoxNum = 5
+
+
+def simulate_temperature_data():
+    # 模拟生成温度数据
+    data = {
+        'City': ['City1', 'City2', 'City3'],
+        'Temperature': np.append([
+            np.random.normal(25, 5, 10),
+            np.random.normal(20, 3, 10),
+            np.random.normal(30, 7, 10)
+        ])
+    }
+    df = pd.DataFrame(data)
+    return df
 
 
 # 取消所有选项按钮
@@ -278,19 +294,37 @@ with featureCCM:
     elif st.session_state.page13 == 1:
         with placeholder.container():
             st.markdown('##### 可视化')
-            chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["p-value", "月份", "图例"])
-            st.vega_lite_chart(
-                chart_data,
-                {
-                    "mark": {"type": "circle", "tooltip": True},
-                    "encoding": {
-                        "x": {"field": "月份", "type": "quantitative"},
-                        "y": {"field": "p-value", "type": "quantitative"},
-                        "size": {"field": "图例", "type": "quantitative"},
-                        "color": {"field": "图例", "type": "quantitative"},
+            tab1, tab2 = st.tabs(["1", "2"])
+            with tab1:
+                precipitation_data = np.random.normal(50, 10, 20)
+                chart_data = pd.DataFrame({
+                    "Precipitation": precipitation_data,
+                    "月份": np.arange(1, 21),  # 月份从1到20
+                    "图例": np.random.randint(1, 5, 20)  # 随机生成图例数据
+                })
+                st.vega_lite_chart(
+                    chart_data,
+                    {
+                        "mark": {"type": "circle", "tooltip": True},
+                        "encoding": {
+                            "x": {"field": "月份", "type": "quantitative"},
+                            "y": {"field": "Precipitation", "type": "quantitative"},
+                            "size": {"field": "图例", "type": "quantitative"},
+                            "color": {"field": "图例", "type": "quantitative"},
+                        },
                     },
-                },
-            )
+                )
+            with tab2:
+                pass
+
+                # df = simulate_temperature_data()
+                # # 创建子图和轴
+                # fig, ax = plt.subplots()
+                # # 使用Seaborn的barplot生成柱状图
+                # sns.barplot(x='City', y='Temperature', data=df, ax=ax)
+                # # 设置图形标题
+                # plt.title('Barplot of Temperature Data')
+                # st.pyplot(fig)
 # with featureCCR:
 #     tabb2, tabb3 = st.tabs(['可视化', '历史记录及数据下载'])
 # with tabb1:

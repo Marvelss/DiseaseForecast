@@ -1,15 +1,55 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import SelectKBest, f_classif
 from streamlit_tree_select import tree_select
 
 import pages_utils
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 if 'page14' not in st.session_state: st.session_state.page14 = 0
 if 'df13' not in st.session_state:
     st.session_state.df13 = pages_utils.FeatureDataSet
 
 checkBoxNum = 3
+
+
+def simulate_temperature_data1():
+    # 模拟生成数据
+    np.random.seed(42)  # 设置随机种子以确保可重复性
+
+    # 创建一个包含随机数据的数据框
+    data = {
+        'Feature1': np.random.normal(0, 1, 100),
+        'Feature2': np.random.normal(0, 1, 100),
+        'Feature3': np.random.normal(0, 1, 100),
+        'Target': np.random.choice([0, 1], size=100)
+    }
+    df = pd.DataFrame(data)
+    return df
+
+
+def simulate_temperature_data():
+    # 模拟生成温度数据
+    np.random.seed(15)
+    N = 15
+
+    temperature1 = np.random.normal(loc=20, scale=2, size=(N,))
+    temperature2 = np.random.normal(loc=25, scale=4, size=(N,))
+    temperature3 = np.random.normal(loc=18, scale=1.5, size=(N,))
+    temperature4 = np.random.normal(loc=22, scale=3, size=(N,))
+
+    # 创建DataFrame
+    df = pd.DataFrame({
+        'Temperature1': temperature1,
+        'Temperature2': temperature2,
+        'Temperature3': temperature3,
+        'Temperature4': temperature4,
+        'Target': np.random.choice([0, 1], size=N)  # 二分类目标
+    })
+    return df
 
 
 def clear_all():
@@ -220,19 +260,43 @@ with dataPCM:
     elif st.session_state.page14 == 1:
         with placeholder.container():
             st.markdown('##### 可视化')
-            chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["p-value", "月份", "图例"])
-            st.vega_lite_chart(
-                chart_data,
-                {
-                    "mark": {"type": "circle", "tooltip": True},
-                    "encoding": {
-                        "x": {"field": "月份", "type": "quantitative"},
-                        "y": {"field": "p-value", "type": "quantitative"},
-                        "size": {"field": "图例", "type": "quantitative"},
-                        "color": {"field": "图例", "type": "quantitative"},
-                    },
-                },
-            )
+            tab1, tab2 = st.tabs(["1", "2"])
+            with tab1:
+                # 模拟气温数据
+                df1 = simulate_temperature_data1()
+                # 划分特征和目标
+                X = df1.drop('Target', axis=1)
+                y = df1['Target']
+
+                # 使用随机森林模型拟合数据
+                rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+                rf_model.fit(X, y)
+
+                # 获取特征重要性
+                feature_importance = rf_model.feature_importances_
+
+                # 创建特征重要性数据框
+                feature_importance_df = pd.DataFrame(
+                    {'Feature': ['temperature', 'precipitation', 'Continuous Rain Days'], 'Importance': feature_importance})
+
+                # 排序特征重要性
+                feature_importance_df = feature_importance_df.sort_values(by='Importance', ascending=False)
+
+                # 创建子图和轴
+                fig, ax = plt.subplots()
+
+                # 使用Seaborn的barplot生成特征重要性图
+                sns.barplot(x='Importance', y='Feature', data=feature_importance_df, ax=ax)
+
+                # 设置图形标题
+                plt.title('Feature Importance Plot')
+                st.pyplot(fig)
+            with tab2:
+                df = simulate_temperature_data()
+                fig, ax = plt.subplots()
+                sns.scatterplot(x='Temperature1', y='Temperature2', hue='Target', data=df)
+                plt.title('Scatter Plot of Selected Features')
+                st.pyplot(fig)
         # btn2 = st.button('下载')
 
 # with dataPCR:
