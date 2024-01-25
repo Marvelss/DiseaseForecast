@@ -1,4 +1,5 @@
 import datetime
+import time
 
 import streamlit as st
 import numpy as np
@@ -8,8 +9,21 @@ import pages_utils
 from streamlit_autorefresh import st_autorefresh
 import seaborn as sns
 import matplotlib.pyplot as plt
+import extra_streamlit_components as stx
 
+data1 = [
+    stx.TabBarItemData(id=1, title="ToDo", description="Tasks to take care of"),
+    stx.TabBarItemData(id=2, title="Done", description="Tasks taken care of"),
+    stx.TabBarItemData(id=3, title="Overdue", description="Tasks missed out"),
+]
 if 'page12' not in st.session_state: st.session_state.page12 = 0
+if "leftTabs" not in st.session_state:
+    # st.session_state["leftTabs"] = data1
+    st.session_state["leftTabs"] = ['标题1']
+    # st.session_state["leftTabs"] = stx.tab_bar(data=[
+    #     stx.TabBarItemData(id=1, title="气象数据", description=""),
+    #     stx.TabBarItemData(id=2, title="植保数据", description=""),
+    # ], default=1)
 
 checkBoxNum = 2
 
@@ -72,6 +86,19 @@ def simulate_box_data():
 
 
 def nextPage():
+    # st.session_state["leftTabs"] = stx.tab_bar(data=[
+    #     stx.TabBarItemData(id=1, title="气象数据", description=""),
+    #     stx.TabBarItemData(id=2, title="植保数据", description=""),
+    #     stx.TabBarItemData(id=3, title="农学数据", description=""),
+    # ], default=1)
+    # new_tab = st.text_input("")
+    # st.session_state["leftTabs"].append("New Tab")
+    # # time.sleep(1)
+    # with leftDataTabs[len(st.session_state["leftTabs"])]:
+    #     st.markdown('s')
+    st.session_state["leftTabs"].append('标题2 ')
+
+    # st.experimental_rerun()
     st.session_state.page12 += 1
     data11 = {"选择字段": True, "数据集": "气象数据", "字段": "温度",
               "大小": '1*3', "处理方法": "缺失值插补", "时间": '22:10:20',
@@ -181,48 +208,69 @@ if 'df11' not in st.session_state:
 dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
-    st.markdown("###### 原始数据")
-    # edited_df = st.data_editor(df)
-    edited_df22 = st.data_editor(
-        pages_utils.RawDataSet,
-        height=190, width=800,
-        column_config={
-            "选择字段": st.column_config.CheckboxColumn(
-                help="选择用于数据处理的字段",
-                default=False,
-            )
-        },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"],
-    )
-    st.markdown('---')
-    st.markdown("###### 预处理数据")
-    edited_df223 = st.data_editor(
-        st.session_state.df11,
-        height=190, width=800,
-        column_config={
-            "选择字段": st.column_config.CheckboxColumn(
-                help="选择用于数据处理的字段",
-                default=False,
-            )
-        },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"])
-    # for index, row in edited_df223.iterrows():
-    #     st.markdown(row.get('下载数据集'))
-    #     if row.get('下载数据集'):
-    #         st.markdown('下载')
+    placeholder1 = st.empty()
+    # leftDataTabs = st.tabs(st.session_state["leftTabs"])
+    st.markdown(st.session_state["leftTabs"])
+    if st.session_state.page12 == 0:
+        # st.markdown(st.session_state.page12)
+        with placeholder1.container():
+            # if st.session_state.page12 == 1:
+            # st.markdown(st.session_state.page12)
+            st.tabs(st.session_state["leftTabs"])[0].markdown('标题1-1')
 
-    st.markdown('---')
-    st.markdown("###### 特征")
-    edited_df2 = st.data_editor(
-        pages_utils.FeatureDataSet,
-        height=190, width=800,
-        column_config={
-            "选择字段": st.column_config.CheckboxColumn(
-                help="选择用于数据处理的字段",
-                default=False,
-            )
-        },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
+    if st.session_state.page12 == 1:
+        with placeholder1.container():
+            tt = st.tabs(st.session_state["leftTabs"])
+            tt[0].markdown('标题1-2')
+            tt[1].markdown('标题2-1')
+        # with tab1:
+        #     st
+        # with tab2:
+        #     st.markdown('2')
+    # print(leftDataTabs)
+    # with leftDataTabs[0]:
+    #     # st.markdown("###### 原始数据")
+    #     # edited_df = st.data_editor(df)
+    #     edited_df22 = st.data_editor(
+    #         pages_utils.RawDataSet,
+    #         height=190, width=800,
+    #         column_config={
+    #             "选择字段": st.column_config.CheckboxColumn(
+    #                 help="选择用于数据处理的字段",
+    #                 default=False,
+    #             )
+    #         },
+    #         disabled=["数据集", "字段", "大小", "处理方法", "时间"],
+    #     )
+    # st.markdown('---')
+    # st.markdown("###### 预处理数据")
+    # edited_df223 = st.data_editor(
+    #     st.session_state.df11,
+    #     height=190, width=800,
+    #     column_config={
+    #         "选择字段": st.column_config.CheckboxColumn(
+    #             help="选择用于数据处理的字段",
+    #             default=False,
+    #         )
+    #     },
+    #     disabled=["数据集", "字段", "大小", "处理方法", "时间"])
+    # # for index, row in edited_df223.iterrows():
+    # #     st.markdown(row.get('下载数据集'))
+    # #     if row.get('下载数据集'):
+    # #         st.markdown('下载')
+    #
+    # st.markdown('---')
+    # st.markdown("###### 特征")
+    # edited_df2 = st.data_editor(
+    #     pages_utils.FeatureDataSet,
+    #     height=190, width=800,
+    #     column_config={
+    #         "选择字段": st.column_config.CheckboxColumn(
+    #             help="选择用于数据处理的字段",
+    #             default=False,
+    #         )
+    #     },
+    #     disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
 
 with (dataPCM):
     # 当选择一类数据集后,其他数据集禁选
