@@ -79,8 +79,12 @@ def simulate_box_data():
     return df
 
 
+def firstPage(): st.session_state.page12 = 0
+
+
 def nextPage():
-    st.session_state["leftTabs"].append('预处理后数据')
+    if '预处理后数据' not in st.session_state["leftTabs"]:
+        st.session_state["leftTabs"].append('预处理后数据')
     st.session_state.page12 += 1
     data11 = {"选择字段": True, "数据集": "气象数据", "字段": "温度",
               "大小": '1*3', "处理方法": "缺失值插补", "时间": '22:10:20',
@@ -217,3 +221,5 @@ with dataPCM:
                 # sns.(x='', y='', data=df, palette='Set3')
                 plt.title('Boxplot of Temperature for Different Days')
                 st.pyplot(fig)
+            interval_col34, interval_col33 = st.columns([5, 1])
+            btn3 = interval_col33.button('返回', on_click=firstPage)

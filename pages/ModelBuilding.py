@@ -15,7 +15,8 @@ if 'df15' not in st.session_state:
 
 
 def onTrain():
-    st.session_state["leftTabs"].append('模型')
+    if '模型' not in st.session_state["leftTabs"]:
+        st.session_state["leftTabs"].append('模型')
     st.session_state.page = 0
     st.session_state.page15 += 1
     data11 = {"模型": "SVM", "时间": "22:10:20",

@@ -63,8 +63,12 @@ def clear_other(key):
     return
 
 
+def firstPage(): st.session_state.page14 = 0
+
+
 def nextPage():
-    st.session_state["leftTabs"].append('优选特征')
+    if '优选特征' not in st.session_state["leftTabs"]:
+        st.session_state["leftTabs"].append('优选特征')
     st.session_state.page14 += 1
     data11 = {"选择特征": False, "数据集": "气象数据", "特征": "温度",
               "大小": '1*3', "处理方法": "t检验", "时间": '22:10:20',
@@ -216,3 +220,5 @@ with dataPCM:
                 sns.scatterplot(x='Temperature1', y='Temperature2', hue='Target', data=df)
                 plt.title('Scatter Plot of Selected Features')
                 st.pyplot(fig)
+            interval_col34, interval_col33 = st.columns([5, 1])
+            btn3 = interval_col33.button('返回', on_click=firstPage)

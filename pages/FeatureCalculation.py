@@ -40,8 +40,12 @@ def clear_other(key):
     return
 
 
+def firstPage(): st.session_state.page13 = 0
+
+
 def nextPage():
-    st.session_state["leftTabs"].append('被选特征')
+    if '被选特征' not in st.session_state["leftTabs"]:
+        st.session_state["leftTabs"].append('被选特征')
     st.session_state.page13 += 1
     data11 = {"选择特征": False, "数据集": "气象数据", "特征": "降雨日数",
               "大小": '1*3', "处理方法": "降水累积量计算", "时间": '22:10:20',
@@ -198,3 +202,5 @@ with featureCCM:
                 )
             with tab2:
                 pass
+            interval_col34, interval_col33 = st.columns([5, 1])
+            btn3 = interval_col33.button('返回', on_click=firstPage)
