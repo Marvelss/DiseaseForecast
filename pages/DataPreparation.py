@@ -1,6 +1,7 @@
 import datetime
+import os
 import time
-
+from PIL import Image
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -150,11 +151,18 @@ with dataPCM:
     st.markdown('---')
     # st.markdown("##### 方法参数设置")
     if agree10:
-        option = st.selectbox(
-            '插补方法',
-            options=('线性插值', '自定义'))
-        if option == '自定义':
-            st.text_input('输入数值')
+        coll11, coll22 = st.columns([0.6, 0.3])
+        with coll11:
+            st.info('用于填补缺失值', icon="ℹ️")
+            # st.markdown(os.path.join(os.getcwd(), 'resource', 'image', '0.png'))
+            img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '0.png'))
+            st.image(img)
+        with coll22:
+            option = st.selectbox(
+                '插补方法',
+                options=('线性插值', '自定义'))
+            if option == '自定义':
+                st.text_input('输入数值')
         # st.markdown('---')
     if agree:
         number2 = st.text_input("剔除大于", value=0.1)
