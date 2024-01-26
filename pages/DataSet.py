@@ -6,11 +6,6 @@ import pandas as pd
 import streamlit as st
 import extra_streamlit_components as stx
 
-from pages_utils import multiselect_all
-
-
-# st.sidebar.info("注意:按照数据集模板内容填写")
-
 
 @st.cache_data
 def convert_df(df):
@@ -28,8 +23,6 @@ if 'data_df' not in st.session_state:
 if 'i' not in st.session_state:
     st.session_state.i = i
 
-# st.header('数据集')
-# st.markdown('---')
 dataSCM, dataSCR = st.columns([0.9, 0.4])
 
 with dataSCM:
@@ -69,16 +62,14 @@ with dataSCM:
             option14 = st.checkbox('温度数据')
         with col2:
             option15 = st.checkbox('降水数据')
-        # with col3:
-        # option16 = st.checkbox('')
+
     if chosen_id == '2':
         col1, col2, col3 = st.columns(3)
         with col1:
             option14 = st.checkbox('植保站数据')
         with col2:
             option15 = st.checkbox('众源数据')
-        # with col3:
-        #     option16 = st.checkbox('模板7')
+
     if chosen_id == '3':
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -108,13 +99,9 @@ with dataSCR:
             st.session_state.data_df, height=190, width=800,
             disabled=["文件名称", "传输状态", "上传时间"],
             hide_index=False, )
-    # st.write("文件名称:", '气温.xlsx')
     st.markdown('---')
     for uploaded_file in uploaded_files:
         bytes_data = uploaded_file.read()
-        # st.write("filename:", uploaded_file.name)
-        # dataframe = pd.read_excel(uploaded_file)
-        # st.write(dataframe)
 
     st.markdown("###### 植保数据")
     st.data_editor(pd.DataFrame(
@@ -123,12 +110,7 @@ with dataSCR:
             "传输状态": ['已上传', '上传出错'],
             "上传时间": ['13:15:10', '12:16:10']
         }
-    ),height=190, width=800, use_container_width=True)
-    # col1ab, col2ab = st.columns(2)
-    # col1ab.write("文件名称: 气温.xlsx")
-    # col1ab.write("文件名称: 降水.xlsx")
-    # col2ab.write("状态:已上传")
-    # col2ab.write("状态:上传出错")
+    ), height=190, width=800, use_container_width=True)
     st.markdown('---')
     st.markdown("###### 农学数据")
     st.data_editor(pd.DataFrame(
