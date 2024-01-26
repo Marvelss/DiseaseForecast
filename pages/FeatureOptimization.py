@@ -66,6 +66,7 @@ def clear_other(key):
 
 
 def nextPage():
+    st.session_state["leftTabs"].append('优选特征')
     st.session_state.page14 += 1
     data11 = {"选择特征": False, "数据集": "气象数据", "特征": "温度",
               "大小": '1*3', "处理方法": "t检验", "时间": '22:10:20',
@@ -167,34 +168,38 @@ def nextPage():
 dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
-    st.markdown("###### 特征")
+    # 根据st.session_state.page12的值刷新表格
+    placeholder1 = st.empty()
+    if st.session_state.page12 == 0:
+        # st.markdown(st.session_state.page12)
+        with placeholder1.container():
+            tt1 = st.tabs(st.session_state["leftTabs"])
+            for i in range(len(st.session_state["leftTabs"])):
+                with tt1[i]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[i],
+                        height=720, width=800,
+                        column_config={
+                            "选择字段": st.column_config.CheckboxColumn(
+                                help="选择用于数据处理的字段",
+                                default=False,
+                            )
+                        })
 
-    edited_df2 = st.data_editor(
-        st.session_state.df13,
-        height=190, width=800,
-        column_config={
-            "选择特征": st.column_config.CheckboxColumn(
-                help="选择用于数据处理的特征",
-            )
-        },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
-    st.markdown('---')
-    st.markdown("###### 预处理数据")
-    edited_df223 = st.data_editor(
-        pages_utils.PreprocessedDataSet,
-        height=190, width=800,
-        column_config={
-            "选择字段": st.column_config.CheckboxColumn(
-                help="选择用于数据处理的字段",
-                default=False,
-            )
-        },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
-    st.markdown('---')
-    st.markdown("###### 原始数据")
-    edited_df = st.data_editor(pages_utils.RawDataSet,
-                               height=190, width=800)
-
+    if st.session_state.page12 == 1:
+        with placeholder1.container():
+            tt = st.tabs(st.session_state["leftTabs"])
+            for i in range(len(st.session_state["leftTabs"])):
+                with tt[i]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[i],
+                        height=720, width=800,
+                        column_config={
+                            "选择字段": st.column_config.CheckboxColumn(
+                                help="选择用于数据处理的字段",
+                                default=False,
+                            )
+                        })
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
     with tab1:
@@ -277,7 +282,8 @@ with dataPCM:
 
                 # 创建特征重要性数据框
                 feature_importance_df = pd.DataFrame(
-                    {'Feature': ['temperature', 'precipitation', 'Continuous Rain Days'], 'Importance': feature_importance})
+                    {'Feature': ['temperature', 'precipitation', 'Continuous Rain Days'],
+                     'Importance': feature_importance})
 
                 # 排序特征重要性
                 feature_importance_df = feature_importance_df.sort_values(by='Importance', ascending=False)

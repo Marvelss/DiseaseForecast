@@ -20,6 +20,7 @@ if 'df15' not in st.session_state:
 
 
 def onTrain():
+    st.session_state["leftTabs"].append('模型')
     st.session_state.page = 0
     st.session_state.page15 += 1
     data11 = {"模型": "SVM", "时间": "22:10:20",
@@ -141,22 +142,38 @@ def firstPage(): st.session_state.page = 0
 modelACV, modelACM = st.columns([0.5, 0.7])
 with modelACV:
     st.markdown("##### 特征与模型")
-    st.markdown("###### 特征")
-    edited_df2 = st.data_editor(
-        pages_utils.FeatureDataSet,
-        height=190, width=800,
-        column_order=["选择特征", "数据集", "特征", "时间"],
-        column_config={
-            "选择字段": st.column_config.CheckboxColumn(
-                help="选择用于数据处理的字段",
-                default=False,
-            )
-        },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
-    st.markdown('---')
-    st.markdown("###### 模型")
-    edited_df1 = st.data_editor(st.session_state.df15,
-                                height=190, width=800)
+    # 根据st.session_state.page12的值刷新表格
+    placeholder1 = st.empty()
+    if st.session_state.page12 == 0:
+        # st.markdown(st.session_state.page12)
+        with placeholder1.container():
+            tt1 = st.tabs(st.session_state["leftTabs"])
+            for i in range(len(st.session_state["leftTabs"])):
+                with tt1[i]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[i],
+                        height=720, width=800,
+                        column_config={
+                            "选择字段": st.column_config.CheckboxColumn(
+                                help="选择用于数据处理的字段",
+                                default=False,
+                            )
+                        })
+
+    if st.session_state.page12 == 1:
+        with placeholder1.container():
+            tt = st.tabs(st.session_state["leftTabs"])
+            for i in range(len(st.session_state["leftTabs"])):
+                with tt[i]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[i],
+                        height=720, width=800,
+                        column_config={
+                            "选择字段": st.column_config.CheckboxColumn(
+                                help="选择用于数据处理的字段",
+                                default=False,
+                            )
+                        })
 with modelACM:
     ph = st.empty()
 

@@ -8,16 +8,10 @@ from streamlit_tree_select import tree_select
 
 import pages_utils
 
-# st.session_state.page = 0
-#
-#
-# def addData1(pha, rootNode):
-#     st.session_state.page += 1
-#     rootNode[0]["children"].append({"label": "降雨日数", "value": "sub_d"})
-
 if 'page13' not in st.session_state: st.session_state.page13 = 0
 if 'df12' not in st.session_state:
     st.session_state.df12 = pages_utils.FeatureDataSet
+
 
 checkBoxNum = 5
 
@@ -52,6 +46,7 @@ def clear_other(key):
 
 
 def nextPage():
+    st.session_state["leftTabs"].append('被选特征')
     st.session_state.page13 += 1
     data11 = {"选择特征": False, "数据集": "气象数据", "特征": "降雨日数",
               "大小": '1*3', "处理方法": "降水累积量计算", "时间": '22:10:20',
@@ -152,34 +147,38 @@ def nextPage():
 featureCCV, featureCCM = st.columns([0.5, 0.7])
 with featureCCV:
     st.markdown("##### 数据与特征")
-    st.markdown("###### 预处理数据")
-    edited_df223 = st.data_editor(
-        pages_utils.PreprocessedDataSet,
-        height=190, width=800,
-        column_config={
-            "选择字段": st.column_config.CheckboxColumn(
-                help="选择用于数据处理的字段",
-                default=False,
-            )
-        },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
-    st.markdown('---')
-    st.markdown("###### 特征")
-    edited_df2 = st.data_editor(
-        st.session_state.df12,
+    # 根据st.session_state.page12的值刷新表格
+    placeholder1 = st.empty()
+    if st.session_state.page12 == 0:
+        # st.markdown(st.session_state.page12)
+        with placeholder1.container():
+            tt1 = st.tabs(st.session_state["leftTabs"])
+            for i in range(len(st.session_state["leftTabs"])):
+                with tt1[i]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[i],
+                        height=720, width=800,
+                        column_config={
+                            "选择字段": st.column_config.CheckboxColumn(
+                                help="选择用于数据处理的字段",
+                                default=False,
+                            )
+                        })
 
-        height=190, width=800,
-        column_config={
-            "选择特征": st.column_config.CheckboxColumn(
-                help="选择用于数据处理的特征",
-                default=False,
-            )
-        },
-        disabled=["数据集", "字段", "大小", "处理方法", "时间"], )
-    st.markdown('---')
-    st.markdown("###### 原始数据")
-    edited_df = st.data_editor(pages_utils.RawDataSet,
-                               height=190, width=800)
+    if st.session_state.page12 == 1:
+        with placeholder1.container():
+            tt = st.tabs(st.session_state["leftTabs"])
+            for i in range(len(st.session_state["leftTabs"])):
+                with tt[i]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[i],
+                        height=720, width=800,
+                        column_config={
+                            "选择字段": st.column_config.CheckboxColumn(
+                                help="选择用于数据处理的字段",
+                                default=False,
+                            )
+                        })
 with featureCCM:
     # tab3, tab4 = st.tabs(["气象", "其他"])
     # with tab3:
