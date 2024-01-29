@@ -55,13 +55,14 @@ with dataSCM:
         st.session_state.i += 1
         temp = uploaded_files
     st.markdown('---')
-    st.markdown("###### 模板下载")
+    st.markdown("###### 数据格式规范")
     if chosen_id == '1':
         col1, col2, col3 = st.columns(3)
         with col1:
             option14 = st.checkbox('温度数据')
         with col2:
             option15 = st.checkbox('降水数据')
+        st.info('温度数据', icon="ℹ️")
 
     if chosen_id == '2':
         col1, col2, col3 = st.columns(3)
@@ -69,6 +70,7 @@ with dataSCM:
             option14 = st.checkbox('植保站数据')
         with col2:
             option15 = st.checkbox('众源数据')
+        st.info('植保数据', icon="ℹ️")
 
     if chosen_id == '3':
         col1, col2, col3 = st.columns(3)
@@ -79,16 +81,7 @@ with dataSCM:
             option15 = st.checkbox('长势数据')
         with col3:
             option16 = st.checkbox('生化指标数据')
-    st.markdown('---')
-    st.markdown("###### 模板预览")
-    csv = convert_df(pd.read_csv(r'E:\a_python\program\diseaseForecastStreamlit\resource\房价数据.csv'))
-    interval_col1, interval_col2 = st.columns([5, 1])
-    interval_col2.download_button(
-        label="下载",
-        data=csv,
-        file_name='large_df.csv',
-        mime='text/csv',
-    )
+        st.info('农学数据', icon="ℹ️")
 with dataSCR:
     st.markdown("##### 文件上传状态显示")
     st.markdown("###### 气象数据")
