@@ -32,25 +32,11 @@ def plot_metrics(st, metrics_list, model, x_test, y_test, class_names):
         st.pyplot()
 
 
-RawDataWeather = pd.DataFrame(
+RawDataSet = pd.DataFrame(
     {
-        "数据集": ["气象数据", "气象数据", "气象数据"],
-        "字段": ["温度", "降水", "湿度"],
-        "时间": ['22:10:20', '20:10:20', '21:10:20'],
-    }
-)
-RawDataPlant = pd.DataFrame(
-    {
-        "数据集": ["植保数据", "植保数据", "植保数据"],
-        "字段": ["受灾面积", "受灾时间", "预测峰值"],
-        "时间": ['22:10:20', '20:10:20', '21:10:20'],
-    }
-)
-RawDataAgriculture = pd.DataFrame(
-    {
-        "数据集": ["农学数据", "农学数据", "农学数据"],
-        "字段": ["农学数据1", "农学数据2", "农学数据3"],
-        "时间": ['22:10:20', '20:10:20', '21:10:20'],
+        "数据集": ["气象数据", "植保数据", "气象数据", "植保数据"],
+        "字段": ["温度", "峰值", "湿度", "降水"],
+        "时间": ['22:10:20', '20:10:20', '21:10:20', '21:10:20'],
     }
 )
 PreprocessedDataSet = pd.DataFrame(columns=["数据集", "字段", "大小", "处理方法", "时间", "下载数据集"])
@@ -65,10 +51,4 @@ FeatureDataSet.loc[3] = ["植保数据", "预测峰值", "1*6", "生育期", '21
 OptimalFeatureDataSet = pd.DataFrame(columns=["数据集", "特征", "大小", "处理方法", "时间", "下载数据集"])
 OptimalFeatureDataSet.loc[0] = ["农学数据", "预测峰值", "1*6", "t检验", '21:10:20', False]
 ModelSet = pd.DataFrame(columns=["模型", "时间", "下载模型结构、结果和参数值"])
-
-RawDataSet = [RawDataWeather, RawDataPlant, RawDataAgriculture]
-PreprocessedDataSet = [RawDataWeather, RawDataPlant, RawDataAgriculture]
-FeatureDataSet = [RawDataWeather, RawDataPlant, RawDataAgriculture]
-OptimalFeatureDataSet = [RawDataWeather, RawDataPlant, RawDataAgriculture]
-TempDataSet = [RawDataSet, PreprocessedDataSet, FeatureDataSet, OptimalFeatureDataSet]
-# TempDataSet = [RawDataSet, PreprocessedDataSet, FeatureDataSet, OptimalFeatureDataSet, ModelSet]
+TempDataSet = [RawDataSet, PreprocessedDataSet, FeatureDataSet, OptimalFeatureDataSet, ModelSet]

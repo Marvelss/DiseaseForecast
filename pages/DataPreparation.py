@@ -93,20 +93,8 @@ def nextPage():
     data12 = {"数据集": "气象数据", "字段": "降水1",
               "大小": '1*5', "处理方法": "剔除异常值1", "时间": '22:110:21',
               "下载数据集": True}
-    data13 = {"数据集": "植保数据", "字段": "降水1",
-              "大小": '1*1', "处理方法": "剔除异常值1", "时间": '22:33:21',
-              "下载数据集": True}
-    data14 = {"数据集": "农学数据", "字段": "降水2",
-              "大小": '1*2', "处理方法": "剔除异常值1", "时间": '22:151:21',
-              "下载数据集": True}
-    data15 = {"数据集": "农学数据", "字段": "降水4",
-              "大小": '1*3', "处理方法": "剔除异常值1", "时间": '22:14:21',
-              "下载数据集": True}
-    st.session_state.df11[0].loc[len(st.session_state.df11[0])] = data11
-    st.session_state.df11[1].loc[len(st.session_state.df11[1])] = data12
-    st.session_state.df11[1].loc[len(st.session_state.df11[1])] = data13
-    st.session_state.df11[2].loc[len(st.session_state.df11[2])] = data14
-    # st.session_state.df11[3].loc[len(st.session_state.df11[3])] = data15
+    st.session_state.df11.loc[len(st.session_state.df11)] = data11
+    st.session_state.df11.loc[len(st.session_state.df11)] = data12
 
 
 if 'df11' not in st.session_state:
@@ -120,51 +108,65 @@ with dataPCV:
     # 根据st.session_state.page12的值刷新表格
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
+        # result1 = pages_utils.multiselect_all(
+        #     st, '气象数据全选', ['温度', '降水'],
+        #     'temp', 'collapsed')
+        # result2 = pages_utils.multiselect_all(
+        #     st, '植保数据全选', ['植保', '植保2'],
+        #     'temp', 'collapsed')
+        # result3 = pages_utils.multiselect_all(
+        #     st, '农学数据全选', ['分支', '降水'],
+        #     'temp', 'collapsed')
         # st.markdown(st.session_state.page12)
         with placeholder1.container():
             tt1 = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
-                    for j in range(len(st.session_state["leftTabs"][i]) - 1):
-                        st.markdown(str(j))
-                        result = pages_utils.multiselect_all(
-                            st, str(j), ['温度', '降水', j],
-                            'temp', 'collapsed')
-                        # st.markdown(result)
-                        st.markdown(pages_utils.TempDataSet[i][j])
-                        st.data_editor(
-                            pages_utils.TempDataSet[i][j],
-                            height=190, width=800, )
-                        # column_config={
-                        #     "选择字段": st.column_config.CheckboxColumn(
-                        #         help="选择用于数据处理的字段",
-                        #         default=False,
-                        #     )
-                        # })
-                        st.markdown('---')
+                    st.data_editor(
+                        pages_utils.TempDataSet[i],
+                        height=220, width=800,
+                        column_config={
+                            "选择字段": st.column_config.CheckboxColumn(
+                                help="选择用于数据处理的字段",
+                                default=False,
+                            )
+                        })
 
     if st.session_state.page12 == 1:
+        # result1 = pages_utils.multiselect_all(
+        #     st, '气象数据全选', ['温度', '降水'],
+        #     'temp', 'collapsed')
+        # result2 = pages_utils.multiselect_all(
+        #     st, '植保数据全选', ['植保', '植保2'],
+        #     'temp', 'collapsed')
+        # result3 = pages_utils.multiselect_all(
+        #     st, '农学数据全选', ['分支', '降水'],
+        #     'temp', 'collapsed')
         with placeholder1.container():
             tt = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
                 with tt[i]:
-                    for j in range(len(st.session_state["leftTabs"][i]) - 1):
-                        result = pages_utils.multiselect_all(
-                            st, str(j)+str(i), ['温度', '降水', j, i],
-                            'temp', 'collapsed')
-                        # st.markdown(result)
-                        st.markdown('第二次')
-                        st.markdown(pages_utils.TempDataSet[i][j])
-                        st.data_editor(
-                            pages_utils.TempDataSet[i][j],
-                            height=190, width=800, )
-                    # column_config={
-                    #     "选择字段": st.column_config.CheckboxColumn(
-                    #         help="选择用于数据处理的字段",
-                    #         default=False,
-                    #     )
-                    # })
-
+                    st.data_editor(
+                        pages_utils.TempDataSet[i],
+                        height=220, width=800,
+                        column_config={
+                            "选择字段": st.column_config.CheckboxColumn(
+                                help="选择用于数据处理的字段",
+                                default=False,
+                            )
+                        })
+    a = st.selectbox(
+        '选择数据集',
+        ('原始数据集', '预处理后数据集', '备选特征'))
+    result1 = pages_utils.multiselect_all(
+        st, '全选-气象数据', ['温度', '降水'],
+        'temp', 'collapsed')
+    result2 = pages_utils.multiselect_all(
+        st, '全选-植保数据', ['植保', '植保2'],
+        'temp', 'collapsed')
+    result3 = pages_utils.multiselect_all(
+        st, '全选-农学数据', ['分支', '降水'],
+        'temp', 'collapsed')
 with dataPCM:
     st.markdown("##### 预处理方法")
     # with tab1:

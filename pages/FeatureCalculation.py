@@ -69,7 +69,7 @@ with featureCCV:
                 with tt1[i]:
                     st.data_editor(
                         pages_utils.TempDataSet[i],
-                        height=720, width=800,
+                        height=220, width=800,
                         column_config={
                             "选择字段": st.column_config.CheckboxColumn(
                                 help="选择用于数据处理的字段",
@@ -84,13 +84,25 @@ with featureCCV:
                 with tt[i]:
                     st.data_editor(
                         pages_utils.TempDataSet[i],
-                        height=720, width=800,
+                        height=220, width=800,
                         column_config={
                             "选择字段": st.column_config.CheckboxColumn(
                                 help="选择用于数据处理的字段",
                                 default=False,
                             )
                         })
+    a = st.selectbox(
+        '选择数据集',
+        ('原始数据集', '预处理后数据集', '备选特征'))
+    result1 = pages_utils.multiselect_all(
+        st, '全选-气象数据', ['温度', '降水'],
+        'temp', 'collapsed')
+    result2 = pages_utils.multiselect_all(
+        st, '全选-植保数据', ['植保', '植保2'],
+        'temp', 'collapsed')
+    result3 = pages_utils.multiselect_all(
+        st, '全选-农学数据', ['分支', '降水'],
+        'temp', 'collapsed')
 with featureCCM:
     st.markdown("##### 特征计算方法")
     col1, col2 = st.columns(2)
