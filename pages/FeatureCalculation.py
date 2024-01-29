@@ -155,7 +155,7 @@ with featureCCM:
         number1 = st.number_input("步长(天)", value=1, min_value=1)
         # st.markdown('---')
     interval_col1, interval_col2 = st.columns([5, 1])
-    btn = interval_col2.button('保存', on_click=clear_all)
+    btn = interval_col2.button('添加处理', on_click=clear_all)
     if btn:
         new_data = {"数据集": "气象数据", "输入特征": "温度", "输出特征": "旬平均温度",
                     "特征计算方法": "时间(温度)分辨率转换", "时间": '22:20:20'}

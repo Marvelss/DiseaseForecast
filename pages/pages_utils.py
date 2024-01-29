@@ -4,8 +4,8 @@ from sklearn.metrics import confusion_matrix, roc_curve, precision_recall_curve
 
 
 # 带有全选的多选框
-def multiselect_all(streamlit, value_list, label, temp_label_visibility):
-    checkbox_all = streamlit.checkbox("全选")
+def multiselect_all(streamlit, box_name, value_list, label, temp_label_visibility):
+    checkbox_all = streamlit.checkbox(box_name)
     if checkbox_all:
         selected_options = streamlit.multiselect(
             label,
@@ -32,25 +32,43 @@ def plot_metrics(st, metrics_list, model, x_test, y_test, class_names):
         st.pyplot()
 
 
-RawDataSet = pd.DataFrame(
+RawDataWeather = pd.DataFrame(
     {
-        "选择字段": [True, False, False],
-        "数据集": ["气象数据", "植保数据", "农学数据"],
-        "字段": ["温度", "生育期", "预测峰值"],
+        "数据集": ["气象数据", "气象数据", "气象数据"],
+        "字段": ["温度", "降水", "湿度"],
         "时间": ['22:10:20', '20:10:20', '21:10:20'],
     }
 )
-PreprocessedDataSet = pd.DataFrame(columns=["选择字段", "数据集", "字段", "大小", "处理方法", "时间", "下载数据集"])
-PreprocessedDataSet.loc[0] = [False, "气象数据", "降雨日数", "1*3", "时间分辨率转换", '22:10:20', True]
+RawDataPlant = pd.DataFrame(
+    {
+        "数据集": ["植保数据", "植保数据", "植保数据"],
+        "字段": ["受灾面积", "受灾时间", "预测峰值"],
+        "时间": ['22:10:20', '20:10:20', '21:10:20'],
+    }
+)
+RawDataAgriculture = pd.DataFrame(
+    {
+        "数据集": ["农学数据", "农学数据", "农学数据"],
+        "字段": ["农学数据1", "农学数据2", "农学数据3"],
+        "时间": ['22:10:20', '20:10:20', '21:10:20'],
+    }
+)
+PreprocessedDataSet = pd.DataFrame(columns=["数据集", "字段", "大小", "处理方法", "时间", "下载数据集"])
+PreprocessedDataSet.loc[0] = ["气象数据", "降雨日数", "1*3", "时间分辨率转换", '22:10:20', True]
 # PreprocessedDataSet.loc[1] = ["植保数据", "基于活动积温的生育期", "1*6", "降雨日数计算", '20:10:20']
 # PreprocessedDataSet.loc[2] = ["农学数据", "预测峰值", "1*6", "降水累积量计算", '21:10:20']
-FeatureDataSet = pd.DataFrame(columns=["选择特征", "数据集", "特征", "大小", "处理方法", "时间", "下载数据集"])
-FeatureDataSet.loc[0] = [False, "农学数据", "预测峰值", "1*6", "降水累积量计算", '21:10:20', False]
-FeatureDataSet.loc[1] = [False, "气象数据", "温度", "1*6", "时间(温度)分辨率转换", '21:10:20', False]
-FeatureDataSet.loc[2] = [False, "气象数据", "降水", "1*6", "降水累积量计算", '21:10:20', False]
-FeatureDataSet.loc[3] = [False, "植保数据", "预测峰值", "1*6", "生育期", '21:10:20', False]
-OptimalFeatureDataSet = pd.DataFrame(columns=["选择特征", "数据集", "特征", "大小", "处理方法", "时间", "下载数据集"])
-OptimalFeatureDataSet.loc[0] = [False, "农学数据", "预测峰值", "1*6", "t检验", '21:10:20', False]
+FeatureDataSet = pd.DataFrame(columns=["数据集", "特征", "大小", "处理方法", "时间", "下载数据集"])
+FeatureDataSet.loc[0] = ["农学数据", "预测峰值", "1*6", "降水累积量计算", '21:10:20', False]
+FeatureDataSet.loc[1] = ["气象数据", "温度", "1*6", "时间(温度)分辨率转换", '21:10:20', False]
+FeatureDataSet.loc[2] = ["气象数据", "降水", "1*6", "降水累积量计算", '21:10:20', False]
+FeatureDataSet.loc[3] = ["植保数据", "预测峰值", "1*6", "生育期", '21:10:20', False]
+OptimalFeatureDataSet = pd.DataFrame(columns=["数据集", "特征", "大小", "处理方法", "时间", "下载数据集"])
+OptimalFeatureDataSet.loc[0] = ["农学数据", "预测峰值", "1*6", "t检验", '21:10:20', False]
 ModelSet = pd.DataFrame(columns=["模型", "时间", "下载模型结构、结果和参数值"])
 
-TempDataSet = [RawDataSet, PreprocessedDataSet, FeatureDataSet, OptimalFeatureDataSet, ModelSet]
+RawDataSet = [RawDataWeather, RawDataPlant, RawDataAgriculture]
+PreprocessedDataSet = [RawDataWeather, RawDataPlant, RawDataAgriculture]
+FeatureDataSet = [RawDataWeather, RawDataPlant, RawDataAgriculture]
+OptimalFeatureDataSet = [RawDataWeather, RawDataPlant, RawDataAgriculture]
+TempDataSet = [RawDataSet, PreprocessedDataSet, FeatureDataSet, OptimalFeatureDataSet]
+# TempDataSet = [RawDataSet, PreprocessedDataSet, FeatureDataSet, OptimalFeatureDataSet, ModelSet]

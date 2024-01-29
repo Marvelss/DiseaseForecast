@@ -155,7 +155,7 @@ with dataPCM:
         # st.markdown('---')
 
     interval_col1, interval_col2 = st.columns([5, 1])
-    btn = interval_col2.button('保存', on_click=clear_all)
+    btn = interval_col2.button('添加处理', on_click=clear_all)
     if btn:
         # update dataframe state
         # st.markdown(type(st.session_state.df))

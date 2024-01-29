@@ -87,14 +87,26 @@ def nextPage():
     if '预处理后数据' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('预处理后数据')
     st.session_state.page12 += 1
-    data11 = {"选择字段": True, "数据集": "气象数据", "字段": "温度",
-              "大小": '1*3', "处理方法": "缺失值插补", "时间": '22:10:20',
+    data11 = {"数据集": "气象数据", "字段": "温度1",
+              "大小": '1*3', "处理方法": "缺失值插补1", "时间": '22:130:20',
               "下载数据集": True}
-    data12 = {"选择字段": True, "数据集": "气象数据", "字段": "降水",
-              "大小": '1*5', "处理方法": "剔除异常值", "时间": '22:10:21',
+    data12 = {"数据集": "气象数据", "字段": "降水1",
+              "大小": '1*5', "处理方法": "剔除异常值1", "时间": '22:110:21',
               "下载数据集": True}
-    st.session_state.df11.loc[len(st.session_state.df11)] = data11
-    st.session_state.df11.loc[len(st.session_state.df11)] = data12
+    data13 = {"数据集": "植保数据", "字段": "降水1",
+              "大小": '1*1', "处理方法": "剔除异常值1", "时间": '22:33:21',
+              "下载数据集": True}
+    data14 = {"数据集": "农学数据", "字段": "降水2",
+              "大小": '1*2', "处理方法": "剔除异常值1", "时间": '22:151:21',
+              "下载数据集": True}
+    data15 = {"数据集": "农学数据", "字段": "降水4",
+              "大小": '1*3', "处理方法": "剔除异常值1", "时间": '22:14:21',
+              "下载数据集": True}
+    st.session_state.df11[0].loc[len(st.session_state.df11[0])] = data11
+    st.session_state.df11[1].loc[len(st.session_state.df11[1])] = data12
+    st.session_state.df11[1].loc[len(st.session_state.df11[1])] = data13
+    st.session_state.df11[2].loc[len(st.session_state.df11[2])] = data14
+    # st.session_state.df11[3].loc[len(st.session_state.df11[3])] = data15
 
 
 if 'df11' not in st.session_state:
@@ -113,30 +125,45 @@ with dataPCV:
             tt1 = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[i],
-                        height=720, width=800,
-                        column_config={
-                            "选择字段": st.column_config.CheckboxColumn(
-                                help="选择用于数据处理的字段",
-                                default=False,
-                            )
-                        })
+                    for j in range(len(st.session_state["leftTabs"][i]) - 1):
+                        st.markdown(str(j))
+                        result = pages_utils.multiselect_all(
+                            st, str(j), ['温度', '降水', j],
+                            'temp', 'collapsed')
+                        # st.markdown(result)
+                        st.markdown(pages_utils.TempDataSet[i][j])
+                        st.data_editor(
+                            pages_utils.TempDataSet[i][j],
+                            height=190, width=800, )
+                        # column_config={
+                        #     "选择字段": st.column_config.CheckboxColumn(
+                        #         help="选择用于数据处理的字段",
+                        #         default=False,
+                        #     )
+                        # })
+                        st.markdown('---')
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
             tt = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
                 with tt[i]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[i],
-                        height=720, width=800,
-                        column_config={
-                            "选择字段": st.column_config.CheckboxColumn(
-                                help="选择用于数据处理的字段",
-                                default=False,
-                            )
-                        })
+                    for j in range(len(st.session_state["leftTabs"][i]) - 1):
+                        result = pages_utils.multiselect_all(
+                            st, str(j)+str(i), ['温度', '降水', j, i],
+                            'temp', 'collapsed')
+                        # st.markdown(result)
+                        st.markdown('第二次')
+                        st.markdown(pages_utils.TempDataSet[i][j])
+                        st.data_editor(
+                            pages_utils.TempDataSet[i][j],
+                            height=190, width=800, )
+                    # column_config={
+                    #     "选择字段": st.column_config.CheckboxColumn(
+                    #         help="选择用于数据处理的字段",
+                    #         default=False,
+                    #     )
+                    # })
 
 with dataPCM:
     st.markdown("##### 预处理方法")
@@ -168,7 +195,7 @@ with dataPCM:
         number2 = st.text_input("剔除大于", value=0.1)
         number3 = st.text_input("剔除小于", value=0.1)
     interval_col1, interval_col2 = st.columns([5, 1])
-    btn = interval_col2.button('保存', on_click=clear_all)
+    btn = interval_col2.button('添加处理', on_click=clear_all)
     if btn:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
