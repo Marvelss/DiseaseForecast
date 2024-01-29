@@ -14,49 +14,50 @@ def convert_df(df):
 
 
 # 用于获取上传数据集名称
-i = 0
+# i = 0
 data = pd.DataFrame(columns=["文件名称", "传输状态", "上传时间"])
 # with every interaction, the script runs from top to bottom
 # resulting in the empty dataframe
 if 'data_df' not in st.session_state:
     st.session_state.data_df = data
-if 'i' not in st.session_state:
-    st.session_state.i = i
+
+
+# if 'i' not in st.session_state:
+#     st.session_state.i = 0
+
+def remove():
+    st.session_state.data_df = st.session_state.data_df.iloc[0:0]
+
 
 dataSCM, dataSCR = st.columns([0.9, 0.4])
 
 with dataSCM:
     st.markdown("##### 上传数据集")
-    chosen_id = stx.tab_bar(data=[
-        stx.TabBarItemData(id=1, title="气象数据", description=""),
-        stx.TabBarItemData(id=2, title="植保数据", description=""),
-        stx.TabBarItemData(id=3, title="农学数据", description=""),
-    ], default=1)
+    ab = st.selectbox(
+        '选择数据集',
+        ('气象数据', '植保数据', '农学数据'))
+
     uploaded_files = st.file_uploader(
         "上传数据集",
         accept_multiple_files=True,
         label_visibility='collapsed',
         type=['xlsx', 'csv', 'txt', 'xls'],
-        help='help', )
+        help='help', on_change=remove)
     st.markdown('''
         <style>
             .uploadedFile {display: none}
         <style>''',
                 unsafe_allow_html=True)
-    # 用于避免点击其他数据集选项卡时出现异常提示(但这样似乎无效)
-    temp = 0
-    if uploaded_files and uploaded_files != temp:
-        # st.markdown(st.session_state.i)
-        # st.markdown(uploaded_files[st.session_state.i].name)
-        # if st.session_state.i != 0:
-        new_data = {"文件名称": uploaded_files[st.session_state.i].name, "传输状态": "已上传",
+    for j in range(len(uploaded_files)):
+        new_data = {"文件名称": uploaded_files[j].name, "传输状态": "已上传",
                     "上传时间": datetime.now().strftime("%H:%M:%S")}
-        st.session_state.data_df.loc[len(st.session_state.data_df)] = new_data
-        st.session_state.i += 1
-        temp = uploaded_files
+        st.session_state.data_df.loc[j] = new_data
+        bytes_data = uploaded_files[j].read()
+        st.data_editor(pd.read_excel(bytes_data))
+
     st.markdown('---')
     st.markdown("###### 数据格式规范")
-    if chosen_id == '1':
+    if ab == '气象数据':
         col1, col2, col3 = st.columns(3)
         with col1:
             option14 = st.checkbox('温度数据')
@@ -64,7 +65,7 @@ with dataSCM:
             option15 = st.checkbox('降水数据')
         st.info('温度数据', icon="ℹ️")
 
-    if chosen_id == '2':
+    if ab == '植保数据':
         col1, col2, col3 = st.columns(3)
         with col1:
             option14 = st.checkbox('植保站数据')
@@ -72,7 +73,7 @@ with dataSCM:
             option15 = st.checkbox('众源数据')
         st.info('植保数据', icon="ℹ️")
 
-    if chosen_id == '3':
+    if ab == '农学数据':
         col1, col2, col3 = st.columns(3)
         with col1:
             option14 = st.checkbox('预测峰值数据')
