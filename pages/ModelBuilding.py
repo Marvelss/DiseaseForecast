@@ -45,7 +45,7 @@ with modelACV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i],
+                        pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_config={
                             "选择字段": st.column_config.CheckboxColumn(
@@ -60,7 +60,7 @@ with modelACV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt[i]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i],
+                        pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_config={
                             "选择字段": st.column_config.CheckboxColumn(

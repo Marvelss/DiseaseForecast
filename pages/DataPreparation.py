@@ -19,6 +19,7 @@ if "leftTabs" not in st.session_state:
     #     stx.TabBarItemData(id=1, title="气象数据", description=""),
     #     stx.TabBarItemData(id=2, title="植保数据", description=""),
     # ], default=1)
+# 处理方法内容记录(任务清单各项值)
 
 checkBoxNum = 2
 
@@ -87,6 +88,9 @@ def nextPage():
     if '预处理后数据' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('预处理后数据')
     st.session_state.page12 += 1
+
+    # 调用数据和各类方法
+
     data11 = {"数据集": "气象数据", "字段": "温度1",
               "大小": '1*3', "处理方法": "缺失值插补1", "时间": '22:130:20',
               "下载数据集": True}
@@ -98,13 +102,14 @@ def nextPage():
 
 
 if 'df11' not in st.session_state:
-    st.session_state.df11 = pages_utils.PreprocessedDataSet
+    st.session_state.df11 = pages_utils.PreprocessedDataSetField
 
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
 dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
+    st.data_editor(pages_utils.RawDataSet)
     # 根据st.session_state.page12的值刷新表格
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
@@ -123,7 +128,7 @@ with dataPCV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i],
+                        pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_config={
                             "选择字段": st.column_config.CheckboxColumn(
@@ -147,7 +152,7 @@ with dataPCV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt[i]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i],
+                        pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_config={
                             "选择字段": st.column_config.CheckboxColumn(

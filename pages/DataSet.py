@@ -6,6 +6,8 @@ import pandas as pd
 import streamlit as st
 import extra_streamlit_components as stx
 
+import pages_utils
+
 
 @st.cache_data
 def convert_df(df):
@@ -15,18 +17,49 @@ def convert_df(df):
 
 # 用于获取上传数据集名称
 # i = 0
-data = pd.DataFrame(columns=["文件名称", "传输状态", "上传时间"])
+data1 = pd.DataFrame(columns=["文件名称", "传输状态", "上传时间"])
+data2 = pd.DataFrame(columns=["文件名称", "传输状态", "上传时间"])
+
+data3 = pd.DataFrame(columns=["文件名称", "传输状态", "上传时间"])
+
 # with every interaction, the script runs from top to bottom
 # resulting in the empty dataframe
-if 'data_df' not in st.session_state:
-    st.session_state.data_df = data
+if 'weatherState' not in st.session_state:
+    st.session_state.weatherState = data1
+if 'plantState' not in st.session_state:
+    st.session_state.plantState = data2
+if 'agricultureState' not in st.session_state:
+    st.session_state.agricultureState = data3
+
+if 'RawDataSet' not in st.session_state:
+    st.session_state.RawDataSet = pages_utils.RawDataSet
 
 
 # if 'i' not in st.session_state:
 #     st.session_state.i = 0
 
-def remove():
-    st.session_state.data_df = st.session_state.data_df.iloc[0:0]
+# def addInfo():
+#     if uploaded_files:
+#         # bytes_data = uploaded_files.read()
+#         # data33 = pd.read_excel(bytes_data)
+#         st.markdown('a')
+# df = getStateDF(ab)
+# new_data = {"文件名称": uploaded_files.name, "传输状态": "已上传",
+#             "上传时间": datetime.now().strftime("%H:%M:%S")}
+# df.loc[len(df)] = new_data
+
+
+def addState(df, info):
+    df.loc[len(df)] = info
+
+
+def getStateDF(name):
+    if name == '气象数据':
+        return st.session_state.weatherState
+    elif name == '植保数据':
+        return st.session_state.plantState
+    elif name == '农学数据':
+        return st.session_state.agricultureState
 
 
 dataSCM, dataSCR = st.columns([0.9, 0.4])
@@ -39,21 +72,16 @@ with dataSCM:
 
     uploaded_files = st.file_uploader(
         "上传数据集",
-        accept_multiple_files=True,
+        accept_multiple_files=False,
         label_visibility='collapsed',
         type=['xlsx', 'csv', 'txt', 'xls'],
-        help='help', on_change=remove)
-    st.markdown('''
-        <style>
-            .uploadedFile {display: none}
-        <style>''',
-                unsafe_allow_html=True)
-    for j in range(len(uploaded_files)):
-        new_data = {"文件名称": uploaded_files[j].name, "传输状态": "已上传",
-                    "上传时间": datetime.now().strftime("%H:%M:%S")}
-        st.session_state.data_df.loc[j] = new_data
-        bytes_data = uploaded_files[j].read()
-        st.data_editor(pd.read_excel(bytes_data))
+        help='help')
+
+    # st.markdown('''
+    #     <style>
+    #         .uploadedFile {display: none}
+    #     <style>''',
+    #             unsafe_allow_html=True)
 
     st.markdown('---')
     st.markdown("###### 数据格式规范")
@@ -83,6 +111,23 @@ with dataSCM:
         with col3:
             option16 = st.checkbox('生化指标数据')
         st.info('农学数据', icon="ℹ️")
+
+    if uploaded_files:
+        bytes_data = uploaded_files.read()
+        data33 = pd.read_excel(bytes_data)
+        # st.markdown(data33)
+        df = getStateDF(ab)
+        new_data = {"文件名称": uploaded_files.name, "传输状态": "已上传",
+                    "上传时间": datetime.now().strftime("%H:%M:%S")}
+        st.session_state.RawDataSet = pd.concat(
+            [st.session_state.RawDataSet, data33])
+        pages_utils.RawDataSet = st.session_state.RawDataSet
+
+        st.markdown(st.session_state.RawDataSet.columns)
+
+        df.loc[len(df)] = new_data
+
+        # st.markdown(uploaded_files.name)
 with dataSCR:
     st.markdown("##### 文件上传状态显示")
     st.markdown("###### 气象数据")
@@ -90,27 +135,18 @@ with dataSCR:
     placeholder = st.empty()
     with placeholder.container():
         st.data_editor(
-            st.session_state.data_df, height=190, width=800,
+            st.session_state.weatherState, height=190, width=800,
             disabled=["文件名称", "传输状态", "上传时间"],
             hide_index=False, )
     st.markdown('---')
-    for uploaded_file in uploaded_files:
-        bytes_data = uploaded_file.read()
 
     st.markdown("###### 植保数据")
     st.data_editor(pd.DataFrame(
-        data={
-            "文件名称": ['植保站数据', '众源数据'],
-            "传输状态": ['已上传', '上传出错'],
-            "上传时间": ['13:15:10', '12:16:10']
-        }
+        st.session_state.plantState
     ), height=190, width=800, use_container_width=True)
     st.markdown('---')
     st.markdown("###### 农学数据")
     st.data_editor(pd.DataFrame(
-        data={
-            "文件名称": ['预测峰值数据', '长势数据', '生化指标数据', '晚稻移栽期数据'],
-            "传输状态": ['已上传', '上传出错', '已上传', '已上传'],
-            "上传时间": ['13:15:10', '12:16:10', '13:15:10', '12:16:10']
-        }
-    ), height=190, width=800, use_container_width=True)
+        st.session_state.agricultureState
+    ), height=190, width=800,
+        disabled=["文件名称", "传输状态"], use_container_width=True)

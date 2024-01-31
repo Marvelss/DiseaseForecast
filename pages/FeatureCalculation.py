@@ -6,7 +6,7 @@ import pages_utils
 
 if 'page13' not in st.session_state: st.session_state.page13 = 0
 if 'df12' not in st.session_state:
-    st.session_state.df12 = pages_utils.FeatureDataSet
+    st.session_state.df12 = pages_utils.FeatureDataSetField
 
 checkBoxNum = 5
 
@@ -68,7 +68,7 @@ with featureCCV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i],
+                        pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_config={
                             "选择字段": st.column_config.CheckboxColumn(
@@ -83,7 +83,7 @@ with featureCCV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt[i]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i],
+                        pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_config={
                             "选择字段": st.column_config.CheckboxColumn(

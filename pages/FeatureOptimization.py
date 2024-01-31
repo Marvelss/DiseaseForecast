@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 if 'page14' not in st.session_state: st.session_state.page14 = 0
 if 'df13' not in st.session_state:
-    st.session_state.df13 = pages_utils.FeatureDataSet
+    st.session_state.df13 = pages_utils.OptimalFeatureDataSetField
 
 checkBoxNum = 3
 
@@ -94,7 +94,7 @@ with dataPCV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i],
+                        pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_config={
                             "选择字段": st.column_config.CheckboxColumn(
@@ -109,7 +109,7 @@ with dataPCV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt[i]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i],
+                        pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_config={
                             "选择字段": st.column_config.CheckboxColumn(
