@@ -1,3 +1,5 @@
+import datetime
+
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -12,6 +14,22 @@ if 'df13' not in st.session_state:
     st.session_state.df13 = pages_utils.OptimalFeatureDataSetField
 
 checkBoxNum = 3
+
+if "OptimizationMethodName" not in st.session_state:
+    st.session_state["OptimizationMethodName"] = None
+
+
+def getCheckboxName(checkbox):
+    if checkbox == 'checkbox0':
+        return 'Person相关性分析'
+    elif checkbox == 'checkbox1':
+        return 't检验'
+    elif checkbox == 'checkbox2':
+        return 'Relief-F互相关分析'
+
+
+def mergeArray(list1, list2, list3):
+    return list(set().union(*[list1, list2, list3]))
 
 
 def simulate_temperature_data1():
@@ -51,8 +69,10 @@ def simulate_temperature_data():
 
 
 def clear_all():
-    for i in range(checkBoxNum):
-        st.session_state[f'checkbox{i}'] = False
+    for h in range(checkBoxNum):
+        if st.session_state[f'checkbox{h}']:
+            st.session_state["OptimizationMethodName"] = f'checkbox{h}'
+        st.session_state[f'checkbox{h}'] = False
     return
 
 
@@ -171,9 +191,15 @@ with dataPCM:
     if btn:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
-        new_data = {"数据集": "气象数据", "输入特征": "温度",
-                    "输出特征": "温度",
-                    "特征优选方法": "t检验", "时间": '22:20:20'}
+        print(st.session_state["OptimizationMethodName"])
+        new_data = {"数据集": a,
+                    "输入特征": mergeArray(result1, result2, result3),
+                    "输出特征": mergeArray(result1, result2, result3),
+                    "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]),
+                    "时间": datetime.datetime.now().time()}
+        # new_data = {"数据集": "气象数据", "输入特征": "温度",
+        #             "输出特征": "温度",
+        #             "特征优选方法": "t检验", "时间": '22:20:20'}
         st.session_state.df1.loc[len(st.session_state.df1)] = new_data
         st.rerun()
     st.markdown('---')

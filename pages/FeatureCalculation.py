@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -9,6 +11,26 @@ if 'df12' not in st.session_state:
     st.session_state.df12 = pages_utils.FeatureDataSetField
 
 checkBoxNum = 5
+if "FeatureMethodName" not in st.session_state:
+    st.session_state["FeatureMethodName"] = None
+checkBoxNum = 2
+
+
+def getCheckboxName(checkbox):
+    if checkbox == 'checkbox0':
+        return '时间(温度)分辨率转换'
+    elif checkbox == 'checkbox1':
+        return '降雨日数计算'
+    elif checkbox == 'checkbox2':
+        return '降水累积量计算'
+    elif checkbox == 'checkbox3':
+        return '基于活动期积温的生育期计算'
+    elif checkbox == 'checkbox4':
+        return '时空抽取'
+
+
+def mergeArray(list1, list2, list3):
+    return list(set().union(*[list1, list2, list3]))
 
 
 def simulate_temperature_data():
@@ -27,8 +49,11 @@ def simulate_temperature_data():
 
 # 取消所有选项按钮
 def clear_all():
-    for i in range(checkBoxNum):
-        st.session_state[f'checkbox{i}'] = False
+    for h in range(checkBoxNum):
+
+        if st.session_state[f'checkbox{h}']:
+            st.session_state["FeatureMethodName"] = f'checkbox{h}'
+        st.session_state[f'checkbox{h}'] = False
     return
 
 
@@ -169,8 +194,14 @@ with featureCCM:
     interval_col1, interval_col2 = st.columns([5, 1])
     btn = interval_col2.button('添加处理', on_click=clear_all)
     if btn:
-        new_data = {"数据集": "气象数据", "输入特征": "温度", "输出特征": "旬平均温度",
-                    "特征计算方法": "时间(温度)分辨率转换", "时间": '22:20:20'}
+        print(st.session_state["FeatureMethodName"])
+        new_data = {"数据集": a,
+                    "输入特征": mergeArray(result1, result2, result3),
+                    "输出特征": mergeArray(result1, result2, result3),
+                    "特征计算方法": getCheckboxName(st.session_state["FeatureMethodName"]),
+                    "时间": datetime.datetime.now().time()}
+        # new_data = {"数据集": "气象数据", "输入特征": "温度", "输出特征": "旬平均温度",
+        #             "特征计算方法": "时间(温度)分辨率转换", "时间": '22:20:20'}
         st.session_state.df2.loc[len(st.session_state.df2)] = new_data
         st.rerun()
     st.markdown('---')

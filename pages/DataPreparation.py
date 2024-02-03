@@ -11,7 +11,6 @@ import pages_utils
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-
 if 'page12' not in st.session_state:
     st.session_state.page12 = 0
 if "leftTabs" not in st.session_state:
@@ -22,13 +21,15 @@ if "leftTabs" not in st.session_state:
     #     stx.TabBarItemData(id=2, title="植保数据", description=""),
     # ], default=1)
 # 处理方法内容记录(任务清单各项值)
-if "methodName" not in st.session_state:
-    st.session_state["methodName"] = None
+if "preMethodName" not in st.session_state:
+    st.session_state["preMethodName"] = None
 checkBoxNum = 2
 
 
 def getCheckboxName(checkbox):
-    if checkbox == 'checkbox1':
+    if checkbox == 'checkbox0':
+        return '剔除异常值'
+    elif checkbox == 'checkbox1':
         return '缺失值插补'
 
 
@@ -49,7 +50,7 @@ def simulate_temperature_data():
 def clear_all():
     for h in range(checkBoxNum):
         if st.session_state[f'checkbox{h}']:
-            st.session_state["methodName"] = f'checkbox{h}'
+            st.session_state["preMethodName"] = f'checkbox{h}'
         st.session_state[f'checkbox{h}'] = False
     return
 
@@ -231,7 +232,7 @@ with dataPCM:
         new_data = {"数据集": a,
                     "输入字段": mergeArray(result1, result2, result3),
                     "输出字段": mergeArray(result1, result2, result3),
-                    "预处理方法": getCheckboxName(st.session_state["methodName"]),
+                    "预处理方法": getCheckboxName(st.session_state["preMethodName"]),
                     "时间": datetime.datetime.now().time()}
         st.session_state.df.loc[len(st.session_state.df)] = new_data
         st.rerun()
