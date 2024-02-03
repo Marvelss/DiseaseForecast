@@ -1,17 +1,19 @@
 import datetime
 import os
-import time
+
 from PIL import Image
 import streamlit as st
 import numpy as np
 import pandas as pd
-from streamlit_tree_select import tree_select
+
 import pages_utils
-from streamlit_autorefresh import st_autorefresh
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-if 'page12' not in st.session_state: st.session_state.page12 = 0
+
+if 'page12' not in st.session_state:
+    st.session_state.page12 = 0
 if "leftTabs" not in st.session_state:
     # st.session_state["leftTabs"] = data1
     st.session_state["leftTabs"] = ['原始数据']
@@ -20,8 +22,18 @@ if "leftTabs" not in st.session_state:
     #     stx.TabBarItemData(id=2, title="植保数据", description=""),
     # ], default=1)
 # 处理方法内容记录(任务清单各项值)
-
+if "methodName" not in st.session_state:
+    st.session_state["methodName"] = None
 checkBoxNum = 2
+
+
+def getCheckboxName(checkbox):
+    if checkbox == 'checkbox1':
+        return '缺失值插补'
+
+
+def mergeArray(list1, list2, list3):
+    return list(set().union(*[list1, list2, list3]))
 
 
 # 模拟24小时气温数据
@@ -29,22 +41,30 @@ def simulate_temperature_data():
     now = datetime.datetime.now()
     hours = pd.date_range(start=now, periods=24, freq='H')
     temperatures = np.random.randint(10, 30, size=24)
-    data = {'Time': hours, 'Temperature': temperatures}
-    df = pd.DataFrame(data)
+    data1 = {'Time': hours, 'Temperature': temperatures}
+    df = pd.DataFrame(data1)
     return df
 
 
 def clear_all():
-    for i in range(checkBoxNum):
-        st.session_state[f'checkbox{i}'] = False
+    for h in range(checkBoxNum):
+        if st.session_state[f'checkbox{h}']:
+            st.session_state["methodName"] = f'checkbox{h}'
+        st.session_state[f'checkbox{h}'] = False
     return
+
+
+# def getMethodName():
+#     for i in range(checkBoxNum):
+#         if st.session_state[f'checkbox{i}']:
+#             return st.session_state[f'checkbox{i}']
 
 
 def clear_other(key):
     # st.markdown(key)
-    for i in range(checkBoxNum):
-        if i != key:
-            st.session_state[f'checkbox{i}'] = False
+    for h in range(checkBoxNum):
+        if h != key:
+            st.session_state[f'checkbox{h}'] = False
     return
 
 
@@ -53,8 +73,8 @@ def simulate_precipitation_data():
     now = datetime.datetime.now()
     hours = pd.date_range(start=now, periods=24, freq='H')
     precipitation = np.random.uniform(0, 10, size=24)
-    data = {'Time': hours, 'Precipitation': precipitation}
-    df = pd.DataFrame(data)
+    data1 = {'Time': hours, 'Precipitation': precipitation}
+    df = pd.DataFrame(data1)
     return df
 
 
@@ -204,10 +224,15 @@ with dataPCM:
     interval_col1, interval_col2 = st.columns([5, 1])
     btn = interval_col2.button('添加处理', on_click=clear_all)
     if btn:
+        # 获取添加处理按钮各项值
+        print('--------------')
         # update dataframe state
         # st.markdown(type(st.session_state.df))
-        new_data = {"数据集": "气象数据", "输入字段": "温度", "输出字段": "温度",
-                    "预处理方法": "缺失值插补", "时间": '22:20:20'}
+        new_data = {"数据集": a,
+                    "输入字段": mergeArray(result1, result2, result3),
+                    "输出字段": mergeArray(result1, result2, result3),
+                    "预处理方法": getCheckboxName(st.session_state["methodName"]),
+                    "时间": datetime.datetime.now().time()}
         st.session_state.df.loc[len(st.session_state.df)] = new_data
         st.rerun()
     st.markdown('---')
