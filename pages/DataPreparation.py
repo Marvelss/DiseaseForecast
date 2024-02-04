@@ -26,6 +26,24 @@ if "preMethodName" not in st.session_state:
 checkBoxNum = 2
 
 
+# 线性插补
+def linearInterpolation(dataFrame, fieldName):
+    dataFrame[fieldName] = dataFrame[fieldName].interpolate(method='linear')
+
+    # 单独计算插补所用的均值
+    mean_value = dataFrame[fieldName].mean()
+    print(f"均值为: {mean_value}")
+
+    # 检查是否还有缺失值
+    missing_values = dataFrame[fieldName].isnull().sum()
+    print(f"字段中的缺失值数量为: {missing_values}")
+    print(dataFrame[fieldName])
+    # 返回三列值
+    print('-------三列值---')
+    tempData = dataFrame[['上级单位', '测报站点', fieldName]]
+    return tempData
+
+
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
         return '剔除异常值'
@@ -111,15 +129,38 @@ def nextPage():
     st.session_state.page12 += 1
 
     # 调用数据和各类方法
+    # print(st.session_state.df)
+    fields = st.session_state.df["输入字段"].tolist()
+    methodNames = st.session_state.df["预处理方法"].tolist()
+    print(methodNames)
+    print(fields)
+    values = pages_utils.RawDataSet["温度"].tolist()
+    # names = [item["温度"] for item in pages_utils.RawDataSet]
 
-    data11 = {"数据集": "气象数据", "字段": "温度1",
-              "大小": '1*3', "处理方法": "缺失值插补1", "时间": '22:130:20',
-              "下载数据集": True}
-    data12 = {"数据集": "气象数据", "字段": "降水1",
-              "大小": '1*5', "处理方法": "剔除异常值1", "时间": '22:110:21',
-              "下载数据集": True}
+    # 根据名称匹配调用各个处理方法
+    print(values)
+    afterHandleData = linearInterpolation(
+        pages_utils.RawDataSet, "温度")
+
+    row_size = len(afterHandleData)
+
+    data11 = {"数据集": "气象数据", "字段": "温度",
+              "大小": '1*' + str(row_size), "处理方法": "缺失值插补",
+              "时间": datetime.datetime.now().time(),
+              "下载数据集": False}
     st.session_state.df11.loc[len(st.session_state.df11)] = data11
-    st.session_state.df11.loc[len(st.session_state.df11)] = data12
+    pages_utils.TempDataSetField[1] = st.session_state.df11
+    print('-------预处理前数据-------')
+    print(pages_utils.TempDataSet[1])
+    print('-------预处理后数据-------')
+    pages_utils.TempDataSet[1] = pd.concat([
+        afterHandleData,
+        pages_utils.TempDataSet[1]], axis=0)
+    print(pages_utils.TempDataSet[1])
+    # pages_utils.TempDataSetField[1] = pd.concat([
+    #     st.session_state.df11,
+    #     pages_utils.TempDataSetField[1]], axis=0)
+    # pages_utils.PreprocessedDataSetField = st.session_state.df11
 
 
 if 'df11' not in st.session_state:
