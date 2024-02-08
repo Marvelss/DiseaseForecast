@@ -224,7 +224,7 @@ with dataPCV:
                         })
     a = st.selectbox(
         '选择数据集',
-        ('原始数据集', '预处理后数据集', '备选特征'))
+        ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
     result1 = pages_utils.multiselect_all(
         st, '全选-气象数据', ['温度', '降水'],
         'temp', 'collapsed')
