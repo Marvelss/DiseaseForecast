@@ -40,7 +40,7 @@ def plot_metrics(st, metrics_list, model, x_test, y_test, class_names):
 #         "时间": ['22:10:20', '20:10:20', '21:10:20', '21:10:20'],
 #     }
 # )
-RawDataSetField = pd.DataFrame(columns=["数据集", "文件名称", "传输状态", "上传时间"])
+RawDataSetField = pd.DataFrame(columns=["数据集", "文件名称", "字段", "传输状态", "上传时间"])
 PreprocessedDataSetField = pd.DataFrame(columns=["数据集", "字段", "大小", "处理方法", "时间", "下载数据集"])
 
 FeatureDataSetField = pd.DataFrame(columns=["数据集", "特征", "大小", "处理方法", "时间", "下载数据集"])

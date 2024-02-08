@@ -171,20 +171,10 @@ if 'df11' not in st.session_state:
 dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
-    st.data_editor(pages_utils.RawDataSet)
+    st.data_editor(pages_utils.TempDataSet[0])
     # 根据st.session_state.page12的值刷新表格
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
-        # result1 = pages_utils.multiselect_all(
-        #     st, '气象数据全选', ['温度', '降水'],
-        #     'temp', 'collapsed')
-        # result2 = pages_utils.multiselect_all(
-        #     st, '植保数据全选', ['植保', '植保2'],
-        #     'temp', 'collapsed')
-        # result3 = pages_utils.multiselect_all(
-        #     st, '农学数据全选', ['分支', '降水'],
-        #     'temp', 'collapsed')
-        # st.markdown(st.session_state.page12)
         with placeholder1.container():
             tt1 = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
@@ -200,15 +190,6 @@ with dataPCV:
                         })
 
     if st.session_state.page12 == 1:
-        # result1 = pages_utils.multiselect_all(
-        #     st, '气象数据全选', ['温度', '降水'],
-        #     'temp', 'collapsed')
-        # result2 = pages_utils.multiselect_all(
-        #     st, '植保数据全选', ['植保', '植保2'],
-        #     'temp', 'collapsed')
-        # result3 = pages_utils.multiselect_all(
-        #     st, '农学数据全选', ['分支', '降水'],
-        #     'temp', 'collapsed')
         with placeholder1.container():
             tt = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
@@ -217,22 +198,32 @@ with dataPCV:
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_config={
-                            "选择字段": st.column_config.CheckboxColumn(
-                                help="选择用于数据处理的字段",
-                                default=False,
-                            )
                         })
+    # 原始数据集表信息
+    tempDF = pages_utils.TempDataSetField[0]
+    # 添加字段名称选项
+    weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
+    if tempDF[tempDF['数据集'] == '气象数据']['字段'].values:
+        weatherName.clear()
+        weatherName = tempDF[tempDF['数据集'] == '气象数据']['字段'].values[0]
+    if tempDF[tempDF['数据集'] == '植保数据']['字段'].values:
+        plantName.clear()
+        plantName = tempDF[tempDF['数据集'] == '植保数据']['字段'].values[0]
+    if tempDF[tempDF['数据集'] == '农学数据']['字段'].values:
+        # agricultureName.clear()
+        agricultureName = tempDF[tempDF['数据集'] == '农学数据']['字段'].values[0]
+    # st.markdown(type(weatherName))
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', ['温度', '降水'],
+        st, '全选-气象数据', weatherName,
         'temp', 'collapsed')
     result2 = pages_utils.multiselect_all(
-        st, '全选-植保数据', ['植保', '植保2'],
+        st, '全选-植保数据', plantName,
         'temp', 'collapsed')
     result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', ['分支', '降水'],
+        st, '全选-农学数据', agricultureName,
         'temp', 'collapsed')
 with dataPCM:
     st.markdown("##### 预处理方法")
