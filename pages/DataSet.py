@@ -127,15 +127,22 @@ with dataSCM:
         # st.markdown(data33)
         # df = getStateDF(ab)
         new_data = {"数据集": ab, "文件名称": uploaded_files.name, "传输状态": "已上传",
-                    "上传时间": datetime.now().strftime("%H:%M:%S")}
+                    "上传时间": datetime.now().strftime("%H:%M:%S"),
+                    "字段": data33.columns.tolist()}
+        # 防止重复添加
+        if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():
+            st.markdown(pages_utils.TempDataSetField[0])
+            st.markdown(uploaded_files.name)
+            st.markdown("和uploaded_files.name变量一致的文件名称已经存在，不执行以下操作")
+            st.markdown('---')
+        else:
+            pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
+            # st.session_state.RawDataSetField.loc[len(st.session_state.RawDataSetField)] = new_data1
+            pages_utils.RawDataSetField = st.session_state.RawDataSetField
+            st.session_state.RawDataSet = pd.concat(
+                [st.session_state.RawDataSet, data33])
 
-        pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
-        # st.session_state.RawDataSetField.loc[len(st.session_state.RawDataSetField)] = new_data1
-        pages_utils.RawDataSetField = st.session_state.RawDataSetField
-        st.session_state.RawDataSet = pd.concat(
-            [st.session_state.RawDataSet, data33])
-
-        pages_utils.TempDataSet[0] = st.session_state.RawDataSet
+            pages_utils.TempDataSet[0] = st.session_state.RawDataSet
 
         st.markdown(st.session_state.RawDataSet.columns)
         st.markdown(new_data)
