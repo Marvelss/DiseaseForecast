@@ -41,18 +41,19 @@ def plot_metrics(st, metrics_list, model, x_test, y_test, class_names):
 #     }
 # )
 RawDataSetField = pd.DataFrame(columns=["数据集", "文件名称", "字段", "传输状态", "上传时间"])
-PreprocessedDataSetField = pd.DataFrame(columns=["数据集", "字段", "大小", "处理方法", "时间", "下载数据集"])
+PreprocessedDataSetField = pd.DataFrame(columns=["数据集", "输入字段", "输出字段", "预处理方法", '时间', "下载数据集"])
 
-FeatureDataSetField = pd.DataFrame(columns=["数据集", "特征", "大小", "处理方法", "时间", "下载数据集"])
-FeatureDataSetField.loc[0] = ["农学数据", "预测峰值", "1*6", "降水累积量计算", '21:10:20', False]
-FeatureDataSetField.loc[1] = ["气象数据", "温度", "1*6", "时间(温度)分辨率转换", '21:10:20', False]
-FeatureDataSetField.loc[2] = ["气象数据", "降水", "1*6", "降水累积量计算", '21:10:20', False]
-FeatureDataSetField.loc[3] = ["植保数据", "预测峰值", "1*6", "生育期", '21:10:20', False]
-OptimalFeatureDataSetField = pd.DataFrame(columns=["数据集", "特征", "大小", "处理方法", "时间", "下载数据集"])
-OptimalFeatureDataSetField.loc[0] = ["农学数据", "预测峰值", "1*6", "t检验", '21:10:20', False]
+FeatureDataSetField = pd.DataFrame(
+    columns=["数据集", "输入特征", "输出特征", "大小", "特征计算方法", "时间", "下载数据集"])
+# FeatureDataSetField.loc[0] = ["农学数据", "预测峰值", "1*6", "降水累积量计算", '21:10:20', False]
+OptimalFeatureDataSetField = pd.DataFrame(
+    columns=["数据集", "输入特征", "输出特征", "大小", "特征优选方法", "时间", "下载数据集"])
+# OptimalFeatureDataSetField.loc[0] = ["农学数据", "预测峰值", "1*6", "t检验", '21:10:20', False]
 ModelSet = pd.DataFrame(columns=["模型", "时间", "下载模型结构、结果和参数值"])
 TempDataSetField = [RawDataSetField, PreprocessedDataSetField, FeatureDataSetField, OptimalFeatureDataSetField,
                     ModelSet]
+
+
 # 特征值
 RawDataSet = pd.DataFrame(columns=["上级单位", "测报站点"])
 PreprocessedDataSet = pd.DataFrame(columns=["上级单位", "测报站点"])

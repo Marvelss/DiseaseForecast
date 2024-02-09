@@ -3,6 +3,7 @@ import datetime
 import streamlit as st
 import numpy as np
 import pandas as pd
+from scipy.stats import stats
 from sklearn.ensemble import RandomForestClassifier
 
 import pages_utils
@@ -86,18 +87,58 @@ def clear_other(key):
 def firstPage(): st.session_state.page14 = 0
 
 
+# t检验
+def tTest(dataFrame, fieldName):
+    # 创建一个空的列表来存储显著的降水特征
+    significant_features = []
+
+    # 计算 t 检验的 p 值，并选择 p < 0.05 的特征
+    column1 = '降水'
+    t_stat, p_value = stats.ttest_ind(dataFrame[column1], dataFrame['峰值率'])
+    if p_value < 0.05:
+        significant_features.append(column)
+    # 返回三列值
+    print('-------三列值---')
+    tempData = dataFrame[['上级单位', '测报站点',
+                          '降水累积量',
+                          fieldName, '峰值率']]
+    return tempData
+
+
 def nextPage():
     if '优选特征' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('优选特征')
     st.session_state.page14 += 1
-    data11 = {"选择特征": False, "数据集": "气象数据", "特征": "温度",
-              "大小": '1*3', "处理方法": "t检验", "时间": '22:10:20',
-              "下载数据集": True}
-    data12 = {"选择特征": False, "数据集": "气象数据", "特征": "降水累积量",
-              "大小": '1*5', "处理方法": "Person相关性分析", "时间": '22:10:21',
-              "下载数据集": True}
-    st.session_state.df13.loc[len(st.session_state.df13)] = data11
-    st.session_state.df13.loc[len(st.session_state.df13)] = data12
+
+    # 调用数据和各类方法
+    # print(st.session_state.df)
+    fields = st.session_state.df2["输入特征"].tolist()
+    methodNames = st.session_state.df2["特征计算方法"].tolist()
+    print(methodNames)
+    print(fields)
+    values = pages_utils.TempDataSet[2]["降水"].tolist()
+    # names = [item["温度"] for item in pages_utils.TempDataSet[0]]
+
+    # 根据名称匹配调用各个处理方法
+    print(values)
+    afterHandleData = tTest(
+        pages_utils.TempDataSet[2], "降水")
+
+    row_size = len(afterHandleData)
+
+    data13 = {"数据集": "气象数据", "输入特征": "降水", "输出特征": "降水累积量",
+              "大小": '1*' + str(row_size), "特征优选方法": "t-检验",
+              "时间": datetime.datetime.now().time(),
+              "下载数据集": False}
+    st.session_state.df13.loc[len(st.session_state.df13)] = data13
+    pages_utils.TempDataSetField[3] = st.session_state.df13
+    print('-------优选特征-------')
+    print(pages_utils.TempDataSet[3])
+    print('-------优选特征-------')
+    pages_utils.TempDataSet[3] = pd.concat([
+        afterHandleData,
+        pages_utils.TempDataSet[3]], axis=0)
+    print(pages_utils.TempDataSet[3])
 
 
 # 界面名称+布局+布局内容
@@ -105,6 +146,7 @@ def nextPage():
 dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
+    st.data_editor(pages_utils.TempDataSet[2])
     # 根据st.session_state.page12的值刷新表格
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
@@ -135,17 +177,30 @@ with dataPCV:
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_order=column)
+    # 被选特征数据集表信息
+    tempDF = pages_utils.TempDataSetField[2]
+    # 添加字段名称选项
+    weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
+    if tempDF[tempDF['数据集'] == '气象数据']['输出特征'].values:
+        weatherName.clear()
+        weatherName = tempDF[tempDF['数据集'] == '气象数据']['输出特征'].values[0]
+    if tempDF[tempDF['数据集'] == '植保数据']['输出特征'].values:
+        plantName.clear()
+        plantName = tempDF[tempDF['数据集'] == '植保数据']['输出特征'].values[0]
+    if tempDF[tempDF['数据集'] == '农学数据']['输出特征'].values:
+        # agricultureName.clear()
+        agricultureName = tempDF[tempDF['数据集'] == '农学数据']['输出特征'].values[0]
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', ['温度', '降水'],
+        st, '全选-气象数据', ['降水'],
         'temp', 'collapsed')
     result2 = pages_utils.multiselect_all(
-        st, '全选-植保数据', ['植保', '植保2'],
+        st, '全选-植保数据', ['无2'],
         'temp', 'collapsed')
     result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', ['分支', '降水'],
+        st, '全选-农学数据', ['无3'],
         'temp', 'collapsed')
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
@@ -192,7 +247,7 @@ with dataPCM:
         print(st.session_state["OptimizationMethodName"])
         new_data = {"数据集": a,
                     "输入特征": mergeArray(result1, result2, result3),
-                    "输出特征": mergeArray(result1, result2, result3),
+                    "输出特征": '降水累积量',
                     "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]),
                     "时间": datetime.datetime.now().time()}
         # new_data = {"数据集": "气象数据", "输入特征": "温度",

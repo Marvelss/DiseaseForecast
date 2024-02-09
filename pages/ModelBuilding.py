@@ -1,11 +1,17 @@
+import datetime
+
 import streamlit as st
 import pandas as pd
 import numpy as np
-from sklearn.metrics import confusion_matrix
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import confusion_matrix, accuracy_score
 
 import seaborn as sns
 
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+
 import pages_utils
 
 if 'page' not in st.session_state: st.session_state.page = 0
@@ -19,12 +25,37 @@ def onTrain():
         st.session_state["leftTabs"].append('模型')
     st.session_state.page = 0
     st.session_state.page15 += 1
-    data11 = {"模型": "SVM", "时间": "22:10:20",
-              "下载模型结构、结果和参数值": True}
-    data12 = {"模型": "FLDA", "时间": "22:10:20",
-              "下载模型结构、结果和参数值": True}
+    # 训练模型
+    # 定义 X 和 Y
+    df111 = pages_utils.TempDataSet[3]
+    mean_y = df111['峰值率'].mean()
+    df111['峰值率'].fillna(mean_y, inplace=True)
+    mean_x1 = df111['降水'].mean()
+    df111['降水'].fillna(mean_x1, inplace=True)
+    mean_x2 = df111['降水累积量'].mean()
+    df111['峰值率'].fillna(mean_x2, inplace=True)
+    X = df111[['降水', '降水累积量']]  # 选择除 '峰值率' 列之外的所有列作为 X
+    Y = df111['峰值率']  # 选择 '峰值率' 列作为 Y
+
+    # 划分训练集和测试集
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+
+    from sklearn.linear_model import LinearRegression
+    model = LinearRegression()
+    model.fit(X_train, Y_train)
+    # 训练模型
+    # model.fit(X_train, Y_train)
+
+    # 在测试集上进行预测
+    Y_pred = model.predict(X_test)
+
+    # 评估模型
+    accuracy = accuracy_score(Y_test, Y_pred)
+    print("模型准确率:", accuracy)
+
+    data11 = {"模型": "SVM", "时间": datetime.datetime.now().time(),
+              "下载模型结构、结果和参数值": False}
     st.session_state.df15.loc[len(st.session_state.df15)] = data11
-    st.session_state.df15.loc[len(st.session_state.df15)] = data12
 
 
 def nextPage(): st.session_state.page += 1
@@ -36,6 +67,7 @@ def firstPage(): st.session_state.page = 0
 modelACV, modelACM = st.columns([0.5, 0.7])
 with modelACV:
     st.markdown("##### 特征与模型")
+    st.data_editor(pages_utils.TempDataSet[3])
     # 根据st.session_state.page12的值刷新表格
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
@@ -66,17 +98,32 @@ with modelACV:
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_order=column)
+    # 预处理后数据集表信息
+    tempDF = pages_utils.TempDataSetField[3]
+    # 添加字段名称选项
+    weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
+    if tempDF[tempDF['数据集'] == '气象数据']['输出特征'].values:
+        weatherName.clear()
+        weatherName = tempDF[tempDF['数据集'] == '气象数据']['输出特征'].values[0]
+    if tempDF[tempDF['数据集'] == '植保数据']['输出特征'].values:
+        plantName.clear()
+        plantName = tempDF[tempDF['数据集'] == '植保数据']['输出特征'].values[0]
+    if tempDF[tempDF['数据集'] == '农学数据']['输出特征'].values:
+        # agricultureName.clear()
+        agricultureName = tempDF[tempDF['数据集'] == '农学数据']['输出特征'].values[0]
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', ['温度', '降水'],
+        st, '全选-气象数据',
+        ['上级单位',
+         '测报站点', '年', 'DayOfYear', '降水', '峰值率'],
         'temp', 'collapsed')
     result2 = pages_utils.multiselect_all(
-        st, '全选-植保数据', ['植保', '植保2'],
+        st, '全选-植保数据', ['无2'],
         'temp', 'collapsed')
     result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', ['分支', '降水'],
+        st, '全选-农学数据', ['无3'],
         'temp', 'collapsed')
 with modelACM:
     ph = st.empty()

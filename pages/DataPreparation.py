@@ -40,7 +40,8 @@ def linearInterpolation(dataFrame, fieldName):
     print(dataFrame[fieldName])
     # 返回三列值
     print('-------三列值---')
-    tempData = dataFrame[['上级单位', '测报站点', fieldName]]
+    tempData = dataFrame[['上级单位', '测报站点', '峰值率',
+                          fieldName]]
     return tempData
 
 
@@ -134,18 +135,18 @@ def nextPage():
     methodNames = st.session_state.df["预处理方法"].tolist()
     print(methodNames)
     print(fields)
-    values = pages_utils.RawDataSet["温度"].tolist()
-    # names = [item["温度"] for item in pages_utils.RawDataSet]
+    values = pages_utils.TempDataSet[0]["降水"].tolist()
+    # names = [item["降水"] for item in pages_utils.TempDataSet[0]]
 
     # 根据名称匹配调用各个处理方法
     print(values)
     afterHandleData = linearInterpolation(
-        pages_utils.RawDataSet, "温度")
+        pages_utils.TempDataSet[0], "降水")
 
     row_size = len(afterHandleData)
 
-    data11 = {"数据集": "气象数据", "字段": "温度",
-              "大小": '1*' + str(row_size), "处理方法": "缺失值插补",
+    data11 = {"数据集": "气象数据", "输入字段": "降水", "输出字段": "降水",
+              "大小": '1*' + str(row_size), "预处理方法": "缺失值插补",
               "时间": datetime.datetime.now().time(),
               "下载数据集": False}
     st.session_state.df11.loc[len(st.session_state.df11)] = data11
@@ -205,13 +206,13 @@ with dataPCV:
     tempDF = pages_utils.TempDataSetField[0]
     # 添加字段名称选项
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
-    if tempDF[tempDF['数据集'] == '气象数据']['字段'].values:
+    if tempDF[tempDF['数据集'] == '气象数据']['字段'].any():
         weatherName.clear()
         weatherName = tempDF[tempDF['数据集'] == '气象数据']['字段'].values[0]
-    if tempDF[tempDF['数据集'] == '植保数据']['字段'].values:
+    if tempDF[tempDF['数据集'] == '植保数据']['字段'].any():
         plantName.clear()
         plantName = tempDF[tempDF['数据集'] == '植保数据']['字段'].values[0]
-    if tempDF[tempDF['数据集'] == '农学数据']['字段'].values:
+    if tempDF[tempDF['数据集'] == '农学数据']['字段'].any():
         # agricultureName.clear()
         agricultureName = tempDF[tempDF['数据集'] == '农学数据']['字段'].values[0]
     # st.markdown(type(weatherName))
