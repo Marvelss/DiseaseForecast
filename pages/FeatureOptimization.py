@@ -113,30 +113,28 @@ with dataPCV:
             tt1 = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
+                    if st.session_state["leftTabs"][i] == '原始数据':
+                        column = ['数据集', '字段', '上传时间']
+                    else:
+                        column = pages_utils.TempDataSetField[i].columns
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
-                        column_config={
-                            "选择字段": st.column_config.CheckboxColumn(
-                                help="选择用于数据处理的字段",
-                                default=False,
-                            )
-                        })
+                        column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
             tt = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
                 with tt[i]:
+                    if st.session_state["leftTabs"][i] == '原始数据':
+                        column = ['数据集', '字段', '上传时间']
+                    else:
+                        column = pages_utils.TempDataSetField[i].columns
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
-                        column_config={
-                            "选择字段": st.column_config.CheckboxColumn(
-                                help="选择用于数据处理的字段",
-                                default=False,
-                            )
-                        })
+                        column_order=column)
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
