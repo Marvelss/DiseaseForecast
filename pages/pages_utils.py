@@ -32,6 +32,10 @@ def plot_metrics(st, metrics_list, model, x_test, y_test, class_names):
         st.pyplot()
 
 
+def getIntersectionCols(df1, df2):
+    return list(set(df1.columns) & set(df2.columns))
+
+
 # 特征字段
 # RawDataSetField = pd.DataFrame(
 #     {
@@ -53,11 +57,10 @@ ModelSet = pd.DataFrame(columns=["模型", "时间", "下载模型结构、结�
 TempDataSetField = [RawDataSetField, PreprocessedDataSetField, FeatureDataSetField, OptimalFeatureDataSetField,
                     ModelSet]
 
-
 # 特征值
-RawDataSet = pd.DataFrame(columns=["上级单位", "测报站点"])
-PreprocessedDataSet = pd.DataFrame(columns=["上级单位", "测报站点"])
-FeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点"])
-OptimalFeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点"])
+RawDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
+PreprocessedDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
+FeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
+OptimalFeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
 TempDataSet = [RawDataSet, PreprocessedDataSet,
                FeatureDataSet, OptimalFeatureDataSet, ModelSet]

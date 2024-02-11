@@ -33,6 +33,7 @@ def linearInterpolation(dataFrame, fieldName):
     # 单独计算插补所用的均值
     mean_value = dataFrame[fieldName].mean()
     print(f"均值为: {mean_value}")
+    dataFrame[fieldName].fillna(mean_value, inplace=True)
 
     # 检查是否还有缺失值
     missing_values = dataFrame[fieldName].isnull().sum()
@@ -154,9 +155,15 @@ def nextPage():
     print('-------预处理前数据-------')
     print(pages_utils.TempDataSet[1])
     print('-------预处理后数据-------')
-    pages_utils.TempDataSet[1] = pd.concat([
-        afterHandleData,
-        pages_utils.TempDataSet[1]], axis=0)
+    intersection_cols = pages_utils.getIntersectionCols(
+        pages_utils.TempDataSet[1], afterHandleData
+    )
+    pages_utils.TempDataSet[1] = pd.merge(
+        afterHandleData, pages_utils.TempDataSet[1],
+        on=intersection_cols, how="left")
+    # pages_utils.TempDataSet[1] = pd.concat([
+    #     afterHandleData,
+    #     pages_utils.TempDataSet[1]], axis=0)
     print(pages_utils.TempDataSet[1])
     # pages_utils.TempDataSetField[1] = pd.concat([
     #     st.session_state.df11,

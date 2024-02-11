@@ -111,9 +111,15 @@ def nextPage():
     print('-------特征-------')
     print(pages_utils.TempDataSet[2])
     print('-------特征-------')
-    pages_utils.TempDataSet[2] = pd.concat([
-        afterHandleData,
-        pages_utils.TempDataSet[2]], axis=0)
+    intersection_cols = pages_utils.getIntersectionCols(
+        pages_utils.TempDataSet[2], afterHandleData
+    )
+    pages_utils.TempDataSet[2] = pd.merge(
+        afterHandleData, pages_utils.TempDataSet[2],
+        on=intersection_cols, how="left")
+    # pages_utils.TempDataSet[2] = pd.concat([
+    #     afterHandleData,
+    #     pages_utils.TempDataSet[2]], axis=0)
     print(pages_utils.TempDataSet[2])
 
     # data11 = {"选择特征": False, "数据集": "气象数据", "特征": "降雨日数",

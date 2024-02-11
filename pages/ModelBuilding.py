@@ -3,13 +3,15 @@ import datetime
 import streamlit as st
 import pandas as pd
 import numpy as np
+from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score, mean_squared_error
 
 import seaborn as sns
 
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
 
 import pages_utils
@@ -26,32 +28,27 @@ def onTrain():
     st.session_state.page = 0
     st.session_state.page15 += 1
     # 训练模型
-    # 定义 X 和 Y
-    df111 = pages_utils.TempDataSet[3]
-    mean_y = df111['峰值率'].mean()
-    df111['峰值率'].fillna(mean_y, inplace=True)
-    mean_x1 = df111['降水'].mean()
-    df111['降水'].fillna(mean_x1, inplace=True)
-    mean_x2 = df111['降水累积量'].mean()
-    df111['峰值率'].fillna(mean_x2, inplace=True)
-    X = df111[['降水', '降水累积量']]  # 选择除 '峰值率' 列之外的所有列作为 X
-    Y = df111['峰值率']  # 选择 '峰值率' 列作为 Y
+    df11 = pages_utils.TempDataSet[3]
+    # 提取特征和目标变量
+    X = df11[['上级单位', '测报站点', '降水累积量', '降水']]
+    Y = df11['峰值率']
+
+    # 对分类变量进行one-hot编码
+    X = pd.get_dummies(X, columns=['上级单位', '测报站点'])
 
     # 划分训练集和测试集
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
 
-    from sklearn.linear_model import LinearRegression
-    model = LinearRegression()
-    model.fit(X_train, Y_train)
     # 训练模型
-    # model.fit(X_train, Y_train)
+    model = LinearRegression()
+    model.fit(X_train, y_train)
 
-    # 在测试集上进行预测
-    Y_pred = model.predict(X_test)
+    # 预测
+    y_pred = model.predict(X_test)
 
-    # 评估模型
-    accuracy = accuracy_score(Y_test, Y_pred)
-    print("模型准确率:", accuracy)
+    # 计算均方误差
+    mse = mean_squared_error(y_test, y_pred)
+    print("均方误差:", mse)
 
     data11 = {"模型": "SVM", "时间": datetime.datetime.now().time(),
               "下载模型结构、结果和参数值": False}

@@ -139,8 +139,13 @@ with dataSCM:
             pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
             # st.session_state.RawDataSetField.loc[len(st.session_state.RawDataSetField)] = new_data1
             pages_utils.RawDataSetField = st.session_state.RawDataSetField
-            st.session_state.RawDataSet = pd.concat(
-                [st.session_state.RawDataSet, data33])
+            # 获取两个DataFrame列名的交集
+            intersection_cols = pages_utils.getIntersectionCols(
+                data33, st.session_state.RawDataSet
+            )
+            st.session_state.RawDataSet = pd.merge(
+                data33, st.session_state.RawDataSet,
+                on=intersection_cols, how="left")
 
             pages_utils.TempDataSet[0] = st.session_state.RawDataSet
 

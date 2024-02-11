@@ -135,9 +135,15 @@ def nextPage():
     print('-------优选特征-------')
     print(pages_utils.TempDataSet[3])
     print('-------优选特征-------')
-    pages_utils.TempDataSet[3] = pd.concat([
-        afterHandleData,
-        pages_utils.TempDataSet[3]], axis=0)
+    intersection_cols = pages_utils.getIntersectionCols(
+        pages_utils.TempDataSet[3], afterHandleData
+    )
+    pages_utils.TempDataSet[3] = pd.merge(
+        afterHandleData, pages_utils.TempDataSet[3],
+        on=intersection_cols, how="left")
+    # pages_utils.TempDataSet[3] = pd.concat([
+    #     afterHandleData,
+    #     pages_utils.TempDataSet[3]], axis=0)
     print(pages_utils.TempDataSet[3])
 
 
