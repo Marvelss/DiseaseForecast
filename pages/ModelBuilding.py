@@ -107,15 +107,15 @@ with modelACV:
     tempDF = pages_utils.TempDataSetField[3]
     # 添加字段名称选项
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
-    if tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].any():
+    if tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].any():
         weatherName.clear()
-        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].any():
+        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].tolist()[0]
+    if tempDF[tempDF['数据类型'] == '植保数据']['优选特征'].any():
         plantName.clear()
-        plantName = tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].any():
+        plantName = tempDF[tempDF['数据类型'] == '植保数据']['优选特征'].tolist()[0]
+    if tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].any():
         # agricultureName.clear()
-        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].tolist()[0]
+        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].tolist()[0]
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))

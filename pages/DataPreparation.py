@@ -121,8 +121,8 @@ def firstPage(): st.session_state.page12 = 0
 
 
 def onRun():
-    if '预处理后数据' not in st.session_state["leftTabs"]:
-        st.session_state["leftTabs"].append('预处理后数据')
+    if '预处理后数据集' not in st.session_state["leftTabs"]:
+        st.session_state["leftTabs"].append('预处理后数据集')
     st.session_state.page12 += 1
 
     # 调用数据和各类方法
@@ -157,7 +157,7 @@ def onRun():
     # 更新记录
     update_values = {"数据类型": "气象数据",
                      "输入字段": fields[0],
-                     "输出字段": fields[0],
+                     "预处理后字段": fields[0],
                      "大小": '1*' + str(row_size), "预处理方法": "缺失值插补",
                      "时间": datetime.datetime.now().time(),
                      }
@@ -187,8 +187,8 @@ with dataPCV:
                 with tt1[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
-                    elif st.session_state["leftTabs"][i] == '预处理后数据':
-                        column = ["数据类型", "输出字段", "预处理方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
+                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -201,8 +201,8 @@ with dataPCV:
                 with tt[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
-                    elif st.session_state["leftTabs"][i] == '预处理后数据':
-                        column = ["数据类型", "输出字段", "预处理方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
+                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
                         print('---{}---'.format(column))
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
@@ -273,7 +273,7 @@ with dataPCM:
             "编号": pages_utils.generateID(),
             "数据类型": a,
             "输入字段": mergeArray(result1, result2, result3),
-            "输出字段": mergeArray(result1, result2, result3),
+            "预处理后字段": mergeArray(result1, result2, result3),
             "预处理方法": getCheckboxName(st.session_state["preMethodName"]),
             "时间": datetime.datetime.now().time(), "下载数据集": False}
         pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
@@ -288,8 +288,8 @@ with dataPCM:
             st.markdown('##### 任务清单')
             edited_df28 = st.data_editor(
                 pages_utils.TempDataSetField[1], height=190, width=800,
-                column_order=["编号", "数据类型", "输入字段", "输出字段", "预处理方法", '时间'],
-                disabled=["数据类型", "输入字段", "输出字段", "时间"], num_rows="dynamic", )
+                column_order=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", '时间'],
+                disabled=["数据类型", "输入字段", "预处理后字段", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
             btn2 = interval_col33.button('运行', on_click=onRun)
 

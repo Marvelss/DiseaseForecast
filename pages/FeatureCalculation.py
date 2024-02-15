@@ -6,7 +6,8 @@ import streamlit as st
 
 import pages_utils
 
-if 'page13' not in st.session_state: st.session_state.page13 = 0
+if 'page13' not in st.session_state:
+    st.session_state.page13 = 0
 if 'df12' not in st.session_state:
     st.session_state.df12 = pages_utils.FeatureDataSetField
 
@@ -113,7 +114,7 @@ def nextPage():
 
     row_size = len(afterHandleData)
 
-    data12 = {"数据类型": "气象数据", "输入特征": fields, "输出特征": getFeatureName(),
+    data12 = {"数据类型": "气象数据", "输入特征": fields, "备选特征": getFeatureName(),
               "大小": '1*' + str(row_size), "特征计算方法": "降水累积量计算",
               "时间": datetime.datetime.now().time(),
               "下载数据集": False}
@@ -128,12 +129,7 @@ def nextPage():
     pages_utils.TempDataSet[2] = pd.merge(
         afterHandleData, pages_utils.TempDataSet[2],
         on=intersection_cols, how="left")
-    # pages_utils.TempDataSet[2] = pd.concat([
-    #     afterHandleData,
-    #     pages_utils.TempDataSet[2]], axis=0)
     print(pages_utils.TempDataSet[2])
-
-
 
 
 featureCCV, featureCCM = st.columns([0.5, 0.7])
@@ -152,8 +148,10 @@ with featureCCV:
                 with tt1[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
-                    else:
-                        column = pages_utils.TempDataSetField[i].columns
+                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
+                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '备选特征':
+                        column = ["数据类型", "备选特征", "特征计算方法", '时间', "下载数据集"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -166,8 +164,10 @@ with featureCCV:
                 with tt[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
-                    else:
-                        column = pages_utils.TempDataSetField[i].columns
+                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
+                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '备选特征':
+                        column = ["数据类型", "备选特征", "特征计算方法", '时间', "下载数据集"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -178,15 +178,15 @@ with featureCCV:
     weatherName = ['无11']
     plantName = ['无21']
     agricultureName = ['无31']
-    if tempDF[tempDF['数据类型'] == '气象数据']['输出字段'].any():
+    if tempDF[tempDF['数据类型'] == '气象数据']['预处理后字段'].any():
         weatherName.clear()
-        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['输出字段'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '植保数据']['输出字段'].any():
+        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['预处理后字段'].tolist()[0]
+    if tempDF[tempDF['数据类型'] == '植保数据']['预处理后字段'].any():
         plantName.clear()
-        plantName = tempDF[tempDF['数据类型'] == '植保数据']['输出字段'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '农学数据']['输出字段'].any():
+        plantName = tempDF[tempDF['数据类型'] == '植保数据']['预处理后字段'].tolist()[0]
+    if tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].any():
         # agricultureName.clear()
-        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['输出字段'].tolist()[0]
+        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].tolist()[0]
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
@@ -266,17 +266,17 @@ with featureCCM:
     btn = interval_col2.button('添加处理', on_click=clear_all)
     if btn:
         print(st.session_state["featureMethodName"])
-        new_data = {"数据类型": a,
-                    "输入特征": mergeArray(result1, result2, result3),
-                    "输出特征": getFeatureName(st.session_state["featureMethodName"]),
-                    "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]),
-                    "时间": datetime.datetime.now().time()}
-        # new_data = {"数据类型": "气象数据", "输入特征": "温度", "输出特征": "旬平均温度",
-        #             "特征计算方法": "时间(温度)分辨率转换", "时间": '22:20:20'}
+        new_data = {
+            "编号": pages_utils.generateID(),
+            "数据类型": a,
+            "输入特征": mergeArray(result1, result2, result3),
+            "备选特征": getFeatureName(st.session_state["featureMethodName"]),
+            "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]),
+            "时间": datetime.datetime.now().time()}
         st.session_state.df2.loc[len(st.session_state.df2)] = new_data
         st.rerun()
     st.markdown('---')
-    data = pd.DataFrame(columns=["数据类型", "输入特征", "输出特征", "特征计算方法", '时间'])
+    data = pd.DataFrame(columns=["数据类型", "输入特征", "备选特征", "特征计算方法", '时间'])
     # with every interaction, the script runs from top to bottom
     # resulting in the empty dataframe
     if 'df2' not in st.session_state:

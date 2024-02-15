@@ -126,7 +126,7 @@ def nextPage():
 
     row_size = len(afterHandleData)
 
-    data13 = {"数据类型": "气象数据", "输入特征": "降水", "输出特征": "降水累积量",
+    data13 = {"数据类型": "气象数据", "输入特征": "降水", "优选特征": "降水累积量",
               "大小": '1*' + str(row_size), "特征优选方法": "t-检验",
               "时间": datetime.datetime.now().time(),
               "下载数据集": False}
@@ -166,8 +166,12 @@ with dataPCV:
                 with tt1[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
-                    else:
-                        column = pages_utils.TempDataSetField[i].columns
+                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
+                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '备选特征':
+                        column = ["数据类型", "备选特征", "特征计算方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '优选特征':
+                        column = ["数据类型", "优选特征", "特征优选方法", '时间', "下载数据集"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -180,8 +184,12 @@ with dataPCV:
                 with tt[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
-                    else:
-                        column = pages_utils.TempDataSetField[i].columns
+                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
+                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '备选特征':
+                        column = ["数据类型", "备选特征", "特征计算方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '优选特征':
+                        column = ["数据类型", "优选特征", "特征优选方法", '时间', "下载数据集"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -190,15 +198,15 @@ with dataPCV:
     tempDF = pages_utils.TempDataSetField[2]
     # 添加字段名称选项
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
-    if tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].any():
+    if tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].any():
         weatherName.clear()
-        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].any():
+        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].tolist()[0]
+    if tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].any():
         plantName.clear()
-        plantName = tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].any():
+        plantName = tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].tolist()[0]
+    if tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].any():
         # agricultureName.clear()
-        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].tolist()[0]
+        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].tolist()[0]
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
@@ -254,15 +262,17 @@ with dataPCM:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
         print(st.session_state["OptimizationMethodName"])
-        new_data = {"数据类型": a,
-                    "输入特征": mergeArray(result1, result2, result3),
-                    "输出特征": '降水累积量',
-                    "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]),
-                    "时间": datetime.datetime.now().time()}
+        new_data = {
+            "编号": pages_utils.generateID(),
+            "数据类型": a,
+            "输入特征": mergeArray(result1, result2, result3),
+            "优选特征": '降水累积量',
+            "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]),
+            "时间": datetime.datetime.now().time()}
         st.session_state.df1.loc[len(st.session_state.df1)] = new_data
         st.rerun()
     st.markdown('---')
-    data = pd.DataFrame(columns=["数据类型", "输入特征", "输出特征", "特征优选方法", '时间'])
+    data = pd.DataFrame(columns=["数据类型", "输入特征", "优选特征", "特征优选方法", '时间'])
 
     if 'df1' not in st.session_state:
         st.session_state.df1 = data

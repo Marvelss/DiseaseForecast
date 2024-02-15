@@ -54,11 +54,11 @@ def generateID():
 RawDataSetField = pd.DataFrame(
     columns=["编号", "数据类型", "文件名称", "字段", "传输状态", "上传时间"])
 PreprocessedDataSetField = pd.DataFrame(
-    columns=["编号", "数据类型", "输入字段", "输出字段", "预处理方法", "方法参数", '时间', "下载数据集"])
+    columns=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", "方法参数", '时间', "下载数据集"])
 FeatureDataSetField = pd.DataFrame(
-    columns=["编号", "数据类型", "输入特征", "输出特征", "大小", "特征计算方法", "方法参数", "时间", "下载数据集"])
+    columns=["编号", "数据类型", "输入特征", "备选特征", "大小", "特征计算方法", "方法参数", "时间", "下载数据集"])
 OptimalFeatureDataSetField = pd.DataFrame(
-    columns=["编号", "数据类型", "输入特征", "输出特征", "大小", "特征优选方法", "方法参数", "时间", "下载数据集"])
+    columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间", "下载数据集"])
 ModelSet = pd.DataFrame(
     columns=["编号", "模型", "模型参数", "时间", "下载模型结构、结果和参数值"])
 TempDataSetField = [RawDataSetField, PreprocessedDataSetField,
