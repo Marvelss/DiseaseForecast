@@ -100,7 +100,7 @@ def tTest(dataFrame, fieldName):
     # 返回三列值
     print('-------三列值---')
     tempData = dataFrame[['上级单位', '测报站点',
-                          '降水累积量',
+                          '降水累积量', "年", "DayOfYear",
                           fieldName, '峰值率']]
     return tempData
 
@@ -126,7 +126,7 @@ def nextPage():
 
     row_size = len(afterHandleData)
 
-    data13 = {"数据集": "气象数据", "输入特征": "降水", "输出特征": "降水累积量",
+    data13 = {"数据类型": "气象数据", "输入特征": "降水", "输出特征": "降水累积量",
               "大小": '1*' + str(row_size), "特征优选方法": "t-检验",
               "时间": datetime.datetime.now().time(),
               "下载数据集": False}
@@ -152,7 +152,10 @@ def nextPage():
 dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
-    st.data_editor(pages_utils.TempDataSet[2])
+    st.data_editor(pages_utils.TempDataSet[0])
+    st.markdown(pages_utils.TempDataSet[1])
+    st.markdown(pages_utils.TempDataSet[2])
+    st.markdown(pages_utils.TempDataSet[3])
     # 根据st.session_state.page12的值刷新表格
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
@@ -162,7 +165,7 @@ with dataPCV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据集', '字段', '上传时间']
+                        column = ['数据类型', '字段', '上传时间']
                     else:
                         column = pages_utils.TempDataSetField[i].columns
                     st.data_editor(
@@ -176,7 +179,7 @@ with dataPCV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据集', '字段', '上传时间']
+                        column = ['数据类型', '字段', '上传时间']
                     else:
                         column = pages_utils.TempDataSetField[i].columns
                     st.data_editor(
@@ -187,15 +190,15 @@ with dataPCV:
     tempDF = pages_utils.TempDataSetField[2]
     # 添加字段名称选项
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
-    if tempDF[tempDF['数据集'] == '气象数据']['输出特征'].values:
+    if tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].values:
         weatherName.clear()
-        weatherName = tempDF[tempDF['数据集'] == '气象数据']['输出特征'].values[0]
-    if tempDF[tempDF['数据集'] == '植保数据']['输出特征'].values:
+        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].values[0]
+    if tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].values:
         plantName.clear()
-        plantName = tempDF[tempDF['数据集'] == '植保数据']['输出特征'].values[0]
-    if tempDF[tempDF['数据集'] == '农学数据']['输出特征'].values:
+        plantName = tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].values[0]
+    if tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].values:
         # agricultureName.clear()
-        agricultureName = tempDF[tempDF['数据集'] == '农学数据']['输出特征'].values[0]
+        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].values[0]
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
@@ -251,18 +254,15 @@ with dataPCM:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
         print(st.session_state["OptimizationMethodName"])
-        new_data = {"数据集": a,
+        new_data = {"数据类型": a,
                     "输入特征": mergeArray(result1, result2, result3),
                     "输出特征": '降水累积量',
                     "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]),
                     "时间": datetime.datetime.now().time()}
-        # new_data = {"数据集": "气象数据", "输入特征": "温度",
-        #             "输出特征": "温度",
-        #             "特征优选方法": "t检验", "时间": '22:20:20'}
         st.session_state.df1.loc[len(st.session_state.df1)] = new_data
         st.rerun()
     st.markdown('---')
-    data = pd.DataFrame(columns=["数据集", "输入特征", "输出特征", "特征优选方法", '时间'])
+    data = pd.DataFrame(columns=["数据类型", "输入特征", "输出特征", "特征优选方法", '时间'])
 
     if 'df1' not in st.session_state:
         st.session_state.df1 = data
@@ -272,7 +272,7 @@ with dataPCM:
             st.markdown('##### 任务清单')
             edited_df28 = st.data_editor(
                 st.session_state.df1, height=190, width=800,
-                disabled=["数据集", "字段", "时间"],
+                disabled=["数据类型", "字段", "时间"],
                 num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
             btn2 = interval_col33.button('运行', on_click=nextPage)

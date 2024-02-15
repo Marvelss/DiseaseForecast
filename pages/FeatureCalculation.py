@@ -76,9 +76,22 @@ def precipitationAccumulation(dataFrame, fieldName):
 
     # 返回三列值
     print('-------三列值---')
-    tempData = dataFrame[['上级单位', '测报站点', fieldName,
+    tempData = dataFrame[['上级单位', '测报站点', "年", "DayOfYear", fieldName,
                           '峰值率', '降水累积量']]
     return tempData
+
+
+def getFeatureName(processName):
+    if processName == '时间(温度)分辨率转换':
+        return ''
+    elif processName == '降雨日数计算':
+        return '降雨日数'
+    elif processName == '降水累积量计算':
+        return '降水累积量'
+    elif processName == '基于活动期积温的生育期计算':
+        return '生育期'
+    elif processName == '时空抽取':
+        return '时空抽取'
 
 
 def nextPage():
@@ -87,22 +100,20 @@ def nextPage():
     st.session_state.page13 += 1
 
     # 调用数据和各类方法
-    # print(st.session_state.df)
     fields = st.session_state.df2["输入特征"].tolist()
     methodNames = st.session_state.df2["特征计算方法"].tolist()
     print(methodNames)
     print(fields)
-    values = pages_utils.TempDataSet[1]["降水"].tolist()
-    # names = [item["温度"] for item in pages_utils.TempDataSet[0]]
+    values = pages_utils.TempDataSet[1][fields].tolist()
+    print(values)
 
     # 根据名称匹配调用各个处理方法
-    print(values)
     afterHandleData = precipitationAccumulation(
-        pages_utils.TempDataSet[1], "降水")
+        pages_utils.TempDataSet[1], fields)
 
     row_size = len(afterHandleData)
 
-    data12 = {"数据集": "气象数据", "字段": "降水",
+    data12 = {"数据类型": "气象数据", "输入特征": fields, "输出特征": getFeatureName(),
               "大小": '1*' + str(row_size), "特征计算方法": "降水累积量计算",
               "时间": datetime.datetime.now().time(),
               "下载数据集": False}
@@ -122,20 +133,16 @@ def nextPage():
     #     pages_utils.TempDataSet[2]], axis=0)
     print(pages_utils.TempDataSet[2])
 
-    # data11 = {"选择特征": False, "数据集": "气象数据", "特征": "降雨日数",
-    #           "大小": '1*3', "处理方法": "降水累积量计算", "时间": '22:10:20',
-    #           "下载数据集": True}
-    # data12 = {"选择特征": False, "数据集": "气象数据", "特征": "降水累积量",
-    #           "大小": '1*5', "处理方法": "降水累积量计算", "时间": '22:10:21',
-    #           "下载数据集": True}
-    # st.session_state.df12.loc[len(st.session_state.df12)] = data11
-    # st.session_state.df12.loc[len(st.session_state.df12)] = data12
+
 
 
 featureCCV, featureCCM = st.columns([0.5, 0.7])
 with featureCCV:
     st.markdown("##### 数据与特征")
-    st.data_editor(pages_utils.TempDataSet[1])
+    st.data_editor(pages_utils.TempDataSet[0])
+    st.markdown(pages_utils.TempDataSet[1])
+    st.markdown(pages_utils.TempDataSet[2])
+    st.markdown(pages_utils.TempDataSet[3])
     # 根据st.session_state.page12的值刷新表格
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
@@ -144,7 +151,7 @@ with featureCCV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据集', '字段', '上传时间']
+                        column = ['数据类型', '字段', '上传时间']
                     else:
                         column = pages_utils.TempDataSetField[i].columns
                     st.data_editor(
@@ -158,7 +165,7 @@ with featureCCV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据集', '字段', '上传时间']
+                        column = ['数据类型', '字段', '上传时间']
                     else:
                         column = pages_utils.TempDataSetField[i].columns
                     st.data_editor(
@@ -167,20 +174,20 @@ with featureCCV:
                         column_order=column)
     # 预处理后数据集表信息
     tempDF = pages_utils.TempDataSetField[1]
-    st.markdown(tempDF[tempDF['数据集'] == '气象数据']['输出字段'].values[0])
+    st.markdown(tempDF[tempDF['数据类型'] == '气象数据']['输出字段'].values[0])
     # 添加字段名称选项
     weatherName = ['无11']
     plantName = ['无21']
     agricultureName = ['无31']
-    if tempDF[tempDF['数据集'] == '气象数据']['输出字段'].values:
+    if tempDF[tempDF['数据类型'] == '气象数据']['输出字段'].values:
         weatherName.clear()
-        weatherName = tempDF[tempDF['数据集'] == '气象数据']['输出字段'].values[0]
-    if tempDF[tempDF['数据集'] == '植保数据']['输出字段'].values:
+        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['输出字段'].values[0]
+    if tempDF[tempDF['数据类型'] == '植保数据']['输出字段'].values:
         plantName.clear()
-        plantName = tempDF[tempDF['数据集'] == '植保数据']['输出字段'].values[0]
-    if tempDF[tempDF['数据集'] == '农学数据']['输出字段'].values:
+        plantName = tempDF[tempDF['数据类型'] == '植保数据']['输出字段'].values[0]
+    if tempDF[tempDF['数据类型'] == '农学数据']['输出字段'].values:
         # agricultureName.clear()
-        agricultureName = tempDF[tempDF['数据集'] == '农学数据']['输出字段'].values[0]
+        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['输出字段'].values[0]
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
@@ -260,17 +267,17 @@ with featureCCM:
     btn = interval_col2.button('添加处理', on_click=clear_all)
     if btn:
         print(st.session_state["featureMethodName"])
-        new_data = {"数据集": a,
+        new_data = {"数据类型": a,
                     "输入特征": mergeArray(result1, result2, result3),
-                    "输出特征": mergeArray(result1, result2, result3),
+                    "输出特征": getFeatureName(st.session_state["featureMethodName"]),
                     "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]),
                     "时间": datetime.datetime.now().time()}
-        # new_data = {"数据集": "气象数据", "输入特征": "温度", "输出特征": "旬平均温度",
+        # new_data = {"数据类型": "气象数据", "输入特征": "温度", "输出特征": "旬平均温度",
         #             "特征计算方法": "时间(温度)分辨率转换", "时间": '22:20:20'}
         st.session_state.df2.loc[len(st.session_state.df2)] = new_data
         st.rerun()
     st.markdown('---')
-    data = pd.DataFrame(columns=["数据集", "输入特征", "输出特征", "特征计算方法", '时间'])
+    data = pd.DataFrame(columns=["数据类型", "输入特征", "输出特征", "特征计算方法", '时间'])
     # with every interaction, the script runs from top to bottom
     # resulting in the empty dataframe
     if 'df2' not in st.session_state:
@@ -281,7 +288,7 @@ with featureCCM:
             st.markdown('##### 任务清单')
             edited_df28 = st.data_editor(
                 st.session_state.df2, height=190, width=800,
-                disabled=["数据集", "特征", "时间"],
+                disabled=["数据类型", "特征", "时间"],
                 num_rows="dynamic")
             interval_col34, interval_col33 = st.columns([5, 1])
             btn2 = interval_col33.button('运行', on_click=nextPage)

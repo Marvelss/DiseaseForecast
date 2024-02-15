@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import confusion_matrix, accuracy_score, mean_squared_error
+from sklearn.metrics import confusion_matrix, accuracy_score, mean_squared_error, r2_score
 
 import seaborn as sns
 
@@ -30,7 +30,7 @@ def onTrain():
     # 训练模型
     df11 = pages_utils.TempDataSet[3]
     # 提取特征和目标变量
-    X = df11[['上级单位', '测报站点', '降水累积量', '降水']]
+    X = df11[['上级单位', '测报站点', "年", "DayOfYear", '降水累积量', '降水']]
     Y = df11['峰值率']
 
     # 对分类变量进行one-hot编码
@@ -48,8 +48,13 @@ def onTrain():
 
     # 计算均方误差
     mse = mean_squared_error(y_test, y_pred)
-    print("均方误差:", mse)
-
+    r2 = r2_score(y_test, y_pred)
+    st.markdown('---')
+    st.markdown(y_test)
+    st.markdown(y_pred)
+    st.markdown(mse)
+    st.markdown(r2)
+    # print("均方误差:", mse)
     data11 = {"模型": "SVM", "时间": datetime.datetime.now().time(),
               "下载模型结构、结果和参数值": False}
     st.session_state.df15.loc[len(st.session_state.df15)] = data11
@@ -64,7 +69,10 @@ def firstPage(): st.session_state.page = 0
 modelACV, modelACM = st.columns([0.5, 0.7])
 with modelACV:
     st.markdown("##### 特征与模型")
-    st.data_editor(pages_utils.TempDataSet[3])
+    st.data_editor(pages_utils.TempDataSet[0])
+    st.markdown(pages_utils.TempDataSet[1])
+    st.markdown(pages_utils.TempDataSet[2])
+    st.markdown(pages_utils.TempDataSet[3])
     # 根据st.session_state.page12的值刷新表格
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
@@ -74,7 +82,7 @@ with modelACV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据集', '字段', '上传时间']
+                        column = ['数据类型', '字段', '上传时间']
                     else:
                         column = pages_utils.TempDataSetField[i].columns
                     st.data_editor(
@@ -88,7 +96,7 @@ with modelACV:
             for i in range(len(st.session_state["leftTabs"])):
                 with tt[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据集', '字段', '上传时间']
+                        column = ['数据类型', '字段', '上传时间']
                     else:
                         column = pages_utils.TempDataSetField[i].columns
                     st.data_editor(
@@ -99,15 +107,15 @@ with modelACV:
     tempDF = pages_utils.TempDataSetField[3]
     # 添加字段名称选项
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
-    if tempDF[tempDF['数据集'] == '气象数据']['输出特征'].values:
+    if tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].values:
         weatherName.clear()
-        weatherName = tempDF[tempDF['数据集'] == '气象数据']['输出特征'].values[0]
-    if tempDF[tempDF['数据集'] == '植保数据']['输出特征'].values:
+        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].values[0]
+    if tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].values:
         plantName.clear()
-        plantName = tempDF[tempDF['数据集'] == '植保数据']['输出特征'].values[0]
-    if tempDF[tempDF['数据集'] == '农学数据']['输出特征'].values:
+        plantName = tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].values[0]
+    if tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].values:
         # agricultureName.clear()
-        agricultureName = tempDF[tempDF['数据集'] == '农学数据']['输出特征'].values[0]
+        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].values[0]
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
