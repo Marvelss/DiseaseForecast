@@ -14,12 +14,7 @@ import matplotlib.pyplot as plt
 if 'page12' not in st.session_state:
     st.session_state.page12 = 0
 if "leftTabs" not in st.session_state:
-    # st.session_state["leftTabs"] = data1
     st.session_state["leftTabs"] = ['原始数据']
-    # st.session_state["leftTabs"] = stx.tab_bar(data=[
-    #     stx.TabBarItemData(id=1, title="气象数据", description=""),
-    #     stx.TabBarItemData(id=2, title="植保数据", description=""),
-    # ], default=1)
 
 # 处理方法内容记录(任务清单各项值)
 if "preMethodName" not in st.session_state:
@@ -129,19 +124,12 @@ def onRun():
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[1]["编号"].tolist()
     fields = pages_utils.TempDataSetField[1]["输入字段"].tolist()
-
-    columnName = fields[0]
-    st.markdown(columnName)
-    st.markdown(pages_utils.TempDataSet[0][columnName])
-    print('===============')
-    print(fields)
-
+    # print('===============')
     # ===============根据名称匹配调用并执行各个处理方法===============
     afterHandleData = linearInterpolation(
         pages_utils.TempDataSet[0], fields[0][0])
     # 获取处理后的数据大小
     row_size = len(afterHandleData)
-
     print('-------预处理前数据-------')
     print(pages_utils.TempDataSet[1])
     print('-------预处理后数据-------')
@@ -155,12 +143,14 @@ def onRun():
     print(pages_utils.TempDataSet[1])
 
     # 更新记录
-    update_values = {"数据类型": "气象数据",
-                     "输入字段": fields[0],
-                     "预处理后字段": fields[0],
-                     "大小": '1*' + str(row_size), "预处理方法": "缺失值插补",
-                     "时间": datetime.datetime.now().time(),
-                     }
+    update_values = {
+        "数据类型": "气象数据",
+        "输入字段": fields[0],
+        "预处理后字段": fields[0],
+        "大小": '1*' + str(row_size),
+        "预处理方法": getCheckboxName(st.session_state["preMethodName"]),
+        "时间": datetime.datetime.now().time(),
+    }
     # 查找要更新的数据记录
     for index, row in pages_utils.TempDataSetField[1].iterrows():
         if row["编号"] == idNumber[0]:
@@ -266,8 +256,9 @@ with dataPCM:
     # 获取添加处理按钮各项值
     interval_col1, interval_col2 = st.columns([5, 1])
     btn = interval_col2.button('添加处理', on_click=clearOption)
+    # =======================执行任务清单=======================
     if btn:
-        print('--------------')
+        # print('--------------')
         # update dataframe state
         new_data = {
             "编号": pages_utils.generateID(),

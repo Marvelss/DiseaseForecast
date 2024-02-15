@@ -8,8 +8,6 @@ import pages_utils
 
 if 'page13' not in st.session_state:
     st.session_state.page13 = 0
-if 'df12' not in st.session_state:
-    st.session_state.df12 = pages_utils.FeatureDataSetField
 
 checkBoxNum = 5
 if "featureMethodName" not in st.session_state:
@@ -95,31 +93,21 @@ def getFeatureName(processName):
         return '时空抽取'
 
 
-def nextPage():
+def onRun():
     if '被选特征' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('被选特征')
     st.session_state.page13 += 1
 
     # 调用数据和各类方法
-    fields = st.session_state.df2["输入特征"].tolist()
-    methodNames = st.session_state.df2["特征计算方法"].tolist()
-    print(methodNames)
-    print(fields)
-    values = pages_utils.TempDataSet[1][fields].tolist()
-    print(values)
+    # ===============获取任务清单内容===============
+    idNumber = pages_utils.TempDataSetField[2]["编号"].tolist()
+    fields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
+    # methodNames = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
 
-    # 根据名称匹配调用各个处理方法
+    # ===============根据名称匹配调用并执行各个处理方法===============
     afterHandleData = precipitationAccumulation(
-        pages_utils.TempDataSet[1], fields)
-
+        pages_utils.TempDataSet[1], fields[0][0])
     row_size = len(afterHandleData)
-
-    data12 = {"数据类型": "气象数据", "输入特征": fields, "备选特征": getFeatureName(),
-              "大小": '1*' + str(row_size), "特征计算方法": "降水累积量计算",
-              "时间": datetime.datetime.now().time(),
-              "下载数据集": False}
-    st.session_state.df12.loc[len(st.session_state.df12)] = data12
-    pages_utils.TempDataSetField[2] = st.session_state.df12
     print('-------特征-------')
     print(pages_utils.TempDataSet[2])
     print('-------特征-------')
@@ -129,7 +117,20 @@ def nextPage():
     pages_utils.TempDataSet[2] = pd.merge(
         afterHandleData, pages_utils.TempDataSet[2],
         on=intersection_cols, how="left")
-    print(pages_utils.TempDataSet[2])
+
+    # 更新记录
+    update_values = {
+        "数据类型": "气象数据", "输入特征": fields[0],
+        "备选特征": getFeatureName(st.session_state["featureMethodName"]),
+        "大小": '1*' + str(row_size),
+        "特征计算方法": st.session_state["featureMethodName"],
+        "时间": datetime.datetime.now().time()}
+    # 查找要更新的数据记录
+    for index, row in pages_utils.TempDataSetField[2].iterrows():
+        if row["编号"] == idNumber[0]:
+            for key, value in update_values.items():
+                pages_utils.TempDataSetField[2].loc[index, key] = value
+                # 根据字段名和索引来更新字段值
 
 
 featureCCV, featureCCM = st.columns([0.5, 0.7])
@@ -139,7 +140,7 @@ with featureCCV:
     st.markdown(pages_utils.TempDataSet[1])
     st.markdown(pages_utils.TempDataSet[2])
     st.markdown(pages_utils.TempDataSet[3])
-    # 根据st.session_state.page12的值刷新表格
+    # =======================左侧数据与特征显示=======================
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
@@ -172,6 +173,7 @@ with featureCCV:
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_order=column)
+    # =======================获取数据集字段=======================
     # 预处理后数据集表信息
     tempDF = pages_utils.TempDataSetField[1]
     # 添加字段名称选项
@@ -187,6 +189,7 @@ with featureCCV:
     if tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].any():
         # agricultureName.clear()
         agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].tolist()[0]
+    # =======================选择数据集=======================
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
@@ -264,8 +267,9 @@ with featureCCM:
         # st.markdown('---')
     interval_col1, interval_col2 = st.columns([5, 1])
     btn = interval_col2.button('添加处理', on_click=clear_all)
+    # =======================执行任务清单=======================
     if btn:
-        print(st.session_state["featureMethodName"])
+        # print(st.session_state["featureMethodName"])
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": a,
@@ -273,24 +277,21 @@ with featureCCM:
             "备选特征": getFeatureName(st.session_state["featureMethodName"]),
             "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]),
             "时间": datetime.datetime.now().time()}
-        st.session_state.df2.loc[len(st.session_state.df2)] = new_data
+        pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_data
         st.rerun()
     st.markdown('---')
-    data = pd.DataFrame(columns=["数据类型", "输入特征", "备选特征", "特征计算方法", '时间'])
-    # with every interaction, the script runs from top to bottom
-    # resulting in the empty dataframe
-    if 'df2' not in st.session_state:
-        st.session_state.df2 = data
+
+    # =======================显示任务清单=======================
     placeholder = st.empty()
     if st.session_state.page13 == 0:
         with placeholder.container():
             st.markdown('##### 任务清单')
             edited_df28 = st.data_editor(
-                st.session_state.df2, height=190, width=800,
-                disabled=["数据类型", "特征", "时间"],
-                num_rows="dynamic")
+                pages_utils.TempDataSetField[2], height=190, width=800,
+                column_order=["编号", "数据类型", "输入特征", "备选特征", "特征计算方法", '时间'],
+                disabled=["数据类型", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
-            btn2 = interval_col33.button('运行', on_click=nextPage)
+            btn2 = interval_col33.button('运行', on_click=onRun)
     elif st.session_state.page13 == 1:
         with placeholder.container():
             st.markdown('##### 可视化')

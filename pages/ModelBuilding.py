@@ -16,10 +16,10 @@ from sklearn.svm import SVC
 
 import pages_utils
 
-if 'page' not in st.session_state: st.session_state.page = 0
-if 'page15' not in st.session_state: st.session_state.page15 = 0
-if 'df15' not in st.session_state:
-    st.session_state.df15 = pages_utils.ModelSet
+if 'page' not in st.session_state:
+    st.session_state.page = 0
+if 'page15' not in st.session_state:
+    st.session_state.page15 = 0
 
 
 def onTrain():
@@ -28,16 +28,18 @@ def onTrain():
     st.session_state.page = 0
     st.session_state.page15 += 1
     # 训练模型
+    # =======================获取优选特征数据集=======================
     df11 = pages_utils.TempDataSet[3]
     # 提取特征和目标变量
     X = df11[['上级单位', '测报站点', "年", "DayOfYear", '降水累积量', '降水']]
     Y = df11['峰值率']
-
     # 对分类变量进行one-hot编码
     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])
 
-    # 划分训练集和测试集
+    # =======================划分训练集和测试集=======================
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
+
+    # =======================获取评价指标=======================
 
     # 训练模型
     model = LinearRegression()
@@ -55,9 +57,11 @@ def onTrain():
     st.markdown(mse)
     st.markdown(r2)
     # print("均方误差:", mse)
+
     data11 = {"模型": "SVM", "时间": datetime.datetime.now().time(),
               "下载模型结构、结果和参数值": False}
-    st.session_state.df15.loc[len(st.session_state.df15)] = data11
+    pages_utils.TempDataSetField[4].loc[len(
+        pages_utils.TempDataSetField[4])] = data11
 
 
 def nextPage(): st.session_state.page += 1
@@ -73,7 +77,7 @@ with modelACV:
     st.markdown(pages_utils.TempDataSet[1])
     st.markdown(pages_utils.TempDataSet[2])
     st.markdown(pages_utils.TempDataSet[3])
-    # 根据st.session_state.page12的值刷新表格
+    # =======================左侧特征与模型显示=======================
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         # st.markdown(st.session_state.page12)
@@ -103,7 +107,7 @@ with modelACV:
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_order=column)
-    # 预处理后数据集表信息
+    # =======================获取特征数据集表信息=======================
     tempDF = pages_utils.TempDataSetField[3]
     # 添加字段名称选项
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
@@ -116,6 +120,7 @@ with modelACV:
     if tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].any():
         # agricultureName.clear()
         agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].tolist()[0]
+    # =======================选择数据集=======================
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
@@ -183,6 +188,7 @@ with modelACM:
             interval_col1.button("返回", on_click=firstPage)
             btn11 = interval_col2.button("开始模型训练", on_click=onTrain)
     placeholder1 = st.empty()
+    # =======================结果可视化=======================
     if st.session_state.page15 == 1:
         with placeholder1.container():
             st.markdown('---')

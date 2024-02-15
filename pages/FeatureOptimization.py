@@ -11,11 +11,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 if 'page14' not in st.session_state: st.session_state.page14 = 0
-if 'df13' not in st.session_state:
-    st.session_state.df13 = pages_utils.OptimalFeatureDataSetField
 
 checkBoxNum = 3
-
 if "OptimizationMethodName" not in st.session_state:
     st.session_state["OptimizationMethodName"] = None
 
@@ -105,33 +102,20 @@ def tTest(dataFrame, fieldName):
     return tempData
 
 
-def nextPage():
+def onRun():
     if '优选特征' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('优选特征')
     st.session_state.page14 += 1
 
     # 调用数据和各类方法
-    # print(st.session_state.df)
-    fields = st.session_state.df2["输入特征"].tolist()
-    methodNames = st.session_state.df2["特征计算方法"].tolist()
-    print(methodNames)
-    print(fields)
-    values = pages_utils.TempDataSet[2]["降水"].tolist()
-    # names = [item["温度"] for item in pages_utils.TempDataSet[0]]
+    # ===============获取任务清单内容===============
+    idNumber = pages_utils.TempDataSetField[3]["编号"].tolist()
+    fields = pages_utils.TempDataSetField[3]["输入特征"].tolist()
 
-    # 根据名称匹配调用各个处理方法
-    print(values)
+    # ===============根据名称匹配调用并执行各个处理方法===============
     afterHandleData = tTest(
-        pages_utils.TempDataSet[2], "降水")
-
+        pages_utils.TempDataSet[2], fields[0][0])
     row_size = len(afterHandleData)
-
-    data13 = {"数据类型": "气象数据", "输入特征": "降水", "优选特征": "降水累积量",
-              "大小": '1*' + str(row_size), "特征优选方法": "t-检验",
-              "时间": datetime.datetime.now().time(),
-              "下载数据集": False}
-    st.session_state.df13.loc[len(st.session_state.df13)] = data13
-    pages_utils.TempDataSetField[3] = st.session_state.df13
     print('-------优选特征-------')
     print(pages_utils.TempDataSet[3])
     print('-------优选特征-------')
@@ -141,10 +125,19 @@ def nextPage():
     pages_utils.TempDataSet[3] = pd.merge(
         afterHandleData, pages_utils.TempDataSet[3],
         on=intersection_cols, how="left")
-    # pages_utils.TempDataSet[3] = pd.concat([
-    #     afterHandleData,
-    #     pages_utils.TempDataSet[3]], axis=0)
-    print(pages_utils.TempDataSet[3])
+
+    # 更新记录
+    update_values = {
+        "数据类型": "气象数据", "输入特征": fields[0],
+        "优选": fields[0],
+        "大小": '1*' + str(row_size),
+        "特征计算方法": st.session_state["OptimizationMethodName"],
+        "时间": datetime.datetime.now().time()}
+    # 查找要更新的数据记录
+    for index, row in pages_utils.TempDataSetField[3].iterrows():
+        if row["编号"] == idNumber[0]:
+            for key, value in update_values.items():
+                pages_utils.TempDataSetField[3].loc[index, key] = value
 
 
 # 界面名称+布局+布局内容
@@ -156,7 +149,7 @@ with dataPCV:
     st.markdown(pages_utils.TempDataSet[1])
     st.markdown(pages_utils.TempDataSet[2])
     st.markdown(pages_utils.TempDataSet[3])
-    # 根据st.session_state.page12的值刷新表格
+    # =======================左侧数据与特征显示=======================
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         # st.markdown(st.session_state.page12)
@@ -194,7 +187,7 @@ with dataPCV:
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_order=column)
-    # 被选特征数据集表信息
+    # =======================获取特征数据集表信息=======================
     tempDF = pages_utils.TempDataSetField[2]
     # 添加字段名称选项
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
@@ -207,6 +200,7 @@ with dataPCV:
     if tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].any():
         # agricultureName.clear()
         agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].tolist()[0]
+    # =======================选择数据集=======================
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
@@ -254,10 +248,10 @@ with dataPCM:
             number1 = st.number_input("TOP(%)", value=5, min_value=5, step=5)
         if option == '按权重值计算':
             number2 = st.number_input("权重阈值", value=10, min_value=10)
-        # st.markdown('---')
 
     interval_col1, interval_col2 = st.columns([5, 1])
     btn = interval_col2.button('添加处理', on_click=clear_all)
+    # =======================执行任务清单=======================
     if btn:
         # update dataframe state
         # st.markdown(type(st.session_state.df))
@@ -269,23 +263,21 @@ with dataPCM:
             "优选特征": '降水累积量',
             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]),
             "时间": datetime.datetime.now().time()}
-        st.session_state.df1.loc[len(st.session_state.df1)] = new_data
+        pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
         st.rerun()
     st.markdown('---')
-    data = pd.DataFrame(columns=["数据类型", "输入特征", "优选特征", "特征优选方法", '时间'])
 
-    if 'df1' not in st.session_state:
-        st.session_state.df1 = data
+    # =======================显示任务清单=======================
     placeholder = st.empty()
     if st.session_state.page14 == 0:
         with placeholder.container():
             st.markdown('##### 任务清单')
             edited_df28 = st.data_editor(
-                st.session_state.df1, height=190, width=800,
-                disabled=["数据类型", "字段", "时间"],
-                num_rows="dynamic", )
+                pages_utils.TempDataSetField[3], height=190, width=800,
+                column_order=["编号", "数据类型", "输入特征", "优选特征", "特征优选方法", '时间'],
+                disabled=["数据类型", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
-            btn2 = interval_col33.button('运行', on_click=nextPage)
+            btn2 = interval_col33.button('运行', on_click=onRun)
     elif st.session_state.page14 == 1:
         with placeholder.container():
             st.markdown('##### 可视化')
