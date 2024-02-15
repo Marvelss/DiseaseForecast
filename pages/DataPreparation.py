@@ -68,7 +68,7 @@ def simulate_temperature_data():
     return df
 
 
-def clear_all():
+def clearOption():
     for h in range(checkBoxNum):
         if st.session_state[f'checkbox{h}']:
             st.session_state["preMethodName"] = f'checkbox{h}'
@@ -120,35 +120,28 @@ def simulate_box_data():
 def firstPage(): st.session_state.page12 = 0
 
 
-def nextPage():
+def onRun():
     if '预处理后数据' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('预处理后数据')
     st.session_state.page12 += 1
 
     # 调用数据和各类方法
-    # ===============获取数据集===============
-    # print(st.session_state.df)
-    fields = st.session_state.df["输入字段"].tolist()
-    methodNames = st.session_state.df["预处理方法"].tolist()
-    # print(methodNames)
-    print(fields)
-    values = pages_utils.TempDataSet[0][fields[0]].tolist()
-    print('===============')
-    print(values)
+    # ===============获取任务清单内容===============
+    idNumber = pages_utils.TempDataSetField[1]["编号"].tolist()
+    fields = pages_utils.TempDataSetField[1]["输入字段"].tolist()
 
-    # ===============根据名称匹配调用各个处理方法===============
+    columnName = fields[0]
+    st.markdown(columnName)
+    st.markdown(pages_utils.TempDataSet[0][columnName])
+    print('===============')
+    print(fields)
+
+    # ===============根据名称匹配调用并执行各个处理方法===============
     afterHandleData = linearInterpolation(
-        pages_utils.TempDataSet[0], fields[0])
+        pages_utils.TempDataSet[0], fields[0][0])
     # 获取处理后的数据大小
     row_size = len(afterHandleData)
-    # 创建记录
-    data11 = {"数据类型": "气象数据", "字段": fields[0],
-              "大小": '1*' + str(row_size), "预处理方法": "缺失值插补",
-              "时间": datetime.datetime.now().time(),
-              "下载数据集": False}
-    # 后续优化可剔除一个存储数据集
-    st.session_state.df11.loc[len(st.session_state.df11)] = data11
-    pages_utils.TempDataSetField[1] = st.session_state.df11
+
     print('-------预处理前数据-------')
     print(pages_utils.TempDataSet[1])
     print('-------预处理后数据-------')
@@ -161,9 +154,20 @@ def nextPage():
 
     print(pages_utils.TempDataSet[1])
 
+    # 更新记录
+    update_values = {"数据类型": "气象数据",
+                     "输入字段": fields[0],
+                     "输出字段": fields[0],
+                     "大小": '1*' + str(row_size), "预处理方法": "缺失值插补",
+                     "时间": datetime.datetime.now().time(),
+                     }
+    # 查找要更新的数据记录
+    for index, row in pages_utils.TempDataSetField[1].iterrows():
+        if row["编号"] == idNumber[0]:
+            for key, value in update_values.items():
+                pages_utils.TempDataSetField[1].loc[index, key] = value
+                # 根据字段名和索引来更新字段值
 
-if 'df11' not in st.session_state:
-    st.session_state.df11 = pages_utils.PreprocessedDataSetField
 
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
@@ -183,8 +187,8 @@ with dataPCV:
                 with tt1[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
-                    else:
-                        column = pages_utils.TempDataSetField[i].columns
+                    elif st.session_state["leftTabs"][i] == '预处理后数据':
+                        column = ["数据类型", "输出字段", "预处理方法", '时间', "下载数据集"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -197,8 +201,9 @@ with dataPCV:
                 with tt[i]:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
-                    else:
-                        column = pages_utils.TempDataSetField[i].columns
+                    elif st.session_state["leftTabs"][i] == '预处理后数据':
+                        column = ["数据类型", "输出字段", "预处理方法", '时间', "下载数据集"]
+                        print('---{}---'.format(column))
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -209,14 +214,13 @@ with dataPCV:
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
     if tempDF[tempDF['数据类型'] == '气象数据']['字段'].any():
         weatherName.clear()
-        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['字段'].values[0]
+        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['字段'].tolist()[0]
     if tempDF[tempDF['数据类型'] == '植保数据']['字段'].any():
         plantName.clear()
-        plantName = tempDF[tempDF['数据类型'] == '植保数据']['字段'].values[0]
+        plantName = tempDF[tempDF['数据类型'] == '植保数据']['字段'].tolist()[0]
     if tempDF[tempDF['数据类型'] == '农学数据']['字段'].any():
-        # agricultureName.clear()
-        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['字段'].values[0]
-    # st.markdown(type(weatherName))
+        agricultureName.clear()
+        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['字段'].tolist()[0]
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
@@ -258,36 +262,36 @@ with dataPCM:
     if agree:
         number2 = st.text_input("剔除大于", value=0.1)
         number3 = st.text_input("剔除小于", value=0.1)
+
+    # 获取添加处理按钮各项值
     interval_col1, interval_col2 = st.columns([5, 1])
-    btn = interval_col2.button('添加处理', on_click=clear_all)
+    btn = interval_col2.button('添加处理', on_click=clearOption)
     if btn:
-        # 获取添加处理按钮各项值
         print('--------------')
         # update dataframe state
-        new_data = {"数据类型": a,
-                    "输入字段": mergeArray(result1, result2, result3),
-                    "输出字段": mergeArray(result1, result2, result3),
-                    "预处理方法": getCheckboxName(st.session_state["preMethodName"]),
-                    "时间": datetime.datetime.now().time()}
-        st.session_state.df.loc[len(st.session_state.df)] = new_data
+        new_data = {
+            "编号": pages_utils.generateID(),
+            "数据类型": a,
+            "输入字段": mergeArray(result1, result2, result3),
+            "输出字段": mergeArray(result1, result2, result3),
+            "预处理方法": getCheckboxName(st.session_state["preMethodName"]),
+            "时间": datetime.datetime.now().time(), "下载数据集": False}
+        pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
         st.rerun()
     st.markdown('---')
-
-    data = pd.DataFrame(columns=["数据类型", "输入字段", "输出字段", "预处理方法", '时间'])
     # with every interaction, the script runs from top to bottom
     # resulting in the empty dataframe
-    if 'df' not in st.session_state:
-        st.session_state.df = data
 
     placeholder = st.empty()
     if st.session_state.page12 == 0:
         with placeholder.container():
             st.markdown('##### 任务清单')
             edited_df28 = st.data_editor(
-                st.session_state.df, height=190, width=800,
+                pages_utils.TempDataSetField[1], height=190, width=800,
+                column_order=["编号", "数据类型", "输入字段", "输出字段", "预处理方法", '时间'],
                 disabled=["数据类型", "输入字段", "输出字段", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
-            btn2 = interval_col33.button('运行', on_click=nextPage)
+            btn2 = interval_col33.button('运行', on_click=onRun)
 
     elif st.session_state.page12 == 1:
         with placeholder.container():

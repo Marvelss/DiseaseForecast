@@ -190,26 +190,26 @@ with dataPCV:
     tempDF = pages_utils.TempDataSetField[2]
     # 添加字段名称选项
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
-    if tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].values:
+    if tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].any():
         weatherName.clear()
-        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].values[0]
-    if tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].values:
+        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['输出特征'].tolist()[0]
+    if tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].any():
         plantName.clear()
-        plantName = tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].values[0]
-    if tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].values:
+        plantName = tempDF[tempDF['数据类型'] == '植保数据']['输出特征'].tolist()[0]
+    if tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].any():
         # agricultureName.clear()
-        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].values[0]
+        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['输出特征'].tolist()[0]
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', ['降水'],
+        st, '全选-气象数据', weatherName,
         'temp', 'collapsed')
     result2 = pages_utils.multiselect_all(
-        st, '全选-植保数据', ['无2'],
+        st, '全选-植保数据', plantName,
         'temp', 'collapsed')
     result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', ['无3'],
+        st, '全选-农学数据', agricultureName,
         'temp', 'collapsed')
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
