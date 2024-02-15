@@ -1,5 +1,6 @@
+import random
+
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, roc_curve, precision_recall_curve
 
 
@@ -36,25 +37,32 @@ def getIntersectionCols(df1, df2):
     return list(set(df1.columns) & set(df2.columns))
 
 
-# 特征字段
-# RawDataSetField = pd.DataFrame(
-#     {
-#         "数据集": ["气象数据", "植保数据", "气象数据", "植保数据"],
-#         "字段": ["温度", "峰值", "湿度", "降水"],
-#         "时间": ['22:10:20', '20:10:20', '21:10:20', '21:10:20'],
-#     }
-# )
-RawDataSetField = pd.DataFrame(columns=["数据集", "文件名称", "字段", "传输状态", "上传时间"])
-PreprocessedDataSetField = pd.DataFrame(columns=["数据集", "输入字段", "输出字段", "预处理方法", '时间', "下载数据集"])
+# 生成长度为16的随机字符串
+def generateID():
+    """
+    生成一个指定长度的随机字符串
+    """
+    random_str = ''
+    base_str = 'ABCDEFGHIGKLMNOPQRSTUVWXYZabcdefghigklmnopqrstuvwxyz0123456789'
+    length = len(base_str) - 1
+    for i in range(16):
+        random_str += base_str[random.randint(0, length)]
+    return random_str
 
+
+# 其他字段值
+RawDataSetField = pd.DataFrame(
+    columns=["编号", "数据类型", "文件名称", "字段", "传输状态", "上传时间"])
+PreprocessedDataSetField = pd.DataFrame(
+    columns=["编号", "数据类型", "输入字段", "输出字段", "预处理方法", "方法参数", '时间', "下载数据集"])
 FeatureDataSetField = pd.DataFrame(
-    columns=["数据集", "输入特征", "输出特征", "大小", "特征计算方法", "时间", "下载数据集"])
-# FeatureDataSetField.loc[0] = ["农学数据", "预测峰值", "1*6", "降水累积量计算", '21:10:20', False]
+    columns=["编号", "数据类型", "输入特征", "输出特征", "大小", "特征计算方法", "方法参数", "时间", "下载数据集"])
 OptimalFeatureDataSetField = pd.DataFrame(
-    columns=["数据集", "输入特征", "输出特征", "大小", "特征优选方法", "时间", "下载数据集"])
-# OptimalFeatureDataSetField.loc[0] = ["农学数据", "预测峰值", "1*6", "t检验", '21:10:20', False]
-ModelSet = pd.DataFrame(columns=["模型", "时间", "下载模型结构、结果和参数值"])
-TempDataSetField = [RawDataSetField, PreprocessedDataSetField, FeatureDataSetField, OptimalFeatureDataSetField,
+    columns=["编号", "数据类型", "输入特征", "输出特征", "大小", "特征优选方法", "方法参数", "时间", "下载数据集"])
+ModelSet = pd.DataFrame(
+    columns=["编号", "模型", "模型参数", "时间", "下载模型结构、结果和参数值"])
+TempDataSetField = [RawDataSetField, PreprocessedDataSetField,
+                    FeatureDataSetField, OptimalFeatureDataSetField,
                     ModelSet]
 
 # 特征值
