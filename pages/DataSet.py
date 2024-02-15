@@ -17,58 +17,6 @@ def convert_df(df):
 
 # 用于获取上传数据集名称
 # i = 0
-data1 = pd.DataFrame(columns=["文件名称", "传输状态", "上传时间"])
-data2 = pd.DataFrame(columns=["文件名称", "传输状态", "上传时间"])
-
-data3 = pd.DataFrame(columns=["文件名称", "传输状态", "上传时间"])
-
-# with every interaction, the script runs from top to bottom
-# resulting in the empty dataframe
-if 'weatherState' not in st.session_state:
-    st.session_state.weatherState = data1
-if 'plantState' not in st.session_state:
-    st.session_state.plantState = data2
-if 'agricultureState' not in st.session_state:
-    st.session_state.agricultureState = data3
-
-if 'RawDataSet' not in st.session_state:
-    st.session_state.RawDataSet = pages_utils.RawDataSet
-
-if 'RawDataSetField' not in st.session_state:
-    st.session_state.RawDataSetField = pages_utils.RawDataSetField
-
-
-# if 'i' not in st.session_state:
-#     st.session_state.i = 0
-
-# def addInfo():
-#     if uploaded_files:
-#         # bytes_data = uploaded_files.read()
-#         # data33 = pd.read_excel(bytes_data)
-#         st.markdown('a')
-# df = getStateDF(ab)
-# new_data = {"文件名称": uploaded_files.name, "传输状态": "已上传",
-#             "上传时间": datetime.now().strftime("%H:%M:%S")}
-# df.loc[len(df)] = new_data
-
-
-# def addState(df, info):
-#     df.loc[len(df)] = info
-
-# def addState():
-#     new_data1 = {"文件名称": uploaded_files.name, "传输状态": "已上传",
-#                  "上传时间": datetime.now().strftime("%H:%M:%S")}
-#     st.session_state.RawDataSetField.loc[len(st.session_state.RawDataSetField)] = new_data1
-#     pages_utils.RawDataSetField = st.session_state.RawDataSetField
-
-
-def getStateDF(name):
-    if name == '气象数据':
-        return st.session_state.weatherState
-    elif name == '植保数据':
-        return st.session_state.plantState
-    elif name == '农学数据':
-        return st.session_state.agricultureState
 
 
 dataSCM, dataSCR = st.columns([0.9, 0.4])
@@ -138,18 +86,16 @@ with dataSCM:
             st.markdown("和uploaded_files.name变量一致的文件名称已经存在，不执行以下操作")
             st.markdown('---')
         else:
+            # 添加字段
             pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
-            # st.session_state.RawDataSetField.loc[len(st.session_state.RawDataSetField)] = new_data1
-            # pages_utils.RawDataSetField = st.session_state.RawDataSetField
             # 获取两个DataFrame列名的交集
             intersection_cols = pages_utils.getIntersectionCols(
                 data33, pages_utils.TempDataSet[0]
             )
+            # 合并数据
             pages_utils.TempDataSet[0] = pd.merge(
                 data33, pages_utils.TempDataSet[0],
                 on=intersection_cols, how="left")
-
-            # pages_utils.TempDataSet[0] = st.session_state.RawDataSet
 
         st.markdown(pages_utils.TempDataSet[0].columns)
         st.markdown(new_data)
