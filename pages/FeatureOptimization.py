@@ -10,11 +10,14 @@ import pages_utils
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-if 'page14' not in st.session_state: st.session_state.page14 = 0
+if 'page14' not in st.session_state:
+    st.session_state.page14 = 0
 
 checkBoxNum = 3
 if "OptimizationMethodName" not in st.session_state:
-    st.session_state["OptimizationMethodName"] = None
+    st.session_state["OptimizationMethodName"] = {
+        'checkBox': None
+    }
 
 
 def getCheckboxName(checkbox):
@@ -69,7 +72,7 @@ def simulate_temperature_data():
 def clear_all():
     for h in range(checkBoxNum):
         if st.session_state[f'checkbox{h}']:
-            st.session_state["OptimizationMethodName"] = f'checkbox{h}'
+            st.session_state["OptimizationMethodName"]['checkBox'] = f'checkbox{h}'
         st.session_state[f'checkbox{h}'] = False
     return
 
@@ -131,7 +134,7 @@ def onRun():
         "数据类型": "气象数据", "输入特征": fields[0],
         "优选": fields[0],
         "大小": '1*' + str(row_size),
-        "特征计算方法": st.session_state["OptimizationMethodName"],
+        "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
         "时间": datetime.datetime.now().time()}
     # 查找要更新的数据记录
     for index, row in pages_utils.TempDataSetField[3].iterrows():
@@ -218,6 +221,7 @@ with dataPCM:
     with tab1:
         genre = st.checkbox("Person相关性分析", key='checkbox0', on_change=clear_other, args=[0])
         genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1])
+
     with tab2:
         genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other, args=[2])
     st.markdown('---')
@@ -238,6 +242,7 @@ with dataPCM:
             label_visibility="collapsed",
             options=['p-value<0.001', 'p-value<0.005', 'p-value<0.01']
         )
+        st.session_state["OptimizationMethodName"]['param1'] = genre2
     # st.markdown('---')
     if genre3:
         # st.markdown('提取条件')
@@ -253,15 +258,16 @@ with dataPCM:
     btn = interval_col2.button('添加处理', on_click=clear_all)
     # =======================执行任务清单=======================
     if btn:
-        # update dataframe state
-        # st.markdown(type(st.session_state.df))
-        print(st.session_state["OptimizationMethodName"])
+        for key11, value11 in st.session_state["OptimizationMethodName"].items():
+            print(f"Key: {key11}, Value: {value11}")
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": a,
             "输入特征": mergeArray(result1, result2, result3),
             "优选特征": '降水累积量',
-            "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]),
+            "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
+            "方法参数": [value for key, value in st.session_state["OptimizationMethodName"].items() if
+                         key != 'checkBox'],
             "时间": datetime.datetime.now().time()}
         pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
         st.rerun()

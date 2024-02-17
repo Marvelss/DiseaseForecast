@@ -11,7 +11,9 @@ if 'page13' not in st.session_state:
 
 checkBoxNum = 5
 if "featureMethodName" not in st.session_state:
-    st.session_state["featureMethodName"] = None
+    st.session_state["featureMethodName"] = {
+        'checkBox': None
+    }
 
 
 def getCheckboxName(checkbox):
@@ -49,7 +51,7 @@ def simulate_temperature_data():
 def clear_all():
     for h in range(checkBoxNum):
         if st.session_state[f'checkbox{h}']:
-            st.session_state["featureMethodName"] = f'checkbox{h}'
+            st.session_state["featureMethodName"]['checkBox'] = f'checkbox{h}'
         st.session_state[f'checkbox{h}'] = False
     return
 
@@ -121,9 +123,9 @@ def onRun():
     # 更新记录
     update_values = {
         "数据类型": "气象数据", "输入特征": fields[0],
-        "备选特征": getFeatureName(st.session_state["featureMethodName"]),
+        "备选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
         "大小": '1*' + str(row_size),
-        "特征计算方法": st.session_state["featureMethodName"],
+        "特征计算方法": st.session_state["featureMethodName"]['checkBox'],
         "时间": datetime.datetime.now().time()}
     # 查找要更新的数据记录
     for index, row in pages_utils.TempDataSetField[2].iterrows():
@@ -233,6 +235,7 @@ with featureCCM:
         option3 = st.selectbox(
             '降水累积量计算',
             ('日累积降水量', '旬累积降水量', '月累积降水量'))
+        st.session_state["featureMethodName"]['param1'] = option3
     if option17:
         d1 = st.date_input("开始时间", value=None)
         d2 = st.date_input("结束时间", value=None)
@@ -269,13 +272,15 @@ with featureCCM:
     btn = interval_col2.button('添加处理', on_click=clear_all)
     # =======================执行任务清单=======================
     if btn:
-        # print(st.session_state["featureMethodName"])
+        for key11, value11 in st.session_state["featureMethodName"].items():
+            print(f"Key: {key11}, Value: {value11}")
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": a,
             "输入特征": mergeArray(result1, result2, result3),
-            "备选特征": getFeatureName(st.session_state["featureMethodName"]),
-            "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]),
+            "备选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
+            "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]['checkBox']),
+            "方法参数": [value for key, value in st.session_state["featureMethodName"].items() if key != 'checkBox'],
             "时间": datetime.datetime.now().time()}
         pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_data
         st.rerun()

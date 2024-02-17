@@ -18,7 +18,10 @@ if "leftTabs" not in st.session_state:
 
 # 处理方法内容记录(任务清单各项值)
 if "preMethodName" not in st.session_state:
-    st.session_state["preMethodName"] = None
+    st.session_state["preMethodName"] = {
+        'checkBox': None
+    }
+
 checkBoxNum = 2
 
 
@@ -66,15 +69,15 @@ def simulate_temperature_data():
 def clearOption():
     for h in range(checkBoxNum):
         if st.session_state[f'checkbox{h}']:
-            st.session_state["preMethodName"] = f'checkbox{h}'
+            st.session_state["preMethodName"]['checkBox'] = f'checkbox{h}'
         st.session_state[f'checkbox{h}'] = False
     return
 
 
-def clear_other(key):
+def clear_other(key1):
     # st.markdown(key)
     for h in range(checkBoxNum):
-        if h != key:
+        if h != key1:
             st.session_state[f'checkbox{h}'] = False
     return
 
@@ -148,14 +151,14 @@ def onRun():
         "输入字段": fields[0],
         "预处理后字段": fields[0],
         "大小": '1*' + str(row_size),
-        "预处理方法": getCheckboxName(st.session_state["preMethodName"]),
+        "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
         "时间": datetime.datetime.now().time(),
     }
     # 查找要更新的数据记录
     for index, row in pages_utils.TempDataSetField[1].iterrows():
         if row["编号"] == idNumber[0]:
-            for key, value in update_values.items():
-                pages_utils.TempDataSetField[1].loc[index, key] = value
+            for key1, value1 in update_values.items():
+                pages_utils.TempDataSetField[1].loc[index, key1] = value1
                 # 根据字段名和索引来更新字段值
 
 
@@ -246,8 +249,10 @@ with dataPCM:
             option = st.selectbox(
                 '插补方法',
                 options=('线性插值', '自定义'))
+            st.session_state["preMethodName"]['param1'] = option
             if option == '自定义':
-                st.text_input('输入数值')
+                num = st.text_input('输入数值')
+                st.session_state["preMethodName"]['param2'] = num
         # st.markdown('---')
     if agree:
         number2 = st.text_input("剔除大于", value=0.1)
@@ -258,6 +263,8 @@ with dataPCM:
     btn = interval_col2.button('添加处理', on_click=clearOption)
     # =======================执行任务清单=======================
     if btn:
+        for key11, value11 in st.session_state["preMethodName"].items():
+            print(f"Key: {key11}, Value: {value11}")
         # print('--------------')
         # update dataframe state
         new_data = {
@@ -265,8 +272,10 @@ with dataPCM:
             "数据类型": a,
             "输入字段": mergeArray(result1, result2, result3),
             "预处理后字段": mergeArray(result1, result2, result3),
-            "预处理方法": getCheckboxName(st.session_state["preMethodName"]),
+            "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
+            "方法参数": [value for key, value in st.session_state["preMethodName"].items() if key != 'checkBox'],
             "时间": datetime.datetime.now().time(), "下载数据集": False}
+        print(new_data)
         pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
         st.rerun()
     st.markdown('---')
@@ -308,7 +317,7 @@ with dataPCM:
                             linewidth=2,
                             width=0.8,
                             fliersize=3,
-                            palette='hls',
+                            # palette='hls',
                             whis=1.5,
                             notch=True,
                             order=['Thur', 'Fri', 'Sat', 'Sun']

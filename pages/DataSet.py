@@ -8,11 +8,15 @@ import extra_streamlit_components as stx
 
 import pages_utils
 
+from warnings import simplefilter
+
+simplefilter(action="ignore", category=FutureWarning)
 
 @st.cache_data
 def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     return df.to_csv().encode('utf-8')
+
 
 
 # 用于获取上传数据集名称
