@@ -60,7 +60,7 @@ FeatureDataSetField = pd.DataFrame(
 OptimalFeatureDataSetField = pd.DataFrame(
     columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间", "下载数据集"])
 ModelSet = pd.DataFrame(
-    columns=["编号", "模型", "模型参数", "时间", "下载模型结构、结果和参数值"])
+    columns=["编号", "模型", "模型参数", "评价指标", "数据集划分", "时间", "下载模型结构、结果和参数值"])
 TempDataSetField = [RawDataSetField, PreprocessedDataSetField,
                     FeatureDataSetField, OptimalFeatureDataSetField,
                     ModelSet]
