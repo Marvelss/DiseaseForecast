@@ -2,9 +2,7 @@ import datetime
 
 import streamlit as st
 import pandas as pd
-import numpy as np
-from sklearn.compose import ColumnTransformer
-from sklearn.linear_model import LinearRegression
+
 from sklearn.metrics import confusion_matrix, accuracy_score, mean_squared_error, r2_score
 
 import seaborn as sns
@@ -27,6 +25,8 @@ if "modelName" not in st.session_state:
     }
 if "modelParamName" not in st.session_state:
     st.session_state["modelParamName"] = {}
+if "modelPrecisionName" not in st.session_state:
+    st.session_state["modelPrecisionName"] = []
 
 # 创建一个空的模型参数字典
 model_params = [
@@ -44,15 +44,15 @@ checkBoxModelNum = 4
 def getCheckboxName():
     for h in range(checkBoxModelNum):
         if st.session_state[f'checkBoxModel{h}']:
-            temp = f'checkBoxModel{h}'
+            temp1 = f'checkBoxModel{h}'
             print(f'--click{h}--')
-            if temp == 'checkBoxModel0':
+            if temp1 == 'checkBoxModel0':
                 return 'SVM'
-            elif temp == 'checkBoxModel2':
+            elif temp1 == 'checkBoxModel2':
                 return 'KNN'
-            elif temp == 'checkBoxModel1':
+            elif temp1 == 'checkBoxModel1':
                 return 'RF'
-            elif temp == 'checkBoxModel3':
+            elif temp1 == 'checkBoxModel3':
                 return 'FLDA'
 
 
@@ -139,7 +139,12 @@ def onAddModel():
     return
 
 
-def onPrecision():
+def onPrecision(cbox1, cbox2):
+    if cbox1:
+        st.session_state["modelPrecisionName"].append('OA')
+    if cbox2:
+        st.session_state["modelPrecisionName"].append('Kappa')
+    pages_utils.TempDataSetField[4]['评价指标'] = st.session_state["modelPrecisionName"]
     # for h in range(checkBoxPrecisionNum):
     #     if st.session_state[f'checkBoxPrecision{h}']:
     #         st.session_state["modelName"]['checkBoxPrecision'] = f'checkBoxPrecision{h}'
@@ -279,15 +284,21 @@ with modelACM:
             agree6 = st.checkbox('OA', key='checkBoxPrecision0')
             agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
             interval_col1, interval_col2 = st.columns([5, 1])
-            btn21 = interval_col1.button("下一步", on_click=onPrecision)
+            btn21 = interval_col1.button("下一步", on_click=onPrecision, args=[agree6, agree7])
+            tempPrecision = ''
+            if agree6:
+                pass
+                # st.session_state["modelPrecisionName"].append('OA')
+                # pages_utils.TempDataSetField[4]['评价指标'] = 'OA'
+                # pages_utils.TempDataSetField[4]['评价指标'] = pages_utils.TempDataSetField[4]['评价指标']+'OA'
+            if agree7:
+                # 'Kappa'
+                pass
+                # pages_utils.TempDataSetField[4]['评价指标'] = 'Kappa'
+                # pages_utils.TempDataSetField[4]['评价指标'] = pages_utils.TempDataSetField[4]['评价指标']+'Kappa'
             if btn21:
-                temp = []
-                if agree6:
-                    temp.append(agree6)
-                if agree7:
-                    temp.append(agree7)
-                for index, row in pages_utils.TempDataSetField[4].iterrows():
-                    pages_utils.TempDataSetField[4].loc[index, '评价指标'] = temp
+                print(st.session_state["modelPrecisionName"])
+
 
     # Page 2
     elif st.session_state.page == 2:
