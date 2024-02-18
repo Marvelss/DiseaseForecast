@@ -25,6 +25,8 @@ if "modelName" not in st.session_state:
     st.session_state["modelName"] = {
         'checkBoxModel': None
     }
+if "modelParamName" not in st.session_state:
+    st.session_state["modelParamName"] = {}
 
 # 创建一个空的模型参数字典
 model_params = [
@@ -129,6 +131,7 @@ def onModel():
 
 
 def onAddModel():
+    print(st.session_state["modelParamName"])
     for h in range(checkBoxModelNum):
         if st.session_state[f'checkBoxModel{h}']:
             st.session_state["modelName"]['checkBoxModel'] = f'checkBoxModel{h}'
@@ -254,7 +257,8 @@ with modelACM:
                 # 转换参数格式
                 formatted_params = [{"参数名": key, "参数值": value} for key, value in svm_params_dict.items()]
                 df = pd.DataFrame(formatted_params)
-                st.data_editor(df)
+                edited_df = st.data_editor(df)
+                st.session_state["modelParamName"] = edited_df.to_dict()
             interval_col1, interval_col2 = st.columns([5, 1])
             btn1 = interval_col2.button("下一步", on_click=onModel)
             btn = interval_col1.button("添加模型", on_click=onAddModel)
@@ -262,8 +266,7 @@ with modelACM:
                 new_data = {
                     "编号": pages_utils.generateID(),
                     "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
-                    "模型参数": [value for key, value in st.session_state["preMethodName"].items() if
-                                 key != 'checkBox'],
+                    "模型参数": st.session_state["modelParamName"],
                     "时间": datetime.datetime.now().time(),
                     "下载模型结构、结果和参数值": False}
                 print(new_data)
@@ -284,7 +287,7 @@ with modelACM:
                 if agree7:
                     temp.append(agree7)
                 for index, row in pages_utils.TempDataSetField[4].iterrows():
-                    pages_utils.TempDataSetField[4].loc[index, '精度指标'] = temp
+                    pages_utils.TempDataSetField[4].loc[index, '评价指标'] = temp
 
     # Page 2
     elif st.session_state.page == 2:
@@ -304,7 +307,7 @@ with modelACM:
     st.markdown('##### 任务清单')
     edited_df28 = st.data_editor(
         pages_utils.TempDataSetField[4], height=190, width=800,
-        column_order=["编号", "模型", "模型参数", "时间"],
+        column_order=["编号", "模型", "时间"],
         disabled=["时间"], num_rows="dynamic", )
     interval_col34, interval_col33 = st.columns([4, 1])
     btn2 = interval_col33.button('开始模型训练', on_click=onTrain)
