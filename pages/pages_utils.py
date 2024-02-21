@@ -1,5 +1,6 @@
 import random
 
+import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix, roc_curve, precision_recall_curve
 
@@ -48,6 +49,59 @@ def generateID():
     for i in range(16):
         random_str += base_str[random.randint(0, length)]
     return random_str
+
+
+# 获取各类数据集字段
+def getDataFiled(dataName):
+    weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
+    for i in range(4):
+        tempDF = TempDataSetField[i]
+        if i == 0:
+            if tempDF[tempDF['数据类型'] == '气象数据']['字段'].any():
+                weatherName.clear()
+                temp = tempDF[tempDF['数据类型'] == '气象数据']['字段'].tolist()[0]
+                weatherName = np.concatenate((temp, weatherName))
+            if tempDF[tempDF['数据类型'] == '植保数据']['字段'].any():
+                plantName.clear()
+                temp = tempDF[tempDF['数据类型'] == '植保数据']['字段'].tolist()[0]
+                plantName = np.concatenate((temp, plantName))
+            if tempDF[tempDF['数据类型'] == '农学数据']['字段'].any():
+                agricultureName.clear()
+                temp = tempDF[tempDF['数据类型'] == '农学数据']['字段'].tolist()[0]
+                agricultureName = np.concatenate((temp, agricultureName))
+        elif i == 1:
+            if tempDF[tempDF['数据类型'] == '气象数据']['预处理后字段'].any():
+                temp = tempDF[tempDF['数据类型'] == '气象数据']['预处理后字段'].tolist()[0]
+                weatherName = np.concatenate((temp, weatherName))
+            if tempDF[tempDF['数据类型'] == '植保数据']['预处理后字段'].any():
+                temp = tempDF[tempDF['数据类型'] == '植保数据']['预处理后字段'].tolist()[0]
+                plantName = np.concatenate((temp, plantName))
+            if tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].any():
+                temp = tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].tolist()[0]
+                agricultureName = np.concatenate((temp, agricultureName))
+        elif i == 2:
+            if tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].tolist()[0]
+                weatherName = np.concatenate((temp, weatherName))
+            if tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].tolist()[0]
+                plantName = np.concatenate((temp, plantName))
+            if tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].tolist()[0]
+                agricultureName = np.concatenate((temp, agricultureName))
+        elif i == 3:
+            if tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].tolist()[0]
+                weatherName = np.concatenate((temp, weatherName))
+            if tempDF[tempDF['数据类型'] == '植保数据']['优选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '植保数据']['优选特征'].tolist()[0]
+                plantName = np.concatenate((temp, plantName))
+            if tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].tolist()[0]
+                agricultureName = np.concatenate((temp, agricultureName))
+    print(weatherName, plantName, agricultureName)
+
+    return weatherName, plantName, agricultureName
 
 
 # 其他字段值

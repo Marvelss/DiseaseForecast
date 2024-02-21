@@ -33,18 +33,18 @@ def mergeArray(list1, list2, list3):
     return list(set().union(*[list1, list2, list3]))
 
 
-def simulate_temperature_data():
-    # 模拟生成温度数据
-    data = {
-        'City': ['City1', 'City2', 'City3'],
-        'Temperature': np.append([
-            np.random.normal(25, 5, 10),
-            np.random.normal(20, 3, 10),
-            np.random.normal(30, 7, 10)
-        ])
-    }
-    df = pd.DataFrame(data)
-    return df
+# def simulate_temperature_data():
+#     # 模拟生成温度数据
+#     data = {
+#         'City': ['City1', 'City2', 'City3'],
+#         'Temperature': np.append([
+#             np.random.normal(25, 5, 10),
+#             np.random.normal(20, 3, 10),
+#             np.random.normal(30, 7, 10)
+#         ])
+#     }
+#     df = pd.DataFrame(data)
+#     return df
 
 
 # 取消所有选项按钮
@@ -58,9 +58,9 @@ def clear_all():
 
 # 取消其他选项按钮
 def clear_other(key):
-    for i in range(checkBoxNum):
-        if i != key:
-            st.session_state[f'checkbox{i}'] = False
+    for h in range(checkBoxNum):
+        if h != key:
+            st.session_state[f'checkbox{h}'] = False
     return
 
 
@@ -77,8 +77,8 @@ def precipitationAccumulation(dataFrame, fieldName):
 
     # 返回三列值
     print('-------三列值---')
-    tempData = dataFrame[['上级单位', '测报站点', "年", "DayOfYear", fieldName,
-                          '峰值率', '降水累积量']]
+    tempData = dataFrame[['上级单位', '测报站点', "年", "DayOfYear",
+                          fieldName, '降水累积量']]
     return tempData
 
 
@@ -122,10 +122,10 @@ def onRun():
 
     # 更新记录
     update_values = {
-        "数据类型": "气象数据", "输入特征": fields[0],
-        "备选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
+        # "数据类型": "气象数据", "输入特征": fields[0],
+        # "备选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
         "大小": '1*' + str(row_size),
-        "特征计算方法": st.session_state["featureMethodName"]['checkBox'],
+        # "特征计算方法": st.session_state["featureMethodName"]['checkBox'],
         "时间": datetime.datetime.now().time()}
     # 查找要更新的数据记录
     for index, row in pages_utils.TempDataSetField[2].iterrows():
@@ -175,26 +175,15 @@ with featureCCV:
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_order=column)
-    # =======================获取数据集字段=======================
-    # 预处理后数据集表信息
-    tempDF = pages_utils.TempDataSetField[1]
-    # 添加字段名称选项
-    weatherName = ['无11']
-    plantName = ['无21']
-    agricultureName = ['无31']
-    if tempDF[tempDF['数据类型'] == '气象数据']['预处理后字段'].any():
-        weatherName.clear()
-        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['预处理后字段'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '植保数据']['预处理后字段'].any():
-        plantName.clear()
-        plantName = tempDF[tempDF['数据类型'] == '植保数据']['预处理后字段'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].any():
-        # agricultureName.clear()
-        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].tolist()[0]
     # =======================选择数据集=======================
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
+
+    # =======================获取数据集字段=======================
+    # 预处理后数据集表信息
+    weatherName, plantName, agricultureName = pages_utils.getDataFiled(a)
+
     result1 = pages_utils.multiselect_all(
         st, '全选-气象数据', weatherName,
         'temp', 'collapsed')
@@ -278,7 +267,7 @@ with featureCCM:
             "编号": pages_utils.generateID(),
             "数据类型": a,
             "输入特征": mergeArray(result1, result2, result3),
-            "备选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
+            "备选特征": getFeatureName(getCheckboxName(st.session_state["featureMethodName"]['checkBox'])),
             "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]['checkBox']),
             "方法参数": [value for key, value in st.session_state["featureMethodName"].items() if key != 'checkBox'],
             "时间": datetime.datetime.now().time()}

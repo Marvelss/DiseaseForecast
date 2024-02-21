@@ -88,20 +88,28 @@ def firstPage(): st.session_state.page14 = 0
 
 
 # t检验
-def tTest(dataFrame, fieldName):
-    # 创建一个空的列表来存储显著的降水特征
+def tTest(fieldName):
+    # 创建一个空列表来存储显著的降水特征
+    dataFrame = []
     significant_features = []
-
+    for name in fieldName:
+        for temp in pages_utils.TempDataSet:
+            if name in temp.columns:
+                dataFrame.append(temp)
     # 计算 t 检验的 p 值，并选择 p < 0.05 的特征
-    column1 = '降水'
-    t_stat, p_value = stats.ttest_ind(dataFrame[column1], dataFrame['峰值率'])
+    # column1 = '降水'
+    data = []
+    # for h in zip(fieldName, dataFrame):
+    #     data.append(dataFrame[h][fieldName[h]])
+    t_stat, p_value = stats.ttest_ind(
+        data[0], data[1])
     if p_value < 0.05:
         significant_features.append(column)
     # 返回三列值
     print('-------三列值---')
     tempData = dataFrame[['上级单位', '测报站点',
                           '降水累积量', "年", "DayOfYear",
-                          fieldName, '峰值率']]
+                          fieldName, '预测峰值率']]
     return tempData
 
 
@@ -116,10 +124,9 @@ def onRun():
     fields = pages_utils.TempDataSetField[3]["输入特征"].tolist()
 
     # ===============根据名称匹配调用并执行各个处理方法===============
-    afterHandleData = tTest(
-        pages_utils.TempDataSet[2], fields[0][0])
+    afterHandleData = tTest(fields[0][0])
     row_size = len(afterHandleData)
-    print('-------优选特征-------')
+    # print('-------优选特征-------')
     print(pages_utils.TempDataSet[3])
     print('-------优选特征-------')
     intersection_cols = pages_utils.getIntersectionCols(
@@ -191,22 +198,11 @@ with dataPCV:
                         height=220, width=800,
                         column_order=column)
     # =======================获取特征数据集表信息=======================
-    tempDF = pages_utils.TempDataSetField[2]
-    # 添加字段名称选项
-    weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
-    if tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].any():
-        weatherName.clear()
-        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].any():
-        plantName.clear()
-        plantName = tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].any():
-        # agricultureName.clear()
-        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].tolist()[0]
     # =======================选择数据集=======================
     a = st.selectbox(
         '选择数据集',
         ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
+    weatherName, plantName, agricultureName = pages_utils.getDataFiled(a)
     result1 = pages_utils.multiselect_all(
         st, '全选-气象数据', weatherName,
         'temp', 'collapsed')

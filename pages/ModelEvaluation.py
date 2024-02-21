@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from pygwalker.api.streamlit import StreamlitRenderer
 from st_pages import add_page_title
+from streamlit import switch_page
 from streamlit_tree_select import tree_select
 import extra_streamlit_components as stx
 
@@ -70,7 +71,9 @@ nodes2 = [
 mainIndex, tempIndex = st.columns([0.9, 0.2])
 with mainIndex:
     val = stx.stepper_bar(steps=["数据集", "数据预处理", "特征计算", "特征优选", "模型构建"])
-    # st.info(f"Phase #{val}")
+    st.info(f"Phase #{val}")
+    if val == 1:
+        switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\DataPreparation.py")
     nodes = [
         {"label": "机器学习", "value": "folder_a",
          "children": [{"label": "SVM", "value": "folder_b", },

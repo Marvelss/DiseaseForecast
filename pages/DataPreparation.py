@@ -5,6 +5,7 @@ from PIL import Image
 import streamlit as st
 import numpy as np
 import pandas as pd
+from streamlit import switch_page
 
 import pages_utils
 
@@ -141,7 +142,7 @@ def onRun():
     )
     pages_utils.TempDataSet[1] = pd.merge(
         afterHandleData, pages_utils.TempDataSet[1],
-        on=intersection_cols, how="left")
+        on=intersection_cols, how="right")
 
     print(pages_utils.TempDataSet[1])
 
@@ -202,6 +203,7 @@ with dataPCV:
                         height=220, width=800,
                         column_order=column)
     # 原始数据集表信息
+
     tempDF = pages_utils.TempDataSetField[0]
     # 添加字段名称选项
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
@@ -286,6 +288,9 @@ with dataPCM:
     if st.session_state.page12 == 0:
         with placeholder.container():
             st.markdown('##### 任务清单')
+            want_to_contribute = st.button("跳转可视化")
+            if want_to_contribute:
+                switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\ModelEvaluation.py")
             edited_df28 = st.data_editor(
                 pages_utils.TempDataSetField[1], height=190, width=800,
                 column_order=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", '时间'],
