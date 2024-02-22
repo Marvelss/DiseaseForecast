@@ -32,17 +32,17 @@ def linearInterpolation(dataFrame, fieldName):
 
     # 单独计算插补所用的均值
     mean_value = dataFrame[fieldName].mean()
-    print(f"均值为: {mean_value}")
+    # print(f"均值为: {mean_value}")
     dataFrame[fieldName].fillna(mean_value, inplace=True)
 
     # 检查是否还有缺失值
     missing_values = dataFrame[fieldName].isnull().sum()
-    print(f"字段中的缺失值数量为: {missing_values}")
-    print(dataFrame[fieldName])
+    # print(f"字段中的缺失值数量为: {missing_values}")
+    # print(dataFrame[fieldName])
     # 返回三列值
-    print('-------三列值---')
+    # print('-------三列值---')
     tempData = dataFrame[['上级单位', '测报站点', "年", "DayOfYear",
-                          fieldName]]
+                          fieldName, '预测病株率']]
     return tempData
 
 
@@ -134,16 +134,14 @@ def onRun():
         pages_utils.TempDataSet[0], fields[0][0])
     # 获取处理后的数据大小
     row_size = len(afterHandleData)
-    print('-------预处理前数据-------')
-    print(pages_utils.TempDataSet[1])
-    print('-------预处理后数据-------')
+
     intersection_cols = pages_utils.getIntersectionCols(
         pages_utils.TempDataSet[1], afterHandleData
     )
     pages_utils.TempDataSet[1] = pd.merge(
         afterHandleData, pages_utils.TempDataSet[1],
-        on=intersection_cols, how="right")
-
+        on=intersection_cols, how="left")
+    print('======================预处理后数据集======================')
     print(pages_utils.TempDataSet[1])
 
     # 更新记录
@@ -168,10 +166,10 @@ def onRun():
 dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
-    st.data_editor(pages_utils.TempDataSet[0])
-    st.markdown(pages_utils.TempDataSet[1])
-    st.markdown(pages_utils.TempDataSet[2])
-    st.markdown(pages_utils.TempDataSet[3])
+    # st.data_editor(pages_utils.TempDataSet[0])
+    # st.markdown(pages_utils.TempDataSet[1])
+    # st.markdown(pages_utils.TempDataSet[2])
+    # st.markdown(pages_utils.TempDataSet[3])
     # 根据st.session_state.page12的值刷新表格
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
@@ -182,7 +180,7 @@ with dataPCV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -196,8 +194,8 @@ with dataPCV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
-                        print('---{}---'.format(column))
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
+                        # print('---{}---'.format(column))
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -218,7 +216,7 @@ with dataPCV:
         agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['字段'].tolist()[0]
     a = st.selectbox(
         '选择数据集',
-        ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
+        ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
     result1 = pages_utils.multiselect_all(
         st, '全选-气象数据', weatherName,
         'temp', 'collapsed')
@@ -266,7 +264,8 @@ with dataPCM:
     # =======================执行任务清单=======================
     if btn:
         for key11, value11 in st.session_state["preMethodName"].items():
-            print(f"Key: {key11}, Value: {value11}")
+            pass
+            # print(f"Key: {key11}, Value: {value11}")
         # print('--------------')
         # update dataframe state
         new_data = {
@@ -277,6 +276,7 @@ with dataPCM:
             "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
             "方法参数": [value for key, value in st.session_state["preMethodName"].items() if key != 'checkBox'],
             "时间": datetime.datetime.now().time(), "下载数据集": False}
+        print('======================预处理-添加任务清单记录======================')
         print(new_data)
         pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
         st.rerun()
@@ -288,9 +288,9 @@ with dataPCM:
     if st.session_state.page12 == 0:
         with placeholder.container():
             st.markdown('##### 任务清单')
-            want_to_contribute = st.button("跳转可视化")
-            if want_to_contribute:
-                switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\ModelEvaluation.py")
+            # want_to_contribute = st.button("跳转可视化")
+            # if want_to_contribute:
+            #     switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\ModelEvaluation.py")
             edited_df28 = st.data_editor(
                 pages_utils.TempDataSetField[1], height=190, width=800,
                 column_order=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", '时间'],

@@ -80,14 +80,14 @@ def getDataFiled(dataName):
                 temp = tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].tolist()[0]
                 agricultureName = np.concatenate((temp, agricultureName))
         elif i == 2:
-            if tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].tolist()[0]
+            if tempDF[tempDF['数据类型'] == '气象数据']['被选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '气象数据']['被选特征'].tolist()[0]
                 weatherName = np.concatenate((temp, weatherName))
-            if tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].tolist()[0]
+            if tempDF[tempDF['数据类型'] == '植保数据']['被选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '植保数据']['被选特征'].tolist()[0]
                 plantName = np.concatenate((temp, plantName))
-            if tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].tolist()[0]
+            if tempDF[tempDF['数据类型'] == '农学数据']['被选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '农学数据']['被选特征'].tolist()[0]
                 agricultureName = np.concatenate((temp, agricultureName))
         elif i == 3:
             if tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].any():
@@ -99,7 +99,7 @@ def getDataFiled(dataName):
             if tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].any():
                 temp = tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].tolist()[0]
                 agricultureName = np.concatenate((temp, agricultureName))
-    print(weatherName, plantName, agricultureName)
+    # print(weatherName, plantName, agricultureName)
 
     return weatherName, plantName, agricultureName
 
@@ -110,7 +110,7 @@ RawDataSetField = pd.DataFrame(
 PreprocessedDataSetField = pd.DataFrame(
     columns=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", "方法参数", '时间', "下载数据集"])
 FeatureDataSetField = pd.DataFrame(
-    columns=["编号", "数据类型", "输入特征", "备选特征", "大小", "特征计算方法", "方法参数", "时间", "下载数据集"])
+    columns=["编号", "数据类型", "输入特征", "被选特征", "大小", "特征计算方法", "方法参数", "时间", "下载数据集"])
 OptimalFeatureDataSetField = pd.DataFrame(
     columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间", "下载数据集"])
 ModelSet = pd.DataFrame(

@@ -88,28 +88,18 @@ def firstPage(): st.session_state.page14 = 0
 
 
 # t检验
-def tTest(fieldName):
+def tTest(dataFrame, fieldName):
     # 创建一个空列表来存储显著的降水特征
-    dataFrame = []
-    significant_features = []
-    for name in fieldName:
-        for temp in pages_utils.TempDataSet:
-            if name in temp.columns:
-                dataFrame.append(temp)
+    # significant_features = []
     # 计算 t 检验的 p 值，并选择 p < 0.05 的特征
-    # column1 = '降水'
-    data = []
-    # for h in zip(fieldName, dataFrame):
-    #     data.append(dataFrame[h][fieldName[h]])
+    # print(fieldName)
+    # print('--------------fieldName--------------')
     t_stat, p_value = stats.ttest_ind(
-        data[0], data[1])
-    if p_value < 0.05:
-        significant_features.append(column)
-    # 返回三列值
-    print('-------三列值---')
-    tempData = dataFrame[['上级单位', '测报站点',
-                          '降水累积量', "年", "DayOfYear",
-                          fieldName, '预测峰值率']]
+        dataFrame[fieldName[0]], dataFrame[fieldName[1]])
+    print('======================特征优选-t检验结果======================')
+    print(t_stat, p_value)
+    tempData = dataFrame[['上级单位', '测报站点', "年", "DayOfYear",
+                          '降水', '降水累积量', '预测病株率']]
     return tempData
 
 
@@ -124,11 +114,11 @@ def onRun():
     fields = pages_utils.TempDataSetField[3]["输入特征"].tolist()
 
     # ===============根据名称匹配调用并执行各个处理方法===============
-    afterHandleData = tTest(fields[0][0])
+    afterHandleData = tTest(
+        pages_utils.TempDataSet[2],
+        fields[0])
     row_size = len(afterHandleData)
     # print('-------优选特征-------')
-    print(pages_utils.TempDataSet[3])
-    print('-------优选特征-------')
     intersection_cols = pages_utils.getIntersectionCols(
         pages_utils.TempDataSet[3], afterHandleData
     )
@@ -136,12 +126,14 @@ def onRun():
         afterHandleData, pages_utils.TempDataSet[3],
         on=intersection_cols, how="left")
 
+    print('======================优选特征======================')
+    print(pages_utils.TempDataSet[3])
     # 更新记录
     update_values = {
-        "数据类型": "气象数据", "输入特征": fields[0],
-        "优选": fields[0],
+        # "数据类型": "气象数据", "输入特征": fields[0],
+        # "优选特征": fields[0],
         "大小": '1*' + str(row_size),
-        "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
+        # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
         "时间": datetime.datetime.now().time()}
     # 查找要更新的数据记录
     for index, row in pages_utils.TempDataSetField[3].iterrows():
@@ -155,10 +147,10 @@ def onRun():
 dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
-    st.data_editor(pages_utils.TempDataSet[0])
-    st.markdown(pages_utils.TempDataSet[1])
-    st.markdown(pages_utils.TempDataSet[2])
-    st.markdown(pages_utils.TempDataSet[3])
+    # st.data_editor(pages_utils.TempDataSet[0])
+    # st.markdown(pages_utils.TempDataSet[1])
+    # st.markdown(pages_utils.TempDataSet[2])
+    # st.markdown(pages_utils.TempDataSet[3])
     # =======================左侧数据与特征显示=======================
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
@@ -170,11 +162,11 @@ with dataPCV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
-                    elif st.session_state["leftTabs"][i] == '备选特征':
-                        column = ["数据类型", "备选特征", "特征计算方法", '时间', "下载数据集"]
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '被选特征':
+                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间', "下载数据集"]
                     elif st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "特征优选方法", '时间', "下载数据集"]
+                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间', "下载数据集"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -188,11 +180,11 @@ with dataPCV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
-                    elif st.session_state["leftTabs"][i] == '备选特征':
-                        column = ["数据类型", "备选特征", "特征计算方法", '时间', "下载数据集"]
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '被选特征':
+                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间', "下载数据集"]
                     elif st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "特征优选方法", '时间', "下载数据集"]
+                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间', "下载数据集"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -201,8 +193,12 @@ with dataPCV:
     # =======================选择数据集=======================
     a = st.selectbox(
         '选择数据集',
-        ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
-    weatherName, plantName, agricultureName = pages_utils.getDataFiled(a)
+        ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
+    # 预处理后数据集表信息
+    weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled(a)
+    # 数组元素去重
+    weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
+        set(agricultureNameT))
     result1 = pages_utils.multiselect_all(
         st, '全选-气象数据', weatherName,
         'temp', 'collapsed')
@@ -255,16 +251,20 @@ with dataPCM:
     # =======================执行任务清单=======================
     if btn:
         for key11, value11 in st.session_state["OptimizationMethodName"].items():
-            print(f"Key: {key11}, Value: {value11}")
+            pass
+            # print(f"Key: {key11}, Value: {value11}")
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": a,
             "输入特征": mergeArray(result1, result2, result3),
-            "优选特征": '降水累积量',
+            "优选特征": '降水',
             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
             "方法参数": [value for key, value in st.session_state["OptimizationMethodName"].items() if
                          key != 'checkBox'],
-            "时间": datetime.datetime.now().time()}
+            "时间": datetime.datetime.now().time(),
+            "下载数据集": False}
+        print('======================特征优选-添加任务清单记录======================')
+        print(new_data)
         pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
         st.rerun()
     st.markdown('---')

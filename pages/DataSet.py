@@ -12,11 +12,11 @@ from warnings import simplefilter
 
 simplefilter(action="ignore", category=FutureWarning)
 
+
 @st.cache_data
 def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     return df.to_csv().encode('utf-8')
-
 
 
 # 用于获取上传数据集名称
@@ -85,9 +85,9 @@ with dataSCM:
             "字段": data33.columns.tolist()}
         # 防止重复添加
         if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():
-            st.markdown(pages_utils.TempDataSetField[0])
-            st.markdown(uploaded_files.name)
-            st.markdown("和uploaded_files.name变量一致的文件名称已经存在，不执行以下操作")
+            # st.markdown(pages_utils.TempDataSetField[0])
+            # st.markdown(uploaded_files.name)
+            # st.markdown("和uploaded_files.name变量一致的文件名称已经存在，不执行以下操作")
             st.markdown('---')
         else:
             # 添加字段
@@ -100,10 +100,12 @@ with dataSCM:
             pages_utils.TempDataSet[0] = pd.merge(
                 data33, pages_utils.TempDataSet[0],
                 on=intersection_cols, how="left")
-
-        st.markdown(pages_utils.TempDataSet[0].columns)
-        st.markdown(new_data)
-        st.markdown(pages_utils.TempDataSetField[0])
+        print('======================实时原始数据集======================')
+        print(pages_utils.TempDataSet[0])
+        # st.markdown('--合并后--')
+        # st.markdown(pages_utils.TempDataSet[0].columns)
+        # st.markdown(new_data)
+        # st.markdown(pages_utils.TempDataSetField[0])
 
 with dataSCR:
     st.markdown("##### 文件上传状态显示")

@@ -1,16 +1,18 @@
 import datetime
 
+import numpy as np
 import streamlit as st
 import pandas as pd
+from sklearn.linear_model import LinearRegression
 
-from sklearn.metrics import confusion_matrix, accuracy_score, mean_squared_error, r2_score
+from sklearn.metrics import confusion_matrix, accuracy_score, mean_squared_error, r2_score, cohen_kappa_score
 
 import seaborn as sns
 
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.svm import SVC
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.svm import SVC, SVR
 
 import pages_utils
 
@@ -27,16 +29,24 @@ if "modelParamName" not in st.session_state:
     st.session_state["modelParamName"] = {}
 if "modelPrecisionName" not in st.session_state:
     st.session_state["modelPrecisionName"] = []
-
+if "labelColumn" not in st.session_state:
+    st.session_state.labelColumn = None
 # 创建一个空的模型参数字典
 model_params = [
-    {"模型名称": "SVM", "参数1": "值1", "参数2": "值2", "参数3": "值3"},
-    {"模型名称": "KNN", "K参数1": "K值1", "K参数2": "K值2", "K参数3": "值3"},
-    {"模型名称": "FLDA", "F参数1": "F值1", "F参数2": "F值2", "F参数3": "值3"},
-    {"模型名称": "RF", "R参数1": "R值1", "R参数2": "R值2", "R参数3": "值3"},
+    {"模型名称": "SVM", "c": "1.0", " kernel": "rbf", "degree ": "3"},
+    {"模型名称": "KNN", "n_neighbors": "5", "leaf_size": "30",
+     "n_jobs": "1"},
+    {"模型名称": "FLDA", "n_components": "sqrt", "solver": "eigen",
+     "store_covariance": "True"},
+    {"模型名称": "RF", "n_estimators": "100", "criterion": "gini",
+     "min_samples_split": "3"},
 ]
 
 checkBoxModelNum = 4
+
+
+def mergeArray(list1, list2, list3):
+    return list(set().union(*[list1, list2, list3]))
 
 
 # checkBoxPrecisionNum = 2
@@ -45,7 +55,7 @@ def getCheckboxName():
     for h in range(checkBoxModelNum):
         if st.session_state[f'checkBoxModel{h}']:
             temp1 = f'checkBoxModel{h}'
-            print(f'--click{h}--')
+            # print(f'--click{h}--')
             if temp1 == 'checkBoxModel0':
                 return 'SVM'
             elif temp1 == 'checkBoxModel2':
@@ -80,45 +90,67 @@ def onTrain():
         st.session_state["leftTabs"].append('模型')
     st.session_state.page = 0
     st.session_state.page15 += 1
-    print('-------------展示结果-------------')
+    # print('-------------展示结果-------------')
     for key, value in pages_utils.TempDataSetField[4].items():
-        print(key, value)
+        pass
+        # print(key, value)
 
     # 训练模型
     # =======================获取优选特征数据集=======================
-    # df11 = pages_utils.TempDataSet[3]
-    # # 提取特征和目标变量
-    # X = df11[['上级单位', '测报站点', "年", "DayOfYear", '降水累积量', '降水']]
-    # Y = df11['峰值率']
-    # # 对分类变量进行one-hot编码
-    # X = pd.get_dummies(X, columns=['上级单位', '测报站点'])
-    #
-    # # =======================划分训练集和测试集=======================
-    # X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
-    #
-    # # =======================获取评价指标=======================
-    #
-    # # 训练模型
-    # model = LinearRegression()
-    # model.fit(X_train, y_train)
-    #
-    # # 预测
-    # y_pred = model.predict(X_test)
-    #
-    # # 计算均方误差
+    df11 = pages_utils.TempDataSet[3]
+    # print('--------训练表----------')
+    # print(df11)
+    # 提取特征和目标变量
+    X = df11[['上级单位', '测报站点', "年", "DayOfYear", '降水']]
+    Y = df11[st.session_state.labelColumn]
+    # 对分类变量进行one-hot编码
+    X = pd.get_dummies(X, columns=['上级单位', '测报站点'])
+
+    # =======================划分训练集和测试集=======================
+    # X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, train_size=0.8, random_state=0)
+
+    # =======================获取评价指标=======================
+
+    # 数据标准化
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # 划分数据集为训练集和测试集
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=42)
+
+    print('======================模型构建-开始训练======================')
+    # 使用SVM回归模型进行拟合
+    model1 = SVR(kernel='rbf')
+    model1.fit(X_train, y_train)
+
+    # 进行预测
+    y_pred = model1.predict(X_test)
+
+    # 计算均方误差
     # mse = mean_squared_error(y_test, y_pred)
-    # r2 = r2_score(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
     # st.markdown('---')
     # st.markdown(y_test)
     # st.markdown(y_pred)
+    print('======================模型构建-精度指标======================')
+    # 计算Overall Accuracy
+    # OA = accuracy_score(y_test, y_pred)
+    # print(y_test)
+    print('X_test:')
+    print(X_test)
+    print('y_pred:')
+    print(y_pred)
+    # kappa = cohen_kappa_score(y_test, y_pred)
     # st.markdown(mse)
-    # st.markdown(r2)
-    # # print("均方误差:", mse)
-    #
-    # data11 = {"模型": "SVM", "时间": datetime.datetime.now().time(),
-    #           "下载模型结构、结果和参数值": False}
-    # pages_utils.TempDataSetField[4].loc[len(
-    #     pages_utils.TempDataSetField[4])] = data11
+    # print("Overall Accuracy:", OA)
+    mse = mean_squared_error(y_test, y_pred)
+    print("均方误差 :", mse)
+    # print("均方误差:", mse)
+
+    data11 = {"模型": "SVM", "时间": datetime.datetime.now().time(),
+              "下载模型结构、结果和参数值": False}
+    pages_utils.TempDataSetField[4].loc[len(
+        pages_utils.TempDataSetField[4])] = data11
 
 
 def onModel():
@@ -131,7 +163,7 @@ def onModel():
 
 
 def onAddModel():
-    print(st.session_state["modelParamName"])
+    # print(st.session_state["modelParamName"])
     for h in range(checkBoxModelNum):
         if st.session_state[f'checkBoxModel{h}']:
             st.session_state["modelName"]['checkBoxModel'] = f'checkBoxModel{h}'
@@ -144,7 +176,10 @@ def onPrecision(cbox1, cbox2):
         st.session_state["modelPrecisionName"].append('OA')
     if cbox2:
         st.session_state["modelPrecisionName"].append('Kappa')
-    pages_utils.TempDataSetField[4]['评价指标'] = st.session_state["modelPrecisionName"]
+    # print(pages_utils.TempDataSetField[4]['评价指标'])
+    pages_utils.TempDataSetField[4]['评价指标'] = ','.join(st.session_state["modelPrecisionName"])
+    # for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
+    #     pages_utils.TempDataSetField[4].loc[index1, '评价指标'] = st.session_state["modelPrecisionName"]
     # for h in range(checkBoxPrecisionNum):
     #     if st.session_state[f'checkBoxPrecision{h}']:
     #         st.session_state["modelName"]['checkBoxPrecision'] = f'checkBoxPrecision{h}'
@@ -158,10 +193,10 @@ def firstPage(): st.session_state.page = 0
 modelACV, modelACM = st.columns([0.5, 0.7])
 with modelACV:
     st.markdown("##### 特征与模型")
-    st.data_editor(pages_utils.TempDataSet[0])
-    st.markdown(pages_utils.TempDataSet[1])
-    st.markdown(pages_utils.TempDataSet[2])
-    st.markdown(pages_utils.TempDataSet[3])
+    # st.data_editor(pages_utils.TempDataSet[0])
+    # st.markdown(pages_utils.TempDataSet[1])
+    # st.markdown(pages_utils.TempDataSet[2])
+    # st.markdown(pages_utils.TempDataSet[3])
     # =======================左侧特征与模型显示=======================
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
@@ -173,11 +208,11 @@ with modelACV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
-                    elif st.session_state["leftTabs"][i] == '备选特征':
-                        column = ["数据类型", "备选特征", "特征计算方法", '时间', "下载数据集"]
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '被选特征':
+                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间', "下载数据集"]
                     elif st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "特征优选方法", '时间', "下载数据集"]
+                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间', "下载数据集"]
                     elif st.session_state["leftTabs"][i] == '模型':
                         column = ["编号", "模型", "评价指标", "数据集划分", "时间", "下载模型结构、结果和参数值"]
                     st.data_editor(
@@ -193,34 +228,26 @@ with modelACV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "预处理方法", '时间', "下载数据集"]
-                    elif st.session_state["leftTabs"][i] == '备选特征':
-                        column = ["数据类型", "备选特征", "特征计算方法", '时间', "下载数据集"]
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
+                    elif st.session_state["leftTabs"][i] == '被选特征':
+                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间', "下载数据集"]
                     elif st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "特征优选方法", '时间', "下载数据集"]
+                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间', "下载数据集"]
                     elif st.session_state["leftTabs"][i] == '模型':
                         column = ["编号", "模型", "评价指标", "数据集划分", "时间", "下载模型结构、结果和参数值"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_order=column)
-    # =======================获取特征数据集表信息=======================
-    tempDF = pages_utils.TempDataSetField[3]
-    # 添加字段名称选项
-    weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
-    if tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].any():
-        weatherName.clear()
-        weatherName = tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '植保数据']['优选特征'].any():
-        plantName.clear()
-        plantName = tempDF[tempDF['数据类型'] == '植保数据']['优选特征'].tolist()[0]
-    if tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].any():
-        # agricultureName.clear()
-        agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].tolist()[0]
     # =======================选择数据集=======================
     a = st.selectbox(
         '选择数据集',
-        ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
+        ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
+    # 预处理后数据集表信息
+    weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled(a)
+    # 数组元素去重
+    weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
+        set(agricultureNameT))
     result1 = pages_utils.multiselect_all(
         st, '全选-气象数据',
         weatherName,
@@ -252,7 +279,7 @@ with modelACM:
             st.markdown('---')
             if agree or agree1 or agree2 or agree2 or agree3:
                 model = getCheckboxName()
-                print(f'--{model}--')
+                # print(f'--{model}--')
                 # 获取SVM模型的参数
                 svm_params_dict = {}
                 for entry in model_params:
@@ -262,7 +289,7 @@ with modelACM:
                 # 转换参数格式
                 formatted_params = [{"参数名": key, "参数值": value} for key, value in svm_params_dict.items()]
                 df = pd.DataFrame(formatted_params)
-                edited_df = st.data_editor(df)
+                edited_df = st.data_editor(df, height=190, width=800)
                 st.session_state["modelParamName"] = edited_df.to_dict()
             interval_col1, interval_col2 = st.columns([5, 1])
             btn1 = interval_col2.button("下一步", on_click=onModel)
@@ -274,6 +301,7 @@ with modelACM:
                     "模型参数": st.session_state["modelParamName"],
                     "时间": datetime.datetime.now().time(),
                     "下载模型结构、结果和参数值": False}
+                print('======================模型构建-添加任务清单记录======================')
                 print(new_data)
                 pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_data
                 st.rerun()
@@ -297,8 +325,8 @@ with modelACM:
                 # pages_utils.TempDataSetField[4]['评价指标'] = 'Kappa'
                 # pages_utils.TempDataSetField[4]['评价指标'] = pages_utils.TempDataSetField[4]['评价指标']+'Kappa'
             if btn21:
-                print(st.session_state["modelPrecisionName"])
-
+                pass
+                # print(st.session_state["modelPrecisionName"])
 
     # Page 2
     elif st.session_state.page == 2:
@@ -306,8 +334,15 @@ with modelACM:
             st.markdown("###### 验证与训练数据集划分")
             option = st.selectbox(
                 label="划分比例",
-                options=("8:2", "7:3", "6:4")
+                options=("8:2", "7:3", "6:4"), label_visibility='collapsed'
             )
+            st.markdown("###### 选择标签列")
+            option1 = st.selectbox(
+                label="选择标签列",
+                options=mergeArray(result1, result2, result3), label_visibility='collapsed'
+            )
+            if option1:
+                st.session_state.labelColumn = option1
             for index, row in pages_utils.TempDataSetField[4].iterrows():
                 pages_utils.TempDataSetField[4].loc[index, '数据集划分'] = option
             interval_col1, interval_col2 = st.columns([5, 1])
