@@ -45,33 +45,34 @@ with dataSCM:
     #             unsafe_allow_html=True)
 
     st.markdown('---')
-    st.markdown("###### 数据格式规范")
+    st.markdown("##### 数据格式规范")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.warning('字段必须包含以下4个:\n'
+                   '* 上级单位(文字)\n'
+                   '* 测报站点(文字)\n'
+                   '* 年(数字)\n'
+                   '* DayOfYear(数字)\n', icon="⚠️")
+    placeholder1 = st.empty()
     if ab == '气象数据':
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            option14 = st.checkbox('温度数据')
-        with col2:
-            option15 = st.checkbox('降水数据')
-        st.info('温度数据', icon="ℹ️")
-
+        with placeholder1.container():
+            with col2:
+                st.info('其他可选字段:\n'
+                        '* 温度(数字)\n'
+                        '* 降水(数字)\n', icon="ℹ️️")
     if ab == '植保数据':
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            option14 = st.checkbox('植保站数据')
-        with col2:
-            option15 = st.checkbox('众源数据')
-        st.info('植保数据', icon="ℹ️")
-
+        with placeholder1.container():
+            with col2:
+                st.info('其他可选字段:\n'
+                        '* 稻作类型(文字)\n'
+                        '* 病害发生程度等级(数字)\n'
+                        '* 预测病株率(数字)\n', icon="ℹ️️")
     if ab == '农学数据':
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            option14 = st.checkbox('预测峰值数据')
-            option17 = st.checkbox('晚稻移栽期数据')
-        with col2:
-            option15 = st.checkbox('长势数据')
-        with col3:
-            option16 = st.checkbox('生化指标数据')
-        st.info('农学数据', icon="ℹ️")
+        with placeholder1.container():
+            with col2:
+                st.info('其他可选字段:\n'
+                        '* 长势(数字)\n'
+                        '* 生化指标(数字)\n', icon="ℹ️️")
 
     if uploaded_files:
         bytes_data = uploaded_files.read()
