@@ -28,15 +28,15 @@ checkBoxNum = 2
 
 # 线性插补
 def linearInterpolation(dataFrame, fieldName):
-    dataFrame[fieldName] = dataFrame[fieldName].interpolate(method='linear')
-
+    # dataFrame[fieldName].interpolate(inplace=True)
+    dataFrame[fieldName] = dataFrame[fieldName].interpolate()
     # 单独计算插补所用的均值
-    mean_value = dataFrame[fieldName].mean()
+    # mean_value = dataFrame[fieldName].mean()
     # print(f"均值为: {mean_value}")
-    dataFrame[fieldName].fillna(mean_value, inplace=True)
+    # dataFrame[fieldName].fillna(mean_value, inplace=True)
 
     # 检查是否还有缺失值
-    missing_values = dataFrame[fieldName].isnull().sum()
+    # missing_values = dataFrame[fieldName].isnull().sum()
     # print(f"字段中的缺失值数量为: {missing_values}")
     # print(dataFrame[fieldName])
     # 返回三列值
@@ -239,13 +239,8 @@ with dataPCM:
     st.markdown('---')
     # st.markdown("##### 方法参数设置")
     if agree10:
-        coll11, coll22 = st.columns([0.6, 0.3])
+        coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:
-            st.info('用于填补缺失值', icon="ℹ️")
-            # st.markdown(os.path.join(os.getcwd(), 'resource', 'image', '0.png'))
-            img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '0.png'))
-            st.image(img)
-        with coll22:
             option = st.selectbox(
                 '插补方法',
                 options=('线性插值', '自定义'))
@@ -253,6 +248,12 @@ with dataPCM:
             if option == '自定义':
                 num = st.text_input('输入数值')
                 st.session_state["preMethodName"]['param2'] = num
+        with coll22:
+            st.info('使用Pandas库中的interpolate方法,查找该缺失值前后最近的两个非缺失值', icon="ℹ️")
+            # st.markdown(os.path.join(os.getcwd(), 'resource', 'image', '0.png'))
+            img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '0.png'))
+            st.image(img)
+
         # st.markdown('---')
     if agree:
         number2 = st.text_input("剔除大于", value=0.1)
