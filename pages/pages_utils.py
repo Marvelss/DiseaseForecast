@@ -54,7 +54,7 @@ def generateID():
 # 获取各类数据集字段
 def getDataFiled(dataName):
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
-    for i in range(4):
+    for i in range(len(TempDataSetField)):
         tempDF = TempDataSetField[i]
         if i == 0:
             if tempDF[tempDF['数据类型'] == '气象数据']['字段'].any():
@@ -82,7 +82,7 @@ def getDataFiled(dataName):
         elif i == 2:
             if tempDF[tempDF['数据类型'] == '气象数据']['被选特征'].any():
                 temp = tempDF[tempDF['数据类型'] == '气象数据']['被选特征'].tolist()[0]
-                weatherName = np.concatenate((temp, weatherName))
+                weatherName = np.concatenate(([temp], weatherName))
             if tempDF[tempDF['数据类型'] == '植保数据']['被选特征'].any():
                 temp = tempDF[tempDF['数据类型'] == '植保数据']['被选特征'].tolist()[0]
                 plantName = np.concatenate((temp, plantName))
@@ -92,7 +92,7 @@ def getDataFiled(dataName):
         elif i == 3:
             if tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].any():
                 temp = tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].tolist()[0]
-                weatherName = np.concatenate((temp, weatherName))
+                weatherName = np.concatenate(([temp], weatherName))
             if tempDF[tempDF['数据类型'] == '植保数据']['优选特征'].any():
                 temp = tempDF[tempDF['数据类型'] == '植保数据']['优选特征'].tolist()[0]
                 plantName = np.concatenate((temp, plantName))

@@ -262,8 +262,15 @@ with dataPCM:
                     latext, icon="ℹ️")
         # st.markdown('---')
     if agree:
-        number2 = st.text_input("剔除大于", value=0.1)
-        number3 = st.text_input("剔除小于", value=0.1)
+        coll11, coll22 = st.columns([0.3, 0.6])
+        with coll11:
+            number2 = st.text_input("剔除大于", value=0.1)
+            number3 = st.text_input("剔除小于", value=0.1)
+        with coll22:
+            st.info('剔除方法介绍\n'
+                    '* 描述:剔除最大值和最小值区域外的异常值\n', icon="ℹ️")
+            img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '3.png'))
+            st.image(img)
 
     # 获取添加处理按钮各项值
     interval_col1, interval_col2 = st.columns([5, 1])

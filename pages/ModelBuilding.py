@@ -149,8 +149,8 @@ def onTrain():
 
     data11 = {"模型": "SVM", "时间": datetime.datetime.now().time(),
               "下载模型结构、结果和参数值": False}
-    pages_utils.TempDataSetField[4].loc[len(
-        pages_utils.TempDataSetField[4])] = data11
+    # pages_utils.TempDataSetField[4].loc[len(
+    #     pages_utils.TempDataSetField[4])] = data11
 
 
 def onModel():
