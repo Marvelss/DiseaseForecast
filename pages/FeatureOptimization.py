@@ -255,7 +255,7 @@ with dataPCM:
             # print(f"Key: {key11}, Value: {value11}")
         new_data = {
             "编号": pages_utils.generateID(),
-            "数据类型": a,
+            "数据类型": '气象数据',
             "输入特征": mergeArray(result1, result2, result3),
             "优选特征": '降水',
             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),

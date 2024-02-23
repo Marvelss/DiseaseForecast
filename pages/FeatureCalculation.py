@@ -270,7 +270,7 @@ with featureCCM:
             # print(f"Key: {key11}, Value: {value11}")
         new_data = {
             "编号": pages_utils.generateID(),
-            "数据类型": a,
+            "数据类型": '气象数据',
             "输入特征": mergeArray(result1, result2, result3),
             "被选特征": getFeatureName(getCheckboxName(st.session_state["featureMethodName"]['checkBox'])),
             "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]['checkBox']),
