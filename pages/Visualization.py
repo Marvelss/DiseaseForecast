@@ -21,9 +21,12 @@ with col1:
                 height=720, width=800)
 with col2:
     st.markdown('##### 可视化')
+    option4 = st.selectbox(
+        '选择数据集',
+        options=st.session_state["leftTabs"])
     option1 = st.selectbox(
         '选择图形',
-        options=('线性插值', '自定义'))
+        options=('散点图', '直方图'))
     option2 = st.selectbox(
         '选择X轴',
         options=('年', 'DayOfYear'))
