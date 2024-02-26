@@ -18,7 +18,9 @@ if "OptimizationMethodName" not in st.session_state:
     st.session_state["OptimizationMethodName"] = {
         'checkBox': None
     }
-
+st.set_page_config(
+    layout="wide"
+)
 
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':

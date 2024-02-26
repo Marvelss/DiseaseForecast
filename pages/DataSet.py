@@ -11,7 +11,9 @@ import pages_utils
 from warnings import simplefilter
 
 simplefilter(action="ignore", category=FutureWarning)
-
+st.set_page_config(
+    layout="wide"
+)
 
 @st.cache_data
 def convert_df(df):

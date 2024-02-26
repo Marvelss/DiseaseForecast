@@ -4,10 +4,13 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from st_pages import add_page_title
-
+st.set_page_config(
+    layout="wide"
+)
 # add_page_title()
 st.header('模型应用')
 st.markdown('---')
+
 uploaded_model = st.file_uploader("加载模型")
 
 uploaded_parameter = st.file_uploader("加载输入参数")

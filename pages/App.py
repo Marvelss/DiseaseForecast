@@ -10,12 +10,12 @@ from pygwalker.api.streamlit import StreamlitRenderer, init_streamlit_comm
 
 # Adjust the width of the Streamlit page
 st.set_page_config(
-    page_title="Use Pygwalker In Streamlit",
+    page_title="病虫害预测系统",
     layout="wide"
 )
 
 # Establish communication between pygwalker and streamlit
-init_streamlit_comm()
+# init_streamlit_comm()
 show_pages(
     [
         Page("pages/App.py", "主页"),
@@ -24,9 +24,10 @@ show_pages(
         Page("pages/FeatureCalculation.py", "特征计算"),
         Page("pages/FeatureOptimization.py", "特征优选"),
         Page("pages/ModelBuilding.py", "模型构建"),
-        Page("pages/ModelEvaluation.py", "模型评估"),
-        Page("pages/Visualization.py", '数据可视化')
-        # Page("pages/demo.py", 'demo'),
+        Page("pages/Visualization.py", '数据可视化'),
+        Page("pages/ModelApplication.py", '模型应用'),
+        Page("pages/ModelEvaluation.py", "测试界面")
+        # Page("pages/demo13.py", 'demo'),
         # Page("pages/zdemo.py", 'demo3'),
         # Page("pages/zdemo1.py", 'demo4'),
     ]

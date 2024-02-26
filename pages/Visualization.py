@@ -8,6 +8,9 @@ import streamlit as st
 
 import pages_utils
 
+st.set_page_config(
+    layout="wide"
+)
 # with tab1:
 col1, col2 = st.columns(2)
 

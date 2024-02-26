@@ -25,6 +25,10 @@ if "preMethodName" not in st.session_state:
 
 checkBoxNum = 2
 
+st.set_page_config(
+    layout="wide"
+)
+
 
 # 线性插补
 def linearInterpolation(dataFrame, fieldName):

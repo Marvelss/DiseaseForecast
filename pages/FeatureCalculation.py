@@ -15,7 +15,9 @@ if "featureMethodName" not in st.session_state:
         'checkBox': None
     }
 
-
+st.set_page_config(
+    layout="wide"
+)
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
         return '时间(温度)分辨率转换'

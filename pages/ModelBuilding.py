@@ -43,7 +43,9 @@ model_params = [
 ]
 
 checkBoxModelNum = 4
-
+st.set_page_config(
+    layout="wide"
+)
 
 def mergeArray(list1, list2, list3):
     return list(set().union(*[list1, list2, list3]))
