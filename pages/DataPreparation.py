@@ -31,21 +31,18 @@ st.set_page_config(
 
 # 线性插补
 def linearInterpolation(dataFrame, fieldName):
-    # dataFrame[fieldName].interpolate(inplace=True)
-    dataFrame[fieldName] = dataFrame[fieldName].interpolate()
-    # 单独计算插补所用的均值
-    # mean_value = dataFrame[fieldName].mean()
-    # print(f"均值为: {mean_value}")
-    # dataFrame[fieldName].fillna(mean_value, inplace=True)
-
+    # 复制新的变量
+    newDataFrame = dataFrame.copy()
+    missing_values1 = newDataFrame[fieldName].isnull().sum()
+    newDataFrame[fieldName] = newDataFrame[fieldName].interpolate()
+    missing_values2 = newDataFrame[fieldName].isnull().sum()
+    # 显示填补信息
+    st.toast(f'填补缺失值:{str(missing_values1 - missing_values2)}' +
+             '\n' +
+             f'剩余缺失值:{missing_values2}', icon='✅')
     # 检查是否还有缺失值
-    # missing_values = dataFrame[fieldName].isnull().sum()
-    # print(f"字段中的缺失值数量为: {missing_values}")
-    # print(dataFrame[fieldName])
-    # 返回三列值
-    # print('-------三列值---')
-    tempData = dataFrame[['上级单位', '测报站点', "年", "DayOfYear",
-                          fieldName, '预测病株率']]
+    tempData = newDataFrame[['上级单位', '测报站点', "年", "DayOfYear",
+                             fieldName]]
     return tempData
 
 
