@@ -5,7 +5,6 @@ from PIL import Image
 import streamlit as st
 import numpy as np
 import pandas as pd
-from streamlit import switch_page
 
 import pages_utils
 
@@ -243,6 +242,21 @@ with dataPCM:
     st.markdown('---')
     # st.markdown("##### 方法参数设置")
     if agree10:
+        # 显示缺失值信息
+        info = '缺失字段及个数:\n'
+        flag = False
+        # 统计缺失值信息
+        for column in pages_utils.TempDataSet[0].columns:
+            # 获取每个字段的缺失值数量
+            missing_values = pages_utils.TempDataSet[0][column].isnull().sum()
+            # 将每个字段的缺失值数量保存到字典中
+            if missing_values:
+                info += f"* {column}:{missing_values}\n"
+                flag = True
+        if not flag:
+            info = '无缺失字段\n'
+        st.info(f"{info}\n", icon="ℹ️")
+
         coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:
             option = st.selectbox(
@@ -253,7 +267,6 @@ with dataPCM:
                 num = st.text_input('输入数值')
                 st.session_state["preMethodName"]['param2'] = num
         with coll22:
-
             img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '0.png'))
             # st.image(img)
             latext = '* 公式:' + r'''
