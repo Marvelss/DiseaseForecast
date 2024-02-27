@@ -1,10 +1,8 @@
 # page2.py
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
 import streamlit as st
-import extra_streamlit_components as stx
 
 import pages_utils
 
@@ -15,10 +13,11 @@ st.set_page_config(
     layout="wide"
 )
 
+
 @st.cache_data
 def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
-    return df.to_csv().encode('utf-8')
+    return df.to_csv(index=False).encode('utf-8')
 
 
 # 用于获取上传数据集名称
@@ -47,34 +46,59 @@ with dataSCM:
     #             unsafe_allow_html=True)
 
     st.markdown('---')
-    st.markdown("##### 数据格式规范")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.warning('字段必须包含以下4个:\n'
-                   '* 上级单位(文字)\n'
-                   '* 测报站点(文字)\n'
-                   '* 年(数字)\n'
-                   '* DayOfYear(数字)\n', icon="⚠️")
+    st.markdown("##### 数据模板下载及注意事项")
+    path1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\气象数据-模板.xlsx'
+    path2 = r'E:\a_python\program\diseaseForecastStreamlit\resource\植保数据-模板.xlsx'
+    path3 = r'E:\a_python\program\diseaseForecastStreamlit\resource\农学数据-模板.xlsx'
+
+    warningMInfo = '''
+    注意事项
+1. 模版中的表头名称不可更改,表头行不可删除;
+2. 删除示例数据后,添加新数据.
+    '''
+    warningPInfo = '''
+        注意事项
+1. 植保站数据每5天为周期记录一次数据;
+2. 模版中的表头名称不可更改,表头行不可删除;
+3. 删除示例数据后,添加新数据.
+        '''
+    warningAInfo = '''
+        注意事项
+1. 模版中的表头名称不可更改,表头行不可删除;
+2. 删除示例数据后,添加新数据.
+        '''
+
     placeholder1 = st.empty()
     if ab == '气象数据':
         with placeholder1.container():
-            with col2:
-                st.info('其他可选字段:\n'
-                        '* 温度(数字)\n'
-                        '* 降水(数字)\n', icon="ℹ️️")
+            st.warning(warningMInfo, icon="⚠️")
+            with open(path1, "rb") as file:
+                st.download_button(
+                    label="下载气象数据",
+                    data=file,
+                    file_name="气象数据-模板.xlsx",
+                    mime="application/octet-stream"
+                )
     if ab == '植保数据':
         with placeholder1.container():
-            with col2:
-                st.info('其他可选字段:\n'
-                        '* 稻作类型(文字)\n'
-                        '* 病害发生程度等级(数字)\n'
-                        '* 预测病株率(数字)\n', icon="ℹ️️")
+            st.warning(warningPInfo, icon="⚠️")
+            with open(path2, "rb") as file:
+                st.download_button(
+                    label="下载植保数据",
+                    data=file,
+                    file_name="植保数据-模板.xlsx",
+                    mime="application/octet-stream"
+                )
     if ab == '农学数据':
         with placeholder1.container():
-            with col2:
-                st.info('其他可选字段:\n'
-                        '* 长势(数字)\n'
-                        '* 生化指标(数字)\n', icon="ℹ️️")
+            st.warning(warningAInfo, icon="⚠️")
+            with open(path3, "rb") as file:
+                st.download_button(
+                    label="下载农学数据",
+                    data=file,
+                    file_name="农学数据-模板.xlsx",
+                    mime="application/octet-stream"
+                )
 
     if uploaded_files:
         bytes_data = uploaded_files.read()
