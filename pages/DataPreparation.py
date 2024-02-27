@@ -243,15 +243,20 @@ with dataPCM:
     # st.markdown("##### 方法参数设置")
     if agree10:
         # 显示缺失值信息
-        info = '缺失字段及个数:\n'
+        info = '缺失字段个数及百分比:\n'
         flag = False
         # 统计缺失值信息
         for column in pages_utils.TempDataSet[0].columns:
-            # 获取每个字段的缺失值数量
-            missing_values = pages_utils.TempDataSet[0][column].isnull().sum()
-            # 将每个字段的缺失值数量保存到字典中
+            # 获取每个字段的非缺失值数量
+            non_missing_values = pages_utils.TempDataSet[0][column].count()
+            total_rows = len(pages_utils.TempDataSet[0])
+            # 计算缺失值数量
+            missing_values = total_rows - non_missing_values
+            # 计算缺失值占比
+            missing_percentage = int((missing_values / total_rows) * 100)
+            # 将每个字段的缺失值占比保存到信息中
             if missing_values:
-                info += f"* {column}:{missing_values}\n"
+                info += f"* {column}:{missing_values} {missing_percentage}%\n"
                 flag = True
         if not flag:
             info = '无缺失字段\n'
