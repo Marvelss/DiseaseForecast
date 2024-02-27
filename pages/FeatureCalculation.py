@@ -18,6 +18,8 @@ if "featureMethodName" not in st.session_state:
 st.set_page_config(
     layout="wide"
 )
+
+
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
         return '时间(温度)分辨率转换'
@@ -71,15 +73,17 @@ def firstPage(): st.session_state.page13 = 0
 
 # 降水累积量计算
 def precipitationAccumulation(dataFrame, fieldName):
-    dataFrame['降水累积量'] = dataFrame[fieldName].sum()
+    # 复制新的变量
+    newDataFrame = dataFrame.copy()
+    newDataFrame['降水累积量'] = newDataFrame[fieldName].sum()
 
     # 单独计算插补所用的总和
-    sum_value = dataFrame[fieldName].sum()
+    sum_value = newDataFrame[fieldName].sum()
     # print(f"均值为: {sum_value}")
-    dataFrame['降水累积量'].fillna(sum_value, inplace=True)
+    newDataFrame['降水累积量'].fillna(sum_value, inplace=True)
 
-    tempData = dataFrame[['上级单位', '测报站点', "年", "DayOfYear",
-                          fieldName, '降水累积量', '预测病株率']]
+    tempData = newDataFrame[['上级单位', '测报站点', "年", "DayOfYear",
+                             fieldName, '降水累积量']]
     return tempData
 
 
