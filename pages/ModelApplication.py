@@ -27,6 +27,7 @@ def onRun(year, situation):
     print(result)
     eng.exit()
     st.session_state.page16 += 1
+    st.toast('运行完成,数据准备完毕', icon='✅')
 
 
 col2, col3 = st.columns(2)
@@ -47,27 +48,31 @@ with col3:
                 )
         btn = st.button('运行程序', on_click=onRun, args=[float(generatedYears), float(weatherScenes)])
 
-        # 读取数据
-        mat = scipy.io.loadmat(r'E:\a_python\program\testForMatlab\weather_generation\out.mat')
-        data1 = np.array((mat['gP']))
-        data2 = np.array(mat['gTmax'])
-        data3 = np.array(mat['gTmin'])
-        # 创建DayOfYear列
-        day_of_year = range(1, len(data1[0]) + 1)
-        # 将数据转换为DataFrame
-        my_large_df = pd.DataFrame({
-            'Day Of Year': day_of_year,
-            'Precipitation': data1.flatten(),
-            'Maximum Temperature': data2.flatten(),
-            'Minimum Temperature': data3.flatten()
-        })
-        csv = convert_df(my_large_df)
-        st.download_button(
-            label="下载数据",
-            data=csv,
-            file_name='Simulated Meteorological Data.csv',
-            mime='text/csv',
-        )
+        if btn:
+            # 读取数据
+            pathM = r'E:\a_python\program\testForMatlab\weather_generation\out.mat'
+            pathE = r'E:\a_python\program\diseaseForecastStreamlit\resource\simulatedData.xlsx'
+            mat = scipy.io.loadmat(pathM)
+            data1 = np.array((mat['gP']))
+            data2 = np.array(mat['gTmax'])
+            data3 = np.array(mat['gTmin'])
+            # 创建DayOfYear列
+            day_of_year = range(1, len(data1[0]) + 1)
+            # 将数据转换为DataFrame
+            my_large_df = pd.DataFrame({
+                'Day Of Year': day_of_year,
+                '模拟降水': data1.flatten(),
+                '模拟最高温度': data2.flatten(),
+                '模拟最低温度': data3.flatten()
+            })
+            my_large_df.to_excel(pathE, index=False)
+            with open(pathE, "rb") as file:
+                st.download_button(
+                    label="下载数据",
+                    data=file,
+                    file_name="模拟气温和降水数据.xlsx",
+                    mime="application/octet-stream"
+                )
 
 # uploaded_files = st.file_uploader("加载数据集", accept_multiple_files=True)
 # for uploaded_file in uploaded_files:

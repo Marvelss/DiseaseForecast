@@ -20,7 +20,8 @@ with tab1:
     for i in range(len(st.session_state["leftTabs"])):
         with tt1[i]:
             st.data_editor(
-                pages_utils.TempDataSet[i])
+                pages_utils.TempDataSet[i],
+                height=800, width=1500)
 with tab2:
     col1, col2 = st.columns([0.2, 0.7])
     with col1:
