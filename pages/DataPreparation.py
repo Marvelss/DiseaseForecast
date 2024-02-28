@@ -250,10 +250,10 @@ with dataPCM:
             # 计算缺失值数量
             missing_values = total_rows - non_missing_values
             # 计算缺失值占比
-            missing_percentage = int((missing_values / total_rows) * 100)
+            missing_percentage = (missing_values / total_rows) * 100
             # 将每个字段的缺失值占比保存到信息中
             if missing_values:
-                info += f"* {column}:{missing_values} {missing_percentage}%\n"
+                info += f"* {column}:{missing_values} {missing_percentage:.2f}%\n"
                 flag = True
         if not flag:
             info = '无缺失字段\n'
