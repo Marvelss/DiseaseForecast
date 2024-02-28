@@ -240,7 +240,7 @@ with dataPCM:
     # st.markdown("##### 方法参数设置")
     if agree10:
         # 显示缺失值信息
-        info = '缺失字段个数及百分比:\n'
+        info = '缺失字段个数及占比:\n'
         flag = False
         # 统计缺失值信息
         for column in pages_utils.TempDataSet[0].columns:
