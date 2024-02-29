@@ -11,6 +11,8 @@ import pages_utils
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from modelandmethod.PretreatmentMethod import PretreatmentMethod
+
 if 'page12' not in st.session_state:
     st.session_state.page12 = 0
 if "leftTabs" not in st.session_state:
@@ -27,24 +29,6 @@ checkBoxNum = 2
 st.set_page_config(
     layout="wide"
 )
-
-
-# 线性插补
-def linearInterpolation(dataFrame, fieldName):
-    # 复制新的变量
-    newDataFrame = dataFrame.copy()
-    missing_values1 = newDataFrame[fieldName].isnull().sum()
-    newDataFrame[fieldName] = newDataFrame[fieldName].interpolate()
-    missing_values2 = newDataFrame[fieldName].isnull().sum()
-    # 显示填补信息
-    st.toast(f'填补缺失值:{str(missing_values1 - missing_values2)}' +
-             '\n' +
-             f'剩余缺失值:{missing_values2}', icon='✅')
-    # 检查是否还有缺失值
-    tempData = newDataFrame[['上级单位', '测报站点',
-                             "年", "DayOfYear",
-                             fieldName]]
-    return tempData
 
 
 def getCheckboxName(checkbox):
@@ -129,37 +113,54 @@ def onRun():
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[1]["编号"].tolist()
     fields = pages_utils.TempDataSetField[1]["输入字段"].tolist()
-    # print('===============')
+    methodParam = pages_utils.TempDataSetField[1]["方法参数"].tolist()
+    methodList = pages_utils.TempDataSetField[1]["预处理方法"].tolist()
     # ===============根据名称匹配调用并执行各个处理方法===============
-    afterHandleData = linearInterpolation(
-        pages_utils.TempDataSet[0], fields[0][0])
-    # 获取处理后的数据大小
-    row_size = len(afterHandleData)
+    for tempMethod in methodList:
+        afterHandleData = None
+        # print(tempMethod)
+        if tempMethod == '缺失值插补':
+            afterHandleData, missingValueBefore, missingValueAfter = PretreatmentMethod(
+                pages_utils.TempDataSet[0], fields[0][0]).linearInterpolation()
+            # 显示填补信息
+            st.toast(f'填补缺失值:{str(missingValueBefore - missingValueAfter)}' +
+                     '\n' +
+                     f'剩余缺失值:{missingValueAfter}', icon='✅')
+        elif tempMethod == '剔除异常值':
+            afterHandleData, outlierNum, lengthAfter = PretreatmentMethod(
+                pages_utils.TempDataSet[0], fields[0][0]).outlierEliminator(methodParam[0])
+            # 显示填补信息
+            st.toast(f'剔除异常值个数:{outlierNum}' +
+                     '\n' +
+                     f'剩余条数:{lengthAfter}', icon='✅')
 
-    intersection_cols = pages_utils.getIntersectionCols(
-        pages_utils.TempDataSet[1], afterHandleData
-    )
-    pages_utils.TempDataSet[1] = pd.merge(
-        afterHandleData, pages_utils.TempDataSet[1],
-        on=intersection_cols, how="left")
-    print('======================预处理后数据集======================')
-    print(pages_utils.TempDataSet[1])
+        # 获取处理后的数据大小
+        row_size = len(afterHandleData)
 
-    # 更新记录
-    update_values = {
-        "数据类型": "气象数据",
-        "输入字段": fields[0],
-        "预处理后字段": fields[0],
-        "大小": '1*' + str(row_size),
-        "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
-        "时间": datetime.datetime.now().time(),
-    }
-    # 查找要更新的数据记录
-    for index, row in pages_utils.TempDataSetField[1].iterrows():
-        if row["编号"] == idNumber[0]:
-            for key1, value1 in update_values.items():
-                pages_utils.TempDataSetField[1].loc[index, key1] = value1
-                # 根据字段名和索引来更新字段值
+        intersection_cols = pages_utils.getIntersectionCols(
+            pages_utils.TempDataSet[1], afterHandleData
+        )
+        pages_utils.TempDataSet[1] = pd.merge(
+            afterHandleData, pages_utils.TempDataSet[1],
+            on=intersection_cols, how="left")
+        print('======================预处理后数据集======================')
+        print(pages_utils.TempDataSet[1])
+
+        # 更新记录
+        update_values = {
+            "数据类型": "气象数据",
+            "输入字段": fields[0],
+            "预处理后字段": fields[0],
+            "大小": '1*' + str(row_size),
+            "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
+            "时间": datetime.datetime.now().time(),
+        }
+        # 查找要更新的数据记录
+        for index, row in pages_utils.TempDataSetField[1].iterrows():
+            if row["编号"] == idNumber[0]:
+                for key1, value1 in update_values.items():
+                    pages_utils.TempDataSetField[1].loc[index, key1] = value1
+                    # 根据字段名和索引来更新字段值
 
 
 # 界面名称+布局+布局内容
@@ -286,6 +287,8 @@ with dataPCM:
         with coll11:
             number2 = st.text_input("剔除大于", value=0.1)
             number3 = st.text_input("剔除小于", value=0.1)
+            st.session_state["preMethodName"]['param1'] = number2
+            st.session_state["preMethodName"]['param2'] = number3
         with coll22:
             st.info('剔除方法介绍\n'
                     '* 描述:剔除最大值和最小值区域外的异常值\n', icon="ℹ️")
