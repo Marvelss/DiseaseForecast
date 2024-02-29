@@ -5,6 +5,7 @@ import pandas as pd
 import streamlit as st
 
 import pages_utils
+from modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 
 if 'page13' not in st.session_state:
     st.session_state.page13 = 0
@@ -71,27 +72,6 @@ def clear_other(key):
 def firstPage(): st.session_state.page13 = 0
 
 
-# 降水累积量计算
-def precipitationAccumulation(dataFrame, fieldName):
-    # 复制新的变量
-    newDataFrame = dataFrame.copy()
-    # newDataFrame['月降水累积量'] = newDataFrame[fieldName].sum()
-
-    # 单独计算插补所用的总和
-    # sum_value = newDataFrame[fieldName].sum()
-    # print(f"均值为: {sum_value}")
-    # newDataFrame['降水累积量'].fillna(sum_value, inplace=True)
-    month_precipitation = (newDataFrame.groupby('MonthOfYear')['降水'].
-                           sum().reset_index(name='月降水累积量'))
-
-    temp = pd.merge(newDataFrame, month_precipitation, on='MonthOfYear', how='left')
-    tempData = temp[['上级单位', '测报站点',
-                     "年", "MonthOfYear",
-                     "DecadeOfYear", "DayOfYear",
-                     fieldName, '月降水累积量']]
-    return tempData
-
-
 def getFeatureName(processName):
     if processName == '时间(温度)分辨率转换':
         return ''
@@ -114,38 +94,53 @@ def onRun():
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[2]["编号"].tolist()
     fields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
-    # methodNames = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
-
+    methodParam = pages_utils.TempDataSetField[2]["方法参数"].tolist()
+    methodList = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
+    print('===============获取任务清单内容===============')
+    print(methodParam)
+    print(methodList)
     # ===============根据名称匹配调用并执行各个处理方法===============
-    afterHandleData = precipitationAccumulation(
-        pages_utils.TempDataSet[1], fields[0][0])
-    row_size = len(afterHandleData)
-    # print('-------特征-------')
-    # print(pages_utils.TempDataSet[2])
-    # print('-------特征-------')
-    intersection_cols = pages_utils.getIntersectionCols(
-        pages_utils.TempDataSet[2], afterHandleData
-    )
-    pages_utils.TempDataSet[2] = pd.merge(
-        afterHandleData, pages_utils.TempDataSet[2],
-        on=intersection_cols, how="left")
+    for tempMethod in methodList:
+        afterHandleData = None
+        if tempMethod == '时间(温度)分辨率转换':
+            pass
+        elif tempMethod == '降雨日数计算':
+            return '降雨日数'
+        elif tempMethod == '降水累积量计算':
+            afterHandleData = FeatureCalculationMethod(
+                pages_utils.TempDataSet[1], fields[0][0]).precipitationAccumulation(methodParam)
+        elif tempMethod == '基于活动期积温的生育期计算':
+            return '生育期'
+        elif tempMethod == '时空抽取':
+            return '时空抽取'
 
-    print('======================被选特征======================')
-    print(pages_utils.TempDataSet[2])
+        row_size = len(afterHandleData)
+        # print('-------特征-------')
+        # print(pages_utils.TempDataSet[2])
+        # print('-------特征-------')
+        intersection_cols = pages_utils.getIntersectionCols(
+            pages_utils.TempDataSet[2], afterHandleData
+        )
+        pages_utils.TempDataSet[2] = pd.merge(
+            afterHandleData, pages_utils.TempDataSet[2],
+            on=intersection_cols, how="left")
 
-    # 更新记录
-    update_values = {
-        # "数据类型": "气象数据", "输入特征": fields[0],
-        # "被选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
-        "大小": '1*' + str(row_size),
-        # "特征计算方法": st.session_state["featureMethodName"]['checkBox'],
-        "时间": datetime.datetime.now().time()}
-    # 查找要更新的数据记录
-    for index, row in pages_utils.TempDataSetField[2].iterrows():
-        if row["编号"] == idNumber[0]:
-            for key, value in update_values.items():
-                pages_utils.TempDataSetField[2].loc[index, key] = value
-                # 根据字段名和索引来更新字段值
+        print('======================被选特征======================')
+        print(pages_utils.TempDataSet[2])
+
+        # 更新记录
+        update_values = {
+            # "数据类型": "气象数据", "输入特征": fields[0],
+            # "被选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
+            "大小": '1*' + str(row_size),
+            # "特征计算方法": st.session_state["featureMethodName"]['checkBox'],
+            "时间": datetime.datetime.now().time()}
+        # 查找要更新的数据记录
+        for index, row in pages_utils.TempDataSetField[2].iterrows():
+            if row["编号"] == idNumber[0]:
+                for key, value in update_values.items():
+                    pages_utils.TempDataSetField[2].loc[index, key] = value
+                    # 根据字段名和索引来更新字段值
 
 
 featureCCV, featureCCM = st.columns([0.5, 0.7])

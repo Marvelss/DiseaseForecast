@@ -2,7 +2,7 @@
 @Author : SakuraFox
 @Time: 2024-02-29 15:04
 @File : PretreatmentMethod.py
-@Description : file description
+@Description : 预处理方法
 """
 
 
