@@ -15,6 +15,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.svm import SVC, SVR
 
 import pages_utils
+from modelandmethod.Model import Model
 
 if 'page' not in st.session_state:
     st.session_state.page = 0
@@ -46,6 +47,7 @@ checkBoxModelNum = 4
 st.set_page_config(
     layout="wide"
 )
+
 
 def mergeArray(list1, list2, list3):
     return list(set().union(*[list1, list2, list3]))
@@ -92,63 +94,24 @@ def onTrain():
         st.session_state["leftTabs"].append('模型')
     st.session_state.page = 0
     st.session_state.page15 += 1
-    # print('-------------展示结果-------------')
-    for key, value in pages_utils.TempDataSetField[4].items():
-        pass
-        # print(key, value)
 
-    # 训练模型
-    # =======================获取优选特征数据集=======================
-    df11 = pages_utils.TempDataSet[3]
-    # print('--------训练表----------')
-    # print(df11)
-    # 提取特征和目标变量
-    X = df11[['上级单位', '测报站点', "年", "DayOfYear", '降水']]
-    Y = df11[st.session_state.labelColumn]
-    # 对分类变量进行one-hot编码
-    X = pd.get_dummies(X, columns=['上级单位', '测报站点'])
+    # ===============获取任务清单内容===============
+    idNumber = pages_utils.TempDataSetField[4]["编号"].tolist()
+    models = pages_utils.TempDataSetField[4]["模型"].tolist()
+    modelParam = pages_utils.TempDataSetField[4]["模型参数"].tolist()
+    evaluationIndicator = pages_utils.TempDataSetField[4]["评价指标"].tolist()
+    dataPartitioning = pages_utils.TempDataSetField[4]["数据集划分"].tolist()
+    # ===============调用模型完成训练===============
+    print(pages_utils.TempDataSetField[4])
+    # for tempModel in models:
+    #     if tempModel == 'SVM':
+    #         Model(pages_utils.TempDataSet[3],
+    #               featureVariable, targetVariable,
+    #               dataPartitioning, modelParam, evaluationIndicator).onSVM()
+    #
+    #     st.session_state.labelColumn
 
-    # =======================划分训练集和测试集=======================
-    # X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, train_size=0.8, random_state=0)
-
-    # =======================获取评价指标=======================
-
-    # 数据标准化
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-
-    # 划分数据集为训练集和测试集
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=42)
-
-    print('======================模型构建-开始训练======================')
-    # 使用SVM回归模型进行拟合
-    model1 = SVR(kernel='rbf')
-    model1.fit(X_train, y_train)
-
-    # 进行预测
-    y_pred = model1.predict(X_test)
-
-    # 计算均方误差
-    # mse = mean_squared_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-    # st.markdown('---')
-    # st.markdown(y_test)
-    # st.markdown(y_pred)
-    print('======================模型构建-精度指标======================')
-    # 计算Overall Accuracy
-    # OA = accuracy_score(y_test, y_pred)
-    # print(y_test)
-    print('X_test:')
-    print(X_test)
-    print('y_pred:')
-    print(y_pred)
-    # kappa = cohen_kappa_score(y_test, y_pred)
-    # st.markdown(mse)
-    # print("Overall Accuracy:", OA)
-    mse = mean_squared_error(y_test, y_pred)
-    print("均方误差 :", mse)
-    # print("均方误差:", mse)
-
+    # 更新记录
     data11 = {"模型": "SVM", "时间": datetime.datetime.now().time(),
               "下载模型结构、结果和参数值": False}
     # pages_utils.TempDataSetField[4].loc[len(
@@ -242,27 +205,25 @@ with modelACV:
                         height=220, width=800,
                         column_order=column)
     # =======================选择数据集=======================
-    a = st.selectbox(
-        '选择数据集',
-        ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
-    # 预处理后数据集表信息
-    weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled(a)
+    # 获取所有column
+    columnArray = []
+    for p in range(len(pages_utils.TempDataSet) - 1):
+        columnArray.extend(pages_utils.TempDataSet[p].columns)
     # 数组元素去重
-    weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
-        set(agricultureNameT))
+    featureList = list(set(columnArray))  # 特征变量
+    # 过滤特定元素
+    filtered_columns = [col for col in featureList if col not in ["上级单位", "测报站点", "年", "DayOfYear"]]
+    # 将过滤后的元素放入集合中
+    targetList = set(filtered_columns)  # 目标变量
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据',
-        weatherName,
+        st, '全选-特征变量',
+        featureList,
         'temp', 'collapsed')
     result2 = pages_utils.multiselect_all(
-        st, '全选-植保数据', plantName,
-        'temp', 'collapsed')
-    result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', agricultureName,
+        st, '全选-目标变量', targetList,
         'temp', 'collapsed')
 with modelACM:
     ph = st.empty()
-
     # Page 0
     if st.session_state.page == 0:
         with ph.container():
@@ -297,10 +258,13 @@ with modelACM:
             btn1 = interval_col2.button("下一步", on_click=onModel)
             btn = interval_col1.button("添加模型", on_click=onAddModel)
             if btn:
+                st.session_state.labelColumn = result1
                 new_data = {
                     "编号": pages_utils.generateID(),
                     "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
                     "模型参数": st.session_state["modelParamName"],
+                    "特征": result1,
+                    "标签": result2,
                     "时间": datetime.datetime.now().time(),
                     "下载模型结构、结果和参数值": False}
                 print('======================模型构建-添加任务清单记录======================')
@@ -338,13 +302,6 @@ with modelACM:
                 label="划分比例",
                 options=("8:2", "7:3", "6:4"), label_visibility='collapsed'
             )
-            st.markdown("###### 选择标签列")
-            option1 = st.selectbox(
-                label="选择标签列",
-                options=mergeArray(result1, result2, result3), label_visibility='collapsed'
-            )
-            if option1:
-                st.session_state.labelColumn = option1
             for index, row in pages_utils.TempDataSetField[4].iterrows():
                 pages_utils.TempDataSetField[4].loc[index, '数据集划分'] = option
             interval_col1, interval_col2 = st.columns([5, 1])
