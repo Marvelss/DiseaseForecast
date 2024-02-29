@@ -41,7 +41,8 @@ def linearInterpolation(dataFrame, fieldName):
              '\n' +
              f'剩余缺失值:{missing_values2}', icon='✅')
     # 检查是否还有缺失值
-    tempData = newDataFrame[['上级单位', '测报站点', "年", "DayOfYear",
+    tempData = newDataFrame[['上级单位', '测报站点',
+                             "年", "DayOfYear",
                              fieldName]]
     return tempData
 
@@ -319,6 +320,14 @@ with dataPCM:
 
     placeholder = st.empty()
     if st.session_state.page12 == 0:
+
+        pages_utils.TempDataSet[1] = pages_utils.TempDataSet[0].copy()
+        # 初始化添加旬、月字段
+        pages_utils.TempDataSet[1]['MonthOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
+            lambda x: (x - 1) // 30 + 1)  # 简化的月份计算，实际应用中可能需要更精确的方法
+        pages_utils.TempDataSet[1]['DecadeOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
+            lambda x: (x - 1) // 10 + 1)  # 计算旬
+
         with placeholder.container():
             st.markdown('##### 任务清单')
             # want_to_contribute = st.button("跳转可视化")
