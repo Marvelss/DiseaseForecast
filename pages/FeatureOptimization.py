@@ -3,12 +3,13 @@ import datetime
 import streamlit as st
 import numpy as np
 import pandas as pd
-from scipy.stats import stats
 from sklearn.ensemble import RandomForestClassifier
 
 import pages_utils
 import seaborn as sns
 import matplotlib.pyplot as plt
+
+from modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
 
 if 'page14' not in st.session_state:
     st.session_state.page14 = 0
@@ -21,6 +22,7 @@ if "OptimizationMethodName" not in st.session_state:
 st.set_page_config(
     layout="wide"
 )
+
 
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
@@ -46,8 +48,8 @@ def simulate_temperature_data1():
         'Feature3': np.random.normal(0, 1, 100),
         'Target': np.random.choice([0, 1], size=100)
     }
-    df = pd.DataFrame(data)
-    return df
+    dfT = pd.DataFrame(data)
+    return dfT
 
 
 def simulate_temperature_data():
@@ -61,14 +63,14 @@ def simulate_temperature_data():
     temperature4 = np.random.normal(loc=22, scale=3, size=(N,))
 
     # 创建DataFrame
-    df = pd.DataFrame({
+    dfT = pd.DataFrame({
         'Temperature1': temperature1,
         'Temperature2': temperature2,
         'Temperature3': temperature3,
         'Temperature4': temperature4,
         'Target': np.random.choice([0, 1], size=N)  # 二分类目标
     })
-    return df
+    return dfT
 
 
 def clear_all():
@@ -80,29 +82,13 @@ def clear_all():
 
 
 def clear_other(key):
-    for i in range(checkBoxNum):
-        if i != key:
-            st.session_state[f'checkbox{i}'] = False
+    for h in range(checkBoxNum):
+        if h != key:
+            st.session_state[f'checkbox{h}'] = False
     return
 
 
 def firstPage(): st.session_state.page14 = 0
-
-
-# t检验
-def tTest(dataFrame, fieldName):
-    # 创建一个空列表来存储显著的降水特征
-    # significant_features = []
-    # 计算 t 检验的 p 值，并选择 p < 0.05 的特征
-    # print(fieldName)
-    # print('--------------fieldName--------------')
-    t_stat, p_value = stats.ttest_ind(
-        dataFrame[fieldName[0]], dataFrame[fieldName[1]])
-    print('======================特征优选-t检验结果======================')
-    print(t_stat, p_value)
-    tempData = dataFrame[['上级单位', '测报站点', "年", "DayOfYear",
-                          '降水', '降水累积量', '预测病株率']]
-    return tempData
 
 
 def onRun():
@@ -114,34 +100,44 @@ def onRun():
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[3]["编号"].tolist()
     fields = pages_utils.TempDataSetField[3]["输入特征"].tolist()
-
+    methodParam = pages_utils.TempDataSetField[3]["方法参数"].tolist()
+    methodList = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()
     # ===============根据名称匹配调用并执行各个处理方法===============
-    afterHandleData = tTest(
-        pages_utils.TempDataSet[2],
-        fields[0])
-    row_size = len(afterHandleData)
-    # print('-------优选特征-------')
-    intersection_cols = pages_utils.getIntersectionCols(
-        pages_utils.TempDataSet[3], afterHandleData
-    )
-    pages_utils.TempDataSet[3] = pd.merge(
-        afterHandleData, pages_utils.TempDataSet[3],
-        on=intersection_cols, how="left")
+    for tempMethod in methodList:
+        afterHandleData = None
+        # print(tempMethod)
+        if tempMethod == 't检验':
+            afterHandleData = FeatureOptimizationMethod(
+                pages_utils.TempDataSet[2],
+                fields[0]).tTest(methodParam)
+        elif tempMethod == 'Person相关性分析':
+            pass
+        elif tempMethod == 'Relief-F互相关分析':
+            pass
 
-    print('======================优选特征======================')
-    print(pages_utils.TempDataSet[3])
-    # 更新记录
-    update_values = {
-        # "数据类型": "气象数据", "输入特征": fields[0],
-        # "优选特征": fields[0],
-        "大小": '1*' + str(row_size),
-        # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
-        "时间": datetime.datetime.now().time()}
-    # 查找要更新的数据记录
-    for index, row in pages_utils.TempDataSetField[3].iterrows():
-        if row["编号"] == idNumber[0]:
-            for key, value in update_values.items():
-                pages_utils.TempDataSetField[3].loc[index, key] = value
+        row_size = len(afterHandleData)
+        # print('-------优选特征-------')
+        intersection_cols = pages_utils.getIntersectionCols(
+            pages_utils.TempDataSet[3], afterHandleData
+        )
+        pages_utils.TempDataSet[3] = pd.merge(
+            afterHandleData, pages_utils.TempDataSet[3],
+            on=intersection_cols, how="left")
+
+        print('======================优选特征======================')
+        print(pages_utils.TempDataSet[3])
+        # 更新记录
+        update_values = {
+            # "数据类型": "气象数据", "输入特征": fields[0],
+            # "优选特征": fields[0],
+            "大小": '1*' + str(row_size),
+            # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
+            "时间": datetime.datetime.now().time()}
+        # 查找要更新的数据记录
+        for index, row in pages_utils.TempDataSetField[3].iterrows():
+            if row["编号"] == idNumber[0]:
+                for key, value in update_values.items():
+                    pages_utils.TempDataSetField[3].loc[index, key] = value
 
 
 # 界面名称+布局+布局内容
@@ -261,8 +257,8 @@ with dataPCM:
             "输入特征": mergeArray(result1, result2, result3),
             "优选特征": '降水',
             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
-            "方法参数": [value for key, value in st.session_state["OptimizationMethodName"].items() if
-                         key != 'checkBox'],
+            "方法参数":
+                [value for key, value in st.session_state["OptimizationMethodName"].items() if key != 'checkBox'],
             "时间": datetime.datetime.now().time(),
             "下载数据集": False}
         print('======================特征优选-添加任务清单记录======================')
