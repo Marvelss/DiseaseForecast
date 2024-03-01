@@ -109,12 +109,14 @@ def onTrain():
                   features[0], targets[0],
                   dataPartitioning, modelParam,
                   evaluationIndicator).onSVM()
-
-    # 更新记录
-    data11 = {"模型": "SVM", "时间": datetime.datetime.now().time(),
-              "下载模型结构、结果和参数值": False}
-    # pages_utils.TempDataSetField[4].loc[len(
-    #     pages_utils.TempDataSetField[4])] = data11
+        # 更新记录
+        update_values = {
+            "时间": datetime.datetime.now().time()}
+        # 查找要更新的数据记录
+        for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
+            if row1["编号"] == idNumber[0]:
+                for key, value in update_values.items():
+                    pages_utils.TempDataSetField[4].loc[index1, key] = value
 
 
 def onModel():
