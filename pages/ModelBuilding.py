@@ -1,19 +1,9 @@
 import datetime
-
-import numpy as np
 import streamlit as st
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-
-from sklearn.metrics import confusion_matrix, accuracy_score, mean_squared_error, r2_score, cohen_kappa_score
-
+from sklearn.metrics import confusion_matrix
 import seaborn as sns
-
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.svm import SVC, SVR
-
 import pages_utils
 from modelandmethod.Model import Model
 
@@ -30,7 +20,7 @@ if "modelParamName" not in st.session_state:
     st.session_state["modelParamName"] = {}
 if "modelPrecisionName" not in st.session_state:
     st.session_state["modelPrecisionName"] = []
-# 创建一个空的模型参数字典
+# 初始化模型参数
 model_params = [
     {"模型名称": "SVM", "c": "1.0", " kernel": "rbf", "degree ": "3"},
     {"模型名称": "KNN", "n_neighbors": "5", "leaf_size": "30",
@@ -50,8 +40,6 @@ st.set_page_config(
 def mergeArray(list1, list2, list3):
     return list(set().union(*[list1, list2, list3]))
 
-
-# checkBoxPrecisionNum = 2
 
 def getCheckboxName():
     for h in range(checkBoxModelNum):
@@ -102,14 +90,22 @@ def onTrain():
     features = pages_utils.TempDataSetField[4]["特征"].tolist()
     targets = pages_utils.TempDataSetField[4]["标签"].tolist()
     # ===============调用模型完成训练===============
-    print(pages_utils.TempDataSetField[4])
+    # print(pages_utils.TempDataSetField[4])
     for tempModel in models:
         if tempModel == 'SVM':
-            Model(pages_utils.TempDataSet[3],
-                  features[0], targets[0],
-                  dataPartitioning, modelParam,
-                  evaluationIndicator).onSVM()
-        # 更新记录
+            evaluationResult = Model(
+                pages_utils.TempDataSet[3],
+                features[0], targets[0],
+                dataPartitioning, modelParam,
+                evaluationIndicator).onSVM()
+            # 显示模型训练结果信息
+            info = ''
+            for key, value in evaluationResult.items():
+                info = f'{key}:{value}' + '\n'
+            # 显示精度结果
+            st.toast('SVM训练完成 \n' + '       ' + ' \n' + info,
+                     icon='✅')
+        # 更新时间记录
         update_values = {
             "时间": datetime.datetime.now().time()}
         # 查找要更新的数据记录
@@ -120,10 +116,6 @@ def onTrain():
 
 
 def onModel():
-    # for h in range(checkBoxModelNum):
-    #     if st.session_state[f'checkBoxModel{h}']:
-    #         st.session_state["modelName"]['checkBoxModel'] = f'checkBoxModel{h}'
-    #     st.session_state[f'checkBoxModel{h}'] = False
     st.session_state.page += 1
     return
 
@@ -137,19 +129,15 @@ def onAddModel():
     return
 
 
-def onPrecision(cbox1, cbox2):
+def onPrecision(cbox1, cbox2, cbox3):
     if cbox1:
         st.session_state["modelPrecisionName"].append('OA')
     if cbox2:
         st.session_state["modelPrecisionName"].append('Kappa')
+    if cbox3:
+        st.session_state["modelPrecisionName"].append('MSE')
     # print(pages_utils.TempDataSetField[4]['评价指标'])
     pages_utils.TempDataSetField[4]['评价指标'] = ','.join(st.session_state["modelPrecisionName"])
-    # for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
-    #     pages_utils.TempDataSetField[4].loc[index1, '评价指标'] = st.session_state["modelPrecisionName"]
-    # for h in range(checkBoxPrecisionNum):
-    #     if st.session_state[f'checkBoxPrecision{h}']:
-    #         st.session_state["modelName"]['checkBoxPrecision'] = f'checkBoxPrecision{h}'
-    #     st.session_state[f'checkBoxPrecision{h}'] = False
     st.session_state.page += 1
 
 
@@ -277,22 +265,13 @@ with modelACM:
             st.markdown("###### 评价指标")
             agree6 = st.checkbox('OA', key='checkBoxPrecision0')
             agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
+            agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
             interval_col1, interval_col2 = st.columns([5, 1])
-            btn21 = interval_col1.button("下一步", on_click=onPrecision, args=[agree6, agree7])
+            btn21 = interval_col1.button(
+                "下一步",
+                on_click=onPrecision,
+                args=[agree6, agree7, agree8])
             tempPrecision = ''
-            if agree6:
-                pass
-                # st.session_state["modelPrecisionName"].append('OA')
-                # pages_utils.TempDataSetField[4]['评价指标'] = 'OA'
-                # pages_utils.TempDataSetField[4]['评价指标'] = pages_utils.TempDataSetField[4]['评价指标']+'OA'
-            if agree7:
-                # 'Kappa'
-                pass
-                # pages_utils.TempDataSetField[4]['评价指标'] = 'Kappa'
-                # pages_utils.TempDataSetField[4]['评价指标'] = pages_utils.TempDataSetField[4]['评价指标']+'Kappa'
-            if btn21:
-                pass
-                # print(st.session_state["modelPrecisionName"])
 
     # Page 2
     elif st.session_state.page == 2:
