@@ -22,7 +22,7 @@ if "modelPrecisionName" not in st.session_state:
     st.session_state["modelPrecisionName"] = []
 # 初始化模型参数
 model_params = [
-    {"模型名称": "SVM", "c": "1.0", " kernel": "rbf", "degree ": "3"},
+    {"模型名称": "SVM", 'C': '1.0', 'kernel': 'rbf', 'gamma': 'scale'},
     {"模型名称": "KNN", "n_neighbors": "5", "leaf_size": "30",
      "n_jobs": "1"},
     {"模型名称": "FLDA", "n_components": "sqrt", "solver": "eigen",
@@ -241,7 +241,8 @@ with modelACM:
                 # 转换参数格式
                 formatted_params = [{"参数名": key, "参数值": value} for key, value in svm_params_dict.items()]
                 df = pd.DataFrame(formatted_params)
-                edited_df = st.data_editor(df, height=190, width=800)
+                edited_df = st.data_editor(df, height=190, width=800,
+                                           disabled=["参数名"])
                 st.session_state["modelParamName"] = edited_df.to_dict()
             interval_col1, interval_col2 = st.columns([5, 1])
             btn1 = interval_col2.button("下一步", on_click=onModel)

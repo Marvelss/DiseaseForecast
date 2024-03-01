@@ -5,10 +5,10 @@
 @Description : 模型训练算法及相关设置参数
 """
 import pandas as pd
+from sklearn import svm
 from sklearn.metrics import r2_score, mean_squared_error, accuracy_score, cohen_kappa_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVR
 
 
 class Model:
@@ -31,7 +31,8 @@ class Model:
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
         # 对分类变量进行one-hot编码
-        X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        if '上级单位' and '测报站点' in self.featureVariable:
+            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
 
@@ -47,8 +48,21 @@ class Model:
 
         # =======================创建模型并开始训练=======================
         print('======================模型构建-开始训练======================')
+        print(self.modelParam)
+        # 合并参数名称和值
+        array = self.modelParam
+        param_names = array[0]['参数名']
+        param_values = array[0]['参数值']
+        parameters_dict = {}
+        for i in range(len(param_names)):
+            parameters_dict[param_names[i]] = param_values[i]
+
+        # 转换参数格式
+        if 'C' in parameters_dict:
+            parameters_dict['C'] = float(parameters_dict['C'])
+        # print(parameters_dict)
         # 使用SVM回归模型进行拟合
-        model1 = SVR(kernel='rbf')
+        model1 = svm.SVC(**parameters_dict)
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
