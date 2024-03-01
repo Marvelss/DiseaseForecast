@@ -30,8 +30,6 @@ if "modelParamName" not in st.session_state:
     st.session_state["modelParamName"] = {}
 if "modelPrecisionName" not in st.session_state:
     st.session_state["modelPrecisionName"] = []
-if "labelColumn" not in st.session_state:
-    st.session_state.labelColumn = None
 # 创建一个空的模型参数字典
 model_params = [
     {"模型名称": "SVM", "c": "1.0", " kernel": "rbf", "degree ": "3"},
@@ -101,15 +99,16 @@ def onTrain():
     modelParam = pages_utils.TempDataSetField[4]["模型参数"].tolist()
     evaluationIndicator = pages_utils.TempDataSetField[4]["评价指标"].tolist()
     dataPartitioning = pages_utils.TempDataSetField[4]["数据集划分"].tolist()
+    features = pages_utils.TempDataSetField[4]["特征"].tolist()
+    targets = pages_utils.TempDataSetField[4]["标签"].tolist()
     # ===============调用模型完成训练===============
     print(pages_utils.TempDataSetField[4])
-    # for tempModel in models:
-    #     if tempModel == 'SVM':
-    #         Model(pages_utils.TempDataSet[3],
-    #               featureVariable, targetVariable,
-    #               dataPartitioning, modelParam, evaluationIndicator).onSVM()
-    #
-    #     st.session_state.labelColumn
+    for tempModel in models:
+        if tempModel == 'SVM':
+            Model(pages_utils.TempDataSet[3],
+                  features[0], targets[0],
+                  dataPartitioning, modelParam,
+                  evaluationIndicator).onSVM()
 
     # 更新记录
     data11 = {"模型": "SVM", "时间": datetime.datetime.now().time(),
@@ -258,7 +257,6 @@ with modelACM:
             btn1 = interval_col2.button("下一步", on_click=onModel)
             btn = interval_col1.button("添加模型", on_click=onAddModel)
             if btn:
-                st.session_state.labelColumn = result1
                 new_data = {
                     "编号": pages_utils.generateID(),
                     "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),

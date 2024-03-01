@@ -25,52 +25,38 @@ class Model:
         # 训练模型
         # =======================获取数据集=======================
         df11 = self.dataFrame
-        # print('--------训练表----------')
-        # print(df11)
-        # 提取特征和目标变量
+        print(self.featureVariable)
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
         # 对分类变量进行one-hot编码
-        X = pd.get_dummies(X, columns=['上级单位', '测报站点'])
-
-        # =======================划分训练集和测试集=======================
-        # X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, train_size=0.8, random_state=0)
-
-        # =======================获取评价指标=======================
-
-        # 数据标准化
+        X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
 
-        # 划分数据集为训练集和测试集
+        # =======================划分训练集和测试集=======================
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=42)
 
+        # =======================创建模型并开始训练=======================
         print('======================模型构建-开始训练======================')
         # 使用SVM回归模型进行拟合
         model1 = SVR(kernel='rbf')
         model1.fit(X_train, y_train)
-
         # 进行预测
         y_pred = model1.predict(X_test)
 
-        # 计算均方误差
-        # mse = mean_squared_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
-        print(r2)
-        # st.markdown('---')
-        # st.markdown(y_test)
-        # st.markdown(y_pred)
+        # =======================获取评价指标=======================
         print('======================模型构建-精度指标======================')
-        # 计算Overall Accuracy
-        # OA = accuracy_score(y_test, y_pred)
-        # print(y_test)
         print('X_test:')
         print(X_test)
         print('y_pred:')
         print(y_pred)
-        # kappa = cohen_kappa_score(y_test, y_pred)
-        # st.markdown(mse)
-        # print("Overall Accuracy:", OA)
+        # 计算均方误差
         mse = mean_squared_error(y_test, y_pred)
         print("均方误差 :", mse)
-        # print("均方误差:", mse)
+        # R方误差
+        r2 = r2_score(y_test, y_pred)
+        print(r2)
+        # 计算Overall Accuracy
+        # OA = accuracy_score(y_test, y_pred)
+        # 计算Kappa
+        # kappa = cohen_kappa_score(y_test, y_pred)
