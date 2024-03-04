@@ -259,7 +259,7 @@ with dataPCM:
                 flag = True
         if not flag:
             info = '无缺失字段\n'
-        st.info(f"{info}\n", icon="ℹ️")
+        st.warning(f"{info}\n", icon="⚠️️")
 
         coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:
