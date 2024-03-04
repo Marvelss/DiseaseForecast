@@ -211,7 +211,7 @@ with dataPCV:
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
     with tab1:
-        genre = st.checkbox("Person相关性分析", key='checkbox0', on_change=clear_other, args=[0])
+        genre = st.checkbox("Person相关性分析", key='checkbox0', on_change=clear_other, args=[0], disabled=True)
         genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1])
 
     with tab2:

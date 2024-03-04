@@ -220,12 +220,12 @@ with modelACM:
             colOption1, colOption2, colOption3 = st.columns(3)
             with colOption1:
                 agree = st.checkbox('SVM', key='checkBoxModel0', on_change=clearOtherOption, args=[0])
-                agree1 = st.checkbox('RF', key='checkBoxModel1', on_change=clearOtherOption, args=[1])
+                agree1 = st.checkbox('RF', key='checkBoxModel1', on_change=clearOtherOption, args=[1], disabled=True)
             with colOption2:
-                agree2 = st.checkbox('KNN', key='checkBoxModel2', on_change=clearOtherOption, args=[2])
+                agree2 = st.checkbox('KNN', key='checkBoxModel2', on_change=clearOtherOption, args=[2], disabled=True)
 
             with colOption3:
-                agree3 = st.checkbox('FLDA', key='checkBoxModel3', on_change=clearOtherOption, args=[3])
+                agree3 = st.checkbox('FLDA', key='checkBoxModel3', on_change=clearOtherOption, args=[3], disabled=True)
                 # agree4 = st.checkbox('贝叶斯统计')
                 # agree5 = st.checkbox('模糊综合评价')
             st.markdown('---')

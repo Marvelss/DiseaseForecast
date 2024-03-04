@@ -207,12 +207,12 @@ with featureCCM:
     st.markdown("##### 特征计算方法")
     col1, col2 = st.columns(2)
     with col1:
-        option14 = st.checkbox('时间(温度)分辨率转换', key='checkbox0', on_change=clear_other, args=[0])
-        option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1])
+        option14 = st.checkbox('时间(温度)分辨率转换', key='checkbox0', on_change=clear_other, args=[0], disabled=True)
+        option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1], disabled=True)
         option16 = st.checkbox('降水累积量计算', key='checkbox2', on_change=clear_other, args=[2])
     with col2:
-        option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3])
-        option18 = st.checkbox('时空抽取', key='checkbox4', on_change=clear_other, args=[4])
+        option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3], disabled=True)
+        option18 = st.checkbox('时空抽取', key='checkbox4', on_change=clear_other, args=[4], disabled=True)
 
     st.markdown('---')
     if option14:
