@@ -113,7 +113,9 @@ def onRun():
         elif tempMethod == 'Person相关性分析':
             pass
         elif tempMethod == 'Relief-F互相关分析':
-            pass
+            afterHandleData = FeatureOptimizationMethod(
+                pages_utils.TempDataSet[2],
+                fields[0]).ReliefF(methodParam)
 
         row_size = len(afterHandleData)
         # print('-------优选特征-------')
@@ -236,14 +238,22 @@ with dataPCM:
     # st.markdown('---')
     if genre3:
         # st.markdown('提取条件')
+        option111 = st.selectbox(
+            '目标变量',
+            mergeArray(result1, result2, result3))
         option = st.selectbox(
             '提取条件',
             ('按百分比选取', '按权重值计算'))
         if option == '按百分比选取':
+            st.session_state["OptimizationMethodName"]['param1'] = option
             number1 = st.number_input("TOP(%)", value=5, min_value=5, step=5)
+            st.session_state["OptimizationMethodName"]['param2'] = str(number1)
         if option == '按权重值计算':
+            st.session_state["OptimizationMethodName"]['param1'] = option
             number2 = st.number_input("权重阈值", value=10, min_value=10)
+            st.session_state["OptimizationMethodName"]['param2'] = str(number2)
 
+        st.session_state["OptimizationMethodName"]['param3'] = option111
     interval_col1, interval_col2 = st.columns([5, 1])
     btn = interval_col2.button('添加处理', on_click=clear_all)
     # =======================执行任务清单=======================
