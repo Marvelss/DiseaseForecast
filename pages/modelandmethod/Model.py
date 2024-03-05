@@ -22,12 +22,15 @@ class Model:
         self.modelParam = modelParam
 
     def onSVM(self):
+        print('=============方法接收=============')
         print(self.evaluationIndicator)
         print(self.dataPartitioning)
+        print(self.featureVariable)
+        print(self.targetVariable)
+        print(self.dataFrame)
         # 训练模型
         # =======================获取数据集=======================
         df11 = self.dataFrame
-        print(self.featureVariable)
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
         # 对分类变量进行one-hot编码
@@ -70,10 +73,10 @@ class Model:
         # =======================获取评价指标=======================
         print('======================模型构建-精度指标======================')
         result = {}
-        # print('X_test:')
-        # print(X_test)
-        # print('y_pred:')
-        # print(y_pred)
+        print('X_test:')
+        print(X_test)
+        print('y_pred:')
+        print(y_pred)
         tempIndicator = self.evaluationIndicator
         if ',' in self.evaluationIndicator[0]:
             tempIndicator = self.evaluationIndicator[0].split(',')
@@ -90,4 +93,5 @@ class Model:
             # 计算Kappa
             elif temp == 'Kappa':
                 result['Kappa'] = cohen_kappa_score(y_test, y_pred)
+        print(result)
         return result

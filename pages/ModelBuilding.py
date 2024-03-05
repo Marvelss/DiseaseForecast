@@ -89,13 +89,59 @@ def onTrain():
     dataPartitioning = pages_utils.TempDataSetField[4]["数据集划分"].tolist()
     features = pages_utils.TempDataSetField[4]["特征"].tolist()
     targets = pages_utils.TempDataSetField[4]["标签"].tolist()
+    # ===============测试是否统一时间分辨率===============
+    # 若数据集行数不一致则提示
+
+    # ===============获取字段对应数据集===============
+    selected_datasets = []
+    inputDataSet = []
+    combinedGroupArray = []
+    # 合并特征和标签
+    for group1, group2 in zip(features, targets):
+        combinedArrayTemp = group1 + group2
+        combinedGroupArray.append(combinedArrayTemp)
+    # for n in range(3, -1, -1):
+    #     print(pages_utils.TempDataSet[n].columns)
+    # 获取对应数据集
+    # print('==========合并特征==========')
+    # print(combinedGroupArray)
+    for smallGroup in combinedGroupArray:
+        temp_selected = []
+        for field in smallGroup:
+            found = False  # 设置一个标志位
+            for n in range(3, -1, -1):
+                if field in pages_utils.TempDataSet[n].columns:
+                    # 判断数据集是否为空
+                    if len(pages_utils.TempDataSet[n]):
+                        print(f'添加了{field}')
+                        temp_selected.append(n)
+                        found = True  # 找到了feature，将标志位设置为True
+                        break  # 找到feature后跳出内循环
+            if not found:
+                # 如果没有找到任何数据集包含feature，可以在这里进行处理
+                pass
+        selected_datasets.append(temp_selected)
+    # ===============合并===============
+    print('============测试合并==============')
+    print(selected_datasets)
+    print(combinedGroupArray)
+    for fieldList, dataIndexList in zip(combinedGroupArray, selected_datasets):
+        merged_df = pd.DataFrame()
+        for field, dataIndex in zip(fieldList, dataIndexList):
+            # print(f'保留字段{field}')
+            # print(dataIndex)
+            tempData = pages_utils.TempDataSet[dataIndex][field]
+            temp_df = pd.DataFrame(tempData, columns=[field])  # 创建临时的DataFrame
+            merged_df = pd.concat([merged_df, temp_df], axis=1)  # 逐步合并数据
+        inputDataSet.append(merged_df)
+    print(inputDataSet)
     # ===============调用模型完成训练===============
     # print(pages_utils.TempDataSetField[4])
-    for tempModel in models:
+    for tempIndex, tempModel in enumerate(models):
         if tempModel == 'SVM':
             evaluationResult = Model(
-                pages_utils.TempDataSet[3],
-                features[0], targets[0],
+                inputDataSet[tempIndex],
+                features[tempIndex], targets[tempIndex],
                 dataPartitioning, modelParam,
                 evaluationIndicator).onSVM()
             # 显示模型训练结果信息
