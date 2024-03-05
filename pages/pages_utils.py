@@ -3,6 +3,8 @@ import random
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix, roc_curve, precision_recall_curve
+import zipfile
+import os
 
 
 # 带有全选的多选框
@@ -102,6 +104,31 @@ def getDataFiled(dataName):
     # print(weatherName, plantName, agricultureName)
 
     return weatherName, plantName, agricultureName
+
+
+# 删除文件夹文件
+def delete_files_in_folder(folder_path):
+    # 遍历文件夹下的所有文件和子文件夹
+    for root, dirs, files in os.walk(folder_path):
+        # 删除文件
+        for file in files:
+            file_path = os.path.join(root, file)
+            os.remove(file_path)
+        # 删除子文件夹
+        for dir1 in dirs:
+            dir_path = os.path.join(root, dir1)
+            os.rmdir(dir_path)
+
+
+# 文件压缩
+def zip_folder(folder_path, output_path):
+    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        # 遍历文件夹下的所有文件和子文件夹
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                # 将文件添加到压缩包
+                zipf.write(str(file_path), arcname=os.path.relpath(str(file_path), start=folder_path))
 
 
 # 其他字段值
