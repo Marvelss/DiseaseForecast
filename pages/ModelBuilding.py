@@ -102,9 +102,9 @@ def onTrain():
         combinedGroupArray.append(combinedArrayTemp)
     # for n in range(3, -1, -1):
     #     print(pages_utils.TempDataSet[n].columns)
-    # 获取对应数据集
     # print('==========合并特征==========')
     # print(combinedGroupArray)
+    # 获取对应数据集
     for smallGroup in combinedGroupArray:
         temp_selected = []
         for field in smallGroup:
@@ -121,8 +121,8 @@ def onTrain():
                 # 如果没有找到任何数据集包含feature，可以在这里进行处理
                 pass
         selected_datasets.append(temp_selected)
-    # ===============合并===============
-    print('============测试合并==============')
+    # ===============抽取数据集===============
+    print('============测试特征对应数据集==============')
     print(selected_datasets)
     print(combinedGroupArray)
     for fieldList, dataIndexList in zip(combinedGroupArray, selected_datasets):
@@ -134,6 +134,7 @@ def onTrain():
             temp_df = pd.DataFrame(tempData, columns=[field])  # 创建临时的DataFrame
             merged_df = pd.concat([merged_df, temp_df], axis=1)  # 逐步合并数据
         inputDataSet.append(merged_df)
+    print('============测试抽取数据集==============')
     print(inputDataSet)
     # ===============调用模型完成训练===============
     # print(pages_utils.TempDataSetField[4])
@@ -144,21 +145,23 @@ def onTrain():
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning, modelParam,
                 evaluationIndicator).onSVM()
+            print('======测试返回模型评价结果======')
+            print(evaluationResult)
             # 显示模型训练结果信息
             info = ''
             for key, value in evaluationResult.items():
-                info = f'{key}:{value}' + '\n'
+                info += f'{key}:{str(round(value, 3))}' + '       '
             # 显示精度结果
             st.toast('SVM训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
-        # 更新时间记录
-        update_values = {
-            "时间": datetime.datetime.now().time()}
-        # 查找要更新的数据记录
-        for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
-            if row1["编号"] == idNumber[0]:
-                for key, value in update_values.items():
-                    pages_utils.TempDataSetField[4].loc[index1, key] = value
+    # 更新时间记录
+    update_values = {
+        "时间": datetime.datetime.now().time()}
+    # 查找要更新的数据记录
+    for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
+        if row1["编号"] == idNumber[0]:
+            for key, value in update_values.items():
+                pages_utils.TempDataSetField[4].loc[index1, key] = value
 
 
 def onModel():
@@ -318,7 +321,6 @@ with modelACM:
                 "下一步",
                 on_click=onPrecision,
                 args=[agree6, agree7, agree8])
-            tempPrecision = ''
 
     # Page 2
     elif st.session_state.page == 2:
