@@ -216,9 +216,9 @@ with dataPCV:
     if tempDF[tempDF['数据类型'] == '农学数据']['字段'].any():
         agricultureName.clear()
         agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['字段'].tolist()[0]
-    a = st.selectbox(
-        '选择数据集',
-        ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
+    # a = st.selectbox(
+    #     '选择数据集',
+    #     ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
     result1 = pages_utils.multiselect_all(
         st, '全选-气象数据', weatherName,
         'temp', 'collapsed')
@@ -307,7 +307,7 @@ with dataPCM:
         # update dataframe state
         new_data = {
             "编号": pages_utils.generateID(),
-            "数据类型": a,
+            "数据类型": '原始数据集',
             "输入字段": mergeArray(result1, result2, result3),
             "预处理后字段": mergeArray(result1, result2, result3),
             "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),

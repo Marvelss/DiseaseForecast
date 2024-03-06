@@ -191,11 +191,11 @@ with dataPCV:
                         column_order=column)
     # =======================获取特征数据集表信息=======================
     # =======================选择数据集=======================
-    a = st.selectbox(
-        '选择数据集',
-        ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
+    # a = st.selectbox(
+    #     '选择数据集',
+    #     ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
     # 预处理后数据集表信息
-    weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled(a)
+    weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled()
     # 数组元素去重
     weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
         set(agricultureNameT))

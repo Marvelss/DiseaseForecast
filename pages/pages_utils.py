@@ -54,7 +54,7 @@ def generateID():
 
 
 # 获取各类数据集字段
-def getDataFiled(dataName):
+def getDataFiled():
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
     for i in range(len(TempDataSetField)):
         tempDF = TempDataSetField[i]
