@@ -32,7 +32,12 @@ show_pages(
         # Page("pages/zdemo1.py", 'demo4'),
     ]
 )
-
+# 控制各环节左侧内容展示
+if 'page12' not in st.session_state:
+    st.session_state.page12 = 0
+# 左侧内容标题
+if "leftTabs" not in st.session_state:
+    st.session_state["leftTabs"] = ['原始数据']
 # 设置网页标题
 st.title('多场景病虫害预测系统')
 

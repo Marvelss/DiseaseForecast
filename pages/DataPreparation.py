@@ -13,10 +13,8 @@ import matplotlib.pyplot as plt
 
 from modelandmethod.PretreatmentMethod import PretreatmentMethod
 
-if 'page12' not in st.session_state:
-    st.session_state.page12 = 0
-if "leftTabs" not in st.session_state:
-    st.session_state["leftTabs"] = ['原始数据']
+
+
 
 # 处理方法内容记录(任务清单各项值)
 if "preMethodName" not in st.session_state:
