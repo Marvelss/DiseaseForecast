@@ -13,31 +13,17 @@ import matplotlib.pyplot as plt
 
 from modelandmethod.PretreatmentMethod import PretreatmentMethod
 
-
-
-
 # 处理方法内容记录(任务清单各项值)
 if "preMethodName" not in st.session_state:
     st.session_state["preMethodName"] = {
         'checkBox': None
     }
-
+# 处理方法个数
 checkBoxNum = 2
 
 st.set_page_config(
     layout="wide"
 )
-
-
-def getCheckboxName(checkbox):
-    if checkbox == 'checkbox0':
-        return '剔除异常值'
-    elif checkbox == 'checkbox1':
-        return '缺失值插补'
-
-
-def mergeArray(list1, list2, list3):
-    return list(set().union(*[list1, list2, list3]))
 
 
 # 模拟24小时气温数据
@@ -48,22 +34,6 @@ def simulate_temperature_data():
     data1 = {'Time': hours, 'Temperature': temperatures}
     df = pd.DataFrame(data1)
     return df
-
-
-def clearOption():
-    for h in range(checkBoxNum):
-        if st.session_state[f'checkbox{h}']:
-            st.session_state["preMethodName"]['checkBox'] = f'checkbox{h}'
-        st.session_state[f'checkbox{h}'] = False
-    return
-
-
-def clear_other(key1):
-    # st.markdown(key)
-    for h in range(checkBoxNum):
-        if h != key1:
-            st.session_state[f'checkbox{h}'] = False
-    return
 
 
 # 模拟24小时降水数据
@@ -99,42 +69,80 @@ def simulate_box_data():
     return df
 
 
+# 获取选项值对应名称
+def getCheckboxName(checkbox):
+    if checkbox == 'checkbox0':
+        return '剔除异常值'
+    elif checkbox == 'checkbox1':
+        return '缺失值插补'
+
+
+def mergeArray(list1, list2, list3):
+    return list(set().union(*[list1, list2, list3]))
+
+
+# 取消选中所有选项
+def clearOption():
+    for h in range(checkBoxNum):
+        if st.session_state[f'checkbox{h}']:
+            st.session_state["preMethodName"]['checkBox'] = f'checkbox{h}'
+        st.session_state[f'checkbox{h}'] = False
+    return
+
+
+# 取消选中外其他所有选项
+def clear_other(key1):
+    # st.markdown(key)
+    for h in range(checkBoxNum):
+        if h != key1:
+            st.session_state[f'checkbox{h}'] = False
+    return
+
+
+# 控制左侧表格不同数据集显示
 def firstPage(): st.session_state.page12 = 0
 
 
+# 运行任务清单中所有方法
 def onRun():
     if '预处理后数据集' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('预处理后数据集')
     st.session_state.page12 += 1
 
-    # 调用数据和各类方法
     # ===============获取任务清单内容===============
-    idNumber = pages_utils.TempDataSetField[1]["编号"].tolist()
-    fields = pages_utils.TempDataSetField[1]["输入字段"].tolist()
-    methodParam = pages_utils.TempDataSetField[1]["方法参数"].tolist()
-    methodList = pages_utils.TempDataSetField[1]["预处理方法"].tolist()
+    idNumber = pages_utils.TempDataSetField[1]["编号"]
+    fields = pages_utils.TempDataSetField[1]["输入字段"]
+    methodParam = pages_utils.TempDataSetField[1]["方法参数"]
+    methodList = pages_utils.TempDataSetField[1]["预处理方法"]
     # ===============根据名称匹配调用并执行各个处理方法===============
-    for tempMethod in methodList:
+    print('=========测试输入数据=========')
+    print(fields)
+    # print(fields[0])
+    # print(fields[1])
+    print(methodParam)
+    print(type(pages_utils.TempDataSetField[1]["编号"]))
+    for indexT, tempMethod in enumerate(methodList):
         afterHandleData = None
         # print(tempMethod)
         if tempMethod == '缺失值插补':
             afterHandleData, missingValueBefore, missingValueAfter = PretreatmentMethod(
-                pages_utils.TempDataSet[0], fields[0][0]).linearInterpolation()
+                pages_utils.TempDataSet[0], fields[indexT]).linearInterpolation()
             # 显示填补信息
             st.toast(f'填补缺失值:{str(missingValueBefore - missingValueAfter)}' +
                      '\n' +
                      f'剩余缺失值:{missingValueAfter}', icon='✅')
         elif tempMethod == '剔除异常值':
+            print(f'执行任务==={fields[indexT]}-{methodParam[indexT]}')
             afterHandleData, outlierNum, lengthAfter = PretreatmentMethod(
-                pages_utils.TempDataSet[0], fields[0][0]).outlierEliminator(methodParam[0])
+                pages_utils.TempDataSet[0], fields[indexT]).outlierEliminator(methodParam[indexT])
+            print('========执行完后数据')
+            print(len(afterHandleData[fields[indexT]]))
             # 显示填补信息
             st.toast(f'剔除异常值个数:{outlierNum}' +
                      '\n' +
                      f'剩余条数:{lengthAfter}', icon='✅')
 
-        # 获取处理后的数据大小
-        row_size = len(afterHandleData)
-
+        # ===============合并处理后数据集===============
         intersection_cols = pages_utils.getIntersectionCols(
             pages_utils.TempDataSet[1], afterHandleData
         )
@@ -144,13 +152,10 @@ def onRun():
         print('======================预处理后数据集======================')
         print(pages_utils.TempDataSet[1])
 
-        # 更新记录
+        # ===============更新左侧显示内容===============
         update_values = {
-            "数据类型": "气象数据",
-            "输入字段": fields[0],
             "预处理后字段": fields[0],
-            "大小": '1*' + str(row_size),
-            "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
+            "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
             "时间": datetime.datetime.now().time(),
         }
         # 查找要更新的数据记录
@@ -158,18 +163,15 @@ def onRun():
             if row["编号"] == idNumber[0]:
                 for key1, value1 in update_values.items():
                     pages_utils.TempDataSetField[1].loc[index, key1] = value1
-                    # 根据字段名和索引来更新字段值
 
 
+# ==============================界面==============================
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
 dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
-    # st.data_editor(pages_utils.TempDataSet[0])
-    # st.markdown(pages_utils.TempDataSet[1])
-    # st.markdown(pages_utils.TempDataSet[2])
-    # st.markdown(pages_utils.TempDataSet[3])
+    # ===============显示左侧数据与特征表格===============
     # 根据st.session_state.page12的值刷新表格
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
@@ -180,7 +182,7 @@ with dataPCV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -194,14 +196,14 @@ with dataPCV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
                         # print('---{}---'.format(column))
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_order=column)
-    # 原始数据集表信息
 
+    # ===============显示左下字段或特征及获取===============
     tempDF = pages_utils.TempDataSetField[0]
     # 添加字段名称选项
     weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
@@ -226,6 +228,8 @@ with dataPCV:
     result3 = pages_utils.multiselect_all(
         st, '全选-农学数据', agricultureName,
         'temp', 'collapsed')
+
+# ===============显示右上预处理方法选项===============
 with dataPCM:
     st.markdown("##### 预处理方法")
     # with tab1:
@@ -257,8 +261,10 @@ with dataPCM:
                 flag = True
         if not flag:
             info = '无缺失字段\n'
-        st.warning(f"{info}\n", icon="⚠️️")
-
+            st.info(f"{info}\n", icon="ℹ️️")
+        else:
+            st.warning(f"{info}\n", icon="⚠️")
+        # ===============显示和处理右中各个处理方法设置参数===============
         coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:
             option = st.selectbox(
@@ -293,16 +299,13 @@ with dataPCM:
             img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '3.png'))
             st.image(img)
 
-    # 获取添加处理按钮各项值
+    # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([5, 1])
     btn = interval_col2.button('添加处理', on_click=clearOption)
-    # =======================执行任务清单=======================
     if btn:
-        for key11, value11 in st.session_state["preMethodName"].items():
-            pass
-            # print(f"Key: {key11}, Value: {value11}")
-        # print('--------------')
         # update dataframe state
+        print('=======获取预处理方法=====')
+        print(getCheckboxName(st.session_state["preMethodName"]['checkBox']))
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": '原始数据集',
@@ -310,18 +313,16 @@ with dataPCM:
             "预处理后字段": mergeArray(result1, result2, result3),
             "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
             "方法参数": [value for key, value in st.session_state["preMethodName"].items() if key != 'checkBox'],
-            "时间": datetime.datetime.now().time(), "下载数据集": False}
+            "时间": datetime.datetime.now().time(), "已处理": False}
         print('======================预处理-添加任务清单记录======================')
         print(new_data)
         pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
         st.rerun()
     st.markdown('---')
-    # with every interaction, the script runs from top to bottom
-    # resulting in the empty dataframe
 
+    # =======================显示右下内容=======================
     placeholder = st.empty()
     if st.session_state.page12 == 0:
-
         pages_utils.TempDataSet[1] = pages_utils.TempDataSet[0].copy()
         # 初始化添加旬、月字段
         pages_utils.TempDataSet[1]['MonthOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
@@ -329,6 +330,7 @@ with dataPCM:
         pages_utils.TempDataSet[1]['DecadeOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
             lambda x: (x - 1) // 10 + 1)  # 计算旬
 
+        # =======================显示右下任务清单表格=======================
         with placeholder.container():
             st.markdown('##### 任务清单')
             # want_to_contribute = st.button("跳转可视化")
@@ -341,6 +343,7 @@ with dataPCM:
             interval_col34, interval_col33 = st.columns([5, 1])
             btn2 = interval_col33.button('运行', on_click=onRun)
 
+        # =======================显示右下可视化图表=======================
     elif st.session_state.page12 == 1:
         with placeholder.container():
             st.markdown('##### 可视化')

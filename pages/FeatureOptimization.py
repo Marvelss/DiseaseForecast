@@ -162,11 +162,11 @@ with dataPCV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
                     elif st.session_state["leftTabs"][i] == '被选特征':
-                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间', "下载数据集"]
+                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
                     elif st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间', "下载数据集"]
+                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -180,11 +180,11 @@ with dataPCV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
                     elif st.session_state["leftTabs"][i] == '被选特征':
-                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间', "下载数据集"]
+                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
                     elif st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间', "下载数据集"]
+                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -270,7 +270,7 @@ with dataPCM:
             "方法参数":
                 [value for key, value in st.session_state["OptimizationMethodName"].items() if key != 'checkBox'],
             "时间": datetime.datetime.now().time(),
-            "下载数据集": False}
+            "已处理": False}
         print('======================特征优选-添加任务清单记录======================')
         print(new_data)
         pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data

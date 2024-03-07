@@ -211,11 +211,11 @@ with modelACV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
                     elif st.session_state["leftTabs"][i] == '被选特征':
-                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间', "下载数据集"]
+                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
                     elif st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间', "下载数据集"]
+                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     elif st.session_state["leftTabs"][i] == '模型':
                         column = ["编号", "模型", "评价指标", "数据集划分", "时间", "下载模型结构、结果和参数值"]
                     st.data_editor(
@@ -231,11 +231,11 @@ with modelACV:
                     if st.session_state["leftTabs"][i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间', "下载数据集"]
+                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
                     elif st.session_state["leftTabs"][i] == '被选特征':
-                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间', "下载数据集"]
+                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
                     elif st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间', "下载数据集"]
+                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     elif st.session_state["leftTabs"][i] == '模型':
                         column = ["编号", "模型", "评价指标", "数据集划分", "时间", "下载模型结构、结果和参数值"]
                     st.data_editor(
