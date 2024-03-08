@@ -12,20 +12,29 @@ simplefilter(action="ignore", category=FutureWarning)
 st.set_page_config(
     layout="wide"
 )
+# 模板路径及注释信息
+path1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\气象数据-模板.xlsx'
+path2 = r'E:\a_python\program\diseaseForecastStreamlit\resource\植保数据-模板.xlsx'
+path3 = r'E:\a_python\program\diseaseForecastStreamlit\resource\农学数据-模板.xlsx'
 
-
-@st.cache_data
-def convert_df(df):
-    # IMPORTANT: Cache the conversion to prevent computation on every rerun
-    return df.to_csv(index=False).encode('utf-8')
-
-
-# 用于获取上传数据集名称
-# i = 0
-
-
+warningMInfo = '''
+注意事项
+1. 模版中的表头名称不可更改,表头行不可删除;
+2. 删除示例数据后,添加新数据.
+'''
+warningPInfo = '''
+    注意事项
+1. 植保站数据每5天为周期记录一次数据;
+2. 模版中的表头名称不可更改,表头行不可删除;
+3. 删除示例数据后,添加新数据.
+    '''
+warningAInfo = '''
+    注意事项
+1. 模版中的表头名称不可更改,表头行不可删除;
+2. 删除示例数据后,添加新数据.
+    '''
+# ==============================文件上传显示==============================
 dataSCM, dataSCR = st.columns([0.9, 0.4])
-
 with dataSCM:
     st.markdown("##### 上传数据集")
     ab = st.selectbox(
@@ -46,28 +55,8 @@ with dataSCM:
     #             unsafe_allow_html=True)
 
     st.markdown('---')
+    # ==============================右侧数据模板下载及注意事项==============================
     st.markdown("##### 数据模板下载及注意事项")
-    path1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\气象数据-模板.xlsx'
-    path2 = r'E:\a_python\program\diseaseForecastStreamlit\resource\植保数据-模板.xlsx'
-    path3 = r'E:\a_python\program\diseaseForecastStreamlit\resource\农学数据-模板.xlsx'
-
-    warningMInfo = '''
-    注意事项
-1. 模版中的表头名称不可更改,表头行不可删除;
-2. 删除示例数据后,添加新数据.
-    '''
-    warningPInfo = '''
-        注意事项
-1. 植保站数据每5天为周期记录一次数据;
-2. 模版中的表头名称不可更改,表头行不可删除;
-3. 删除示例数据后,添加新数据.
-        '''
-    warningAInfo = '''
-        注意事项
-1. 模版中的表头名称不可更改,表头行不可删除;
-2. 删除示例数据后,添加新数据.
-        '''
-
     placeholder1 = st.empty()
     if ab == '气象数据':
         with placeholder1.container():
@@ -99,25 +88,22 @@ with dataSCM:
                     file_name="农学数据-模板.xlsx",
                     mime="application/octet-stream"
                 )
-
+    # ==============================控制文件上传逻辑==============================
     if uploaded_files:
         bytes_data = uploaded_files.read()
         data33 = pd.read_excel(bytes_data)
         # st.markdown(data33)
-        # df = getStateDF(ab)
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": ab, "文件名称": uploaded_files.name, "传输状态": "已上传",
             "上传时间": datetime.now().strftime("%H:%M:%S"),
             "字段": data33.columns.tolist()}
+
         # 防止重复添加
         if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():
-            # st.markdown(pages_utils.TempDataSetField[0])
-            # st.markdown(uploaded_files.name)
-            # st.markdown("和uploaded_files.name变量一致的文件名称已经存在，不执行以下操作")
-            st.markdown('---')
+            pass
         else:
-            # 添加字段
+            # 添加并合并至原始数据集
             pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
             # 获取两个DataFrame列名的交集
             intersection_cols = pages_utils.getIntersectionCols(
@@ -129,11 +115,7 @@ with dataSCM:
                 on=intersection_cols, how="left")
         print('======================实时原始数据集======================')
         print(pages_utils.TempDataSet[0])
-        # st.markdown('--合并后--')
-        # st.markdown(pages_utils.TempDataSet[0].columns)
-        # st.markdown(new_data)
-        # st.markdown(pages_utils.TempDataSetField[0])
-
+# ==============================右侧文件上传状态显示==============================
 with dataSCR:
     st.markdown("##### 文件上传状态显示")
     placeholder = st.empty()

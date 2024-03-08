@@ -7,6 +7,10 @@ import streamlit as st
 import pages_utils
 from modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 
+st.set_page_config(
+    layout="wide"
+)
+
 if 'page13' not in st.session_state:
     st.session_state.page13 = 0
 
@@ -16,11 +20,8 @@ if "featureMethodName" not in st.session_state:
         'checkBox': None
     }
 
-st.set_page_config(
-    layout="wide"
-)
 
-
+# 获取选项值对应名称
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
         return '时间(温度)分辨率转换'
@@ -36,20 +37,6 @@ def getCheckboxName(checkbox):
 
 def mergeArray(list1, list2, list3):
     return list(set().union(*[list1, list2, list3]))
-
-
-# def simulate_temperature_data():
-#     # 模拟生成温度数据
-#     data = {
-#         'City': ['City1', 'City2', 'City3'],
-#         'Temperature': np.append([
-#             np.random.normal(25, 5, 10),
-#             np.random.normal(20, 3, 10),
-#             np.random.normal(30, 7, 10)
-#         ])
-#     }
-#     df = pd.DataFrame(data)
-#     return df
 
 
 # 取消所有选项按钮
@@ -72,6 +59,7 @@ def clear_other(key):
 def firstPage(): st.session_state.page13 = 0
 
 
+# 获取输出特征名称
 def getFeatureName(processName):
     if processName == '时间(温度)分辨率转换':
         return ''
@@ -90,7 +78,6 @@ def onRun():
         st.session_state["leftTabs"].append('被选特征')
     st.session_state.page13 += 1
 
-    # 调用数据和各类方法
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[2]["编号"].tolist()
     fields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
@@ -114,10 +101,8 @@ def onRun():
         elif tempMethod == '时空抽取':
             return '时空抽取'
 
+        # ===============合并处理后数据集===============
         row_size = len(afterHandleData)
-        # print('-------特征-------')
-        # print(pages_utils.TempDataSet[2])
-        # print('-------特征-------')
         intersection_cols = pages_utils.getIntersectionCols(
             pages_utils.TempDataSet[2], afterHandleData
         )
@@ -128,7 +113,7 @@ def onRun():
         print('======================被选特征======================')
         print(pages_utils.TempDataSet[2])
 
-        # 更新记录
+        # ===============更新左侧显示内容===============
         update_values = {
             # "数据类型": "气象数据", "输入特征": fields[0],
             # "被选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
@@ -143,14 +128,11 @@ def onRun():
                     # 根据字段名和索引来更新字段值
 
 
+# ==============================界面==============================
 featureCCV, featureCCM = st.columns([0.5, 0.7])
 with featureCCV:
     st.markdown("##### 数据与特征")
-    # st.data_editor(pages_utils.TempDataSet[0])
-    # st.markdown(pages_utils.TempDataSet[1])
-    # st.markdown(pages_utils.TempDataSet[2])
-    # st.markdown(pages_utils.TempDataSet[3])
-    # =======================左侧数据与特征显示=======================
+    # =======================显示左侧数据与特征表格=======================
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
@@ -183,12 +165,11 @@ with featureCCV:
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_order=column)
-    # =======================选择数据集=======================
+    # ===============显示左下字段或特征及获取===============
     # a = st.selectbox(
     #     '选择数据集',
     #     ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
 
-    # =======================获取数据集字段=======================
     # 预处理后数据集表信息
     weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled()
     # 数组元素去重
@@ -203,6 +184,8 @@ with featureCCV:
     result3 = pages_utils.multiselect_all(
         st, '全选-农学数据', agricultureName,
         'temp', 'collapsed')
+
+# ===============显示右上处理方法选项===============
 with featureCCM:
     st.markdown("##### 特征计算方法")
     col1, col2 = st.columns(2)
@@ -211,10 +194,11 @@ with featureCCM:
         option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1], disabled=True)
         option16 = st.checkbox('降水累积量计算', key='checkbox2', on_change=clear_other, args=[2])
     with col2:
-        option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3], disabled=True)
+        option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3],
+                               disabled=True)
         option18 = st.checkbox('时空抽取', key='checkbox4', on_change=clear_other, args=[4], disabled=True)
-
     st.markdown('---')
+    # ===============显示和处理右中各个处理方法设置参数===============
     if option14:
         option1 = st.selectbox(
             '分辨率转换',
@@ -266,11 +250,12 @@ with featureCCM:
             pass
         d4 = st.date_input("结束日期", value=None)
         number1 = st.number_input("步长(天)", value=1, min_value=1)
-        # st.markdown('---')
+
+    # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([5, 1])
     btn = interval_col2.button('添加处理', on_click=clear_all)
-    # =======================执行任务清单=======================
     if btn:
+        # 测试特征方法名称正确性
         for key11, value11 in st.session_state["featureMethodName"].items():
             pass
             # print(f"Key: {key11}, Value: {value11}")
@@ -289,9 +274,10 @@ with featureCCM:
         st.rerun()
     st.markdown('---')
 
-    # =======================显示任务清单=======================
+    # =======================显示右下内容=======================
     placeholder = st.empty()
     if st.session_state.page13 == 0:
+        # =======================显示右下任务清单表格=======================
         with placeholder.container():
             st.markdown('##### 任务清单')
             edited_df28 = st.data_editor(
@@ -301,6 +287,7 @@ with featureCCM:
             interval_col34, interval_col33 = st.columns([5, 1])
             btn2 = interval_col33.button('运行', on_click=onRun)
     elif st.session_state.page13 == 1:
+        # =======================显示右下可视化图表=======================
         with placeholder.container():
             st.markdown('##### 可视化')
             tab1, tab2 = st.tabs(["1", "2"])

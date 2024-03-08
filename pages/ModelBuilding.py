@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import pages_utils
 from modelandmethod.Model import Model
 
+st.set_page_config(
+    layout="wide"
+)
 if 'page' not in st.session_state:
     st.session_state.page = 0
 if 'page15' not in st.session_state:
@@ -20,6 +23,8 @@ if "modelParamName" not in st.session_state:
     st.session_state["modelParamName"] = {}
 if "modelPrecisionName" not in st.session_state:
     st.session_state["modelPrecisionName"] = []
+checkBoxModelNum = 4
+
 # 初始化模型参数
 model_params = [
     {"模型名称": "SVM", 'C': '1.0', 'kernel': 'rbf', 'gamma': 'scale'},
@@ -31,21 +36,16 @@ model_params = [
      "min_samples_split": "3"},
 ]
 
-checkBoxModelNum = 4
-st.set_page_config(
-    layout="wide"
-)
-
 
 def mergeArray(list1, list2, list3):
     return list(set().union(*[list1, list2, list3]))
 
 
+# 获取模型选项值对应名称
 def getCheckboxName():
     for h in range(checkBoxModelNum):
         if st.session_state[f'checkBoxModel{h}']:
             temp1 = f'checkBoxModel{h}'
-            # print(f'--click{h}--')
             if temp1 == 'checkBoxModel0':
                 return 'SVM'
             elif temp1 == 'checkBoxModel2':
@@ -67,6 +67,7 @@ def getModelName(temp1):
         return 'FLDA'
 
 
+# 取消其他选项按钮
 def clearOtherOption(key1):
     # st.markdown(key)
     for h in range(checkBoxModelNum):
@@ -75,6 +76,7 @@ def clearOtherOption(key1):
     return
 
 
+# 模型训练
 def onTrain():
     if '模型' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('模型')
@@ -100,8 +102,6 @@ def onTrain():
     for group1, group2 in zip(features, targets):
         combinedArrayTemp = group1 + group2
         combinedGroupArray.append(combinedArrayTemp)
-    # for n in range(3, -1, -1):
-    #     print(pages_utils.TempDataSet[n].columns)
     # print('==========合并特征==========')
     # print(combinedGroupArray)
     # 获取对应数据集
@@ -121,6 +121,7 @@ def onTrain():
                 # 如果没有找到任何数据集包含feature，可以在这里进行处理
                 pass
         selected_datasets.append(temp_selected)
+
     # ===============抽取数据集===============
     print('============测试特征对应数据集==============')
     print(selected_datasets)
@@ -136,8 +137,8 @@ def onTrain():
         inputDataSet.append(merged_df)
     print('============测试抽取数据集==============')
     print(inputDataSet)
-    # ===============调用模型完成训练===============
-    # print(pages_utils.TempDataSetField[4])
+
+    # ===============运行任务清单调用模型准备训练===============
     for tempIndex, tempModel in enumerate(models):
         if tempModel == 'SVM':
             evaluationResult = Model(
@@ -154,7 +155,8 @@ def onTrain():
             # 显示精度结果
             st.toast('SVM训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
-    # 更新时间记录
+
+    # ===============更新左侧显示内容===============
     update_values = {
         "时间": datetime.datetime.now().time()}
     # 查找要更新的数据记录
@@ -178,6 +180,7 @@ def onAddModel():
     return
 
 
+# 获取评价指标
 def onPrecision(cbox1, cbox2, cbox3):
     if cbox1:
         st.session_state["modelPrecisionName"].append('OA')
@@ -193,17 +196,14 @@ def onPrecision(cbox1, cbox2, cbox3):
 def firstPage(): st.session_state.page = 0
 
 
+# ==============================界面==============================
 modelACV, modelACM = st.columns([0.5, 0.7])
 with modelACV:
     st.markdown("##### 特征与模型")
-    # st.data_editor(pages_utils.TempDataSet[0])
-    # st.markdown(pages_utils.TempDataSet[1])
-    # st.markdown(pages_utils.TempDataSet[2])
-    # st.markdown(pages_utils.TempDataSet[3])
-    # =======================左侧特征与模型显示=======================
+
+    # =======================显示左侧特征与模型=======================
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
-        # st.markdown(st.session_state.page12)
         with placeholder1.container():
             tt1 = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
@@ -242,7 +242,7 @@ with modelACV:
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_order=column)
-    # =======================选择数据集=======================
+    # ===============显示左下字段或特征及获取===============
     # 获取所有column
     columnArray = []
     for p in range(len(pages_utils.TempDataSet) - 1):
@@ -260,6 +260,8 @@ with modelACV:
     result2 = pages_utils.multiselect_all(
         st, '全选-目标变量', targetList,
         'temp', 'collapsed')
+
+# ===============显示右上模型选项===============
 with modelACM:
     ph = st.empty()
     # Page 0
@@ -278,6 +280,8 @@ with modelACM:
                 # agree4 = st.checkbox('贝叶斯统计')
                 # agree5 = st.checkbox('模糊综合评价')
             st.markdown('---')
+
+            # ===============显示和处理右中各个模型参数===============
             if agree or agree1 or agree2 or agree2 or agree3:
                 model = getCheckboxName()
                 # print(f'--{model}--')
@@ -293,9 +297,12 @@ with modelACM:
                 edited_df = st.data_editor(df, height=190, width=800,
                                            disabled=["参数名"])
                 st.session_state["modelParamName"] = edited_df.to_dict()
+
+            # =======================准备任务清单内容=======================
             interval_col1, interval_col2 = st.columns([5, 1])
             btn1 = interval_col2.button("下一步", on_click=onModel)
             btn = interval_col1.button("添加模型", on_click=onAddModel)
+            # =======================添加模型=======================
             if btn:
                 new_data = {
                     "编号": pages_utils.generateID(),
@@ -305,12 +312,13 @@ with modelACM:
                     "标签": result2,
                     "时间": datetime.datetime.now().time(),
                     "下载模型结构、结果和参数值": False}
-                print('======================模型构建-添加任务清单记录======================')
+                print('======================模型构建-添加模型======================')
                 print(new_data)
                 pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_data
                 st.rerun()
     # Page 1
     elif st.session_state.page == 1:
+        # =======================添加评价指标=======================
         with ph.container():
             st.markdown("###### 评价指标")
             agree6 = st.checkbox('OA', key='checkBoxPrecision0')
@@ -324,6 +332,7 @@ with modelACM:
 
     # Page 2
     elif st.session_state.page == 2:
+        # =======================添加验证与训练数据集划分=======================
         with ph.container():
             st.markdown("###### 验证与训练数据集划分")
             option = st.selectbox(
@@ -335,8 +344,7 @@ with modelACM:
             interval_col1, interval_col2 = st.columns([5, 1])
             interval_col1.button("保存", on_click=firstPage)
 
-            # btn11 = interval_col2.button("开始模型训练", on_click=onTrain)
-
+    # =======================显示右下内容=======================
     st.markdown('##### 任务清单')
     edited_df28 = st.data_editor(
         pages_utils.TempDataSetField[4], height=190, width=800,
@@ -346,7 +354,7 @@ with modelACM:
     btn2 = interval_col33.button('开始模型训练', on_click=onTrain)
 
     placeholder1 = st.empty()
-    # =======================结果可视化=======================
+    # =======================显示右下可视化图表=======================
     if st.session_state.page15 == 1:
         with placeholder1.container():
             st.markdown('---')

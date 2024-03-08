@@ -1,12 +1,9 @@
-# markdown
 import streamlit as st
-import numpy as np
-import pandas as pd
 
-from st_pages import Page, Section, show_pages, add_page_title, show_pages_from_config
+from st_pages import Page,  show_pages
 
 # add_page_title()
-from pygwalker.api.streamlit import StreamlitRenderer, init_streamlit_comm
+
 
 # Adjust the width of the Streamlit page
 st.set_page_config(
@@ -16,6 +13,8 @@ st.set_page_config(
 
 # Establish communication between pygwalker and streamlit
 # init_streamlit_comm()
+
+# 控制界面显示
 show_pages(
     [
         Page("pages/App.py", "主页"),
@@ -27,20 +26,17 @@ show_pages(
         Page("pages/Visualization.py", '数据可视化'),
         Page("pages/ModelApplication.py", '模型应用'),
         Page("pages/ModelEvaluation.py", "测试界面")
-        # Page("pages/demo13.py", 'demo'),
-        # Page("pages/zdemo.py", 'demo3'),
-        # Page("pages/zdemo1.py", 'demo4'),
     ]
 )
-# 控制各环节左侧内容展示
+# 初始化控制各环节左侧内容展示
 if 'page12' not in st.session_state:
     st.session_state.page12 = 0
 # 左侧内容标题
 if "leftTabs" not in st.session_state:
     st.session_state["leftTabs"] = ['原始数据']
+
 # 设置网页标题
 st.title('多场景病虫害预测系统')
-
 st.subheader('简介')
 # # 纯文本
 st.text("""
@@ -55,8 +51,3 @@ st.text("""
 4.实时预警和建议：系统具有实时监测功能，能够根据预测模型输出的结果，及时向农户或专业人士发出预警信息，提示可能的病虫害发生风险，并提供相应的防治建议。
 5.云端服务：由于使用基于WEB的技术，多场景病虫害预测系统可以部署在云端平台上，提供灵活的访问和使用方式，用户可以通过智能手机、平板电脑等设备随时随地获取相关信息。
 """)
-# st.write("magic方法使用")
-# df = pd.DataFrame({
-#     'first column': [1, 2, 3, 4],
-#     'second column': [10, 20, 30, 40]
-# })

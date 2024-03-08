@@ -1,4 +1,3 @@
-import io
 import os.path
 
 import scipy
@@ -16,12 +15,7 @@ if 'page16' not in st.session_state:
     st.session_state.page16 = 0
 
 
-@st.cache_data
-def convert_df(df1):
-    # IMPORTANT: Cache the conversion to prevent computation on every rerun
-    return df1.to_csv(index=False).encode('utf-8')
-
-
+# =======================调用matlab天气情景生成器=======================
 def onRun(year, situation):
     # 调用matlab程序
     # print(year, situation)
@@ -35,6 +29,7 @@ def onRun(year, situation):
     st.toast('运行完成,数据准备完毕', icon='✅')
 
 
+# ==============================界面==============================
 st.markdown("##### 加载模型和特征")
 col2, col3 = st.columns(2)
 with col2:
@@ -55,7 +50,7 @@ with col3:
                 '* 4:常温常雨 5:常温多雨 6:常温少雨\n'
                 '* 7:低温少雨 8:低温常雨 9:低温多雨\n', icon="ℹ️")
         btn = st.button('运行程序', on_click=onRun, args=[float(generatedYears), float(weatherScenes)])
-
+        # ==============================获取并准备下载数据==============================
         if btn:
             # 读取数据
             pathM = r'E:\a_python\program\testForMatlab\weather_generation\out.mat'
@@ -92,12 +87,7 @@ with col3:
                     file_name="基于天气情景生成器的模拟数据.zip",
                     mime="application/zip",
                 )
-
-# uploaded_files = st.file_uploader("加载数据集", accept_multiple_files=True)
-# for uploaded_file in uploaded_files:
-#     bytes_data = uploaded_file.read()
-#     st.write("filename:", uploaded_file.name)
-# st.write(bytes_data)
+        # =======================可视化结果=======================
 print('---')
 st.markdown("##### 可视化结果")
 if btn33:

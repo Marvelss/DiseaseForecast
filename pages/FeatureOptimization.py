@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 
 from modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
 
+st.set_page_config(
+    layout="wide"
+)
 if 'page14' not in st.session_state:
     st.session_state.page14 = 0
 
@@ -19,11 +22,9 @@ if "OptimizationMethodName" not in st.session_state:
     st.session_state["OptimizationMethodName"] = {
         'checkBox': None
     }
-st.set_page_config(
-    layout="wide"
-)
 
 
+# 获取选项值对应名称
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
         return 'Person相关性分析'
@@ -73,6 +74,7 @@ def simulate_temperature_data():
     return dfT
 
 
+# 取消所有选项按钮
 def clear_all():
     for h in range(checkBoxNum):
         if st.session_state[f'checkbox{h}']:
@@ -81,6 +83,7 @@ def clear_all():
     return
 
 
+# 取消其他选项按钮
 def clear_other(key):
     for h in range(checkBoxNum):
         if h != key:
@@ -88,6 +91,7 @@ def clear_other(key):
     return
 
 
+# 控制左侧表格不同数据集显示
 def firstPage(): st.session_state.page14 = 0
 
 
@@ -96,7 +100,6 @@ def onRun():
         st.session_state["leftTabs"].append('优选特征')
     st.session_state.page14 += 1
 
-    # 调用数据和各类方法
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[3]["编号"].tolist()
     fields = pages_utils.TempDataSetField[3]["输入特征"].tolist()
@@ -117,6 +120,7 @@ def onRun():
                 pages_utils.TempDataSet[2],
                 fields[0]).ReliefF(methodParam)
 
+        # ===============合并处理后数据集===============
         row_size = len(afterHandleData)
         # print('-------优选特征-------')
         intersection_cols = pages_utils.getIntersectionCols(
@@ -128,7 +132,7 @@ def onRun():
 
         print('======================优选特征======================')
         print(pages_utils.TempDataSet[3])
-        # 更新记录
+        # ===============更新左侧显示内容===============
         update_values = {
             # "数据类型": "气象数据", "输入特征": fields[0],
             # "优选特征": fields[0],
@@ -142,19 +146,15 @@ def onRun():
                     pages_utils.TempDataSetField[3].loc[index, key] = value
 
 
+# ==============================界面==============================
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
 dataPCV, dataPCM = st.columns([0.5, 0.7])
 with dataPCV:
     st.markdown("##### 数据与特征")
-    # st.data_editor(pages_utils.TempDataSet[0])
-    # st.markdown(pages_utils.TempDataSet[1])
-    # st.markdown(pages_utils.TempDataSet[2])
-    # st.markdown(pages_utils.TempDataSet[3])
-    # =======================左侧数据与特征显示=======================
+    # ===============显示左侧数据与特征表格===============
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
-        # st.markdown(st.session_state.page12)
         with placeholder1.container():
             tt1 = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
@@ -189,8 +189,7 @@ with dataPCV:
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
                         column_order=column)
-    # =======================获取特征数据集表信息=======================
-    # =======================选择数据集=======================
+    # ===============显示左下字段或特征及获取===============
     # a = st.selectbox(
     #     '选择数据集',
     #     ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
@@ -208,6 +207,7 @@ with dataPCV:
     result3 = pages_utils.multiselect_all(
         st, '全选-农学数据', agricultureName,
         'temp', 'collapsed')
+# ===============显示右上处理方法选项===============
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
     with tab1:
@@ -217,7 +217,8 @@ with dataPCM:
     with tab2:
         genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other, args=[2])
     st.markdown('---')
-    # st.markdown("##### 方法参数设置")
+
+    # ===============显示和处理右中各个处理方法设置参数===============
     if genre:
         st.markdown('提取条件')
         genre2 = st.radio(
@@ -254,9 +255,10 @@ with dataPCM:
             st.session_state["OptimizationMethodName"]['param2'] = str(number2)
 
         st.session_state["OptimizationMethodName"]['param3'] = option111
+
+    # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([5, 1])
     btn = interval_col2.button('添加处理', on_click=clear_all)
-    # =======================执行任务清单=======================
     if btn:
         for key11, value11 in st.session_state["OptimizationMethodName"].items():
             pass
@@ -277,9 +279,10 @@ with dataPCM:
         st.rerun()
     st.markdown('---')
 
-    # =======================显示任务清单=======================
+    # =======================显示右下内容=======================
     placeholder = st.empty()
     if st.session_state.page14 == 0:
+        # =======================显示右下任务清单表格=======================
         with placeholder.container():
             st.markdown('##### 任务清单')
             edited_df28 = st.data_editor(
@@ -289,6 +292,7 @@ with dataPCM:
             interval_col34, interval_col33 = st.columns([5, 1])
             btn2 = interval_col33.button('运行', on_click=onRun)
     elif st.session_state.page14 == 1:
+        # =======================显示右下可视化图表=======================
         with placeholder.container():
             st.markdown('##### 可视化')
             tab1, tab2 = st.tabs(["1", "2"])

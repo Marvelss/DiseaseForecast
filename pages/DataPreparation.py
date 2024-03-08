@@ -241,7 +241,8 @@ with dataPCM:
     with col2:
         agree10 = st.checkbox("缺失值插补", key='checkbox1', on_change=clear_other, args=[1])
     st.markdown('---')
-    # st.markdown("##### 方法参数设置")
+
+    # ===============显示和处理右中各个处理方法设置参数===============
     if agree10:
         # 显示缺失值信息
         info = '缺失字段个数及占比:\n'
@@ -264,7 +265,6 @@ with dataPCM:
             st.info(f"{info}\n", icon="ℹ️️")
         else:
             st.warning(f"{info}\n", icon="⚠️")
-        # ===============显示和处理右中各个处理方法设置参数===============
         coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:
             option = st.selectbox(
