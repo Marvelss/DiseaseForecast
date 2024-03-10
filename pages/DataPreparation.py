@@ -347,19 +347,24 @@ with dataPCM:
     elif st.session_state.page12 == 1:
         with placeholder.container():
             st.markdown('##### 可视化')
+            plt.rc("font", family='Microsoft YaHei')
             tab1, tab2, tab3 = st.tabs(["1", "2", "3"])
             with tab1:
-                # 模拟气温数据
-                temperature_data = simulate_temperature_data()
-                st.line_chart(temperature_data.set_index('Time'))
-            with tab2:
                 # 模拟降水数据
                 precipitation_data = simulate_precipitation_data()
-                fig, ax = plt.subplots()
-                sns.lineplot(data=precipitation_data)
-                ax.set_xlabel('Time(hours)')
-                ax.set_ylabel('Precipitation')
-                st.pyplot(fig)
+                # 绘制最高温度和最低温度的折线图
+                plt.figure(figsize=(10, 5))
+                sns.lineplot(data=precipitation_data, x="Time", y="Precipitation", label="降水量")
+                plt.xlabel('日期')
+                plt.ylabel('降水量(mm)')
+                plt.title('预处理后降水量')
+                plt.legend()
+                st.pyplot(plt)
+                # 模拟气温数据
+
+            with tab2:
+                pass
+                # temperature_data = simulate_temperature_data()
             with tab3:
                 df111 = simulate_box_data()
                 # 绘制箱型图

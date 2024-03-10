@@ -6,6 +6,8 @@ import streamlit as st
 
 import pages_utils
 from modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 st.set_page_config(
     layout="wide"
@@ -19,6 +21,20 @@ if "featureMethodName" not in st.session_state:
     st.session_state["featureMethodName"] = {
         'checkBox': None
     }
+
+
+# 模拟月降水量数据
+def simulate_month_precipitation():
+    # 生成一个包含一整年每个月第一天的日期时间序列
+    months = pd.date_range(start='2023-01-01', end='2023-12-01', freq='MS')
+
+    # 生成12个随机的降水量数据
+    precipitation = np.random.uniform(0, 100, size=12)
+
+    # 创建包含月份和降水量的数据框
+    data = {'Month': months, 'Precipitation': precipitation}
+    df = pd.DataFrame(data)
+    return df
 
 
 # 获取选项值对应名称
@@ -290,26 +306,19 @@ with featureCCM:
         # =======================显示右下可视化图表=======================
         with placeholder.container():
             st.markdown('##### 可视化')
+            plt.rc("font", family='Microsoft YaHei')
             tab1, tab2 = st.tabs(["1", "2"])
             with tab1:
-                precipitation_data = np.random.normal(50, 10, 20)
-                chart_data = pd.DataFrame({
-                    "Precipitation": precipitation_data,
-                    "月份": np.arange(1, 21),  # 月份从1到20
-                    "图例": np.random.randint(1, 5, 20)  # 随机生成图例数据
-                })
-                st.vega_lite_chart(
-                    chart_data,
-                    {
-                        "mark": {"type": "circle", "tooltip": True},
-                        "encoding": {
-                            "x": {"field": "月份", "type": "quantitative"},
-                            "y": {"field": "Precipitation", "type": "quantitative"},
-                            "size": {"field": "图例", "type": "quantitative"},
-                            "color": {"field": "图例", "type": "quantitative"},
-                        },
-                    },
-                )
+                # 模拟降水数据
+                precipitation_data = simulate_month_precipitation()
+                # 绘制最高温度和最低温度的折线图
+                plt.figure(figsize=(10, 5))
+                sns.lineplot(data=precipitation_data, x="Month", y="Precipitation", label="降水量")
+                plt.xlabel('日期')
+                plt.ylabel('降水累积量(mm)')
+                plt.title('降水累积量特征')
+                plt.legend()
+                st.pyplot(plt)
             with tab2:
                 pass
             interval_col34, interval_col33 = st.columns([5, 1])
