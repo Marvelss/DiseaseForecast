@@ -88,7 +88,7 @@ def onTrain():
     models = pages_utils.TempDataSetField[4]["模型"].tolist()
     modelParam = pages_utils.TempDataSetField[4]["模型参数"].tolist()
     evaluationIndicator = pages_utils.TempDataSetField[4]["评价指标"].tolist()
-    dataPartitioning = pages_utils.TempDataSetField[4]["数据集划分"].tolist()
+    dataPartitioning = pages_utils.TempDataSetField[4]["数据集划分比例"].tolist()
     features = pages_utils.TempDataSetField[4]["特征"].tolist()
     targets = pages_utils.TempDataSetField[4]["标签"].tolist()
     # ===============测试是否统一时间分辨率===============
@@ -217,7 +217,7 @@ with modelACV:
                     elif st.session_state["leftTabs"][i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     elif st.session_state["leftTabs"][i] == '模型':
-                        column = ["编号", "模型", "评价指标", "数据集划分", "时间", "下载模型结构、结果和参数值"]
+                        column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -237,7 +237,7 @@ with modelACV:
                     elif st.session_state["leftTabs"][i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     elif st.session_state["leftTabs"][i] == '模型':
-                        column = ["编号", "模型", "评价指标", "数据集划分", "时间", "下载模型结构、结果和参数值"]
+                        column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -340,7 +340,7 @@ with modelACM:
                 options=("8:2", "7:3", "6:4"), label_visibility='collapsed'
             )
             for index, row in pages_utils.TempDataSetField[4].iterrows():
-                pages_utils.TempDataSetField[4].loc[index, '数据集划分'] = option
+                pages_utils.TempDataSetField[4].loc[index, '数据集划分比例'] = option
             interval_col1, interval_col2 = st.columns([5, 1])
             interval_col1.button("保存", on_click=firstPage)
 
