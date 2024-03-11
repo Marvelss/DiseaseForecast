@@ -34,6 +34,10 @@ def getCheckboxName(checkbox):
         return 'Relief-F互相关分析'
 
 
+def mergeArray4(list1, list2, list3, list4):
+    return list(set().union(*[list1, list2, list3, list4]))
+
+
 def mergeArray(list1, list2, list3):
     return list(set().union(*[list1, list2, list3]))
 
@@ -95,7 +99,7 @@ def clear_other(key):
 def firstPage(): st.session_state.page14 = 0
 
 
-def onRun():
+def onRun(reservedFiled):
     if '优选特征' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('优选特征')
     st.session_state.page14 += 1
@@ -112,13 +116,13 @@ def onRun():
         if tempMethod == 't检验':
             afterHandleData = FeatureOptimizationMethod(
                 pages_utils.TempDataSet[2],
-                fields[0]).tTest(methodParam)
+                fields[0], reservedFiled).tTest(methodParam)
         elif tempMethod == 'Person相关性分析':
             pass
         elif tempMethod == 'Relief-F互相关分析':
             afterHandleData = FeatureOptimizationMethod(
                 pages_utils.TempDataSet[2],
-                fields[0]).ReliefF(methodParam)
+                fields[0], reservedFiled).ReliefF(methodParam)
 
         # ===============合并处理后数据集===============
         row_size = len(afterHandleData)
@@ -290,7 +294,19 @@ with dataPCM:
                 column_order=["编号", "数据类型", "输入特征", "优选特征", "特征优选方法", '时间'],
                 disabled=["数据类型", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
-            btn2 = interval_col33.button('运行', on_click=onRun)
+            with interval_col33:
+                with st.popover("准备运行"):
+                    st.markdown('保留字段选择')
+                    residualField = [arr for arr in pages_utils.TempDataSet[2].columns if
+                                     arr not in mergeArray4(
+                                         ['上级单位', '测报站点',
+                                          "年", "DayOfYear"], result1, result2, result3)]
+                    # print(f'剩余字段{residualField}')
+                    reservedFiled = pages_utils.multiselect_all(
+                        st, '全选',
+                        residualField,
+                        'temp2', 'collapsed')
+                    btn = st.button('运行', on_click=onRun, args=[reservedFiled])
     elif st.session_state.page14 == 1:
         # =======================显示右下可视化图表=======================
         with placeholder.container():

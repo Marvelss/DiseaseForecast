@@ -12,15 +12,21 @@ from skrebate import ReliefF
 
 
 class FeatureOptimizationMethod:
-    def __init__(self, dataFrame, fieldName):
+    def __init__(self, dataFrame, fieldName, reservedField):
         self.dataFrame = dataFrame
         self.fieldName = fieldName
+        self.reservedField = ['上级单位', '测报站点', "年", "DayOfYear"] + reservedField
 
     # t检验
     def tTest(self, methodParam):
         pValue = methodParam[0][0]
+        # print(pValue)
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
+        print('============测试============')
+        print(newDataFrame)
+        print(self.fieldName[0])
+        print(self.fieldName[1])
         # 创建一个空列表来存储显著的降水特征
         # significant_features = []
         # 计算 t 检验的 p 值，并选择 p < 0.05 的特征
@@ -33,10 +39,7 @@ class FeatureOptimizationMethod:
             newDataFrame[self.fieldName[1]])
         print('======================特征优选-t检验结果======================')
         print(t_stat, p_value)
-        tempData = newDataFrame[['上级单位', '测报站点',
-                                 "年", "MonthOfYear",
-                                 "DecadeOfYear", "DayOfYear",
-                                 '降水', '发生程度']]
+        tempData = newDataFrame[self.reservedField + self.fieldName]
         return tempData
 
     # t检验
@@ -77,7 +80,6 @@ class FeatureOptimizationMethod:
         elif name == '按权重值计算':
             # 按照权重阈值选取特征
             # 设置得分阈值
-            score_threshold = 0.42
             score_threshold = proportion
             # 选取得分高于阈值的特征
             selected_features_indices = np.where(feature_scores > score_threshold)[0]
@@ -85,7 +87,7 @@ class FeatureOptimizationMethod:
         # X_train_transformed = X_train[:, selected_features_indices]
         # X_test_transformed = X_test[:, selected_features_indices]
         selected_features = df.columns[selected_features_indices]
-        tempData = df[selected_features]
+        tempData = df[selected_features + self.reservedField]
         print('--调用--')
         print(tempData)
         return tempData

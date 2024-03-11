@@ -23,6 +23,10 @@ if "featureMethodName" not in st.session_state:
     }
 
 
+def mergeArray4(list1, list2, list3, list4):
+    return list(set().union(*[list1, list2, list3, list4]))
+
+
 # 模拟月降水量数据
 def simulate_month_precipitation():
     # 生成一个包含一整年每个月第一天的日期时间序列
@@ -89,7 +93,7 @@ def getFeatureName(processName):
         return '时空抽取'
 
 
-def onRun():
+def onRun(reservedField):
     if '被选特征' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('被选特征')
     st.session_state.page13 += 1
@@ -102,16 +106,17 @@ def onRun():
     print('===============获取任务清单内容===============')
     print(methodParam)
     print(methodList)
+
+    afterHandleData = None
     # ===============根据名称匹配调用并执行各个处理方法===============
     for tempMethod in methodList:
-        afterHandleData = None
         if tempMethod == '时间(温度)分辨率转换':
             pass
         elif tempMethod == '降雨日数计算':
             return '降雨日数'
         elif tempMethod == '降水累积量计算':
             afterHandleData = FeatureCalculationMethod(
-                pages_utils.TempDataSet[1], fields[0][0]).precipitationAccumulation(methodParam)
+                pages_utils.TempDataSet[1], fields[0][0], reservedField).precipitationAccumulation(methodParam)
         elif tempMethod == '基于活动期积温的生育期计算':
             return '生育期'
         elif tempMethod == '时空抽取':
@@ -142,6 +147,10 @@ def onRun():
                 for key, value in update_values.items():
                     pages_utils.TempDataSetField[2].loc[index, key] = value
                     # 根据字段名和索引来更新字段值
+    # ======================特征计算-保留字段======================
+    print('======================特征计算-保留字段======================')
+    tempReserved = afterHandleData.columns
+    pages_utils.TempDataSet[2] = pages_utils.TempDataSet[2][tempReserved]
 
 
 # ==============================界面==============================
@@ -301,7 +310,20 @@ with featureCCM:
                 column_order=["编号", "数据类型", "输入特征", "被选特征", "特征计算方法", '时间'],
                 disabled=["数据类型", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
-            btn2 = interval_col33.button('运行', on_click=onRun)
+            with interval_col33:
+                with st.popover("准备运行"):
+                    st.markdown('保留字段选择')
+                    residualField = [arr for arr in pages_utils.TempDataSet[1].columns if
+                                     arr not in mergeArray4(
+                                         ['上级单位', '测报站点',
+                                          "年", "DayOfYear"], result1, result2, result3)]
+                    # print(f'剩余字段{residualField}')
+                    reservedFiled = pages_utils.multiselect_all(
+                        st, '全选',
+                        residualField,
+                        'temp2', 'collapsed')
+                    btn = st.button('运行', on_click=onRun, args=[reservedFiled])
+            # btn2 = interval_col33.button('运行', on_click=onRun)
     elif st.session_state.page13 == 1:
         # =======================显示右下可视化图表=======================
         with placeholder.container():

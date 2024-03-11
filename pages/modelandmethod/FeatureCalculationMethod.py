@@ -8,9 +8,10 @@ import pandas as pd
 
 
 class FeatureCalculationMethod:
-    def __init__(self, dataFrame, fieldName):
+    def __init__(self, dataFrame, fieldName, reservedField):
         self.dataFrame = dataFrame
         self.fieldName = fieldName
+        self.reservedField = ['上级单位', '测报站点', "年", "DayOfYear"] + reservedField
 
     # 降水累积量计算
     def precipitationAccumulation(self, timeRation):
@@ -27,8 +28,5 @@ class FeatureCalculationMethod:
             month_precipitation = (newDataFrame.groupby('MonthOfYear')['降水'].
                                    sum().reset_index(name='月累积降水量'))
             temp = pd.merge(newDataFrame, month_precipitation, on='MonthOfYear', how='left')
-        tempData = temp[['上级单位', '测报站点',
-                         "年", "MonthOfYear",
-                         "DecadeOfYear", "DayOfYear",
-                         '月累积降水量']]
+        tempData = temp[self.reservedField + [self.fieldName]]
         return tempData
