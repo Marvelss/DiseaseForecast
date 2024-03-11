@@ -42,7 +42,7 @@ class PretreatmentMethod:
 
         # 获取原始记录数
         lengthBefore = len(newDataFrame)
-        newDataFrame[self.fieldName] = newDataFrame[self.fieldName].clip(minNum, maxNum)
+        # newDataFrame[self.fieldName] = newDataFrame[self.fieldName].clip(minNum, maxNum)
         newDataFrame = newDataFrame[
             (newDataFrame[self.fieldName] >= minNum) &
             (newDataFrame[self.fieldName] <= maxNum)]
