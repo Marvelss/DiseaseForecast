@@ -334,12 +334,12 @@ with dataPCM:
     # =======================显示右下内容=======================
     placeholder = st.empty()
     if st.session_state.page12 == 0:
-        pages_utils.TempDataSet[1] = pages_utils.TempDataSet[0].copy()
-        # 初始化添加旬、月字段
-        pages_utils.TempDataSet[1]['MonthOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
-            lambda x: (x - 1) // 30 + 1)  # 简化的月份计算，实际应用中可能需要更精确的方法
-        pages_utils.TempDataSet[1]['DecadeOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
-            lambda x: (x - 1) // 10 + 1)  # 计算旬
+        # pages_utils.TempDataSet[1] = pages_utils.TempDataSet[0].copy()
+        # # 初始化添加旬、月字段
+        # pages_utils.TempDataSet[1]['MonthOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
+        #     lambda x: (x - 1) // 30 + 1)  # 简化的月份计算，实际应用中可能需要更精确的方法
+        # pages_utils.TempDataSet[1]['DecadeOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
+        #     lambda x: (x - 1) // 10 + 1)  # 计算旬
 
         # =======================显示右下任务清单表格=======================
         with placeholder.container():
