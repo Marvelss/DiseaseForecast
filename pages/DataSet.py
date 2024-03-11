@@ -112,7 +112,7 @@ with dataSCM:
             # 合并数据
             pages_utils.TempDataSet[0] = pd.merge(
                 data33, pages_utils.TempDataSet[0],
-                on=intersection_cols, how="left")
+                on=intersection_cols, how="outer")
         print('======================实时原始数据集======================')
         print(pages_utils.TempDataSet[0])
 # ==============================右侧文件上传状态显示==============================
