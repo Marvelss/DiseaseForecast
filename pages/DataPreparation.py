@@ -81,6 +81,10 @@ def mergeArray(list1, list2, list3):
     return list(set().union(*[list1, list2, list3]))
 
 
+def mergeArray4(list1, list2, list3, list4):
+    return list(set().union(*[list1, list2, list3, list4]))
+
+
 # 取消选中所有选项
 def clearOption():
     for h in range(checkBoxNum):
@@ -104,7 +108,7 @@ def firstPage(): st.session_state.page12 = 0
 
 
 # 运行任务清单中所有方法
-def onRun():
+def onRun(reservedField):
     if '预处理后数据集' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('预处理后数据集')
     st.session_state.page12 += 1
@@ -121,12 +125,13 @@ def onRun():
     # print(fields[1])
     print(methodParam)
     print(type(pages_utils.TempDataSetField[1]["编号"]))
+    afterHandleData = None
     for indexT, tempMethod in enumerate(methodList):
-        afterHandleData = None
         # print(tempMethod)
         if tempMethod == '缺失值插补':
             afterHandleData, missingValueBefore, missingValueAfter = PretreatmentMethod(
-                pages_utils.TempDataSet[0], fields[indexT]).linearInterpolation()
+                pages_utils.TempDataSet[0],
+                fields[indexT], reservedField).linearInterpolation()
             # 显示填补信息
             st.toast(f'填补缺失值:{str(missingValueBefore - missingValueAfter)}' +
                      '\n' +
@@ -134,7 +139,8 @@ def onRun():
         elif tempMethod == '剔除异常值':
             print(f'执行任务==={fields[indexT]}-{methodParam[indexT]}')
             afterHandleData, outlierNum, lengthAfter = PretreatmentMethod(
-                pages_utils.TempDataSet[0], fields[indexT]).outlierEliminator(methodParam[indexT])
+                pages_utils.TempDataSet[0],
+                fields[indexT], reservedField).outlierEliminator(methodParam[indexT])
             print('========执行完后数据')
             print(len(afterHandleData[fields[indexT]]))
             # 显示填补信息
@@ -146,11 +152,11 @@ def onRun():
         intersection_cols = pages_utils.getIntersectionCols(
             pages_utils.TempDataSet[1], afterHandleData
         )
+
         pages_utils.TempDataSet[1] = pd.merge(
             afterHandleData, pages_utils.TempDataSet[1],
             on=intersection_cols, how="left")
         print('======================预处理后数据集======================')
-        print(pages_utils.TempDataSet[1])
 
         # ===============更新左侧显示内容===============
         update_values = {
@@ -163,6 +169,11 @@ def onRun():
             if row["编号"] == idNumber[0]:
                 for key1, value1 in update_values.items():
                     pages_utils.TempDataSetField[1].loc[index, key1] = value1
+
+    # ======================保留字段======================
+    print('======================保留字段======================')
+    tempReserved = afterHandleData.columns
+    pages_utils.TempDataSet[1] = pages_utils.TempDataSet[1][tempReserved]
 
 
 # ==============================界面==============================
@@ -341,7 +352,20 @@ with dataPCM:
                 column_order=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", '时间'],
                 disabled=["数据类型", "输入字段", "预处理后字段", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
-            btn2 = interval_col33.button('运行', on_click=onRun)
+            with interval_col33:
+                with st.popover("准备运行"):
+                    st.markdown('保留字段选择')
+                    residualField = [arr for arr in pages_utils.TempDataSet[0].columns if
+                                     arr not in mergeArray4(
+                                         ['上级单位', '测报站点',
+                                          "年", "DayOfYear"], result1, result2, result3)]
+                    # print(f'剩余字段{residualField}')
+                    reservedFiled = pages_utils.multiselect_all(
+                        st, '全选',
+                        residualField,
+                        'temp1', 'collapsed')
+                    btn = st.button('运行', on_click=onRun, args=[reservedFiled])
+            # btn2 = interval_col33.button('运行', on_click=onRun)
 
         # =======================显示右下可视化图表=======================
     elif st.session_state.page12 == 1:
