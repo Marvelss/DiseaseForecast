@@ -18,29 +18,35 @@ tab1, tab2 = st.tabs(['数据及下载', '可视化'])
 with tab1:
     col1, col2 = st.columns([0.7, 0.2])
     with col2:
+        column = ['无数据']
         option55 = st.selectbox(
             '选择下载内容',
-            options=st.session_state["leftTabs"])
+            options=st.session_state["leftTabs"][1:])  # 从第二个元素开始获取
         if option55 == '模型':
             result1 = pages_utils.multiselect_all(
                 st, '全选',
-                ['SVM', 'FLDA'],
+                pages_utils.TempDataSetField[4]['模型'],
                 'temp11', 'collapsed')
             btn11 = st.button('下载特征和标签、模型结构及训练结果')
-        else:
-            result1 = pages_utils.multiselect_all(
-                st, '全选',
-                ['降水', '温度'],
-                'temp111', 'collapsed')
-            btn11 = st.button('下载')
+        elif option55 == '预处理后数据集':
+            column = pages_utils.TempDataSet[1].columns.tolist()
+        elif option55 == '被选特征':
+            column = pages_utils.TempDataSet[2].columns.tolist()
+        elif option55 == '优选特征':
+            column = pages_utils.TempDataSet[3].columns.tolist()
+        result1 = pages_utils.multiselect_all(
+            st, '全选',
+            column,
+            'temp111', 'collapsed')
+        btn11 = st.button('下载')
 
-    with col1:
-        tt1 = st.tabs(st.session_state["leftTabs"])
-        for i in range(len(st.session_state["leftTabs"])):
-            with tt1[i]:
-                st.data_editor(
-                    pages_utils.TempDataSet[i],
-                    height=800, width=1500)
+with col1:
+    tt1 = st.tabs(st.session_state["leftTabs"])
+    for i in range(len(st.session_state["leftTabs"])):
+        with tt1[i]:
+            st.data_editor(
+                pages_utils.TempDataSet[i],
+                height=800, width=1500)
 with tab2:
     col1, col2 = st.columns([0.2, 0.7])
     with col1:
