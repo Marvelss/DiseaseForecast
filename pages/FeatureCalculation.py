@@ -114,7 +114,8 @@ def onRun(reservedField):
         if tempMethod == '时间(温度)分辨率转换':
             pass
         elif tempMethod == '降雨日数计算':
-            return '降雨日数'
+            afterHandleData = FeatureCalculationMethod(
+                pages_utils.TempDataSet[1], fields[0][0], reservedField).rainfallDaysAccumulation(methodParam)
         elif tempMethod == '降水累积量计算':
             afterHandleData = FeatureCalculationMethod(
                 pages_utils.TempDataSet[1], fields[0][0], reservedField).precipitationAccumulation(methodParam)
@@ -217,7 +218,7 @@ with featureCCM:
     col1, col2 = st.columns(2)
     with col1:
         option14 = st.checkbox('时间(温度)分辨率转换', key='checkbox0', on_change=clear_other, args=[0], disabled=True)
-        option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1], disabled=True)
+        option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1])
         option16 = st.checkbox('降水累积量计算', key='checkbox2', on_change=clear_other, args=[2])
     with col2:
         option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3],
@@ -235,11 +236,18 @@ with featureCCM:
         option = st.selectbox(
             '计算阈值方式',
             ('总降水量', '单日降水量'))
+        st.session_state["featureMethodName"]['param1'] = str(d1)
+        st.session_state["featureMethodName"]['param2'] = str(d2)
+        st.session_state["featureMethodName"]['param3'] = option
         if option == '总降水量':
-            number1 = st.number_input("总降水量数值(mm)", value=100)
+            number11 = st.number_input("总降水量数值(mm)", value=100)
+            st.session_state["featureMethodName"]['param4'] = str(number11)
         if option == '单日降水量':
             number2 = st.text_input("单日降水量数值(mm)", value=0.1)
+            st.session_state["featureMethodName"]['param4'] = str(number2)
         number1 = st.number_input("连续降雨日数时长(天数)", value=1, min_value=1)
+        st.session_state["featureMethodName"]['param5'] = str(number1)
+
     if option16:
         option3 = st.selectbox(
             '降水累积量计算',
@@ -284,6 +292,7 @@ with featureCCM:
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["featureMethodName"].items():
             pass
+            # print('============测试方法参数正确性============')
             # print(f"Key: {key11}, Value: {value11}")
         new_data = {
             "编号": pages_utils.generateID(),

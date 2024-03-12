@@ -4,6 +4,8 @@
 @File : FeatureCalculationMethod.py
 @Description : 特征计算方法
 """
+from datetime import datetime
+
 import pandas as pd
 
 
@@ -43,7 +45,7 @@ class FeatureCalculationMethod:
 
             # 计算每月降水量总和
             monthly_precipitation_sum = newDataFrame.groupby(['年', '月'])['降水'].sum().reset_index(
-                name='月累积降水量')
+                name='降水累积量')
 
             # 将月降水量总和合并回原始DataFrame
             # 使用左连接保证所有原始记录都被保留
@@ -62,10 +64,53 @@ class FeatureCalculationMethod:
 
             # 计算每旬的累积降水量
             decade_precipitation_sum = newDataFrame.groupby(['年', '月', '旬'])['降水'].sum().reset_index(
-                name='旬累积降水量')
+                name='降水累积量')
 
             # 将旬累积降水量合并回原始DataFrame
             temp = pd.merge(newDataFrame, decade_precipitation_sum, on=['年', '月', '旬'], how='left')
 
-        tempData = temp[list(set(self.reservedField + [self.fieldName] + [timeRation[0][0]]))]
+        tempData = temp[list(set(self.reservedField + ['降水累积量']))]
         return tempData
+
+    # 计算降雨日数
+    def rainfallDaysAccumulation(self, param):
+        # 复制新的变量
+        newDataFrame = self.dataFrame.copy()
+        print('===========接收参数===========')
+        print(param)
+        startMD = param[0][0]
+        tempS = startMD.split('-')
+        startM, startD = int(tempS[1]), int(tempS[2])
+        endMD = param[0][1]
+        tempE = endMD.split('-')
+        endM, endD = int(tempE[1]), int(tempE[2])
+        rule = param[0][2]
+        minNum = param[0][3]
+        duration = param[0][4]  # 暂未使用,默认1天
+        print(self.fieldName)
+        if rule == '单日降水量':
+            # 转换DayOfYear为日期
+            newDataFrame['日期'] = pd.to_datetime(
+                newDataFrame['年'].astype(str) +
+                newDataFrame['DayOfYear'].astype(str), format='%Y%j')
+            # 根据上级单位、测报站点、年分类
+            grouped = newDataFrame.groupby(['上级单位', '测报站点', '年'])
+            for (key, group) in grouped:
+                start_date_range = datetime(key[2], startM, startD)
+                end_date_range = datetime(key[2], endM, endD)
+                rainy_days_count = len(
+                    group[
+                        (group['日期'] >= start_date_range) &
+                        (group['日期'] <= end_date_range) &
+                        (group[self.fieldName] > float(minNum))]
+                )
+                # print(key, rainy_days_count)
+
+                # Assign the calculated rainy days count to the '降雨日数' column within the specified date range
+                mask = (newDataFrame['上级单位'] == key[0]) & (newDataFrame['测报站点'] == key[1]) & (
+                        newDataFrame['日期'] >= start_date_range) & (
+                               newDataFrame['日期'] <= end_date_range)
+                newDataFrame.loc[mask, '降雨日数'] = rainy_days_count
+            # print(newDataFrame)
+            tempData = newDataFrame[list(set(self.reservedField + ['降雨日数']))]
+            return tempData
