@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import streamlit as st
+from streamlit import switch_page
 
 import pages_utils
 from modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
@@ -344,4 +345,7 @@ with featureCCM:
             with tab2:
                 pass
             interval_col34, interval_col33 = st.columns([5, 1])
+            want_to_contribute = interval_col34.button("跳转至可视化界面")
+            if want_to_contribute:
+                switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\Visualization.py")
             btn3 = interval_col33.button('返回', on_click=firstPage)

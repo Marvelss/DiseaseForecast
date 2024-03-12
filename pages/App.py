@@ -23,8 +23,8 @@ show_pages(
         Page("pages/FeatureCalculation.py", "特征计算"),
         Page("pages/FeatureOptimization.py", "特征优选"),
         Page("pages/ModelBuilding.py", "模型构建"),
-        Page("pages/Visualization.py", '数据可视化'),
         Page("pages/ModelApplication.py", '模型应用'),
+        Page("pages/Visualization.py", '可视化'),
         Page("pages/ModelEvaluation.py", "测试界面")
     ]
 )

@@ -4,6 +4,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from streamlit import switch_page
 
 import pages_utils
 import seaborn as sns
@@ -350,4 +351,7 @@ with dataPCM:
                 plt.title('Scatter Plot of Selected Features')
                 st.pyplot(fig)
             interval_col34, interval_col33 = st.columns([5, 1])
+            want_to_contribute = interval_col34.button("跳转至可视化界面")
+            if want_to_contribute:
+                switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\Visualization.py")
             btn3 = interval_col33.button('返回', on_click=firstPage)
