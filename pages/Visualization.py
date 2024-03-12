@@ -16,8 +16,8 @@ st.set_page_config(
 tab1, tab2 = st.tabs(['数据及下载', '可视化'])
 
 with tab1:
-    col1, col2 = st.columns([0.2, 0.7])
-    with col1:
+    col1, col2 = st.columns([0.7, 0.2])
+    with col2:
         option55 = st.selectbox(
             '选择下载内容',
             options=st.session_state["leftTabs"])
@@ -34,7 +34,7 @@ with tab1:
                 'temp111', 'collapsed')
             btn11 = st.button('下载')
 
-    with col2:
+    with col1:
         tt1 = st.tabs(st.session_state["leftTabs"])
         for i in range(len(st.session_state["leftTabs"])):
             with tt1[i]:
