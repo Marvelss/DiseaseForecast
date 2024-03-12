@@ -77,7 +77,7 @@ def clearOtherOption(key1):
 
 
 # 模型训练
-def onTrain():
+def onTrain(temporaResolution):
     if '模型' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('模型')
     st.session_state.page = 0
@@ -93,7 +93,8 @@ def onTrain():
     targets = pages_utils.TempDataSetField[4]["标签"].tolist()
     # ===============测试是否统一时间分辨率===============
     # 若数据集行数不一致则提示
-
+    if temporaResolution!=1:
+        st.toast()
     # ===============获取字段对应数据集===============
     selected_datasets = []
     inputDataSet = []
@@ -351,8 +352,13 @@ with modelACM:
         column_order=["编号", "模型", "时间"],
         disabled=["时间"], num_rows="dynamic", )
     interval_col34, interval_col33 = st.columns([4, 1])
-    btn2 = interval_col33.button('开始模型训练', on_click=onTrain)
-
+    with interval_col33:
+        with st.popover("准备模型训练"):
+            st.info('当前时间分辨率为:1天')
+            temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)
+            btn = st.button('开始模型训练',
+                            on_click=onTrain,
+                            args=[temporaResolutionNum])
     placeholder1 = st.empty()
     # =======================显示右下可视化图表=======================
     if st.session_state.page15 == 1:
