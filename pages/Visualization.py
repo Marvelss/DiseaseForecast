@@ -6,6 +6,8 @@
 """
 import pandas as pd
 import streamlit as st
+from matplotlib import pyplot as plt
+import seaborn as sns
 
 import pages_utils
 
@@ -70,23 +72,54 @@ with col1:
 with tab2:
     col1, col2 = st.columns([0.2, 0.7])
     with col1:
+        column1 = ['无数据']
+        data1 = pd.DataFrame(columns=['无数据'])
         option4 = st.selectbox(
-            '选择数据集',
+            '选择数据集或模型',
             options=st.session_state["leftTabs"])
+        if option4 == '模型':
+            column1 = pages_utils.TempDataSet[4].columns.tolist()
+            data1 = pages_utils.TempDataSet[4]
+        elif option4 == '预处理后数据集':
+            column1 = pages_utils.TempDataSet[1].columns.tolist()
+            data1 = pages_utils.TempDataSet[1]
+        elif option4 == '被选特征':
+            column1 = pages_utils.TempDataSet[2].columns.tolist()
+            data1 = pages_utils.TempDataSet[2]
+        elif option4 == '优选特征':
+            column1 = pages_utils.TempDataSet[3].columns.tolist()
+            data1 = pages_utils.TempDataSet[3]
         option1 = st.selectbox(
             '选择图形',
             options=('散点图', '直方图'))
         option2 = st.selectbox(
             '选择X轴',
-            options=('年', 'DayOfYear'))
+            options=column1)
         option3 = st.selectbox(
             '选择Y轴',
-            options=('预测病株率', '病害发生程度'))
+            options=column1)
         interval_col1, interval_col2 = st.columns([1.4, 1])
         btn = interval_col2.button('添加图形')
 
     with col2:
         if btn:
-            st.bar_chart({"data": [1, 5, 2, 6, 2, 1]})
+            if option1 == '散点图':
+                # 取x,y轴数据
+                file = data[option3]
+                print(option2)
+                print(option3)
+                print(file)
+                # 以下未实现x轴和y轴数据合并成绘图格式
+                plt.rc("font", family='Microsoft YaHei')
+                tab1, tab2 = st.tabs(["1", "2"])
+                with tab1:
+                    # 绘制最高温度和最低温度的折线图
+                    plt.figure(figsize=(10, 5))
+                    sns.lineplot(data=file, x="Year", y="Precipitation", label="降水量")
+                    plt.xlabel('日期')
+                    plt.ylabel('降水累积量(mm)')
+                    plt.title('降水累积量特征')
+                    plt.legend()
+                    st.pyplot(plt)
         else:
             st.markdown('可视化')
