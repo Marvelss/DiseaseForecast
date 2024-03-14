@@ -102,6 +102,7 @@ def onRun(reservedField):
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[2]["编号"].tolist()
     fields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
+    outFields = pages_utils.TempDataSetField[2]["被选特征"].tolist()
     methodParam = pages_utils.TempDataSetField[2]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
     print('===============获取任务清单内容===============')
@@ -110,15 +111,18 @@ def onRun(reservedField):
 
     afterHandleData = None
     # ===============根据名称匹配调用并执行各个处理方法===============
-    for tempMethod in methodList:
+    # 初始化特征计算方法
+    methodTool = FeatureCalculationMethod(
+        pages_utils.TempDataSet[1],
+        reservedField + outFields)
+
+    for indexT, tempMethod in enumerate(methodList):
         if tempMethod == '时间(温度)分辨率转换':
             pass
         elif tempMethod == '降雨日数计算':
-            afterHandleData = FeatureCalculationMethod(
-                pages_utils.TempDataSet[1], fields[0][0], reservedField).rainfallDaysAccumulation(methodParam)
+            afterHandleData = methodTool.rainfallDaysAccumulation(fields[indexT], methodParam[indexT])
         elif tempMethod == '降水累积量计算':
-            afterHandleData = FeatureCalculationMethod(
-                pages_utils.TempDataSet[1], fields[0][0], reservedField).precipitationAccumulation(methodParam)
+            afterHandleData = methodTool.precipitationAccumulation(fields[indexT], methodParam[indexT])
         elif tempMethod == '基于活动期积温的生育期计算':
             return '生育期'
         elif tempMethod == '时空抽取':

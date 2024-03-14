@@ -10,9 +10,8 @@ import pandas as pd
 
 
 class FeatureCalculationMethod:
-    def __init__(self, dataFrame, fieldName, reservedField):
-        self.dataFrame = dataFrame
-        self.fieldName = fieldName
+    def __init__(self, dataFrame, reservedField):
+        self.dataFrame = dataFrame.copy()
         self.reservedField = ['上级单位', '测报站点', "年", "DayOfYear"] + reservedField
 
     # 旬值获取
@@ -26,75 +25,73 @@ class FeatureCalculationMethod:
             return 3
 
     # 降水累积量计算
-    def precipitationAccumulation(self, timeRation):
-        # 复制新的变量
-        newDataFrame = self.dataFrame.copy()
+    def precipitationAccumulation(self, inputFields, timeRation):
         temp = None
-        # newDataFrame['月降水累积量'] = newDataFrame[fieldName].sum()
+        inputField = inputFields[0]
+        flag = timeRation[0]
 
-        # 单独计算插补所用的总和
-        # sum_value = newDataFrame[fieldName].sum()
-        # print(f"均值为: {sum_value}")
-        # newDataFrame['降水累积量'].fillna(sum_value, inplace=True)
-        if timeRation[0][0] == '月累积降水量':
-            newDataFrame['日期'] = pd.to_datetime(
-                newDataFrame['年'].astype(str) + newDataFrame['DayOfYear'].astype(str), format='%Y%j')
+        if flag == '月累积降水量':
+            self.dataFrame['日期'] = pd.to_datetime(
+                self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
 
             # 提取月份
-            newDataFrame['月'] = newDataFrame['日期'].dt.month
+            self.dataFrame['月'] = self.dataFrame['日期'].dt.month
 
             # 计算每月降水量总和
-            monthly_precipitation_sum = newDataFrame.groupby(['年', '月'])['降水'].sum().reset_index(
+            monthly_precipitation_sum = self.dataFrame.groupby(['年', '月'])[inputField].sum().reset_index(
                 name='降水累积量')
 
             # 将月降水量总和合并回原始DataFrame
             # 使用左连接保证所有原始记录都被保留
-            temp = pd.merge(newDataFrame, monthly_precipitation_sum, on=['年', '月'], how='left')
-        elif timeRation[0][0] == '旬累积降水量':
+            temp = pd.merge(self.dataFrame, monthly_precipitation_sum, on=['年', '月'], how='left')
+        elif flag == '旬累积降水量':
             # 转换DayOfYear为日期，以便提取月份
-            newDataFrame['日期'] = pd.to_datetime(
-                newDataFrame['年'].astype(str) + newDataFrame['DayOfYear'].astype(str), format='%Y%j')
+            self.dataFrame['日期'] = pd.to_datetime(
+                self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
 
             # 提取月份
-            newDataFrame['月'] = newDataFrame['日期'].dt.month
+            self.dataFrame['月'] = self.dataFrame['日期'].dt.month
 
             # 计算每天所在的旬，假设1-10日为第一旬，11-20日为第二旬，21日至月末为第三旬
 
-            newDataFrame['旬'] = newDataFrame['日期'].dt.day.apply(FeatureCalculationMethod.get_decade)
+            self.dataFrame['旬'] = self.dataFrame['日期'].dt.day.apply(FeatureCalculationMethod.get_decade)
 
             # 计算每旬的累积降水量
-            decade_precipitation_sum = newDataFrame.groupby(['年', '月', '旬'])['降水'].sum().reset_index(
+            decade_precipitation_sum = self.dataFrame.groupby(['年', '月', '旬'])[inputField].sum().reset_index(
                 name='降水累积量')
 
             # 将旬累积降水量合并回原始DataFrame
-            temp = pd.merge(newDataFrame, decade_precipitation_sum, on=['年', '月', '旬'], how='left')
+            temp = pd.merge(self.dataFrame, decade_precipitation_sum, on=['年', '月', '旬'], how='left')
 
-        tempData = temp[list(set(self.reservedField + ['降水累积量']))]
+        # 删除还没生成的字段
+        tempReservedField = [field for field in self.reservedField if field in temp.columns]
+        print(f'==============降水累积量-筛选特征{tempReservedField}================')
+        tempData = temp[list(set(tempReservedField + ['降水累积量']))]
         return tempData
 
     # 计算降雨日数
-    def rainfallDaysAccumulation(self, param):
+    def rainfallDaysAccumulation(self, inputFields, param):
         # 复制新的变量
-        newDataFrame = self.dataFrame.copy()
         print('===========接收参数===========')
         print(param)
-        startMD = param[0][0]
+        print(inputFields)
+        startMD = param[0]
         tempS = startMD.split('-')
         startM, startD = int(tempS[1]), int(tempS[2])
-        endMD = param[0][1]
+        endMD = param[1]
         tempE = endMD.split('-')
         endM, endD = int(tempE[1]), int(tempE[2])
-        rule = param[0][2]
-        minNum = param[0][3]
-        duration = param[0][4]  # 暂未使用,默认1天
-        print(self.fieldName)
+        rule = param[2]
+        minNum = param[3]
+        # duration = param[0][4]  # 暂未使用,默认1天
+        # print(self.fieldName)
         if rule == '单日降水量':
             # 转换DayOfYear为日期
-            newDataFrame['日期'] = pd.to_datetime(
-                newDataFrame['年'].astype(str) +
-                newDataFrame['DayOfYear'].astype(str), format='%Y%j')
+            self.dataFrame['日期'] = pd.to_datetime(
+                self.dataFrame['年'].astype(str) +
+                self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
             # 根据上级单位、测报站点、年分类
-            grouped = newDataFrame.groupby(['上级单位', '测报站点', '年'])
+            grouped = self.dataFrame.groupby(['上级单位', '测报站点', '年'])
             for (key, group) in grouped:
                 start_date_range = datetime(key[2], startM, startD)
                 end_date_range = datetime(key[2], endM, endD)
@@ -102,15 +99,17 @@ class FeatureCalculationMethod:
                     group[
                         (group['日期'] >= start_date_range) &
                         (group['日期'] <= end_date_range) &
-                        (group[self.fieldName] > float(minNum))]
+                        (group[inputFields[0]] > float(minNum))]
                 )
-                # print(key, rainy_days_count)
 
                 # Assign the calculated rainy days count to the '降雨日数' column within the specified date range
-                mask = (newDataFrame['上级单位'] == key[0]) & (newDataFrame['测报站点'] == key[1]) & (
-                        newDataFrame['日期'] >= start_date_range) & (
-                               newDataFrame['日期'] <= end_date_range)
-                newDataFrame.loc[mask, '降雨日数'] = rainy_days_count
-            # print(newDataFrame)
-            tempData = newDataFrame[list(set(self.reservedField + ['降雨日数']))]
+                mask = (self.dataFrame['上级单位'] == key[0]) & (self.dataFrame['测报站点'] == key[1]) & (
+                        self.dataFrame['日期'] >= start_date_range) & (
+                               self.dataFrame['日期'] <= end_date_range)
+                self.dataFrame.loc[mask, '降雨日数'] = rainy_days_count
+
+            # 删除还没生成的字段
+            tempReservedField = [field for field in self.reservedField if field in self.dataFrame.columns]
+            print(f'==============降雨日数-筛选特征{tempReservedField}================')
+            tempData = self.dataFrame[list(set(tempReservedField + ['降雨日数']))]
             return tempData
