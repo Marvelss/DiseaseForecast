@@ -93,8 +93,8 @@ def onTrain(temporaResolution):
     targets = pages_utils.TempDataSetField[4]["标签"].tolist()
     # ===============测试是否统一时间分辨率===============
     # 若数据集行数不一致则提示
-    if temporaResolution!=1:
-        st.toast()
+    if temporaResolution != 1:
+        st.toast('测试')
     # ===============获取字段对应数据集===============
     selected_datasets = []
     inputDataSet = []
@@ -141,6 +141,7 @@ def onTrain(temporaResolution):
 
     # ===============运行任务清单调用模型准备训练===============
     for tempIndex, tempModel in enumerate(models):
+        evaluationResult = None
         if tempModel == 'SVM':
             evaluationResult = Model(
                 inputDataSet[tempIndex],
@@ -157,14 +158,21 @@ def onTrain(temporaResolution):
             st.toast('SVM训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
 
-    # ===============更新左侧显示内容===============
-    update_values = {
-        "时间": datetime.datetime.now().time()}
-    # 查找要更新的数据记录
-    for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
-        if row1["编号"] == idNumber[0]:
-            for key, value in update_values.items():
-                pages_utils.TempDataSetField[4].loc[index1, key] = value
+        print('==============更新前================')
+        print(evaluationResult)
+        print(pages_utils.TempDataSetField[4])
+        # ===============更新左侧显示内容===============
+        update_values = {
+            "时间": datetime.datetime.now().time(),
+            "评价指标": evaluationResult}
+        # 查找要更新的数据记录
+        for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
+            if row1["编号"] == idNumber[tempIndex]:
+                for key, value in update_values.items():
+                    pages_utils.TempDataSetField[4].at[index1, key] = value
+
+    print('==============更新后指标================')
+    print(pages_utils.TempDataSetField[4])
 
 
 def onModel():
@@ -365,40 +373,32 @@ with modelACM:
         with placeholder1.container():
             st.markdown('---')
             st.write('###### 精度评价')
-            tab1, tab2 = st.tabs(["SVM", "FLDA"])
-            with tab1:
-                # 创建模拟的混淆矩阵
-                data = {'y_Actual': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-                        'y_Predicted': [1, 1, 1, 1, 0, 0, 0, 0, 1, 1]}
-                df = pd.DataFrame(data, columns=['y_Actual', 'y_Predicted'])
-
-                conf_matrix = confusion_matrix(df['y_Actual'], df['y_Predicted'])
-
-                # 使用 seaborn 绘制混淆矩阵图
-                fig, ax = plt.subplots()
-                sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
-                ax.set_xlabel('Predicted Label')
-                ax.set_ylabel('True Label')
-                st.pyplot(fig)
-
-                col2, col3 = st.columns(2)
-                oa = col2.metric("OA", "0.36")
-                pa = col3.metric("Kappa", "0.5")
-            with tab2:
-                # 创建模拟的混淆矩阵
-                data = {'y_Actual': [1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
-                        'y_Predicted': [1, 1, 1, 1, 0, 0, 0, 0, 1, 1]}
-                df = pd.DataFrame(data, columns=['y_Actual', 'y_Predicted'])
-
-                conf_matrix = confusion_matrix(df['y_Actual'], df['y_Predicted'])
-
-                # 使用 seaborn 绘制混淆矩阵图
-                fig, ax = plt.subplots()
-                sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
-                ax.set_xlabel('Predicted Label')
-                ax.set_ylabel('True Label')
-                st.pyplot(fig)
-
-                col2, col3 = st.columns(2)
-                oa1 = col2.metric("OA", "0.37")
-                pa1 = col3.metric("Kappa", "0.8")
+            models = pages_utils.TempDataSetField[4]["模型"].tolist()
+            evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
+            tt1 = st.tabs(models)
+            for i in range(len(models)):
+                with tt1[i]:
+                    # # 创建模拟的混淆矩阵
+                    # data = {'y_Actual': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+                    #         'y_Predicted': [1, 1, 1, 1, 0, 0, 0, 0, 1, 1]}
+                    # df = pd.DataFrame(data, columns=['y_Actual', 'y_Predicted'])
+                    #
+                    # conf_matrix = confusion_matrix(df['y_Actual'], df['y_Predicted'])
+                    #
+                    # # 使用 seaborn 绘制混淆矩阵图
+                    # fig, ax = plt.subplots()
+                    # sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
+                    # ax.set_xlabel('Predicted Label')
+                    # ax.set_ylabel('True Label')
+                    # st.pyplot(fig)
+                    # Populate the array with key-value pairs
+                    metrics = []
+                    for key, value in evaluationIndex[i].items():
+                        metrics.append((key, round(value, 3)))
+                    # Display the metrics in two columns
+                    half = len(metrics) // 2
+                    col1, col2 = st.columns(2)
+                    for h in range(half):
+                        col2.metric(metrics[h][0], metrics[h][1])
+                    for h in range(half, len(metrics)):
+                        col1.metric(metrics[h][0], metrics[h][1])
