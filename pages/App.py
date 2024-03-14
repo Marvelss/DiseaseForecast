@@ -1,6 +1,6 @@
 import streamlit as st
 
-from st_pages import Page,  show_pages
+from st_pages import Page, show_pages
 
 # add_page_title()
 
@@ -24,7 +24,7 @@ show_pages(
         Page("pages/FeatureOptimization.py", "特征优选"),
         Page("pages/ModelBuilding.py", "模型构建"),
         Page("pages/ModelApplication.py", '模型应用'),
-        Page("pages/Visualization.py", '可视化'),
+        Page("pages/Visualization.py", '可视化及数据下载'),
         Page("pages/ModelEvaluation.py", "测试界面")
     ]
 )
