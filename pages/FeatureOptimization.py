@@ -111,19 +111,21 @@ def onRun(reservedFiled):
     methodParam = pages_utils.TempDataSetField[3]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()
     # ===============根据名称匹配调用并执行各个处理方法===============
+    # 初始化特征计算方法
+    featureOptimizationTool = FeatureOptimizationMethod(
+        pages_utils.TempDataSet[2], reservedFiled)
     for tempMethod in methodList:
         afterHandleData = None
         # print(tempMethod)
         if tempMethod == 't检验':
-            afterHandleData = FeatureOptimizationMethod(
-                pages_utils.TempDataSet[2],
-                fields[0], reservedFiled).tTest(methodParam)
+            afterHandleData = featureOptimizationTool.tTest(
+                fields[0], methodParam)
         elif tempMethod == 'Person相关性分析':
             pass
         elif tempMethod == 'Relief-F互相关分析':
             afterHandleData = FeatureOptimizationMethod(
-                pages_utils.TempDataSet[2],
-                fields[0], reservedFiled).ReliefF(methodParam)
+                pages_utils.TempDataSet[2], reservedFiled).ReliefF(
+                fields[0], methodParam)
 
         # ===============合并处理后数据集===============
         row_size = len(afterHandleData)
@@ -247,19 +249,18 @@ with dataPCM:
         option111 = st.selectbox(
             '目标变量',
             mergeArray(result1, result2, result3))
+        st.session_state["OptimizationMethodName"]['param1'] = option111
         option = st.selectbox(
             '提取条件',
             ('按百分比选取', '按权重值计算'))
         if option == '按百分比选取':
-            st.session_state["OptimizationMethodName"]['param1'] = option
+            st.session_state["OptimizationMethodName"]['param2'] = option
             number1 = st.number_input("TOP(%)", value=5, min_value=5, step=5)
-            st.session_state["OptimizationMethodName"]['param2'] = str(number1)
+            st.session_state["OptimizationMethodName"]['param3'] = str(number1)
         if option == '按权重值计算':
-            st.session_state["OptimizationMethodName"]['param1'] = option
+            st.session_state["OptimizationMethodName"]['param2'] = option
             number2 = st.number_input("权重阈值", value=10, min_value=10)
-            st.session_state["OptimizationMethodName"]['param2'] = str(number2)
-
-        st.session_state["OptimizationMethodName"]['param3'] = option111
+            st.session_state["OptimizationMethodName"]['param3'] = str(number2)
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([5, 1])
