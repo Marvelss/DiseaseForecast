@@ -4,6 +4,10 @@
 @File : Model.py
 @Description : 模型训练算法及相关设置参数
 """
+import os
+
+import joblib
+import numpy as np
 import pandas as pd
 from sklearn import svm
 from sklearn.metrics import r2_score, mean_squared_error, accuracy_score, cohen_kappa_score
@@ -69,29 +73,44 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-
+        # 保存模型
+        joblib.dump(model1, r'E:\a_python\program\testPlatform\demo\model2.pkl')
         # =======================获取评价指标=======================
+
         print('======================模型构建-精度指标======================')
-        result = {}
-        print('X_test:')
-        print(X_test)
+        precision = {}
+        savePathDir = os.path.join(os.getcwd(), 'temp')
+        savePath1 = os.path.join(savePathDir, 'predictLabel.xlsx')
+        savePath2 = os.path.join(savePathDir, 'actualLabel.xlsx')
+        pd.DataFrame(y_pred,
+                     columns=['predictLabel']).to_excel(
+            savePath1, index=False)
+        y_test.to_excel(
+            savePath2, index=False)
+        # actualAndPredictResult = [savePath1, savePath2]
+        actualAndPredictResult = y_pred.tolist()
+        # 'predictLabel': ,
+        # 'actualLabel': }
+        print(actualAndPredictResult)
+        # print('X_test:')
+        # print(X_test)
         print('y_pred:')
-        print(y_pred)
+        # print(y_pred)
         tempIndicator = self.evaluationIndicator
+        # print(tempIndicator)
         if ',' in self.evaluationIndicator[0]:
             tempIndicator = self.evaluationIndicator[0].split(',')
         for temp in tempIndicator:
             # 计算均方误差
             if temp == 'MSE':
-                result['MSE'] = mean_squared_error(y_test, y_pred)
+                precision['MSE'] = mean_squared_error(y_test, y_pred)
             # 计算R方
-            elif temp == 'R2':
-                result['R2'] = r2_score(y_test, y_pred)
+            elif temp == 'R方':
+                precision['R方'] = r2_score(y_test, y_pred)
             # 计算OA
             elif temp == 'OA':
-                result['OA'] = accuracy_score(y_test, y_pred)
+                precision['OA'] = accuracy_score(y_test, y_pred)
             # 计算Kappa
             elif temp == 'Kappa':
-                result['Kappa'] = cohen_kappa_score(y_test, y_pred)
-        print(result)
-        return result
+                precision['Kappa'] = cohen_kappa_score(y_test, y_pred)
+        return precision, actualAndPredictResult

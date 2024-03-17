@@ -93,8 +93,8 @@ def onTrain(temporaResolution):
     targets = pages_utils.TempDataSetField[4]["标签"].tolist()
     # ===============测试是否统一时间分辨率===============
     # 若数据集行数不一致则提示
-    if temporaResolution != 1:
-        st.toast('测试')
+    # if temporaResolution != 1:
+    #     st.toast('测试')
     # ===============获取字段对应数据集===============
     selected_datasets = []
     inputDataSet = []
@@ -142,8 +142,9 @@ def onTrain(temporaResolution):
     # ===============运行任务清单调用模型准备训练===============
     for tempIndex, tempModel in enumerate(models):
         evaluationResult = None
+        actualAndPredictResult = None
         if tempModel == 'SVM':
-            evaluationResult = Model(
+            evaluationResult, actualAndPredictResult = Model(
                 inputDataSet[tempIndex],
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning, modelParam,
@@ -159,12 +160,13 @@ def onTrain(temporaResolution):
                      icon='✅')
 
         print('==============更新前================')
-        print(evaluationResult)
         print(pages_utils.TempDataSetField[4])
         # ===============更新左侧显示内容===============
+        print(actualAndPredictResult)
         update_values = {
             "时间": datetime.datetime.now().time(),
             "评价指标": evaluationResult}
+        # "实际和预测值": actualAndPredictResult}
         # 查找要更新的数据记录
         for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
             if row1["编号"] == idNumber[tempIndex]:
@@ -172,7 +174,7 @@ def onTrain(temporaResolution):
                     pages_utils.TempDataSetField[4].at[index1, key] = value
 
     print('==============更新后指标================')
-    print(pages_utils.TempDataSetField[4])
+    # print(pages_utils.TempDataSetField[4])
 
 
 def onModel():
@@ -190,13 +192,16 @@ def onAddModel():
 
 
 # 获取评价指标
-def onPrecision(cbox1, cbox2, cbox3):
-    if cbox1:
-        st.session_state["modelPrecisionName"].append('OA')
-    if cbox2:
-        st.session_state["modelPrecisionName"].append('Kappa')
-    if cbox3:
-        st.session_state["modelPrecisionName"].append('MSE')
+def onPrecision(*cboxList):
+    for cbox in cboxList:
+        if cbox:
+            st.session_state["modelPrecisionName"].append('OA')
+        if cbox:
+            st.session_state["modelPrecisionName"].append('Kappa')
+        if cbox:
+            st.session_state["modelPrecisionName"].append('MSE')
+        if cbox:
+            st.session_state["modelPrecisionName"].append('R方')
     # print(pages_utils.TempDataSetField[4]['评价指标'])
     pages_utils.TempDataSetField[4]['评价指标'] = ','.join(st.session_state["modelPrecisionName"])
     st.session_state.page += 1
@@ -330,14 +335,20 @@ with modelACM:
         # =======================添加评价指标=======================
         with ph.container():
             st.markdown("###### 评价指标")
-            agree6 = st.checkbox('OA', key='checkBoxPrecision0')
-            agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
-            agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
+            tempCol1, tempCol2 = st.columns(2)
+            with tempCol1:
+                agree6 = st.checkbox('OA', key='checkBoxPrecision0')
+                agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
+            with tempCol2:
+                agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
+                agree9 = st.checkbox('R方', key='checkBoxPrecision3')
             interval_col1, interval_col2 = st.columns([5, 1])
+            # 传入指标
+            # tempArgs =
             btn21 = interval_col1.button(
                 "下一步",
                 on_click=onPrecision,
-                args=[agree6, agree7, agree8])
+                args=[agree6, agree7, agree8, agree9])
 
     # Page 2
     elif st.session_state.page == 2:
@@ -375,22 +386,25 @@ with modelACM:
             st.write('###### 精度评价')
             models = pages_utils.TempDataSetField[4]["模型"].tolist()
             evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
+            actualAndPredictList = pages_utils.TempDataSetField[4]["实际和预测值"].tolist()
             tt1 = st.tabs(models)
             for i in range(len(models)):
                 with tt1[i]:
-                    # # 创建模拟的混淆矩阵
-                    # data = {'y_Actual': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-                    #         'y_Predicted': [1, 1, 1, 1, 0, 0, 0, 0, 1, 1]}
-                    # df = pd.DataFrame(data, columns=['y_Actual', 'y_Predicted'])
-                    #
-                    # conf_matrix = confusion_matrix(df['y_Actual'], df['y_Predicted'])
-                    #
-                    # # 使用 seaborn 绘制混淆矩阵图
-                    # fig, ax = plt.subplots()
-                    # sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
-                    # ax.set_xlabel('Predicted Label')
-                    # ax.set_ylabel('True Label')
-                    # st.pyplot(fig)
+                    print(actualAndPredictList)
+                    # y_Actual = actualAndPredictList[i]['predictLabel']
+                    # y_Predicted = actualAndPredictList[i]['actualLabel']
+                    # print(f'=============可视化{y_Actual}{y_Predicted}=============')
+                    # 创建模拟的混淆矩阵
+                    data = {'y_Actual': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+                            'y_Predicted': [1, 1, 1, 1, 0, 0, 0, 0, 1, 1]}
+                    df = pd.DataFrame(data, columns=['y_Actual', 'y_Predicted'])
+                    conf_matrix = confusion_matrix(df['y_Actual'], df['y_Predicted'])
+                    # 使用 seaborn 绘制混淆矩阵图
+                    fig, ax = plt.subplots()
+                    sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
+                    ax.set_xlabel('Predicted Label')
+                    ax.set_ylabel('True Label')
+                    st.pyplot(fig)
                     # Populate the array with key-value pairs
                     metrics = []
                     for key, value in evaluationIndex[i].items():
