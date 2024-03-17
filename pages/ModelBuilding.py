@@ -193,16 +193,16 @@ def onAddModel():
 
 # 获取评价指标
 def onPrecision(*cboxList):
-    for cbox in cboxList:
-        if cbox:
-            st.session_state["modelPrecisionName"].append('OA')
-        if cbox:
-            st.session_state["modelPrecisionName"].append('Kappa')
-        if cbox:
-            st.session_state["modelPrecisionName"].append('MSE')
-        if cbox:
-            st.session_state["modelPrecisionName"].append('R方')
-    # print(pages_utils.TempDataSetField[4]['评价指标'])
+    # print('传入接收参数')
+    if cboxList[0]:
+        st.session_state["modelPrecisionName"].append('OA')
+    if cboxList[1]:
+        st.session_state["modelPrecisionName"].append('Kappa')
+    if cboxList[2]:
+        st.session_state["modelPrecisionName"].append('MSE')
+    if cboxList[3]:
+        st.session_state["modelPrecisionName"].append('R方')
+    # print(st.session_state["modelPrecisionName"])
     pages_utils.TempDataSetField[4]['评价指标'] = ','.join(st.session_state["modelPrecisionName"])
     st.session_state.page += 1
 
