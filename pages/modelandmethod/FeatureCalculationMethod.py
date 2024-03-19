@@ -99,9 +99,14 @@ class FeatureCalculationMethod:
                     group[
                         (group['日期'] >= start_date_range) &
                         (group['日期'] <= end_date_range) &
-                        (group[inputFields[0]] > float(minNum))]
+                        (group[inputFields[0]] >= float(minNum))]
                 )
-
+                # print('==========具体明细==========')
+                # print(group[
+                #         (group['日期'] >= start_date_range) &
+                #         (group['日期'] <= end_date_range) &
+                #         (group[inputFields[0]] >= float(minNum))])
+                # print(f'长度{rainy_days_count}')
                 # Assign the calculated rainy days count to the '降雨日数' column within the specified date range
                 mask = (self.dataFrame['上级单位'] == key[0]) & (self.dataFrame['测报站点'] == key[1]) & (
                         self.dataFrame['日期'] >= start_date_range) & (
