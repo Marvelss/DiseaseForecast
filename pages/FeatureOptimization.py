@@ -163,37 +163,33 @@ with dataPCV:
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
-            tt1 = st.tabs(st.session_state["leftTabs"])
-            for i in range(len(st.session_state["leftTabs"])):
+            tempLeftTabs = st.session_state["leftTabs"][2:]
+            print(f'f=========测试{tempLeftTabs}================')
+            tt1 = st.tabs(tempLeftTabs)
+            for i in range(len(tempLeftTabs)):
                 with tt1[i]:
-                    if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据类型', '字段', '上传时间']
-                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '被选特征':
+                    if tempLeftTabs[i] == '被选特征':
                         column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '优选特征':
+                    elif tempLeftTabs[i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     st.data_editor(
-                        pages_utils.TempDataSetField[i],
+                        pages_utils.TempDataSetField[i + 2],
                         height=220, width=800,
                         column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
-            tt = st.tabs(st.session_state["leftTabs"])
-            for i in range(len(st.session_state["leftTabs"])):
+            tempLeftTabs = st.session_state["leftTabs"][2:]
+            print(f'f=========测试{tempLeftTabs}================')
+            tt = st.tabs(tempLeftTabs)
+            for i in range(len(tempLeftTabs)):
                 with tt[i]:
-                    if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据类型', '字段', '上传时间']
-                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '被选特征':
+                    if tempLeftTabs[i] == '被选特征':
                         column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '优选特征':
+                    elif tempLeftTabs[i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     st.data_editor(
-                        pages_utils.TempDataSetField[i],
+                        pages_utils.TempDataSetField[i + 2],
                         height=220, width=800,
                         column_order=column)
     # ===============显示左下字段或特征及获取===============
