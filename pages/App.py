@@ -18,7 +18,7 @@ st.set_page_config(
 show_pages(
     [
         Page("pages/App.py", "主页"),
-        Page("pages/DataSet.py", "数据集"),
+        Page("pages/DataSet.py", "原始数据"),
         Page("pages/DataPreparation.py", "数据预处理"),
         Page("pages/FeatureCalculation.py", "特征计算"),
         Page("pages/FeatureOptimization.py", "特征优选"),
