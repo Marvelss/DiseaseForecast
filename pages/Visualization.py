@@ -33,7 +33,11 @@ with tab1:
         data = pd.DataFrame(columns=['无数据'])
 
         # 从第二个元素开始获取
-        option55 = pills("选择下载内容", options=st.session_state["leftTabs"][1:])
+        if not st.session_state["leftTabs"][1:]:
+            downloadList = ['空']
+        else:
+            downloadList = st.session_state["leftTabs"][1:]
+        option55 = pills("选择下载内容", options=downloadList)
 
         if option55 == '模型':
             result1 = pages_utils.multiselect_all(
