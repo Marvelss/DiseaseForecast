@@ -63,7 +63,7 @@ with dataSCM:
             st.warning(warningMInfo, icon="⚠️")
             with open(path1, "rb") as file:
                 st.download_button(
-                    label="下载气象数据",
+                    label="下载气象数据模板",
                     data=file,
                     file_name="气象数据-模板.xlsx",
                     mime="application/octet-stream"
@@ -73,7 +73,7 @@ with dataSCM:
             st.warning(warningPInfo, icon="⚠️")
             with open(path2, "rb") as file:
                 st.download_button(
-                    label="下载植保数据",
+                    label="下载植保数据模板",
                     data=file,
                     file_name="植保数据-模板.xlsx",
                     mime="application/octet-stream"
@@ -83,7 +83,7 @@ with dataSCM:
             st.warning(warningAInfo, icon="⚠️")
             with open(path3, "rb") as file:
                 st.download_button(
-                    label="下载农学数据",
+                    label="下载农学数据模板",
                     data=file,
                     file_name="农学数据-模板.xlsx",
                     mime="application/octet-stream"
