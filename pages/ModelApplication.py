@@ -42,14 +42,24 @@ with col3:
     ex = st.expander('下载基于天气情景生成器生成的全年模拟气温和降水数据')
     with ex:
         generatedYears = st.number_input('生成的气象数据长度(年为单位)', value=1)
-        weatherScenes = st.number_input('生成的气象情景', value=1)
+
+        weatherScenesList = pages_utils.multiselect_all(
+            st, '全选',
+            [
+                '高温多雨', '高温常雨', '高温少雨',
+                '常温常雨', '常温多雨', '常温少雨',
+                '低温少雨', '低温常雨', '低温多雨'],
+            'temp111', 'collapsed')
+
+        # 情景转换为对应数字
+        weatherNumList = pages_utils.getWeatherNum(weatherScenesList)
         # print('----------')
         # print(float(generatedYears), float(weatherScenes))
         st.info('生成的气象情景:\n'
                 '* 1:高温多雨 2:高温常雨 3:高温少雨\n'
                 '* 4:常温常雨 5:常温多雨 6:常温少雨\n'
                 '* 7:低温少雨 8:低温常雨 9:低温多雨\n', icon="ℹ️")
-        btn = st.button('运行程序', on_click=onRun, args=[float(generatedYears), float(weatherScenes)])
+        btn = st.button('运行程序', on_click=onRun, args=[float(generatedYears), weatherNumList[0]])
         # ==============================获取并准备下载数据==============================
         if btn:
             # 读取数据
