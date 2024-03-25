@@ -287,8 +287,6 @@ with dataPCM:
                 num = st.text_input('输入数值')
                 st.session_state["preMethodName"]['param2'] = num
         with coll22:
-            img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '0.png'))
-            # st.image(img)
             latext = '* 公式:' + r'''
             $$ 
             y = y_0 + (y_1 - y_0) \frac{(x - x_0)}{(x_1 - x_0)} 
@@ -297,6 +295,8 @@ with dataPCM:
             st.info('插补方法介绍\n'
                     '* 描述:使用缺失值前后最近的两个非缺失值填充\n' +
                     latext, icon="ℹ️")
+            img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'Figure_5.png'))
+            st.image(img)
         # st.markdown('---')
     if agree:
         coll11, coll22 = st.columns([0.3, 0.6])
