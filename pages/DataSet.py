@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 
 import pages_utils
-
+from streamlit_pills import pills
 from warnings import simplefilter
 
 simplefilter(action="ignore", category=FutureWarning)
@@ -37,10 +37,8 @@ warningAInfo = '''
 dataSCM, dataSCR = st.columns([0.9, 0.4])
 with dataSCM:
     st.markdown("##### 上传数据集")
-    ab = st.selectbox(
-        '选择数据集',
-        ('气象数据', '植保数据', '农学数据'))
 
+    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '农学数据'], ["🌨️️", "🌾", "☣️"])
     uploaded_files = st.file_uploader(
         "上传数据集",
         accept_multiple_files=False,
@@ -58,7 +56,7 @@ with dataSCM:
     # ==============================右侧数据模板下载及注意事项==============================
     st.markdown("##### 数据模板下载及注意事项")
     placeholder1 = st.empty()
-    if ab == '气象数据':
+    if selectedTemplate == '气象数据':
         with placeholder1.container():
             st.warning(warningMInfo, icon="⚠️")
             with open(path1, "rb") as file:
@@ -68,7 +66,7 @@ with dataSCM:
                     file_name="气象数据-模板.xlsx",
                     mime="application/octet-stream"
                 )
-    if ab == '植保数据':
+    if selectedTemplate == '植保数据':
         with placeholder1.container():
             st.warning(warningPInfo, icon="⚠️")
             with open(path2, "rb") as file:
@@ -78,7 +76,7 @@ with dataSCM:
                     file_name="植保数据-模板.xlsx",
                     mime="application/octet-stream"
                 )
-    if ab == '农学数据':
+    if selectedTemplate == '农学数据':
         with placeholder1.container():
             st.warning(warningAInfo, icon="⚠️")
             with open(path3, "rb") as file:
@@ -95,7 +93,7 @@ with dataSCM:
         # st.markdown(data33)
         new_data = {
             "编号": pages_utils.generateID(),
-            "数据类型": ab, "文件名称": uploaded_files.name, "传输状态": "已上传",
+            "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "已上传",
             "上传时间": datetime.now().strftime("%H:%M:%S"),
             "字段": data33.columns.tolist()}
 
