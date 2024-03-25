@@ -8,6 +8,7 @@ import pandas as pd
 import streamlit as st
 from matplotlib import pyplot as plt
 import seaborn as sns
+from streamlit_pills import pills
 
 import pages_utils
 
@@ -30,9 +31,10 @@ with tab1:
     with col2:
         column = ['无数据']
         data = pd.DataFrame(columns=['无数据'])
-        option55 = st.selectbox(
-            '选择下载内容',
-            options=st.session_state["leftTabs"][1:])  # 从第二个元素开始获取
+
+        # 从第二个元素开始获取
+        option55 = pills("选择下载内容", options=st.session_state["leftTabs"][1:])
+
         if option55 == '模型':
             result1 = pages_utils.multiselect_all(
                 st, '全选',
