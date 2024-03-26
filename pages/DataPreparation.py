@@ -109,7 +109,7 @@ def firstPage(): st.session_state.page12 = 0
 
 
 # 运行任务清单中所有方法
-def onRun(reservedField):
+def onRun():
     if '预处理后数据集' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('预处理后数据集')
     st.session_state.page12 += 1
@@ -126,8 +126,12 @@ def onRun(reservedField):
     # print(fields[1])
     print(methodParam)
     print(type(pages_utils.TempDataSetField[1]["编号"]))
+
     afterHandleData = None
     for indexT, tempMethod in enumerate(methodList):
+        reservedField = pages_utils.TempDataSet[0].columns.tolist()
+        print(f'=============测试保留字段-{reservedField}=============')
+        print(type(reservedField))
         # print(tempMethod)
         if tempMethod == '缺失值插补':
             afterHandleData, missingValueBefore, missingValueAfter = PretreatmentMethod(
@@ -354,18 +358,17 @@ with dataPCM:
                 disabled=["数据类型", "输入字段", "预处理后字段", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
             with interval_col33:
-                with st.popover("准备运行"):
-                    st.markdown('保留字段选择')
-                    residualField = [arr for arr in pages_utils.TempDataSet[0].columns if
-                                     arr not in mergeArray4(
-                                         ['上级单位', '测报站点',
-                                          "年", "DayOfYear"], result1, result2, result3)]
-                    # print(f'剩余字段{residualField}')
-                    reservedFiled = pages_utils.multiselect_all(
-                        st, '全选',
-                        residualField,
-                        'temp1', 'collapsed')
-                    btn = st.button('运行', on_click=onRun, args=[reservedFiled])
+                # residualField = [arr for arr in pages_utils.TempDataSet[0].columns if
+                #                  arr not in mergeArray4(
+                #                      ['上级单位', '测报站点',
+                #                       "年", "DayOfYear"], result1, result2, result3)]
+                # print(f'剩余字段{residualField}')
+                # 默认保留上一环节所有字段
+                # reservedFiled = pages_utils.multiselect_all(
+                #     st, '全选',
+                #     residualField,
+                #     'temp1', 'collapsed')
+                btn2 = st.button('运行', on_click=onRun)
             # btn2 = interval_col33.button('运行', on_click=onRun)
 
         # =======================显示右下可视化图表=======================
