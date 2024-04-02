@@ -1,3 +1,4 @@
+import datetime
 import os.path
 
 import scipy
@@ -35,64 +36,119 @@ def onRun(year, situation):
 
 
 # with col3:
-ex = st.expander('下载基于天气情景生成器生成的全年模拟气温和降水数据')
-with ex:
-    generatedYears = st.number_input('生成的气象数据长度(年为单位)', value=1)
+# ex = st.expander('下载基于天气情景生成器生成的全年模拟气温和降水数据')
+st.markdown("##### 天气情景生成器")
+# with ex:
+# generatedYears = st.number_input('输入时间序列的起始年', value=1)
+# generatedYears1 = st.number_input('输入时间序列的起始月', value=1)
+# generatedYears2 = st.number_input('输入时间序列的截至年', value=1)
+# generatedYears3 = st.number_input('输入时间序列的截至月', value=1)
+col123, col223 = st.columns(2)
+with col123:
+    # 上传历史气象数据
+    uploadedHistoricalData = st.file_uploader(
+        "上传历史气象数据数据",
+        accept_multiple_files=False,
+        type=['xlsx', 'xls'],
+        help='help')
+with col223:
+    warningMInfo = '''
+    注意事项
+    1. 模版中的表头名称不可更改,表头行不可删除;
+    2. 删除示例数据后,添加新数据.
+    '''
+    st.markdown("##### 数据模板下载及注意事项")
+    st.warning(warningMInfo, icon="⚠️")
+    path2 = r'E:\a_python\program\diseaseForecastStreamlit\resource\上传历史数据集模板-测试.xlsx'
+    with open(path2, "rb") as file:
+        st.download_button(
+            label="下载历史气象数据模板",
+            data=file,
+            file_name="历史气象数据模板.xlsx",
+            mime="application/octet-stream"
+        )
 
-    weatherScenesList = pages_utils.multiselect_all(
-        st, '全选',
-        [
-            '高温多雨', '高温常雨', '高温少雨',
-            '常温常雨', '常温多雨', '常温少雨',
-            '低温少雨', '低温常雨', '低温多雨'],
-        'temp111', 'collapsed')
+today = datetime.datetime.now()
+next_year = today.year + 10
+jan_1 = datetime.date(today.year, 1, 1)
+dec_31 = datetime.date(today.year + 10, 12, 31)
 
-    # 情景转换为对应数字
-    weatherNumList = pages_utils.getWeatherNum(weatherScenesList)
-    # print('----------')
-    # print(float(generatedYears), float(weatherScenes))
-    st.info('生成的气象情景:\n'
-            '* 1:高温多雨 2:高温常雨 3:高温少雨\n'
-            '* 4:常温常雨 5:常温多雨 6:常温少雨\n'
-            '* 7:低温少雨 8:低温常雨 9:低温多雨\n', icon="ℹ️")
-    btn = st.button('运行程序', on_click=onRun, args=[float(generatedYears), weatherNumList[0]])
-    # ==============================获取并准备下载数据==============================
-    if btn:
-        # 读取数据
-        pathM = r'E:\a_python\program\testForMatlab\weather_generation\out.mat'
-        pathE = r'E:\a_python\program\diseaseForecastStreamlit\resource\simulate'
-        if not os.path.exists(pathE):
-            os.mkdir(pathE)
-        # 清空上一次生成数据
-        pages_utils.delete_files_in_folder(pathE)
-        # 加载结果
-        mat = scipy.io.loadmat(pathM)
-        data1 = np.array((mat['gP']))
-        data2 = np.array(mat['gTmax'])
-        data3 = np.array(mat['gTmin'])
-        for i in range(len(data1)):
-            tempPath = os.path.join(pathE, '第' + str(i + 1) + '年.xlsx')
-            # 创建DayOfYear列
-            day_of_year = range(1, 366)
-            # 将数据转换为DataFrame
-            my_large_df = pd.DataFrame({
-                'DayOfYear': day_of_year,
-                '降水': data1[i].flatten(),
-                '最高温度': data2[i].flatten(),
-                '最低温度': data3[i].flatten()
-            })
-            my_large_df.to_excel(tempPath, index=False)
-        # 气象数据的压缩文件路径
-        zipPath = r'E:\a_python\program\diseaseForecastStreamlit\resource\基于天气情景生成器的模拟数据.zip'
-        # 压缩生成的xlsx数据
-        pages_utils.zip_folder(pathE, zipPath)
-        with open(zipPath, "rb") as file:
-            st.download_button(
-                label="下载数据",
-                data=file,
-                file_name="基于天气情景生成器的模拟数据.zip",
-                mime="application/zip",
-            )
+generatedYears = st.date_input(
+    "选择起止年月(日期默认1号)",
+    (jan_1, datetime.date(next_year, 1, 7)),
+    jan_1,
+    dec_31,
+    format="YYYY.MM.DD",
+)
+year_difference = generatedYears[1].year - generatedYears[0].year
+
+st.markdown("##### 生成的气象情景")
+weatherScenesList = pages_utils.multiselect_all(
+    st, '全选',
+    [
+        '高温多雨', '高温常雨', '高温少雨',
+        '常温常雨', '常温多雨', '常温少雨',
+        '低温少雨', '低温常雨', '低温多雨'],
+    'temp111', 'collapsed')
+
+# 情景转换为对应数字
+weatherNumList = pages_utils.getWeatherNum(weatherScenesList)
+# print('----------')
+# print(float(generatedYears), float(weatherScenes))
+
+# st.info('生成的气象情景:\n'
+#         '* 1:高温多雨 2:高温常雨 3:高温少雨\n'
+#         '* 4:常温常雨 5:常温多雨 6:常温少雨\n'
+#         '* 7:低温少雨 8:低温常雨 9:低温多雨\n', icon="ℹ️")
+st.markdown("##### 异常程度设置")
+col1231, col1232 = st.columns(2)
+with col1231:
+    number51 = st.number_input("气温标准差下限", value=2.0, max_value=10.0, min_value=-10.0, step=0.1)
+    number53 = st.number_input("降水量距平百分率下限(PA)/%", value=90, max_value=100, min_value=-100, step=5)
+with col1232:
+    number52 = st.number_input("气温标准差上限", value=2.5, max_value=10.0, min_value=-10.0, step=0.1)
+    number54 = st.number_input("降水量距平百分率上限(PA)/%", value=95, max_value=100, min_value=-100, step=5)
+
+if not weatherNumList:
+    weatherNumList = ['无']
+btn = st.button('运行程序', on_click=onRun, args=[float(year_difference), weatherNumList[0]])
+# ==============================获取并准备下载数据==============================
+if btn:
+    # 读取数据
+    pathM = r'E:\a_python\program\testForMatlab\weather_generation\out.mat'
+    pathE = r'E:\a_python\program\diseaseForecastStreamlit\resource\simulate'
+    if not os.path.exists(pathE):
+        os.mkdir(pathE)
+    # 清空上一次生成数据
+    pages_utils.delete_files_in_folder(pathE)
+    # 加载结果
+    mat = scipy.io.loadmat(pathM)
+    data1 = np.array((mat['gP']))
+    data2 = np.array(mat['gTmax'])
+    data3 = np.array(mat['gTmin'])
+    for i in range(len(data1)):
+        tempPath = os.path.join(pathE, '第' + str(i + 1) + '年.xlsx')
+        # 创建DayOfYear列
+        day_of_year = range(1, 366)
+        # 将数据转换为DataFrame
+        my_large_df = pd.DataFrame({
+            'DayOfYear': day_of_year,
+            '降水': data1[i].flatten(),
+            '最高温度': data2[i].flatten(),
+            '最低温度': data3[i].flatten()
+        })
+        my_large_df.to_excel(tempPath, index=False)
+    # 气象数据的压缩文件路径
+    zipPath = r'E:\a_python\program\diseaseForecastStreamlit\resource\基于天气情景生成器的模拟数据.zip'
+    # 压缩生成的xlsx数据
+    pages_utils.zip_folder(pathE, zipPath)
+    with open(zipPath, "rb") as file:
+        st.download_button(
+            label="下载数据",
+            data=file,
+            file_name="基于天气情景生成器的模拟数据.zip",
+            mime="application/zip",
+        )
         # =======================可视化结果=======================
 print('---')
 st.markdown("##### 加载模型和特征")
