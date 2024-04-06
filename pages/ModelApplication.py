@@ -17,15 +17,15 @@ if 'page16' not in st.session_state:
 
 
 # =======================调用matlab天气情景生成器=======================
-def onRun(year, situation):
+def onRun(year, situation, sigama_temp, sigama_max_temp, PA_temp, PA_max_temp):
     # 调用matlab程序
     # print(year, situation)
     # 调用matlab
     eng = matlab.engine.start_matlab()
     eng.cd(r'E:\a_python\program\testForMatlab\weather_generation', nargout=0)
-    sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = 2.5, 3.0, 90 * 0.01, 95 * 0.01
-    result = eng.myPython('0', 'out', 1.0, 1.0, sigama_temp, sigama_max_temp, PA_temp, PA_max_temp, nargout=1)
-    # result = eng.myPython('0', 'out', year, situation, nargout=1)
+    # sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = 2.5, 3.0, 90 * 0.01, 95 * 0.01
+    # result = eng.myPython('0', 'out', 1.0, 1.0, sigama_temp, sigama_max_temp, PA_temp, PA_max_temp, nargout=1)
+    result = eng.myPython('0', 'out', year, situation, sigama_temp, sigama_max_temp, PA_temp, PA_max_temp, nargout=1)
     print(result)
     eng.exit()
     st.session_state.page16 += 1
@@ -37,52 +37,39 @@ def onRun(year, situation):
 
 # with col3:
 # ex = st.expander('下载基于天气情景生成器生成的全年模拟气温和降水数据')
-st.markdown("##### 天气情景生成器")
+# st.markdown("##### 天气情景生成器")
 # with ex:
 # generatedYears = st.number_input('输入时间序列的起始年', value=1)
 # generatedYears1 = st.number_input('输入时间序列的起始月', value=1)
 # generatedYears2 = st.number_input('输入时间序列的截至年', value=1)
 # generatedYears3 = st.number_input('输入时间序列的截至月', value=1)
+st.markdown("##### 历史气象站点数据上传及模板下载注意事项")
 col123, col223 = st.columns(2)
 with col123:
     # 上传历史气象数据
     uploadedHistoricalData = st.file_uploader(
-        "上传历史气象数据数据",
+        "上传数据",
         accept_multiple_files=False,
         type=['xlsx', 'xls'],
         help='help')
 with col223:
     warningMInfo = '''
-    注意事项
-    1. 模版中的表头名称不可更改,表头行不可删除;
-    2. 删除示例数据后,添加新数据.
+    注意事项(待填)
     '''
-    st.markdown("##### 数据模板下载及注意事项")
+    st.markdown("###### 模板下载")
     st.warning(warningMInfo, icon="⚠️")
     path2 = r'E:\a_python\program\diseaseForecastStreamlit\resource\上传历史数据集模板-测试.xlsx'
     with open(path2, "rb") as file:
         st.download_button(
-            label="下载历史气象数据模板",
+            label="下载历史站点气象数据模板",
             data=file,
             file_name="历史气象数据模板.xlsx",
             mime="application/octet-stream"
         )
 
-today = datetime.datetime.now()
-next_year = today.year + 10
-jan_1 = datetime.date(today.year, 1, 1)
-dec_31 = datetime.date(today.year + 10, 12, 31)
-
-generatedYears = st.date_input(
-    "选择起止年月(日期默认1号)",
-    (jan_1, datetime.date(next_year, 1, 7)),
-    jan_1,
-    dec_31,
-    format="YYYY.MM.DD",
-)
-year_difference = generatedYears[1].year - generatedYears[0].year
-
-st.markdown("##### 生成的气象情景")
+st.markdown("##### 生成模拟气象情景及数据长度")
+# st.markdown("##### 生成气象情景")
+# ==============================生成气象情景==============================
 weatherScenesList = pages_utils.multiselect_all(
     st, '全选',
     [
@@ -93,6 +80,21 @@ weatherScenesList = pages_utils.multiselect_all(
 
 # 情景转换为对应数字
 weatherNumList = pages_utils.getWeatherNum(weatherScenesList)
+# ==============================时间长度==============================
+today = datetime.datetime.now()
+next_year = today.year + 1
+jan_1 = datetime.date(today.year, 1, 1)
+dec_31 = datetime.date(today.year + 1, 12, 31)
+generatedYears = st.date_input(
+    "选择起止年月",
+    (jan_1, datetime.date(next_year, 1, 7)),
+    jan_1,
+    dec_31,
+    format="YYYY.MM.DD",
+)
+year_difference = generatedYears[1].year - generatedYears[0].year
+print(year_difference)
+
 # print('----------')
 # print(float(generatedYears), float(weatherScenes))
 
@@ -100,6 +102,8 @@ weatherNumList = pages_utils.getWeatherNum(weatherScenesList)
 #         '* 1:高温多雨 2:高温常雨 3:高温少雨\n'
 #         '* 4:常温常雨 5:常温多雨 6:常温少雨\n'
 #         '* 7:低温少雨 8:低温常雨 9:低温多雨\n', icon="ℹ️")
+st.markdown(' ')
+# ==============================异常程度设置==============================
 st.markdown("##### 异常程度设置")
 col1231, col1232 = st.columns(2)
 with col1231:
@@ -109,9 +113,11 @@ with col1232:
     number52 = st.number_input("气温标准差上限", value=2.5, max_value=10.0, min_value=-10.0, step=0.1)
     number54 = st.number_input("降水量距平百分率上限(PA)/%", value=95, max_value=100, min_value=-100, step=5)
 
+sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = number51, number53 * 0.01, number52, number54 * 0.01
 if not weatherNumList:
     weatherNumList = ['无']
-btn = st.button('运行程序', on_click=onRun, args=[float(year_difference), weatherNumList[0]])
+btn = st.button('运行程序', on_click=onRun,
+                args=[float(year_difference), weatherNumList[0], sigama_temp, sigama_max_temp, PA_temp, PA_max_temp])
 # ==============================获取并准备下载数据==============================
 if btn:
     # 读取数据
