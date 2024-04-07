@@ -129,12 +129,15 @@ def onRun():
 
     afterHandleData = None
     for indexT, tempMethod in enumerate(methodList):
+        # 使用处理后最新的字段内容
         reservedField = pages_utils.TempDataSet[0].columns.tolist()
         print(f'=============测试保留字段-{reservedField}=============')
-        print(type(reservedField))
+        # print(type(reservedField))
         # print(tempMethod)
+        newDataColumn = fields[indexT]
         if tempMethod == '缺失值插补':
-            afterHandleData, missingValueBefore, missingValueAfter = PretreatmentMethod(
+            (afterHandleData, missingValueBefore, missingValueAfter,
+             newDataColumn) = PretreatmentMethod(
                 pages_utils.TempDataSet[0],
                 fields[indexT], reservedField).linearInterpolation()
             # 显示填补信息
@@ -143,7 +146,8 @@ def onRun():
                      f'剩余缺失值:{missingValueAfter}', icon='✅')
         elif tempMethod == '剔除异常值':
             print(f'执行任务==={fields[indexT]}-{methodParam[indexT]}')
-            afterHandleData, outlierNum, lengthAfter = PretreatmentMethod(
+            (afterHandleData, outlierNum, lengthAfter,
+             newDataColumn) = PretreatmentMethod(
                 pages_utils.TempDataSet[0],
                 fields[indexT], reservedField).outlierEliminator(methodParam[indexT])
             print('========执行完后数据')
@@ -165,7 +169,7 @@ def onRun():
 
         # ===============更新左侧显示内容===============
         update_values = {
-            "预处理后字段": fields[0],
+            "预处理后字段": newDataColumn,
             "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
             "时间": datetime.datetime.now().time(),
         }
@@ -234,7 +238,7 @@ with dataPCV:
         agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['字段'].tolist()[0]
     # a = st.selectbox(
     #     '选择数据集',
-    #     ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
+    #     ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
     result1 = pages_utils.multiselect_all(
         st, '全选-气象数据', weatherName,
         'temp', 'collapsed')

@@ -43,7 +43,7 @@ class PretreatmentMethod:
         # print(self.reservedField + [self.fieldName])
         tempData = newDataFrame
         # tempData = newDataFrame[self.reservedField + [self.fieldName + '_预处理后']]
-        return tempData, missingValueBefore, missingValueAfter
+        return tempData, missingValueBefore, missingValueAfter, newDataColumn
 
     # 剔除异常值
     def outlierEliminator(self, methodParam):
@@ -69,4 +69,4 @@ class PretreatmentMethod:
         print('======到处理完数据集')
         print(newDataFrame)
         tempData = newDataFrame
-        return tempData, str(lengthBefore - lengthAfter), lengthAfter
+        return tempData, str(lengthBefore - lengthAfter), lengthAfter, newDataColumn
