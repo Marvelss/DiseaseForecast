@@ -12,7 +12,7 @@ import pandas as pd
 class FeatureCalculationMethod:
     def __init__(self, dataFrame, reservedField):
         self.dataFrame = dataFrame.copy()
-        self.reservedField = ['上级单位', '测报站点', "年", "DayOfYear"] + reservedField
+        self.reservedField = reservedField
 
     # 旬值获取
     @staticmethod
@@ -44,6 +44,8 @@ class FeatureCalculationMethod:
             # 将月降水量总和合并回原始DataFrame
             # 使用左连接保证所有原始记录都被保留
             temp = pd.merge(self.dataFrame, monthly_precipitation_sum, on=['年', '月'], how='left')
+            # 删除'月','旬' '日期'字段
+            temp = temp.drop(['月', '日期'], axis=1)
         elif flag == '旬累积降水量':
             # 转换DayOfYear为日期，以便提取月份
             self.dataFrame['日期'] = pd.to_datetime(
@@ -62,12 +64,13 @@ class FeatureCalculationMethod:
 
             # 将旬累积降水量合并回原始DataFrame
             temp = pd.merge(self.dataFrame, decade_precipitation_sum, on=['年', '月', '旬'], how='left')
-
+            # 删除'月','旬' '日期'字段
+            temp = temp.drop(['旬', '日期'], axis=1)
         # 删除还没生成的字段
-        tempReservedField = [field for field in self.reservedField if field in temp.columns]
-        print(f'==============降水累积量-筛选特征{tempReservedField}================')
-        tempData = temp[list(set(tempReservedField + ['降水累积量']))]
-        return tempData
+        # tempReservedField = [field for field in self.reservedField if field in temp.columns]
+        # print(f'==============降水累积量-筛选特征{tempReservedField}================')
+        # tempData = temp[list(set(tempReservedField + ['降水累积量']))]
+        return temp
 
     # 计算降雨日数
     def rainfallDaysAccumulation(self, inputFields, param):
@@ -113,8 +116,10 @@ class FeatureCalculationMethod:
                                self.dataFrame['日期'] <= end_date_range)
                 self.dataFrame.loc[mask, '降雨日数'] = rainy_days_count
 
-            # 删除还没生成的字段
-            tempReservedField = [field for field in self.reservedField if field in self.dataFrame.columns]
-            print(f'==============降雨日数-筛选特征{tempReservedField}================')
-            tempData = self.dataFrame[list(set(tempReservedField + ['降雨日数']))]
-            return tempData
+            # # 删除还没生成的字段
+            # tempReservedField = [field for field in self.reservedField if field in self.dataFrame.columns]
+            # print(f'==============降雨日数-筛选特征{tempReservedField}================')
+            # tempData = self.dataFrame[list(set(tempReservedField + ['降雨日数']))]
+            # 删除'月','旬' '日期'字段
+            self.dataFrame = self.dataFrame.drop(['日期'], axis=1)
+            return self.dataFrame

@@ -94,15 +94,15 @@ def getFeatureName(processName):
         return '时空抽取'
 
 
-def onRun(reservedField):
-    if '被选特征' not in st.session_state["leftTabs"]:
-        st.session_state["leftTabs"].append('被选特征')
+def onRun():
+    if '备选特征' not in st.session_state["leftTabs"]:
+        st.session_state["leftTabs"].append('备选特征')
     st.session_state.page13 += 1
 
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[2]["编号"].tolist()
     fields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
-    outFields = pages_utils.TempDataSetField[2]["被选特征"].tolist()
+    outFields = pages_utils.TempDataSetField[2]["备选特征"].tolist()
     methodParam = pages_utils.TempDataSetField[2]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
     print('===============获取任务清单内容===============')
@@ -112,17 +112,24 @@ def onRun(reservedField):
     afterHandleData = None
     # ===============根据名称匹配调用并执行各个处理方法===============
     # 初始化特征计算方法
-    methodTool = FeatureCalculationMethod(
-        pages_utils.TempDataSet[1],
-        reservedField + outFields)
+    # methodTool = FeatureCalculationMethod(
+    #     pages_utils.TempDataSet[1],
+    #     reservedField + outFields)
 
     for indexT, tempMethod in enumerate(methodList):
+        # 使用处理后最新的字段内容
+        reservedField = pages_utils.TempDataSet[1].columns.tolist()
+        print(f'=============测试保留字段-{reservedField}=============')
         if tempMethod == '时间(温度)分辨率转换':
             pass
         elif tempMethod == '降雨日数计算':
-            afterHandleData = methodTool.rainfallDaysAccumulation(fields[indexT], methodParam[indexT])
+            afterHandleData = FeatureCalculationMethod(
+                pages_utils.TempDataSet[1], reservedField).rainfallDaysAccumulation(
+                fields[indexT], methodParam[indexT])
         elif tempMethod == '降水累积量计算':
-            afterHandleData = methodTool.precipitationAccumulation(fields[indexT], methodParam[indexT])
+            afterHandleData = FeatureCalculationMethod(
+                pages_utils.TempDataSet[1], reservedField).precipitationAccumulation(
+                fields[indexT], methodParam[indexT])
         elif tempMethod == '基于活动期积温的生育期计算':
             return '生育期'
         elif tempMethod == '时空抽取':
@@ -137,13 +144,13 @@ def onRun(reservedField):
             afterHandleData, pages_utils.TempDataSet[2],
             on=intersection_cols, how="left")
 
-        print('======================被选特征======================')
+        print('======================备选特征======================')
         print(pages_utils.TempDataSet[2])
 
         # ===============更新左侧显示内容===============
         update_values = {
             # "数据类型": "气象数据", "输入特征": fields[0],
-            # "被选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
+            # "备选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
             "大小": '1*' + str(row_size),
             # "特征计算方法": st.session_state["featureMethodName"]['checkBox'],
             "时间": datetime.datetime.now().time()}
@@ -169,27 +176,14 @@ with featureCCV:
         with placeholder1.container():
             tempLefTabs = st.session_state["leftTabs"][1:]
             tt1 = st.tabs(tempLefTabs)
-            print(f'=============测试左侧数据显示=============')
-            print(st.session_state["leftTabs"][1:])
-
-            # with tt1[0]:
-            #     st.data_editor(
-            #         pages_utils.TempDataSetField[1],
-            #         height=220, width=800,
-            #         column_order=["数据类型", "预处理后字段", "大小", "预处理方法", '时间'])
-            # with tt1[1]:
-            #     st.data_editor(
-            #         pages_utils.TempDataSetField[2],
-            #         height=220, width=800,
-            #         column_order=["数据类型", "被选特征", "大小", "特征计算方法", '时间'])
             for i in range(len(tempLefTabs)):
                 with tt1[i]:
                     if tempLefTabs[i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif tempLefTabs[i] == '预处理后数据集':
                         column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    elif tempLefTabs[i] == '被选特征':
-                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
+                    elif tempLefTabs[i] == '备选特征':
+                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
                     st.data_editor(
                         pages_utils.TempDataSetField[i + 1],
                         height=220, width=800,
@@ -199,22 +193,14 @@ with featureCCV:
         with placeholder1.container():
             tempLefTabs = st.session_state["leftTabs"][1:]
             tt = st.tabs(tempLefTabs)
-            print(f'=============测试左侧数据显示=============')
-            print(st.session_state["leftTabs"][1:])
-            # with tt[0]:
-            #     st.data_editor(
-            #         pages_utils.TempDataSetField[1],
-            #         height=220, width=800,
-            #         column_order=["数据类型", "预处理后字段", "大小", "预处理方法", '时间'])
-
             for i in range(len(tempLefTabs)):
                 with tt[i]:
                     if tempLefTabs[i] == '原始数据':
                         column = ['数据类型', '字段', '上传时间']
                     elif tempLefTabs[i] == '预处理后数据集':
                         column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    elif tempLefTabs[i] == '被选特征':
-                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
+                    elif tempLefTabs[i] == '备选特征':
+                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
                     st.data_editor(
                         pages_utils.TempDataSetField[i + 1],
                         height=220, width=800,
@@ -222,10 +208,11 @@ with featureCCV:
     # ===============显示左下字段或特征及获取===============
     # a = st.selectbox(
     #     '选择数据集',
-    #     ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
+    #     ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
 
     # 预处理后数据集表信息
-    weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled()
+    # weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled()
+    weatherNameT, plantNameT, agricultureNameT = pages_utils.TempDataSet[1].columns.tolist(), ['无1'], ['无2']
     # 数组元素去重
     weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
         set(agricultureNameT))
@@ -325,7 +312,7 @@ with featureCCM:
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
             "输入特征": mergeArray(result1, result2, result3),
-            "被选特征": getFeatureName(getCheckboxName(st.session_state["featureMethodName"]['checkBox'])),
+            "备选特征": getFeatureName(getCheckboxName(st.session_state["featureMethodName"]['checkBox'])),
             "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]['checkBox']),
             "方法参数": [value for key, value in st.session_state["featureMethodName"].items() if key != 'checkBox'],
             "时间": datetime.datetime.now().time(),
@@ -344,23 +331,24 @@ with featureCCM:
             st.markdown('##### 任务清单')
             edited_df28 = st.data_editor(
                 pages_utils.TempDataSetField[2], height=190, width=800,
-                column_order=["编号", "数据类型", "输入特征", "被选特征", "特征计算方法", '时间'],
+                column_order=["编号", "数据类型", "输入特征", "备选特征", "特征计算方法", '时间'],
                 disabled=["数据类型", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
-            with interval_col33:
-                with st.popover("准备运行"):
-                    st.markdown('保留字段选择')
-                    residualField = [arr for arr in pages_utils.TempDataSet[1].columns if
-                                     arr not in mergeArray4(
-                                         ['上级单位', '测报站点',
-                                          "年", "DayOfYear"], result1, result2, result3)]
-                    # print(f'剩余字段{residualField}')
-                    reservedFiled = pages_utils.multiselect_all(
-                        st, '全选',
-                        residualField,
-                        'temp2', 'collapsed')
-                    btn = st.button('运行', on_click=onRun, args=[reservedFiled])
-            # btn2 = interval_col33.button('运行', on_click=onRun)
+
+            # with interval_col33:
+            #     with st.popover("准备运行"):
+            #         st.markdown('保留字段选择')
+            #         residualField = [arr for arr in pages_utils.TempDataSet[1].columns if
+            #                          arr not in mergeArray4(
+            #                              ['上级单位', '测报站点',
+            #                               "年", "DayOfYear"], result1, result2, result3)]
+            #         # print(f'剩余字段{residualField}')
+            #         reservedFiled = pages_utils.multiselect_all(
+            #             st, '全选',
+            #             residualField,
+            #             'temp2', 'collapsed')
+            #         btn = st.button('运行', on_click=onRun, args=[reservedFiled])
+            btn2 = interval_col33.button('运行', on_click=onRun)
     elif st.session_state.page13 == 1:
         # =======================显示右下可视化图表=======================
         with placeholder.container():
