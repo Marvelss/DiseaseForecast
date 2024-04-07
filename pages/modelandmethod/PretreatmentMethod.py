@@ -12,6 +12,16 @@ class PretreatmentMethod:
         self.fieldName = fieldName
         self.reservedField = reservedField
 
+    # 加工字段名称
+    def getHandledField(self, fieldName):
+        # 若字段为原始数据
+        if '_预' not in fieldName:
+            return f"{fieldName}_预处理后"
+        # 若字段已处理,则末尾数字+1
+        if '_预' in fieldName:
+            return (fieldName.split('后')[0] + '后' +
+                    str(int(fieldName.split('后')[1]) + 1))
+
     # 线性插补
     def linearInterpolation(self):
         print('==========接收self.fieldName==========')
@@ -20,7 +30,8 @@ class PretreatmentMethod:
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
         # 复制原处理字段,并在名称后添加_预处理后
-        newDataColumn = f"{self.fieldName}_预处理后"
+        # newDataColumn = f"{self.fieldName}_预处理后"
+        newDataColumn = self.getHandledField(self.fieldName)
         newDataFrame[newDataColumn] = newDataFrame[self.fieldName]
         missingValueBefore = newDataFrame[newDataColumn].isnull().sum()
         newDataFrame[newDataColumn] = newDataFrame[newDataColumn].interpolate()
@@ -44,6 +55,9 @@ class PretreatmentMethod:
         newDataFrame = self.dataFrame.copy()
         print(newDataFrame)
 
+        newDataColumn = self.getHandledField(self.fieldName)
+        newDataFrame[newDataColumn] = newDataFrame[self.fieldName]
+
         # 获取原始记录数
         lengthBefore = len(newDataFrame)
         # newDataFrame[self.fieldName] = newDataFrame[self.fieldName].clip(minNum, maxNum)
@@ -54,5 +68,5 @@ class PretreatmentMethod:
         # 检查是否还有缺失值
         print('======到处理完数据集')
         print(newDataFrame)
-        tempData = newDataFrame[self.reservedField + [self.fieldName + '_预处理后']]
+        tempData = newDataFrame
         return tempData, str(lengthBefore - lengthAfter), lengthAfter
