@@ -15,7 +15,17 @@ from skrebate import ReliefF
 class FeatureOptimizationMethod:
     def __init__(self, dataFrame, reservedField):
         self.dataFrame = dataFrame.copy()
-        self.reservedField = ['上级单位', '测报站点', "年", "DayOfYear"] + reservedField
+        self.reservedField = reservedField
+
+    # 加工字段名称
+    def getHandledField(self, fieldName):
+        # 若字段为原始数据
+        if '_优' not in fieldName:
+            return f"{fieldName}_优选特征"
+        # 若字段已处理,则末尾数字+1
+        if '_优' in fieldName:
+            return (fieldName.split('征')[0] + '征' +
+                    str(int(fieldName.split('征')[1]) + 1))
 
     # t检验
     def tTest(self, inputFields, methodParam):
@@ -32,6 +42,8 @@ class FeatureOptimizationMethod:
         # 计算 t 检验的 p 值，并选择 p < 0.05 的特征
         # print(fieldName)
         # print('--------------fieldName--------------')
+        # 修改优选特征名称
+        newDataColumn = self.getHandledField(inputFields)
         if pValue == '0.05':
             pass
         t_stat, p_value = stats.ttest_ind(
@@ -42,24 +54,37 @@ class FeatureOptimizationMethod:
         tempData = newDataFrame[self.reservedField + inputFields]
         return tempData
 
-    # t检验
+    # 互相关分析
     def ReliefF(self, inputFields, methodParam):
         target = methodParam[0][0]
         name = methodParam[0][1]
         proportion = methodParam[0][2]
-        print('--调用--')
-        X = self.dataFrame[inputFields]
-        y = self.dataFrame[target]
+        print(f'接收参数-{target}-{name}-{proportion}-'
+              f'{inputFields.to_list()}')
+        newList = [item for item in inputFields.to_list() if item != '发生程度']
+        print(self.dataFrame['发生程度'].value_counts())
+        # 准备数据
+        X = self.dataFrame.drop(columns=['发生程度'])  # 假设我们已经从df中删除了目标列和不需要的列
+        y = self.dataFrame[['发生程度']]
+        # X = self.dataFrame[newList]
+        # y = self.dataFrame[[target]]
+        # y= self.dataFrame[[target]].values.ravel()  # 如果y_train是DataFrame
+        print(X)
+        print(y)
         # 对分类变量进行one-hot编码
-        # if '上级单位' and '测报站点' in df.columns.tolist():
-        #     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
-        # scaler = StandardScaler()
-        # X_scaled = scaler.fit_transform(X)
+        if '上级单位' and '测报站点' in self.dataFrame.columns.tolist():
+            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
         # 划分训练集和测试集
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, stratify=y, random_state=42)
 
         # 初始化ReliefF算法
-        fs = ReliefF(n_neighbors=10, n_features_to_select=4)  # n_neighbors参数根据数据集大小调整，n_features_to_keep是你想要保留的特征数量
+        fs = ReliefF(n_neighbors=4)  # n_neighbors参数根据数据集大小调整，n_features_to_keep是你想要保留的特征数量
+
+
+        # 修改优选特征名称
+        newDataColumn = self.getHandledField(inputFields)
 
         # 训练ReliefF模型以找到最重要的特征
         fs.fit(X_train, y_train)

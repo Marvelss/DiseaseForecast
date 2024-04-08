@@ -100,7 +100,7 @@ def clear_other(key):
 def firstPage(): st.session_state.page14 = 0
 
 
-def onRun(reservedFiled):
+def onRun():
     if '优选特征' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('优选特征')
     st.session_state.page14 += 1
@@ -112,19 +112,19 @@ def onRun(reservedFiled):
     methodList = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()
     # ===============根据名称匹配调用并执行各个处理方法===============
     # 初始化特征计算方法
-    featureOptimizationTool = FeatureOptimizationMethod(
-        pages_utils.TempDataSet[2], reservedFiled)
     for tempMethod in methodList:
+        reservedField = pages_utils.TempDataSet[2].columns.tolist()
         afterHandleData = None
         # print(tempMethod)
         if tempMethod == 't检验':
-            afterHandleData = featureOptimizationTool.tTest(
+            afterHandleData = FeatureOptimizationMethod(
+                pages_utils.TempDataSet[2], reservedField).tTest(
                 fields[0], methodParam)
         elif tempMethod == 'Person相关性分析':
             pass
         elif tempMethod == 'Relief-F互相关分析':
             afterHandleData = FeatureOptimizationMethod(
-                pages_utils.TempDataSet[2], reservedFiled).ReliefF(
+                pages_utils.TempDataSet[2], reservedField).ReliefF(
                 fields[0], methodParam)
 
         # ===============合并处理后数据集===============
@@ -168,8 +168,8 @@ with dataPCV:
             tt1 = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
                 with tt1[i]:
-                    if tempLeftTabs[i] == '被选特征':
-                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
+                    if tempLeftTabs[i] == '备选特征':
+                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
                     elif tempLeftTabs[i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     st.data_editor(
@@ -184,8 +184,8 @@ with dataPCV:
             tt = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
                 with tt[i]:
-                    if tempLeftTabs[i] == '被选特征':
-                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
+                    if tempLeftTabs[i] == '备选特征':
+                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
                     elif tempLeftTabs[i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     st.data_editor(
@@ -195,7 +195,7 @@ with dataPCV:
     # ===============显示左下字段或特征及获取===============
     # a = st.selectbox(
     #     '选择数据集',
-    #     ('原始数据集', '预处理后数据集', '被选特征', '优选特征'))
+    #     ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
     # 预处理后数据集表信息
     weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled()
     # 数组元素去重
@@ -292,19 +292,20 @@ with dataPCM:
                 column_order=["编号", "数据类型", "输入特征", "优选特征", "特征优选方法", '时间'],
                 disabled=["数据类型", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
-            with interval_col33:
-                with st.popover("准备运行"):
-                    st.markdown('保留字段选择')
-                    residualField = [arr for arr in pages_utils.TempDataSet[2].columns if
-                                     arr not in mergeArray4(
-                                         ['上级单位', '测报站点',
-                                          "年", "DayOfYear"], result1, result2, result3)]
-                    # print(f'剩余字段{residualField}')
-                    reservedFiled = pages_utils.multiselect_all(
-                        st, '全选',
-                        residualField,
-                        'temp2', 'collapsed')
-                    btn = st.button('运行', on_click=onRun, args=[reservedFiled])
+            # with interval_col33:
+            #     with st.popover("准备运行"):
+            #         st.markdown('保留字段选择')
+            #         residualField = [arr for arr in pages_utils.TempDataSet[2].columns if
+            #                          arr not in mergeArray4(
+            #                              ['上级单位', '测报站点',
+            #                               "年", "DayOfYear"], result1, result2, result3)]
+            #         # print(f'剩余字段{residualField}')
+            #         reservedFiled = pages_utils.multiselect_all(
+            #             st, '全选',
+            #             residualField,
+            #             'temp2', 'collapsed')
+            #         btn = st.button('运行', on_click=onRun, args=[reservedFiled])
+            btn2 = st.button('运行', on_click=onRun)
     elif st.session_state.page14 == 1:
         # =======================显示右下可视化图表=======================
         with placeholder.container():
