@@ -292,20 +292,20 @@ with dataPCM:
                 column_order=["编号", "数据类型", "输入特征", "优选特征", "特征优选方法", '时间'],
                 disabled=["数据类型", "时间"], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
-            # with interval_col33:
-            #     with st.popover("准备运行"):
-            #         st.markdown('保留字段选择')
-            #         residualField = [arr for arr in pages_utils.TempDataSet[2].columns if
-            #                          arr not in mergeArray4(
-            #                              ['上级单位', '测报站点',
-            #                               "年", "DayOfYear"], result1, result2, result3)]
-            #         # print(f'剩余字段{residualField}')
-            #         reservedFiled = pages_utils.multiselect_all(
-            #             st, '全选',
-            #             residualField,
-            #             'temp2', 'collapsed')
-            #         btn = st.button('运行', on_click=onRun, args=[reservedFiled])
-            btn2 = st.button('运行', on_click=onRun)
+            with interval_col33:
+                #     with st.popover("准备运行"):
+                #         st.markdown('保留字段选择')
+                #         residualField = [arr for arr in pages_utils.TempDataSet[2].columns if
+                #                          arr not in mergeArray4(
+                #                              ['上级单位', '测报站点',
+                #                               "年", "DayOfYear"], result1, result2, result3)]
+                #         # print(f'剩余字段{residualField}')
+                #         reservedFiled = pages_utils.multiselect_all(
+                #             st, '全选',
+                #             residualField,
+                #             'temp2', 'collapsed')
+                #         btn = st.button('运行', on_click=onRun, args=[reservedFiled])
+                btn = st.button('运行', on_click=onRun)
     elif st.session_state.page14 == 1:
         # =======================显示右下可视化图表=======================
         with placeholder.container():
