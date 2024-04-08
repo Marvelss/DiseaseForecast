@@ -105,12 +105,26 @@ print(year_difference)
 st.markdown(' ')
 # ==============================异常程度设置==============================
 st.markdown("##### 异常程度设置")
+# ============================气温标准差============================
 col1231, col1232 = st.columns(2)
 with col1231:
-    number51 = st.number_input("气温标准差下限", value=2.0, max_value=10.0, min_value=-10.0, step=0.1)
-    number53 = st.number_input("降水量距平百分率下限(PA)/%", value=90, max_value=100, min_value=-100, step=5)
+    st.info('标准差气温评价指标和等级:\n'
+            '* 异常偏低:$$\Delta T<-2.0\sigma$$       \n* 明显偏低:$$-2.0\sigma \leq \Delta T<-1.5\sigma$$      \n'
+            '* 偏低:$$-1.5\sigma \leq \Delta T<-0.5\sigma$$      \n* 正常(接近常年):$$-0.5\sigma \leq \Delta T\leq 0.5\sigma$$      \n'
+            '* 偏高:$$0.5\sigma \leq \Delta T \leq1.5\sigma$$       \n* 明显偏高:$$1.5\sigma \leq \Delta T \leq2.0\sigma$$      \n'
+            '* 异常偏高:$$\Delta T>2.0\sigma$$', icon="ℹ️")
 with col1232:
+    number51 = st.number_input("气温标准差下限", value=2.0, max_value=10.0, min_value=-10.0, step=0.1)
     number52 = st.number_input("气温标准差上限", value=2.5, max_value=10.0, min_value=-10.0, step=0.1)
+# ============================降水量距平百分率============================
+col12313, col12323 = st.columns(2)
+with col12313:
+    st.info('降水量距平百分率干旱等级划分(月尺度):\n'
+            '* 无旱:$$-40<PA$$       \n* 轻旱:$$-60<PA \leq -40$$      \n'
+            '* 中旱:$$-80<PA \leq -60$$      \n* 重旱:$$-95<PA \leq -80$$      \n'
+            '* 特旱:$$PA \leq -95$$', icon="ℹ️")
+with col12323:
+    number53 = st.number_input("降水量距平百分率下限(PA)/%", value=90, max_value=100, min_value=-100, step=5)
     number54 = st.number_input("降水量距平百分率上限(PA)/%", value=95, max_value=100, min_value=-100, step=5)
 
 sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = number51, number53 * 0.01, number52, number54 * 0.01
