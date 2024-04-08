@@ -54,17 +54,21 @@ def getCheckboxName():
                 return 'RF'
             elif temp1 == 'checkBoxModel3':
                 return 'FLDA'
+            elif temp1 == 'checkBoxModel4':
+                return 'SEIR机理模型'
 
 
 def getModelName(temp1):
     if temp1 == 'checkBoxModel0':
         return 'SVM'
-    elif temp1 == 'checkBoxModel2':
-        return 'KNN'
     elif temp1 == 'checkBoxModel1':
         return 'RF'
+    elif temp1 == 'checkBoxModel2':
+        return 'KNN'
     elif temp1 == 'checkBoxModel3':
         return 'FLDA'
+    elif temp1 == 'checkBoxModel4':
+        return 'SEIR机理模型'
 
 
 # 取消其他选项按钮
@@ -325,18 +329,20 @@ with modelACM:
     # Page 0
     if st.session_state.page == 0:
         with ph.container():
-            st.markdown("###### 建模方法")
+            st.markdown("##### 建模方法")
             colOption1, colOption2, colOption3 = st.columns(3)
             with colOption1:
                 agree = st.checkbox('SVM', key='checkBoxModel0', on_change=clearOtherOption, args=[0])
                 agree1 = st.checkbox('RF', key='checkBoxModel1', on_change=clearOtherOption, args=[1])
             with colOption2:
                 agree2 = st.checkbox('KNN', key='checkBoxModel2', on_change=clearOtherOption, args=[2])
-
+                agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4],
+                                     disabled=True)
             with colOption3:
                 agree3 = st.checkbox('FLDA', key='checkBoxModel3', on_change=clearOtherOption, args=[3])
                 # agree4 = st.checkbox('贝叶斯统计')
                 # agree5 = st.checkbox('模糊综合评价')
+
             st.markdown('---')
 
             # ===============显示和处理右中各个模型参数===============
