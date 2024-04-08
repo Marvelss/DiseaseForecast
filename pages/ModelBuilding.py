@@ -158,7 +158,51 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('SVM训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
-
+        elif tempModel == 'KNN':
+            evaluationResult, actualAndPredictResult = Model(
+                inputDataSet[tempIndex],
+                features[tempIndex], targets[tempIndex],
+                dataPartitioning, modelParam,
+                evaluationIndicator).onKNN()
+            print('======测试返回模型评价结果======')
+            print(evaluationResult)
+            # 显示模型训练结果信息
+            info = ''
+            for key, value in evaluationResult.items():
+                info += f'{key}:{str(round(value, 3))}' + '       '
+            # 显示精度结果
+            st.toast('KNN训练完成 \n' + '       ' + ' \n' + info,
+                     icon='✅')
+        elif tempModel == 'FLDA':
+            evaluationResult, actualAndPredictResult = Model(
+                inputDataSet[tempIndex],
+                features[tempIndex], targets[tempIndex],
+                dataPartitioning, modelParam,
+                evaluationIndicator).onFLDA()
+            print('======测试返回模型评价结果======')
+            print(evaluationResult)
+            # 显示模型训练结果信息
+            info = ''
+            for key, value in evaluationResult.items():
+                info += f'{key}:{str(round(value, 3))}' + '       '
+            # 显示精度结果
+            st.toast('FLDA训练完成 \n' + '       ' + ' \n' + info,
+                     icon='✅')
+        elif tempModel == 'RF':
+            evaluationResult, actualAndPredictResult = Model(
+                inputDataSet[tempIndex],
+                features[tempIndex], targets[tempIndex],
+                dataPartitioning, modelParam,
+                evaluationIndicator).onRF()
+            print('======测试返回模型评价结果======')
+            print(evaluationResult)
+            # 显示模型训练结果信息
+            info = ''
+            for key, value in evaluationResult.items():
+                info += f'{key}:{str(round(value, 3))}' + '       '
+            # 显示精度结果
+            st.toast('RF训练完成 \n' + '       ' + ' \n' + info,
+                     icon='✅')
         print('==============更新前================')
         print(pages_utils.TempDataSetField[4])
         # ===============更新左侧显示内容===============
@@ -226,8 +270,8 @@ with modelACV:
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
                         column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '被选特征':
-                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
+                    elif st.session_state["leftTabs"][i] == '备选特征':
+                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
                     elif st.session_state["leftTabs"][i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     elif st.session_state["leftTabs"][i] == '模型':
@@ -246,8 +290,8 @@ with modelACV:
                         column = ['数据类型', '字段', '上传时间']
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
                         column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '被选特征':
-                        column = ["数据类型", "被选特征", "大小", "特征计算方法", '时间']
+                    elif st.session_state["leftTabs"][i] == '备选特征':
+                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
                     elif st.session_state["leftTabs"][i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     elif st.session_state["leftTabs"][i] == '模型':
@@ -285,12 +329,12 @@ with modelACM:
             colOption1, colOption2, colOption3 = st.columns(3)
             with colOption1:
                 agree = st.checkbox('SVM', key='checkBoxModel0', on_change=clearOtherOption, args=[0])
-                agree1 = st.checkbox('RF', key='checkBoxModel1', on_change=clearOtherOption, args=[1], disabled=True)
+                agree1 = st.checkbox('RF', key='checkBoxModel1', on_change=clearOtherOption, args=[1])
             with colOption2:
-                agree2 = st.checkbox('KNN', key='checkBoxModel2', on_change=clearOtherOption, args=[2], disabled=True)
+                agree2 = st.checkbox('KNN', key='checkBoxModel2', on_change=clearOtherOption, args=[2])
 
             with colOption3:
-                agree3 = st.checkbox('FLDA', key='checkBoxModel3', on_change=clearOtherOption, args=[3], disabled=True)
+                agree3 = st.checkbox('FLDA', key='checkBoxModel3', on_change=clearOtherOption, args=[3])
                 # agree4 = st.checkbox('贝叶斯统计')
                 # agree5 = st.checkbox('模糊综合评价')
             st.markdown('---')

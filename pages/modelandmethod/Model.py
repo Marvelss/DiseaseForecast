@@ -10,8 +10,11 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn import svm
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import r2_score, mean_squared_error, accuracy_score, cohen_kappa_score
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 
 
@@ -74,7 +77,272 @@ class Model:
         # 进行预测
         y_pred = model1.predict(X_test)
         # 保存模型
-        joblib.dump(model1, r'E:\a_python\program\testPlatform\demo\model2.pkl')
+        path = r'E:\a_python\program\diseaseForecastStreamlit\resource\models\model_SVM.pkl'
+        joblib.dump(model1, path)
+        # =======================获取评价指标=======================
+
+        print('======================模型构建-精度指标======================')
+        precision = {}
+        savePathDir = os.path.join(os.getcwd(), 'temp')
+        savePath1 = os.path.join(savePathDir, 'predictLabel.xlsx')
+        savePath2 = os.path.join(savePathDir, 'actualLabel.xlsx')
+        pd.DataFrame(y_pred,
+                     columns=['predictLabel']).to_excel(
+            savePath1, index=False)
+        y_test.to_excel(
+            savePath2, index=False)
+        # actualAndPredictResult = [savePath1, savePath2]
+        actualAndPredictResult = y_pred.tolist()
+        # 'predictLabel': ,
+        # 'actualLabel': }
+        print(actualAndPredictResult)
+        # print('X_test:')
+        # print(X_test)
+        print('y_pred:')
+        # print(y_pred)
+        tempIndicator = self.evaluationIndicator
+        # print(tempIndicator)
+        if ',' in self.evaluationIndicator[0]:
+            tempIndicator = self.evaluationIndicator[0].split(',')
+        for temp in tempIndicator:
+            # 计算均方误差
+            if temp == 'MSE':
+                precision['MSE'] = mean_squared_error(y_test, y_pred)
+            # 计算R方
+            elif temp == 'R方':
+                precision['R方'] = r2_score(y_test, y_pred)
+            # 计算OA
+            elif temp == 'OA':
+                precision['OA'] = accuracy_score(y_test, y_pred)
+            # 计算Kappa
+            elif temp == 'Kappa':
+                precision['Kappa'] = cohen_kappa_score(y_test, y_pred)
+        return precision, actualAndPredictResult
+
+    def onKNN(self):
+        print('=============方法接收=============')
+        print(self.evaluationIndicator)
+        print(self.dataPartitioning)
+        print(self.featureVariable)
+        print(self.targetVariable)
+        print(self.dataFrame)
+        # 训练模型
+        # =======================获取数据集=======================
+        df11 = self.dataFrame
+        X = df11[self.featureVariable]
+        Y = df11[self.targetVariable]
+        # 对分类变量进行one-hot编码
+        if '上级单位' and '测报站点' in self.featureVariable:
+            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        # =======================划分训练集和测试集=======================
+        partition = 0.2
+        if self.dataPartitioning[0] == '8:2':
+            partition = 0.2
+        elif self.dataPartitioning[0] == '7:3':
+            partition = 0.3
+        elif self.dataPartitioning[0] == '6:4':
+            partition = 0.4
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
+
+        # =======================创建模型并开始训练=======================
+        print('======================模型构建-开始训练======================')
+        print(self.modelParam)
+        # 合并参数名称和值
+        array = self.modelParam
+        param_names = array[0]['参数名']
+        param_values = array[0]['参数值']
+        parameters_dict = {}
+        for i in range(len(param_names)):
+            parameters_dict[param_names[i]] = param_values[i]
+
+        # print(parameters_dict)
+        # 使用SVM回归模型进行拟合
+        model1 = KNeighborsClassifier(n_neighbors=3)
+        model1.fit(X_train, y_train)
+        # 进行预测
+        y_pred = model1.predict(X_test)
+        # 保存模型
+        path = r'E:\a_python\program\diseaseForecastStreamlit\resource\models\model_KNN.pkl'
+        joblib.dump(model1, path)
+        # =======================获取评价指标=======================
+
+        print('======================模型构建-精度指标======================')
+        precision = {}
+        savePathDir = os.path.join(os.getcwd(), 'temp')
+        savePath1 = os.path.join(savePathDir, 'predictLabel.xlsx')
+        savePath2 = os.path.join(savePathDir, 'actualLabel.xlsx')
+        pd.DataFrame(y_pred,
+                     columns=['predictLabel']).to_excel(
+            savePath1, index=False)
+        y_test.to_excel(
+            savePath2, index=False)
+        # actualAndPredictResult = [savePath1, savePath2]
+        actualAndPredictResult = y_pred.tolist()
+        # 'predictLabel': ,
+        # 'actualLabel': }
+        print(actualAndPredictResult)
+        # print('X_test:')
+        # print(X_test)
+        print('y_pred:')
+        # print(y_pred)
+        tempIndicator = self.evaluationIndicator
+        # print(tempIndicator)
+        if ',' in self.evaluationIndicator[0]:
+            tempIndicator = self.evaluationIndicator[0].split(',')
+        for temp in tempIndicator:
+            # 计算均方误差
+            if temp == 'MSE':
+                precision['MSE'] = mean_squared_error(y_test, y_pred)
+            # 计算R方
+            elif temp == 'R方':
+                precision['R方'] = r2_score(y_test, y_pred)
+            # 计算OA
+            elif temp == 'OA':
+                precision['OA'] = accuracy_score(y_test, y_pred)
+            # 计算Kappa
+            elif temp == 'Kappa':
+                precision['Kappa'] = cohen_kappa_score(y_test, y_pred)
+        return precision, actualAndPredictResult
+
+    def onFLDA(self):
+        print('=============方法接收=============')
+        print(self.evaluationIndicator)
+        print(self.dataPartitioning)
+        print(self.featureVariable)
+        print(self.targetVariable)
+        print(self.dataFrame)
+        # 训练模型
+        # =======================获取数据集=======================
+        df11 = self.dataFrame
+        X = df11[self.featureVariable]
+        Y = df11[self.targetVariable]
+        # 对分类变量进行one-hot编码
+        if '上级单位' and '测报站点' in self.featureVariable:
+            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        # =======================划分训练集和测试集=======================
+        partition = 0.2
+        if self.dataPartitioning[0] == '8:2':
+            partition = 0.2
+        elif self.dataPartitioning[0] == '7:3':
+            partition = 0.3
+        elif self.dataPartitioning[0] == '6:4':
+            partition = 0.4
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
+
+        # =======================创建模型并开始训练=======================
+        print('======================模型构建-开始训练======================')
+        print(self.modelParam)
+        # 合并参数名称和值
+        array = self.modelParam
+        param_names = array[0]['参数名']
+        param_values = array[0]['参数值']
+        parameters_dict = {}
+        for i in range(len(param_names)):
+            parameters_dict[param_names[i]] = param_values[i]
+
+        # print(parameters_dict)
+        # 使用SVM回归模型进行拟合
+        model1 = LinearDiscriminantAnalysis()
+        model1.fit(X_train, y_train)
+        # 进行预测
+        y_pred = model1.predict(X_test)
+        # 保存模型
+        path = r'E:\a_python\program\diseaseForecastStreamlit\resource\models\model_FLDA.pkl'
+        joblib.dump(model1, path)
+        # =======================获取评价指标=======================
+
+        print('======================模型构建-精度指标======================')
+        precision = {}
+        savePathDir = os.path.join(os.getcwd(), 'temp')
+        savePath1 = os.path.join(savePathDir, 'predictLabel.xlsx')
+        savePath2 = os.path.join(savePathDir, 'actualLabel.xlsx')
+        pd.DataFrame(y_pred,
+                     columns=['predictLabel']).to_excel(
+            savePath1, index=False)
+        y_test.to_excel(
+            savePath2, index=False)
+        # actualAndPredictResult = [savePath1, savePath2]
+        actualAndPredictResult = y_pred.tolist()
+        # 'predictLabel': ,
+        # 'actualLabel': }
+        print(actualAndPredictResult)
+        # print('X_test:')
+        # print(X_test)
+        print('y_pred:')
+        # print(y_pred)
+        tempIndicator = self.evaluationIndicator
+        # print(tempIndicator)
+        if ',' in self.evaluationIndicator[0]:
+            tempIndicator = self.evaluationIndicator[0].split(',')
+        for temp in tempIndicator:
+            # 计算均方误差
+            if temp == 'MSE':
+                precision['MSE'] = mean_squared_error(y_test, y_pred)
+            # 计算R方
+            elif temp == 'R方':
+                precision['R方'] = r2_score(y_test, y_pred)
+            # 计算OA
+            elif temp == 'OA':
+                precision['OA'] = accuracy_score(y_test, y_pred)
+            # 计算Kappa
+            elif temp == 'Kappa':
+                precision['Kappa'] = cohen_kappa_score(y_test, y_pred)
+        return precision, actualAndPredictResult
+
+    def onRF(self):
+        print('=============方法接收=============')
+        print(self.evaluationIndicator)
+        print(self.dataPartitioning)
+        print(self.featureVariable)
+        print(self.targetVariable)
+        print(self.dataFrame)
+        # 训练模型
+        # =======================获取数据集=======================
+        df11 = self.dataFrame
+        X = df11[self.featureVariable]
+        Y = df11[self.targetVariable]
+        # 对分类变量进行one-hot编码
+        if '上级单位' and '测报站点' in self.featureVariable:
+            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        # =======================划分训练集和测试集=======================
+        partition = 0.2
+        if self.dataPartitioning[0] == '8:2':
+            partition = 0.2
+        elif self.dataPartitioning[0] == '7:3':
+            partition = 0.3
+        elif self.dataPartitioning[0] == '6:4':
+            partition = 0.4
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
+
+        # =======================创建模型并开始训练=======================
+        print('======================模型构建-开始训练======================')
+        print(self.modelParam)
+        # 合并参数名称和值
+        array = self.modelParam
+        param_names = array[0]['参数名']
+        param_values = array[0]['参数值']
+        parameters_dict = {}
+        for i in range(len(param_names)):
+            parameters_dict[param_names[i]] = param_values[i]
+
+        # print(parameters_dict)
+        # 使用SVM回归模型进行拟合
+        model1 = RandomForestClassifier(n_estimators=100, random_state=42)
+        model1.fit(X_train, y_train)
+        # 进行预测
+        y_pred = model1.predict(X_test)
+        # 保存模型
+        path = r'E:\a_python\program\diseaseForecastStreamlit\resource\models\model_RF.pkl'
+        joblib.dump(model1, path)
         # =======================获取评价指标=======================
 
         print('======================模型构建-精度指标======================')
