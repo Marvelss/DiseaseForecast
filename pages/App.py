@@ -25,6 +25,7 @@ show_pages(
         Page("pages/ModelBuilding.py", "模型构建"),
         Page("pages/ModelApplication.py", '模型应用'),
         Page("pages/Visualization.py", '可视化及数据下载'),
+        Page("pages/WeatherGenerator.py", '天气情景生成器'),
         Page("pages/ModelEvaluation.py", "测试界面")
     ]
 )
