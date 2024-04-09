@@ -124,8 +124,8 @@ with col12313:
             '* 中旱:$$-80<PA \leq -60$$      \n* 重旱:$$-95<PA \leq -80$$      \n'
             '* 特旱:$$PA \leq -95$$', icon="ℹ️")
 with col12323:
-    number53 = st.number_input("降水量距平百分率下限(PA)/%", value=90, max_value=100, min_value=-100, step=5)
-    number54 = st.number_input("降水量距平百分率上限(PA)/%", value=95, max_value=100, min_value=-100, step=5)
+    number53 = st.number_input("降水量距平百分率下限(PA)/%", value=-90, max_value=100, min_value=-100, step=5)
+    number54 = st.number_input("降水量距平百分率上限(PA)/%", value=-95, max_value=100, min_value=-100, step=5)
 
 sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = number51, number53 * 0.01, number52, number54 * 0.01
 if not weatherNumList:
