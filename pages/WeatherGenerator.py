@@ -22,6 +22,19 @@ st.set_page_config(
 if 'page16' not in st.session_state:
     st.session_state.page16 = 0
 
+# 情景对应异常程度参数表
+weatherSituationParams = {
+    '高温多雨': [2.5, 3.0, 90, 95],
+    '高温常雨': [2.5, 3.0, 0, 0],
+    '高温少雨': [2.5, 3.0, -90, -95],
+    '常温常雨': [0.0, 0.0, 0, 0],
+    '常温多雨': [0.0, 0.0, 90, 95],
+    '常温少雨': [0.0, 0.0, -90, -95],
+    '低温少雨': [-2.5, -3.0, -90, -95],
+    '低温常雨': [-2.5, -3.0, 0, 0],
+    '低温多雨': [-2.5, -3.0, 90, 95]
+}
+
 
 # =======================调用matlab天气情景生成器=======================
 def onRun(year, situation, sigama_temp, sigama_max_temp, PA_temp, PA_max_temp):
@@ -98,7 +111,7 @@ print(year_difference)
 #         '* 4:常温常雨 5:常温多雨 6:常温少雨\n'
 #         '* 7:低温少雨 8:低温常雨 9:低温多雨\n', icon="ℹ️")
 st.markdown(' ')
-st.markdown("##### 生成模拟气象情景及异常程度设置")
+st.markdown("##### 生成模拟气象情景")
 # st.markdown("##### 生成气象情景")
 # ==============================生成气象情景==============================
 weatherScenesList = pages_utils.multiselect_all(
@@ -108,16 +121,17 @@ weatherScenesList = pages_utils.multiselect_all(
         '常温常雨', '常温多雨', '常温少雨',
         '低温少雨', '低温常雨', '低温多雨'],
     'temp111', 'collapsed')
-
+if not weatherScenesList:
+    weatherScenesList = ['高温少雨']
 # 情景转换为对应数字
 weatherNumList = pages_utils.getWeatherNum(weatherScenesList)
-
+st.markdown("##### 异常程度设置")
 # ==============================异常程度设置==============================
 # ============================气温标准差============================
-selectedTemplate = pills("选择情景", [
-    '高温多雨', '高温常雨', '高温少雨',
-    '常温常雨', '常温多雨', '常温少雨',
-    '低温少雨', '低温常雨', '低温多雨'])
+selectedWeather = pills("异常程度设置", weatherScenesList, label_visibility='collapsed')
+
+# 获取天气情景对应异常程度值
+anomalyValue = weatherSituationParams.get(selectedWeather)
 col1231, col1232 = st.columns(2)
 with col1231:
     st.info('标准差气温评价指标和等级:\n'
@@ -126,8 +140,8 @@ with col1231:
             '* 偏高:$$0.5\sigma \leq \Delta T \leq1.5\sigma$$       \n* 明显偏高:$$1.5\sigma \leq \Delta T \leq2.0\sigma$$      \n'
             '* 异常偏高:$$\Delta T>2.0\sigma$$', icon="ℹ️")
 with col1232:
-    number51 = st.number_input("气温标准差下限", value=2.0, max_value=10.0, min_value=-10.0, step=0.1)
-    number52 = st.number_input("气温标准差上限", value=2.5, max_value=10.0, min_value=-10.0, step=0.1)
+    number51 = st.number_input("气温标准差下限", value=anomalyValue[0], max_value=10.0, min_value=-10.0, step=0.1)
+    number52 = st.number_input("气温标准差上限", value=anomalyValue[1], max_value=10.0, min_value=-10.0, step=0.1)
 # ============================降水量距平百分率============================
 col12313, col12323 = st.columns(2)
 with col12313:
@@ -136,8 +150,10 @@ with col12313:
             '* 中旱:$$-80<PA \leq -60$$      \n* 重旱:$$-95<PA \leq -80$$      \n'
             '* 特旱:$$PA \leq -95$$', icon="ℹ️")
 with col12323:
-    number53 = st.number_input("降水量距平百分率下限(PA)/%", value=-90, max_value=100, min_value=-100, step=5)
-    number54 = st.number_input("降水量距平百分率上限(PA)/%", value=-95, max_value=100, min_value=-100, step=5)
+    number53 = st.number_input("降水量距平百分率下限(PA)/%", value=anomalyValue[2], max_value=100, min_value=-100,
+                               step=5)
+    number54 = st.number_input("降水量距平百分率上限(PA)/%", value=anomalyValue[3], max_value=100, min_value=-100,
+                               step=5)
 
 sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = number51, number53 * 0.01, number52, number54 * 0.01
 if not weatherNumList:
