@@ -12,6 +12,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matlab.engine
+from PIL import Image
 from streamlit_pills import pills
 
 import pages_utils
@@ -155,6 +156,12 @@ with col12323:
     number54 = st.number_input("降水量距平百分率上限(PA)/%", value=anomalyValue[3], max_value=100, min_value=-100,
                                step=5)
 
+st.markdown("##### 指定评价模型")
+modelSList = pages_utils.multiselect_all(
+    st, '全选-模型',
+    [
+        '模型1', '模型2'],
+    'tempModels', 'collapsed')
 sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = number51, number53 * 0.01, number52, number54 * 0.01
 if not weatherNumList:
     weatherNumList = ['无']
@@ -198,10 +205,22 @@ if btn:
             mime="application/zip",
         )
 # =======================预测评价结果及数据下载=======================
-st.markdown("##### 预测评价结果及数据下载")
+st.markdown("##### 模型评价指标结果及可视化")
 tab11, tab12 = st.tabs(['模型1', '模型2'])
 with tab11:
-    st.markdown('指标')
-    st.markdown('可视化图')
+    # 评价指标结果示意图
+    img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'weatherGeneratorEvaluateResult1.jpg'))
+    st.image(img)
+    co1, co2 = st.columns(2)
+    with co1:
+        st.metric("Dev_S", "0.0262")
+    with co2:
+        st.metric("Dev_S", "0.0888")
 with tab12:
-    pass
+    img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'weatherGeneratorEvaluateResult2.jpg'))
+    st.image(img)
+    co3, co4 = st.columns(2)
+    with co3:
+        st.metric("Dev_D", "0.0799")
+    with co4:
+        st.metric("Dev_D", "0.0899")
