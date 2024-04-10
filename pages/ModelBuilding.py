@@ -162,6 +162,9 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('SVM训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
+            pd.DataFrame(evaluationResult.items(),
+                         columns=['精度指标', '值']).to_excel(
+                r'E:\a_python\program\diseaseForecastStreamlit\resource\SVM.xlsx', index=False)
         elif tempModel == 'KNN':
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet[tempIndex],
@@ -177,6 +180,9 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('KNN训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
+            pd.DataFrame(evaluationResult.items(),
+                         columns=['精度指标', '值']).to_excel(
+                r'E:\a_python\program\diseaseForecastStreamlit\resource\KNN.xlsx', index=False)
         elif tempModel == 'FLDA':
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet[tempIndex],
@@ -192,6 +198,9 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('FLDA训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
+            pd.DataFrame(evaluationResult.items(),
+                         columns=['精度指标', '值']).to_excel(
+                r'E:\a_python\program\diseaseForecastStreamlit\resource\FLDA.xlsx', index=False)
         elif tempModel == 'RF':
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet[tempIndex],
@@ -207,6 +216,9 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('RF训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
+            pd.DataFrame(evaluationResult.items(),
+                         columns=['精度指标', '值']).to_excel(
+                r'E:\a_python\program\diseaseForecastStreamlit\resource\RF.xlsx', index=False)
         print('==============更新前================')
         print(pages_utils.TempDataSetField[4])
         # ===============更新左侧显示内容===============
