@@ -117,7 +117,10 @@ class Model:
         y_test.to_excel(
             savePath2, index=False)
         # 保存评价指标
-
+        precisionResultDir = os.path.join(rootPath, 'precision', 'SVM_precision.xlsx')
+        pd.DataFrame(precision.items(),
+                     columns=['evaluationIndex', 'value']).to_excel(
+            precisionResultDir, index=False)
         return precision, actualAndPredictResult
 
     def onKNN(self):
@@ -202,7 +205,10 @@ class Model:
         y_test.to_excel(
             savePath2, index=False)
         # 保存评价指标
-
+        precisionResultDir = os.path.join(rootPath, 'precision', 'KNN_precision.xlsx')
+        pd.DataFrame(precision.items(),
+                     columns=['evaluationIndex', 'value']).to_excel(
+            precisionResultDir, index=False)
         return precision, actualAndPredictResult
 
     def onFLDA(self):
@@ -294,7 +300,10 @@ class Model:
         y_test.to_excel(
             savePath2, index=False)
         # 保存评价指标
-
+        precisionResultDir = os.path.join(rootPath, 'precision', 'FLDA_precision.xlsx')
+        pd.DataFrame(precision.items(),
+                     columns=['evaluationIndex', 'value']).to_excel(
+            precisionResultDir, index=False)
         return precision, actualAndPredictResult
 
     def onRF(self):
@@ -379,7 +388,10 @@ class Model:
         y_test.to_excel(
             savePath2, index=False)
         # 保存评价指标
-
+        precisionResultDir = os.path.join(rootPath, 'precision', 'RF_precision.xlsx')
+        pd.DataFrame(precision.items(),
+                     columns=['evaluationIndex', 'value']).to_excel(
+            precisionResultDir, index=False)
         return precision, actualAndPredictResult
 
     def onSEIR(self, ka, kb, kc, q, r, OPT_PRI, YZQ_num, YZQ_txt, YZQ_data, ZB_num, ZB_data, met_num, met_txt, met_data,

@@ -162,9 +162,6 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('SVM训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
-            pd.DataFrame(evaluationResult.items(),
-                         columns=['精度指标', '值']).to_excel(
-                r'E:\a_python\program\diseaseForecastStreamlit\resource\SVM.xlsx', index=False)
         elif tempModel == 'KNN':
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet[tempIndex],
@@ -180,9 +177,6 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('KNN训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
-            pd.DataFrame(evaluationResult.items(),
-                         columns=['精度指标', '值']).to_excel(
-                r'E:\a_python\program\diseaseForecastStreamlit\resource\KNN.xlsx', index=False)
         elif tempModel == 'FLDA':
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet[tempIndex],
@@ -198,9 +192,6 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('FLDA训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
-            pd.DataFrame(evaluationResult.items(),
-                         columns=['精度指标', '值']).to_excel(
-                r'E:\a_python\program\diseaseForecastStreamlit\resource\FLDA.xlsx', index=False)
         elif tempModel == 'RF':
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet[tempIndex],
@@ -216,9 +207,7 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('RF训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
-            pd.DataFrame(evaluationResult.items(),
-                         columns=['精度指标', '值']).to_excel(
-                r'E:\a_python\program\diseaseForecastStreamlit\resource\RF.xlsx', index=False)
+
         print('==============更新前================')
         print(pages_utils.TempDataSetField[4])
         # ===============更新左侧显示内容===============
@@ -457,10 +446,9 @@ with modelACM:
                     # y_Predicted = actualAndPredictList[i]['actualLabel']
                     # print(f'=============可视化{y_Actual}{y_Predicted}=============')
                     # 创建模拟的混淆矩阵
-                    data = {'y_Actual': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-                            'y_Predicted': [1, 1, 1, 1, 0, 0, 0, 0, 1, 1]}
-                    df = pd.DataFrame(data, columns=['y_Actual', 'y_Predicted'])
-                    conf_matrix = confusion_matrix(df['y_Actual'], df['y_Predicted'])
+                    df1 = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\temp\actualLabel.xlsx')
+                    df2 = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\temp\predictLabel.xlsx')
+                    conf_matrix = confusion_matrix(df1['发生程度'], df2['predictLabel'])
                     # 使用 seaborn 绘制混淆矩阵图
                     fig, ax = plt.subplots()
                     sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
