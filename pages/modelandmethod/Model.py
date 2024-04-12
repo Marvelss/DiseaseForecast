@@ -79,30 +79,11 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-        # 保存模型
-        path = r'E:\a_python\program\diseaseForecastStreamlit\resource\models\model_SVM.pkl'
-        joblib.dump(model1, path)
-        # =======================获取评价指标=======================
-
         print('======================模型构建-精度指标======================')
         precision = {}
-        savePathDir = os.path.join(os.getcwd(), 'temp')
-        savePath1 = os.path.join(savePathDir, 'predictLabel.xlsx')
-        savePath2 = os.path.join(savePathDir, 'actualLabel.xlsx')
-        pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(
-            savePath1, index=False)
-        y_test.to_excel(
-            savePath2, index=False)
-        # actualAndPredictResult = [savePath1, savePath2]
         actualAndPredictResult = y_pred.tolist()
-        # 'predictLabel': ,
-        # 'actualLabel': }
-        print(actualAndPredictResult)
-        # print('X_test:')
-        # print(X_test)
         print('y_pred:')
-        # print(y_pred)
+        print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
         if ',' in self.evaluationIndicator[0]:
@@ -120,6 +101,23 @@ class Model:
             # 计算Kappa
             elif temp == 'Kappa':
                 precision['Kappa'] = cohen_kappa_score(y_test, y_pred)
+
+        # =======================保存结果-模型结构+预测结果+评价指标结果=======================
+        # 保存模型
+        rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+        joblib.dump(model1, os.path.join(
+            rootPath, 'modelsStructure', 'SVM_structure.pkl'))
+        # 保存预测结果
+        savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
+        savePath1 = os.path.join(savePathDir, 'SVM_predictLabel.xlsx')
+        savePath2 = os.path.join(savePathDir, 'SVM_testLabel.xlsx')
+        pd.DataFrame(y_pred,
+                     columns=['predictLabel']).to_excel(
+            savePath1, index=False)
+        y_test.to_excel(
+            savePath2, index=False)
+        # 保存评价指标
+
         return precision, actualAndPredictResult
 
     def onKNN(self):
@@ -160,37 +158,17 @@ class Model:
         parameters_dict = {}
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
-
         # print(parameters_dict)
         # 使用SVM回归模型进行拟合
         model1 = KNeighborsClassifier(n_neighbors=3)
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-        # 保存模型
-        path = r'E:\a_python\program\diseaseForecastStreamlit\resource\models\model_KNN.pkl'
-        joblib.dump(model1, path)
-        # =======================获取评价指标=======================
-
         print('======================模型构建-精度指标======================')
         precision = {}
-        savePathDir = os.path.join(os.getcwd(), 'temp')
-        savePath1 = os.path.join(savePathDir, 'predictLabel.xlsx')
-        savePath2 = os.path.join(savePathDir, 'actualLabel.xlsx')
-        pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(
-            savePath1, index=False)
-        y_test.to_excel(
-            savePath2, index=False)
-        # actualAndPredictResult = [savePath1, savePath2]
         actualAndPredictResult = y_pred.tolist()
-        # 'predictLabel': ,
-        # 'actualLabel': }
-        print(actualAndPredictResult)
-        # print('X_test:')
-        # print(X_test)
         print('y_pred:')
-        # print(y_pred)
+        print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
         if ',' in self.evaluationIndicator[0]:
@@ -208,6 +186,23 @@ class Model:
             # 计算Kappa
             elif temp == 'Kappa':
                 precision['Kappa'] = cohen_kappa_score(y_test, y_pred)
+
+        # =======================保存结果-模型结构+预测结果+评价指标结果=======================
+        # 保存模型
+        rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+        joblib.dump(model1, os.path.join(
+            rootPath, 'modelsStructure', 'KNN_structure.pkl'))
+        # 保存预测结果
+        savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
+        savePath1 = os.path.join(savePathDir, 'KNN_predictLabel.xlsx')
+        savePath2 = os.path.join(savePathDir, 'KNN_testLabel.xlsx')
+        pd.DataFrame(y_pred,
+                     columns=['predictLabel']).to_excel(
+            savePath1, index=False)
+        y_test.to_excel(
+            savePath2, index=False)
+        # 保存评价指标
+
         return precision, actualAndPredictResult
 
     def onFLDA(self):
@@ -255,21 +250,8 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-        # 保存模型
-        path = r'E:\a_python\program\diseaseForecastStreamlit\resource\models\model_FLDA.pkl'
-        joblib.dump(model1, path)
-        # =======================获取评价指标=======================
-
         print('======================模型构建-精度指标======================')
         precision = {}
-        savePathDir = os.path.join(os.getcwd(), 'temp')
-        savePath1 = os.path.join(savePathDir, 'predictLabel.xlsx')
-        savePath2 = os.path.join(savePathDir, 'actualLabel.xlsx')
-        pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(
-            savePath1, index=False)
-        y_test.to_excel(
-            savePath2, index=False)
         # actualAndPredictResult = [savePath1, savePath2]
         actualAndPredictResult = y_pred.tolist()
         # 'predictLabel': ,
@@ -296,6 +278,23 @@ class Model:
             # 计算Kappa
             elif temp == 'Kappa':
                 precision['Kappa'] = cohen_kappa_score(y_test, y_pred)
+
+        # =======================保存结果-模型结构+预测结果+评价指标结果=======================
+        # 保存模型
+        rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+        joblib.dump(model1, os.path.join(
+            rootPath, 'modelsStructure', 'FLDA_structure.pkl'))
+        # 保存预测结果
+        savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
+        savePath1 = os.path.join(savePathDir, 'FLDA_predictLabel.xlsx')
+        savePath2 = os.path.join(savePathDir, 'FLDA_testLabel.xlsx')
+        pd.DataFrame(y_pred,
+                     columns=['predictLabel']).to_excel(
+            savePath1, index=False)
+        y_test.to_excel(
+            savePath2, index=False)
+        # 保存评价指标
+
         return precision, actualAndPredictResult
 
     def onRF(self):
@@ -336,37 +335,17 @@ class Model:
         parameters_dict = {}
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
-
         # print(parameters_dict)
         # 使用SVM回归模型进行拟合
         model1 = RandomForestClassifier(n_estimators=100, random_state=42)
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-        # 保存模型
-        path = r'E:\a_python\program\diseaseForecastStreamlit\resource\models\model_RF.pkl'
-        joblib.dump(model1, path)
-        # =======================获取评价指标=======================
-
         print('======================模型构建-精度指标======================')
         precision = {}
-        savePathDir = os.path.join(os.getcwd(), 'temp')
-        savePath1 = os.path.join(savePathDir, 'predictLabel.xlsx')
-        savePath2 = os.path.join(savePathDir, 'actualLabel.xlsx')
-        pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(
-            savePath1, index=False)
-        y_test.to_excel(
-            savePath2, index=False)
-        # actualAndPredictResult = [savePath1, savePath2]
         actualAndPredictResult = y_pred.tolist()
-        # 'predictLabel': ,
-        # 'actualLabel': }
-        print(actualAndPredictResult)
-        # print('X_test:')
-        # print(X_test)
         print('y_pred:')
-        # print(y_pred)
+        print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
         if ',' in self.evaluationIndicator[0]:
@@ -384,6 +363,23 @@ class Model:
             # 计算Kappa
             elif temp == 'Kappa':
                 precision['Kappa'] = cohen_kappa_score(y_test, y_pred)
+
+        # =======================保存结果-模型结构+预测结果+评价指标结果=======================
+        # 保存模型
+        rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+        joblib.dump(model1, os.path.join(
+            rootPath, 'modelsStructure', 'RF_structure.pkl'))
+        # 保存预测结果
+        savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
+        savePath1 = os.path.join(savePathDir, 'RF_predictLabel.xlsx')
+        savePath2 = os.path.join(savePathDir, 'RF_testLabel.xlsx')
+        pd.DataFrame(y_pred,
+                     columns=['predictLabel']).to_excel(
+            savePath1, index=False)
+        y_test.to_excel(
+            savePath2, index=False)
+        # 保存评价指标
+
         return precision, actualAndPredictResult
 
     def onSEIR(self, ka, kb, kc, q, r, OPT_PRI, YZQ_num, YZQ_txt, YZQ_data, ZB_num, ZB_data, met_num, met_txt, met_data,
