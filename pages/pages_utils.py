@@ -1,4 +1,5 @@
 import random
+import shutil
 
 import numpy as np
 import pandas as pd
@@ -82,14 +83,14 @@ def getDataFiled():
                 temp = tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].tolist()[0]
                 agricultureName = np.concatenate((temp, agricultureName))
         elif i == 2:
-            if tempDF[tempDF['数据类型'] == '气象数据']['被选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '气象数据']['被选特征'].tolist()[0]
+            if tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].tolist()[0]
                 weatherName = np.concatenate(([temp], weatherName))
-            if tempDF[tempDF['数据类型'] == '植保数据']['被选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '植保数据']['被选特征'].tolist()[0]
+            if tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].tolist()[0]
                 plantName = np.concatenate((temp, plantName))
-            if tempDF[tempDF['数据类型'] == '农学数据']['被选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '农学数据']['被选特征'].tolist()[0]
+            if tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].any():
+                temp = tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].tolist()[0]
                 agricultureName = np.concatenate((temp, agricultureName))
         elif i == 3:
             if tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].any():
@@ -118,6 +119,7 @@ def delete_files_in_folder(folder_path):
         for dir1 in dirs:
             dir_path = os.path.join(root, dir1)
             os.rmdir(dir_path)
+            shutil.rmtree(dir_path)
 
 
 # 文件压缩
@@ -131,17 +133,35 @@ def zip_folder(folder_path, output_path):
                 zipf.write(str(file_path), arcname=os.path.relpath(str(file_path), start=folder_path))
 
 
+# 天气情景转换为对应数字
+def getWeatherNum(situations):
+    weatherMap = {
+        "高温多雨": 1,
+        "高温常雨": 2,
+        "高温少雨": 3,
+        "常温常雨": 4,
+        "常温多雨": 5,
+        "常温少雨": 6,
+        "低温少雨": 7,
+        "低温常雨": 8,
+        "低温多雨": 9
+    }
+    result = [float(weatherMap[weather]) for weather in situations]
+    return result
+
+
 # 其他字段值
 RawDataSetField = pd.DataFrame(
     columns=["编号", "数据类型", "文件名称", "字段", "传输状态", "上传时间"])
 PreprocessedDataSetField = pd.DataFrame(
     columns=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", "方法参数", '时间', "已处理"])
 FeatureDataSetField = pd.DataFrame(
-    columns=["编号", "数据类型", "输入特征", "被选特征", "大小", "特征计算方法", "方法参数", "时间", "已处理"])
+    columns=["编号", "数据类型", "输入特征", "备选特征", "大小", "特征计算方法", "方法参数", "时间", "已处理"])
 OptimalFeatureDataSetField = pd.DataFrame(
     columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间", "已处理"])
 ModelSet = pd.DataFrame(
-    columns=["编号", "模型", "模型参数", "特征", "标签", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"])
+    columns=["编号", "模型", "模型参数", "特征", "标签", "评价指标", "数据集划分比例", "时间", "实际和预测值",
+             "下载模型结构、结果和参数值"])
 TempDataSetField = [RawDataSetField, PreprocessedDataSetField,
                     FeatureDataSetField, OptimalFeatureDataSetField,
                     ModelSet]
