@@ -24,17 +24,18 @@ if 'page16' not in st.session_state:
     st.session_state.page16 = 0
 
 # 情景对应异常程度参数表
-weatherSituationParams = {
-    '高温多雨': [2.5, 3.0, 90, 95],
-    '高温常雨': [2.5, 3.0, 0, 0],
-    '高温少雨': [2.5, 3.0, -90, -95],
-    '常温常雨': [0.0, 0.0, 0, 0],
-    '常温多雨': [0.0, 0.0, 90, 95],
-    '常温少雨': [0.0, 0.0, -90, -95],
-    '低温少雨': [-2.5, -3.0, -90, -95],
-    '低温常雨': [-2.5, -3.0, 0, 0],
-    '低温多雨': [-2.5, -3.0, 90, 95]
-}
+if 'weatherSituationParams' not in st.session_state:
+    st.session_state.weatherSituationParams = {
+        '高温多雨': [2.5, 3.0, 90, 95],
+        '高温常雨': [2.5, 3.0, 0, 0],
+        '高温少雨': [2.5, 3.0, -90, -95],
+        '常温常雨': [0.0, 0.0, 0, 0],
+        '常温多雨': [0.0, 0.0, 90, 95],
+        '常温少雨': [0.0, 0.0, -90, -95],
+        '低温少雨': [-2.5, -3.0, -90, -95],
+        '低温常雨': [-2.5, -3.0, 0, 0],
+        '低温多雨': [-2.5, -3.0, 90, 95]
+    }
 
 
 # =======================调用matlab天气情景生成器=======================
@@ -132,7 +133,7 @@ st.markdown("##### 异常程度设置")
 selectedWeather = pills("异常程度设置", weatherScenesList, label_visibility='collapsed')
 
 # 获取天气情景对应异常程度值
-anomalyValue = weatherSituationParams.get(selectedWeather)
+anomalyValue = st.session_state.weatherSituationParams.get(selectedWeather)
 col1231, col1232 = st.columns(2)
 with col1231:
     st.info('标准差气温评价指标和等级:\n'
@@ -155,6 +156,12 @@ with col12323:
                                step=5)
     number54 = st.number_input("降水量距平百分率上限(PA)/%", value=anomalyValue[3], max_value=100, min_value=-100,
                                step=5)
+
+# =============================保存异常程度参数==============================
+# 更新场景对应的值
+st.session_state.weatherSituationParams[selectedWeather] = [number51, number52, number53, number54]
+# 打印更新后的值
+# st.markdown(st.session_state.weatherSituationParams[selectedWeather])
 
 st.markdown("##### 指定评价模型")
 modelSList = pages_utils.multiselect_all(
