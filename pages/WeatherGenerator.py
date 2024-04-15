@@ -38,20 +38,54 @@ if 'weatherSituationParams' not in st.session_state:
     }
 
 
-# =======================调用matlab天气情景生成器=======================
-def onRun(year, situation, sigama_temp, sigama_max_temp, PA_temp, PA_max_temp):
-    # 调用matlab程序
-    # print(year, situation)
-    # 调用matlab
+# =======================调用matlab天气情景生成器并保存结果数据=======================
+# 调用matlab程序
+def onRun(year, selectedWeatherScenesList, weatherSituationParams):
+    # 情景转换为对应数字
+    weatherNumList = pages_utils.getWeatherNum(selectedWeatherScenesList)
     eng = matlab.engine.start_matlab()
     eng.cd(r'E:\a_python\program\testForMatlab\weather_generation', nargout=0)
-    # sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = 2.5, 3.0, 90 * 0.01, 95 * 0.01
-    # result = eng.myPython('0', 'out', 1.0, 1.0, sigama_temp, sigama_max_temp, PA_temp, PA_max_temp, nargout=1)
-    result = eng.myPython('0', 'out', year, situation, sigama_temp, sigama_max_temp, PA_temp, PA_max_temp, nargout=1)
-    print(result)
+    simulateDataDirRoot = r'E:\a_python\program\diseaseForecastStreamlit\resource\weatherGeneratorOutput'
+    # 清空上一次生成数据
+    pages_utils.delete_files_in_folder(simulateDataDirRoot)
+    for weatherNum, weatherScene in zip(weatherNumList, selectedWeatherScenesList):
+        sceneDataDir = os.path.join(simulateDataDirRoot, weatherScene)
+        # 检查文件夹是否存在
+        if not os.path.exists(sceneDataDir):
+            # 创建文件夹
+            os.mkdir(sceneDataDir)
+        ParamsTemp = weatherSituationParams[weatherScene]
+        sigama, sigama_max, PA, PA_max = (ParamsTemp[0],
+                                          ParamsTemp[1],
+                                          ParamsTemp[2] * 0.01,
+                                          ParamsTemp[3] * 0.01)
+        result = eng.myPython('0', 'out', year, weatherNum, sigama, sigama_max, PA, PA_max,
+                              nargout=1)
+        print(result)
+        # 读取数据
+        pathM = r'E:\a_python\program\testForMatlab\weather_generation\out.mat'
+        # 加载结果
+        mat = scipy.io.loadmat(pathM)
+        data1 = np.array((mat['gP']))
+        data2 = np.array(mat['gTmax'])
+        data3 = np.array(mat['gTmin'])
+        for i in range(len(data1)):
+            tempPath = os.path.join(sceneDataDir, '第' + str(i + 1) + '年.xlsx')
+            # 创建DayOfYear列
+            day_of_year = range(1, 366)
+            # 将数据转换为DataFrame
+            my_large_df = pd.DataFrame({
+                'DayOfYear': day_of_year,
+                '降水': data1[i].flatten(),
+                '最高温度': data2[i].flatten(),
+                '最低温度': data3[i].flatten()
+            })
+            my_large_df.to_excel(tempPath, index=False)
+        st.toast(f'{weatherScene}情景数据准备完毕', icon='✅')
+
     eng.exit()
     st.session_state.page16 += 1
-    st.toast('运行完成,数据准备完毕', icon='✅')
+    st.toast('运行完成,所有数据准备完毕', icon='✅')
 
 
 # ==============================界面==============================
@@ -125,8 +159,7 @@ weatherScenesList = pages_utils.multiselect_all(
     'temp111', 'collapsed')
 if not weatherScenesList:
     weatherScenesList = ['高温少雨']
-# 情景转换为对应数字
-weatherNumList = pages_utils.getWeatherNum(weatherScenesList)
+
 st.markdown("##### 异常程度设置")
 # ==============================异常程度设置==============================
 # ============================气温标准差============================
@@ -170,40 +203,15 @@ modelSList = pages_utils.multiselect_all(
         '模型1', '模型2'],
     'tempModels', 'collapsed')
 sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = number51, number53 * 0.01, number52, number54 * 0.01
-if not weatherNumList:
-    weatherNumList = ['无']
+
 btn = st.button('运行程序', on_click=onRun,
-                args=[float(year_difference), weatherNumList[0], sigama_temp, sigama_max_temp, PA_temp, PA_max_temp])
-# ==============================获取并准备下载数据==============================
+                args=[float(year_difference), weatherScenesList, st.session_state.weatherSituationParams])
+# ==============================准备下载数据==============================
 if btn:
-    # 读取数据
-    pathM = r'E:\a_python\program\testForMatlab\weather_generation\out.mat'
-    pathE = r'E:\a_python\program\diseaseForecastStreamlit\resource\simulate'
-    if not os.path.exists(pathE):
-        os.mkdir(pathE)
-    # 清空上一次生成数据
-    pages_utils.delete_files_in_folder(pathE)
-    # 加载结果
-    mat = scipy.io.loadmat(pathM)
-    data1 = np.array((mat['gP']))
-    data2 = np.array(mat['gTmax'])
-    data3 = np.array(mat['gTmin'])
-    for i in range(len(data1)):
-        tempPath = os.path.join(pathE, '第' + str(i + 1) + '年.xlsx')
-        # 创建DayOfYear列
-        day_of_year = range(1, 366)
-        # 将数据转换为DataFrame
-        my_large_df = pd.DataFrame({
-            'DayOfYear': day_of_year,
-            '降水': data1[i].flatten(),
-            '最高温度': data2[i].flatten(),
-            '最低温度': data3[i].flatten()
-        })
-        my_large_df.to_excel(tempPath, index=False)
-    # 气象数据的压缩文件路径
     zipPath = r'E:\a_python\program\diseaseForecastStreamlit\resource\基于天气情景生成器的模拟数据.zip'
     # 压缩生成的xlsx数据
-    pages_utils.zip_folder(pathE, zipPath)
+    pathEE = r'E:\a_python\program\diseaseForecastStreamlit\resource\weatherGeneratorOutput'
+    pages_utils.zip_folder(pathEE, zipPath)
     with open(zipPath, "rb") as file:
         st.download_button(
             label="下载数据",
