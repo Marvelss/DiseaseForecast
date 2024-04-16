@@ -154,14 +154,14 @@ def getWeatherNum(situations):
 RawDataSetField = pd.DataFrame(
     columns=["编号", "数据类型", "文件名称", "字段", "传输状态", "上传时间"])
 PreprocessedDataSetField = pd.DataFrame(
-    columns=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", "方法参数", '时间', "已处理"])
+    columns=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", "方法参数", '时间', "处理状态"])
 FeatureDataSetField = pd.DataFrame(
-    columns=["编号", "数据类型", "输入特征", "备选特征", "大小", "特征计算方法", "方法参数", "时间", "已处理"])
+    columns=["编号", "数据类型", "输入特征", "备选特征", "大小", "特征计算方法", "方法参数", "时间", "处理状态"])
 OptimalFeatureDataSetField = pd.DataFrame(
-    columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间", "已处理"])
+    columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间", "处理状态"])
 ModelSet = pd.DataFrame(
     columns=["编号", "模型", "模型参数", "特征", "标签", "评价指标", "数据集划分比例", "时间", "实际和预测值",
-             "下载模型结构、结果和参数值"])
+             "下载模型结构、结果和参数值", "处理状态"])
 TempDataSetField = [RawDataSetField, PreprocessedDataSetField,
                     FeatureDataSetField, OptimalFeatureDataSetField,
                     ModelSet]

@@ -145,7 +145,8 @@ def onRun():
             # "优选特征": fields[0],
             "大小": '1*' + str(row_size),
             # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
-            "时间": datetime.datetime.now().time()}
+            "时间": datetime.datetime.now().time(),
+            "处理状态": True}
         # 查找要更新的数据记录
         for index, row in pages_utils.TempDataSetField[3].iterrows():
             if row["编号"] == idNumber[0]:
@@ -274,7 +275,7 @@ with dataPCM:
             "方法参数":
                 [value for key, value in st.session_state["OptimizationMethodName"].items() if key != 'checkBox'],
             "时间": datetime.datetime.now().time(),
-            "已处理": False}
+            "处理状态": False}
         print('======================特征优选-添加任务清单记录======================')
         print(new_data)
         pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
@@ -289,8 +290,8 @@ with dataPCM:
             st.markdown('##### 任务清单')
             edited_df28 = st.data_editor(
                 pages_utils.TempDataSetField[3], height=190, width=800,
-                column_order=["编号", "数据类型", "输入特征", "优选特征", "特征优选方法", '时间'],
-                disabled=["数据类型", "时间"], num_rows="dynamic", )
+                column_order=["编号", "数据类型", "输入特征", "优选特征", "特征优选方法", '时间', '处理状态'],
+                disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
             with interval_col33:
                 #     with st.popover("准备运行"):

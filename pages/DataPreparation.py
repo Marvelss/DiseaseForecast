@@ -172,6 +172,7 @@ def onRun():
             "预处理后字段": newDataColumn,
             "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
             "时间": datetime.datetime.now().time(),
+            "处理状态": True
         }
         # 查找要更新的数据记录
         for index, row in pages_utils.TempDataSetField[1].iterrows():
@@ -333,7 +334,7 @@ with dataPCM:
             "预处理后字段": mergeArray(result1, result2, result3),
             "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
             "方法参数": [value for key, value in st.session_state["preMethodName"].items() if key != 'checkBox'],
-            "时间": datetime.datetime.now().time(), "已处理": False}
+            "时间": datetime.datetime.now().time(), "处理状态": False}
         print('======================预处理-添加任务清单记录======================')
         print(new_data)
         pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
@@ -358,8 +359,8 @@ with dataPCM:
             #     switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\ModelEvaluation.py")
             edited_df28 = st.data_editor(
                 pages_utils.TempDataSetField[1], height=190, width=800,
-                column_order=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", '时间'],
-                disabled=["数据类型", "输入字段", "预处理后字段", "时间"], num_rows="dynamic", )
+                column_order=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", '时间', '处理状态'],
+                disabled=["数据类型", "输入字段", "预处理后字段", "时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
             with interval_col33:
                 # residualField = [arr for arr in pages_utils.TempDataSet[0].columns if

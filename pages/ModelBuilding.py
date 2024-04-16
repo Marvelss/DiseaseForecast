@@ -214,7 +214,8 @@ def onTrain(temporaResolution):
         print(actualAndPredictResult)
         update_values = {
             "时间": datetime.datetime.now().time(),
-            "评价指标": evaluationResult}
+            "评价指标": evaluationResult,
+            "处理状态": True}
         # "实际和预测值": actualAndPredictResult}
         # 查找要更新的数据记录
         for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
@@ -376,7 +377,8 @@ with modelACM:
                     "特征": result1,
                     "标签": result2,
                     "时间": datetime.datetime.now().time(),
-                    "下载模型结构、结果和参数值": False}
+                    "下载模型结构、结果和参数值": False,
+                    "处理状态": False}
                 print('======================模型构建-添加模型======================')
                 print(new_data)
                 pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_data
@@ -419,8 +421,8 @@ with modelACM:
     st.markdown('##### 任务清单')
     edited_df28 = st.data_editor(
         pages_utils.TempDataSetField[4], height=190, width=800,
-        column_order=["编号", "模型", "时间"],
-        disabled=["时间"], num_rows="dynamic", )
+        column_order=["编号", "模型", "时间", '处理状态'],
+        disabled=["时间", '处理状态'], num_rows="dynamic", )
     interval_col34, interval_col33 = st.columns([4, 1])
     with interval_col33:
         with st.popover("准备模型训练"):
