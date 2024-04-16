@@ -176,6 +176,9 @@ with featureCCV:
     if st.session_state.page12 == 0:
         with placeholder1.container():
             tempLefTabs = st.session_state["leftTabs"][1:]
+            if not tempLefTabs:
+                tempLefTabs = ['待进行数据预处理']
+                column = ['空']
             tt1 = st.tabs(tempLefTabs)
             for i in range(len(tempLefTabs)):
                 with tt1[i]:

@@ -165,6 +165,9 @@ with dataPCV:
     if st.session_state.page12 == 0:
         with placeholder1.container():
             tempLeftTabs = st.session_state["leftTabs"][2:]
+            if not tempLeftTabs:
+                tempLeftTabs = ['待进行特征计算']
+                column = ['空']
             print(f'f=========测试{tempLeftTabs}================')
             tt1 = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
