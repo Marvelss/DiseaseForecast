@@ -5,7 +5,7 @@
 @Description : 特征优化方法
 """
 import pandas as pd
-from scipy.stats import stats
+from scipy.stats import stats, pearsonr
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -29,7 +29,7 @@ class FeatureOptimizationMethod:
 
     # t检验
     def tTest(self, inputFields, methodParam):
-        pValue = methodParam[0][0]
+        pValue = methodParam[0][1]
         # print(pValue)
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
@@ -54,7 +54,7 @@ class FeatureOptimizationMethod:
         tempData = newDataFrame[self.reservedField + inputFields]
         return tempData
 
-    # 互相关分析
+    # RF互相关分析
     def ReliefF(self, inputFields, methodParam):
         target = methodParam[0][0]
         name = methodParam[0][1]
@@ -81,7 +81,6 @@ class FeatureOptimizationMethod:
 
         # 初始化ReliefF算法
         fs = ReliefF(n_neighbors=4)  # n_neighbors参数根据数据集大小调整，n_features_to_keep是你想要保留的特征数量
-
 
         # 修改优选特征名称
         newDataColumn = self.getHandledField(inputFields)
@@ -110,3 +109,42 @@ class FeatureOptimizationMethod:
         # X_test_transformed = X_test[:, selected_features_indices]
         selected_features = self.dataFrame.columns[selected_features_indices]
         return self.dataFrame[selected_features + self.reservedField]
+
+    # Pearson相关分析
+    def Pearson(self, inputFields, methodParam):
+        # 保存字段名称对应系数值,用于返回热力图显示
+        tempDict = {}
+        # 筛选后的字段
+        newColumns = []
+        # print(methodParam[0])
+        objectField = methodParam[0][0]
+        coefficientStandard = methodParam[0][1].split('>')[1]
+        # print(pValue)
+        # 复制新的变量
+        newDataFrame = self.dataFrame.copy()
+        # print('============测试============')
+
+        # 遍历输入变量进行pearson分析
+        # print(inputFields)
+        tempInputFields = [item for item in inputFields if item != '病害发生程度']
+        for temp in tempInputFields:
+            pearson_corr_value, a = stats.pearsonr(
+                newDataFrame[temp], newDataFrame[objectField])
+            # print(pearson_corr_value)
+            # print(coefficientStandard)
+            tempDict[temp] = pearson_corr_value
+            # 判断是否符合筛选条件
+            if pearson_corr_value < float(coefficientStandard):
+                # 字段名称添加_优选
+                newDataColumn = self.getHandledField(temp)
+                newDataFrame[newDataColumn] = newDataFrame[temp]
+                newColumns.append(newDataColumn)
+        # print(newDataFrame)
+        # print(newColumns)
+        # # 返回包含筛选前的所有字段相关系数
+        # pearson_corr = df[inputFields].corr(method='pearson')
+        # # 绘制热力图
+        # plt.rcParams['font.sans-serif'] = 'Microsoft Yahei'
+        # sns.heatmap(pearson_corr, vmax=.8, square=True, annot=True)  # 画热力图   annot=True 显示系数
+        # plt.show()
+        return newDataFrame[self.reservedField + newColumns]

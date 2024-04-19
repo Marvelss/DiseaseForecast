@@ -28,7 +28,7 @@ if "OptimizationMethodName" not in st.session_state:
 # 获取选项值对应名称
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
-        return 'Person相关性分析'
+        return 'Pearson相关性分析'
     elif checkbox == 'checkbox1':
         return 't检验'
     elif checkbox == 'checkbox2':
@@ -120,13 +120,16 @@ def onRun():
             afterHandleData = FeatureOptimizationMethod(
                 pages_utils.TempDataSet[2], reservedField).tTest(
                 fields[0], methodParam)
-        elif tempMethod == 'Person相关性分析':
-            pass
+        elif tempMethod == 'Pearson相关性分析':
+            afterHandleData = FeatureOptimizationMethod(
+                pages_utils.TempDataSet[2], reservedField).Pearson(
+                fields[0], methodParam)
         elif tempMethod == 'Relief-F互相关分析':
             afterHandleData = FeatureOptimizationMethod(
                 pages_utils.TempDataSet[2], reservedField).ReliefF(
                 fields[0], methodParam)
-
+        print('=============返回数据=============')
+        print(afterHandleData)
         # ===============合并处理后数据集===============
         row_size = len(afterHandleData)
         # print('-------优选特征-------')
@@ -218,7 +221,7 @@ with dataPCV:
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
     with tab1:
-        genre = st.checkbox("Person相关性分析", key='checkbox0', on_change=clear_other, args=[0], disabled=True)
+        genre = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other, args=[0])
         genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1])
 
     with tab2:
@@ -227,14 +230,23 @@ with dataPCM:
 
     # ===============显示和处理右中各个处理方法设置参数===============
     if genre:
-        st.markdown('提取条件')
-        genre2 = st.radio(
+        option113 = st.selectbox(
+            '目标变量',
+            mergeArray(result1, result2, result3))
+        st.markdown('剔除条件')
+        genre33 = st.radio(
             label='',
             horizontal=True,
             label_visibility="collapsed",
-            options=['p-value<0.001', 'p-value<0.005', 'p-value<0.01']
+            options=['相关系数的绝对值<0.2', '相关系数的绝对值>0.8']
         )
+        st.session_state["OptimizationMethodName"]['param1'] = option113
+        st.session_state["OptimizationMethodName"]['param2'] = genre33
+
     if genre1:
+        option112 = st.selectbox(
+            '目标变量',
+            mergeArray(result1, result2, result3))
         st.markdown('提取条件')
         genre2 = st.radio(
             label='',
@@ -242,7 +254,8 @@ with dataPCM:
             label_visibility="collapsed",
             options=['p-value<0.001', 'p-value<0.005', 'p-value<0.01']
         )
-        st.session_state["OptimizationMethodName"]['param1'] = genre2
+        st.session_state["OptimizationMethodName"]['param1'] = option112
+        st.session_state["OptimizationMethodName"]['param2'] = genre2
     # st.markdown('---')
     if genre3:
         # st.markdown('提取条件')
