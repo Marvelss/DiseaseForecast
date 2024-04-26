@@ -23,7 +23,7 @@ if "modelParamName" not in st.session_state:
     st.session_state["modelParamName"] = {}
 if "modelPrecisionName" not in st.session_state:
     st.session_state["modelPrecisionName"] = []
-checkBoxModelNum = 4
+checkBoxModelNum = 6
 
 # 初始化模型参数
 model_params = [
@@ -34,6 +34,8 @@ model_params = [
      "store_covariance": "True"},
     {"模型名称": "RF", "n_estimators": "100", "criterion": "gini",
      "min_samples_split": "3"},
+    {"模型名称": "SEIR机理模型"},
+    {"模型名称": "PLSR", "n_components": "2", "scale": "True", "max_iter": "500"}
 ]
 
 
@@ -56,6 +58,8 @@ def getCheckboxName():
                 return 'FLDA'
             elif temp1 == 'checkBoxModel4':
                 return 'SEIR机理模型'
+            elif temp1 == 'checkBoxModel5':
+                return 'PLSR'
 
 
 def getModelName(temp1):
@@ -69,6 +73,8 @@ def getModelName(temp1):
         return 'FLDA'
     elif temp1 == 'checkBoxModel4':
         return 'SEIR机理模型'
+    elif temp1 == 'checkBoxModel5':
+        return 'PLSR'
 
 
 # 取消其他选项按钮
@@ -207,7 +213,23 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('RF训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
-
+        elif tempModel == 'PLSR':
+            print('======测试输入参数======')
+            print(modelParam)
+            evaluationResult, actualAndPredictResult = Model(
+                inputDataSet[tempIndex],
+                features[tempIndex], targets[tempIndex],
+                dataPartitioning, modelParam,
+                evaluationIndicator).onPLSR()
+            print('======测试返回模型评价结果======')
+            print(evaluationResult)
+            # 显示模型训练结果信息
+            info = ''
+            for key, value in evaluationResult.items():
+                info += f'{key}:{str(round(value, 3))}' + '       '
+            # 显示精度结果
+            st.toast('PLSR训练完成 \n' + '       ' + ' \n' + info,
+                     icon='✅')
         print('==============更新前================')
         print(pages_utils.TempDataSetField[4])
         # ===============更新左侧显示内容===============
@@ -342,13 +364,14 @@ with modelACM:
                                      disabled=True)
             with colOption3:
                 agree3 = st.checkbox('FLDA', key='checkBoxModel3', on_change=clearOtherOption, args=[3])
+                agree5 = st.checkbox('PLSR', key='checkBoxModel5', on_change=clearOtherOption, args=[5])
                 # agree4 = st.checkbox('贝叶斯统计')
                 # agree5 = st.checkbox('模糊综合评价')
 
             st.markdown('---')
 
-            # ===============显示和处理右中各个模型参数===============
-            if agree or agree1 or agree2 or agree2 or agree3:
+            # ===============显示和处理右中各个模型参数(主要添加模型时加入checkbox名称)===============
+            if agree or agree1 or agree2 or agree2 or agree3 or agree5:
                 model = getCheckboxName()
                 # print(f'--{model}--')
                 # 获取SVM模型的参数
