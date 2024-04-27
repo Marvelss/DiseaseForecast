@@ -13,6 +13,7 @@ from sklearn import svm
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score, mean_squared_error, accuracy_score, cohen_kappa_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
@@ -20,6 +21,7 @@ from sklearn.preprocessing import StandardScaler
 import math
 import operator
 from scipy.stats import norm
+from sklearn.svm import SVR
 
 
 class Model:
@@ -252,7 +254,7 @@ class Model:
             parameters_dict[param_names[i]] = param_values[i]
 
         # print(parameters_dict)
-        # 使用SVM回归模型进行拟合
+        # 使用FLDA回归模型进行拟合
         model1 = LinearDiscriminantAnalysis()
         model1.fit(X_train, y_train)
         # 进行预测
@@ -346,7 +348,7 @@ class Model:
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
         # print(parameters_dict)
-        # 使用SVM回归模型进行拟合
+        # 使用RF回归模型进行拟合
         model1 = RandomForestClassifier(n_estimators=100, random_state=42)
         model1.fit(X_train, y_train)
         # 进行预测
@@ -585,7 +587,7 @@ class Model:
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
         # print(parameters_dict)
-        # 使用SVM回归模型进行拟合
+        # 使用PLSR回归模型进行拟合
         model1 = PLSRegression(n_components=2)
         model1.fit(X_train, y_train)
         # 进行预测
@@ -627,6 +629,182 @@ class Model:
             savePath2, index=False)
         # 保存评价指标
         precisionResultDir = os.path.join(rootPath, 'precision', 'PLSR_precision.xlsx')
+        pd.DataFrame(precision.items(),
+                     columns=['evaluationIndex', 'value']).to_excel(
+            precisionResultDir, index=False)
+        return precision, actualAndPredictResult
+
+    def onLR(self):
+        print('=============方法接收=============')
+        print(self.evaluationIndicator)
+        print(self.dataPartitioning)
+        print(self.featureVariable)
+        print(self.targetVariable)
+        print(self.dataFrame)
+        # 训练模型
+        # =======================获取数据集=======================
+        df11 = self.dataFrame
+        X = df11[self.featureVariable]
+        Y = df11[self.targetVariable]
+        # 对分类变量进行one-hot编码
+        if '上级单位' and '测报站点' in self.featureVariable:
+            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        # =======================划分训练集和测试集=======================
+        partition = 0.2
+        if self.dataPartitioning[0] == '8:2':
+            partition = 0.2
+        elif self.dataPartitioning[0] == '7:3':
+            partition = 0.3
+        elif self.dataPartitioning[0] == '6:4':
+            partition = 0.4
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
+
+        # =======================创建模型并开始训练=======================
+        print('======================模型构建-开始训练======================')
+        print(self.modelParam)
+        # 合并参数名称和值
+        array = self.modelParam
+        param_names = array[0]['参数名']
+        param_values = array[0]['参数值']
+        parameters_dict = {}
+        for i in range(len(param_names)):
+            parameters_dict[param_names[i]] = param_values[i]
+        # print(parameters_dict)
+        # 使用LR回归模型进行拟合
+        model1 = LinearRegression()
+        model1.fit(X_train, y_train)
+        # 进行预测
+        y_pred = model1.predict(X_test)
+        print('======================模型构建-精度指标======================')
+        precision = {}
+        actualAndPredictResult = y_pred.tolist()
+        print('y_pred:')
+        print(actualAndPredictResult)
+        tempIndicator = self.evaluationIndicator
+        # print(tempIndicator)
+        if ',' in self.evaluationIndicator[0]:
+            tempIndicator = self.evaluationIndicator[0].split(',')
+        for temp in tempIndicator:
+            # 计算均方误差
+            if temp == 'MSE':
+                precision['MSE'] = mean_squared_error(y_test, y_pred)
+            # 计算R方
+            elif temp == 'R方':
+                precision['R方'] = r2_score(y_test, y_pred)
+            # 计算OA
+            elif temp == 'OA':
+                precision['OA'] = accuracy_score(y_test, y_pred)
+            # 计算Kappa
+            elif temp == 'Kappa':
+                precision['Kappa'] = cohen_kappa_score(y_test, y_pred)
+
+        # =======================保存结果-模型结构+预测结果+评价指标结果=======================
+        # 保存模型
+        rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+        joblib.dump(model1, os.path.join(
+            rootPath, 'modelsStructure', 'LR_structure.pkl'))
+        # 保存预测结果
+        savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
+        savePath1 = os.path.join(savePathDir, 'LR_predictLabel.xlsx')
+        savePath2 = os.path.join(savePathDir, 'LR_testLabel.xlsx')
+        pd.DataFrame(y_pred,
+                     columns=['predictLabel']).to_excel(
+            savePath1, index=False)
+        y_test.to_excel(
+            savePath2, index=False)
+        # 保存评价指标
+        precisionResultDir = os.path.join(rootPath, 'precision', 'LR_precision.xlsx')
+        pd.DataFrame(precision.items(),
+                     columns=['evaluationIndex', 'value']).to_excel(
+            precisionResultDir, index=False)
+        return precision, actualAndPredictResult
+
+    def onSVR(self):
+        # print('=============方法接收=============')
+        # print(self.evaluationIndicator)
+        # print(self.dataPartitioning)
+        # print(self.featureVariable)
+        # print(self.targetVariable)
+        # print(self.dataFrame)
+        # 训练模型
+        # =======================获取数据集=======================
+        df11 = self.dataFrame
+        X = df11[self.featureVariable]
+        Y = df11[self.targetVariable]
+        # 对分类变量进行one-hot编码
+        if '上级单位' and '测报站点' in self.featureVariable:
+            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        # =======================划分训练集和测试集=======================
+        partition = 0.2
+        if self.dataPartitioning[0] == '8:2':
+            partition = 0.2
+        elif self.dataPartitioning[0] == '7:3':
+            partition = 0.3
+        elif self.dataPartitioning[0] == '6:4':
+            partition = 0.4
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
+
+        # =======================创建模型并开始训练=======================
+        print('======================模型构建-开始训练======================')
+        print(self.modelParam)
+        # 合并参数名称和值
+        array = self.modelParam
+        param_names = array[0]['参数名']
+        param_values = array[0]['参数值']
+        parameters_dict = {}
+        for i in range(len(param_names)):
+            parameters_dict[param_names[i]] = param_values[i]
+        # print(parameters_dict)
+        # 使用SVM回归模型进行拟合
+        model1 = SVR(kernel='linear')
+        model1.fit(X_train, y_train)
+        # 进行预测
+        y_pred = model1.predict(X_test)
+        print('======================模型构建-精度指标======================')
+        precision = {}
+        actualAndPredictResult = y_pred.tolist()
+        print('y_pred:')
+        print(actualAndPredictResult)
+        tempIndicator = self.evaluationIndicator
+        # print(tempIndicator)
+        if ',' in self.evaluationIndicator[0]:
+            tempIndicator = self.evaluationIndicator[0].split(',')
+        for temp in tempIndicator:
+            # 计算均方误差
+            if temp == 'MSE':
+                precision['MSE'] = mean_squared_error(y_test, y_pred)
+            # 计算R方
+            elif temp == 'R方':
+                precision['R方'] = r2_score(y_test, y_pred)
+            # 计算OA
+            elif temp == 'OA':
+                precision['OA'] = accuracy_score(y_test, y_pred)
+            # 计算Kappa
+            elif temp == 'Kappa':
+                precision['Kappa'] = cohen_kappa_score(y_test, y_pred)
+
+        # =======================保存结果-模型结构+预测结果+评价指标结果=======================
+        # 保存模型
+        rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+        joblib.dump(model1, os.path.join(
+            rootPath, 'modelsStructure', 'SVR_structure.pkl'))
+        # 保存预测结果
+        savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
+        savePath1 = os.path.join(savePathDir, 'SVR_predictLabel.xlsx')
+        savePath2 = os.path.join(savePathDir, 'SVR_testLabel.xlsx')
+        pd.DataFrame(y_pred,
+                     columns=['predictLabel']).to_excel(
+            savePath1, index=False)
+        y_test.to_excel(
+            savePath2, index=False)
+        # 保存评价指标
+        precisionResultDir = os.path.join(rootPath, 'precision', 'SVR_precision.xlsx')
         pd.DataFrame(precision.items(),
                      columns=['evaluationIndex', 'value']).to_excel(
             precisionResultDir, index=False)
