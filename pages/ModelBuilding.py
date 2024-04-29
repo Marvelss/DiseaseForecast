@@ -517,8 +517,8 @@ with modelACM:
                     # y_Predicted = actualAndPredictList[i]['actualLabel']
                     # print(f'=============可视化{y_Actual}{y_Predicted}=============')
                     # 创建模拟的混淆矩阵
-                    df1 = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\temp\actualLabel.xlsx')
-                    df2 = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\temp\predictLabel.xlsx')
+                    df1 = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\modelsResults\predictAndTestLabel\FLDA_testLabel.xlsx')
+                    df2 = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\modelsResults\predictAndTestLabel\FLDA_predictLabel.xlsx')
                     conf_matrix = confusion_matrix(df1['发生程度'], df2['predictLabel'])
                     # 使用 seaborn 绘制混淆矩阵图
                     fig, ax = plt.subplots()
