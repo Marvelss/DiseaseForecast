@@ -117,7 +117,7 @@ class FeatureOptimizationMethod:
         print('============测试============')
         print(methodParam)
         objectField = methodParam[0]
-        selectedFeature = methodParam[1].split(',')
+        selectedFeature = methodParam[1].split(' ')
         coefficientStandard = methodParam[2].split('>')[1]
         # print(pValue)
         # 复制新的变量

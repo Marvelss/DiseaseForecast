@@ -248,7 +248,7 @@ with dataPCM:
             options=['相关系数的绝对值<0.2', '相关系数的绝对值>0.8']
         )
         st.session_state["OptimizationMethodName"]['param1'] = option113
-        st.session_state["OptimizationMethodName"]['param2'] = ','.join(option1132)
+        st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1132)
         st.session_state["OptimizationMethodName"]['param3'] = genre33
 
     if genre1:
