@@ -66,9 +66,7 @@ class FeatureOptimizationMethod:
         # 准备数据
         X = self.dataFrame.drop(columns=['发生程度'])  # 假设我们已经从df中删除了目标列和不需要的列
         y = self.dataFrame[['发生程度']]
-        # X = self.dataFrame[newList]
-        # y = self.dataFrame[[target]]
-        # y= self.dataFrame[[target]].values.ravel()  # 如果y_train是DataFrame
+
         print(X)
         print(y)
         # 对分类变量进行one-hot编码
@@ -121,7 +119,6 @@ class FeatureOptimizationMethod:
         objectField = methodParam[0]
         selectedFeature = methodParam[1].split(',')
         coefficientStandard = methodParam[2].split('>')[1]
-        # coefficientStandard = methodParam[0][1].split('>')[1]
         # print(pValue)
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
@@ -140,14 +137,4 @@ class FeatureOptimizationMethod:
                 newDataColumn = self.getHandledField(temp)
                 newDataFrame[newDataColumn] = newDataFrame[temp]
                 newColumns.append(newDataColumn)
-        # print(newDataFrame)
-        # print(newColumns)
-        # # 返回包含筛选前的所有字段相关系数
-        # pearson_corr = df[inputFields].corr(method='pearson')
-        # # 绘制热力图
-        # plt.rcParams['font.sans-serif'] = 'Microsoft Yahei'
-        # sns.heatmap(pearson_corr, vmax=.8, square=True, annot=True)  # 画热力图   annot=True 显示系数
-        # plt.show()
-        print(newDataFrame[self.reservedField + newColumns])
-        newDataFrame[self.reservedField + newColumns].to_excel(r'E:\a_python\program\diseaseForecastStreamlit\tests\test17\optimalResult.xlsx')
         return newDataFrame[self.reservedField + newColumns]
