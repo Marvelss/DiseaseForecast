@@ -105,6 +105,7 @@ def onRun():
     outFields = pages_utils.TempDataSetField[2]["备选特征"].tolist()
     methodParam = pages_utils.TempDataSetField[2]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
+    isHandledFlags = pages_utils.TempDataSetField[2]["处理状态"].tolist()
     print('===============获取任务清单内容===============')
     print(methodParam)
     print(methodList)
@@ -115,8 +116,10 @@ def onRun():
     # methodTool = FeatureCalculationMethod(
     #     pages_utils.TempDataSet[1],
     #     reservedField + outFields)
-
-    for indexT, tempMethod in enumerate(methodList):
+    for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
+        # 检查方法是否已执行
+        if isHandled:
+            continue
         # 使用处理后最新的字段内容
         reservedField = pages_utils.TempDataSet[1].columns.tolist()
         print(f'=============测试保留字段-{reservedField}=============')
@@ -146,6 +149,9 @@ def onRun():
 
         print('======================备选特征======================')
         print(pages_utils.TempDataSet[2])
+
+        pages_utils.TempDataSet[2].to_excel(
+            r'E:\a_python\program\testPlatform\demo\demo109\a' + str(indexT) + '.xlsx', index=False)
 
         # ===============更新左侧显示内容===============
         update_values = {
@@ -269,8 +275,15 @@ with featureCCM:
     if option16:
         option3 = st.selectbox(
             '降水累积量计算',
-            ('日累积降水量', '旬累积降水量', '月累积降水量'))
+            ('月累积降水量', '指定日期', '旬累积降水量'))
         st.session_state["featureMethodName"]['param1'] = option3
+
+        if option3 == '指定日期':
+            sd1 = st.date_input("开始时间", value='today')
+            ed1 = st.date_input("结束时间", value='today')
+            st.session_state["featureMethodName"]['param2'] = sd1.strftime('%m-%d')
+            st.session_state["featureMethodName"]['param3'] = ed1.strftime('%m-%d')
+
     if option17:
         d1 = st.date_input("开始时间", value=None)
         d2 = st.date_input("结束时间", value=None)

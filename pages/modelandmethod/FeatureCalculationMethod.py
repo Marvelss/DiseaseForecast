@@ -27,9 +27,13 @@ class FeatureCalculationMethod:
     # 降水累积量计算
     def precipitationAccumulation(self, inputFields, timeRation):
         temp = None
+        startDate = None
+        endDate = None
         inputField = inputFields[0]
         flag = timeRation[0]
-
+        if timeRation[1]:
+            startDate = timeRation[1]
+            endDate = timeRation[2]
         if flag == '月累积降水量':
             self.dataFrame['日期'] = pd.to_datetime(
                 self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
@@ -66,6 +70,34 @@ class FeatureCalculationMethod:
             temp = pd.merge(self.dataFrame, decade_precipitation_sum, on=['年', '月', '旬'], how='left')
             # 删除'月','旬' '日期'字段
             temp = temp.drop(['旬', '日期'], axis=1)
+        elif flag == '指定日期':
+            # 指定日期范围（每年相同的日期）
+            start_day = startDate
+            end_day = endDate
+            self.dataFrame['日期'] = pd.to_datetime(
+                self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
+
+            # 转换日期到年内的日期格式，忽略年份
+            self.dataFrame['年内日期'] = self.dataFrame['日期'].dt.strftime('%m-%d')
+
+            # 过滤数据，只保留在指定日期范围内的记录
+            date_filter = (self.dataFrame['年内日期'] >= start_day) & (self.dataFrame['年内日期'] <= end_day)
+            filtered_df = self.dataFrame.loc[date_filter]
+
+            # 计算每个分组在指定日期范围内的降水累积量
+            sums = filtered_df.groupby(['上级单位', '测报站点', '年'])['降水'].sum()
+
+            # 在原 DataFrame 上创建一个新列 '降水累积量'，初始值设置为 NaN
+            newColumn = startDate + '_' + endDate + '_' + '降水累积量'
+            self.dataFrame[newColumn] = pd.NA
+
+            # 只为符合指定日期条件的行赋值累积降水量
+            for index, total_precip in sums.items():
+                match_condition = (self.dataFrame['上级单位'] == index[0]) & (
+                        self.dataFrame['测报站点'] == index[1]) & (
+                                          self.dataFrame['年'] == index[2]) & date_filter
+                self.dataFrame.loc[match_condition, newColumn] = total_precip
+            temp = self.dataFrame
         # 删除还没生成的字段
         # tempReservedField = [field for field in self.reservedField if field in temp.columns]
         # print(f'==============降水累积量-筛选特征{tempReservedField}================')
