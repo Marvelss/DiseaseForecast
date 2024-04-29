@@ -5,7 +5,7 @@
 @Description : 特征优化方法
 """
 import pandas as pd
-from scipy.stats import stats, pearsonr
+from scipy.stats import stats
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -111,25 +111,26 @@ class FeatureOptimizationMethod:
         return self.dataFrame[selected_features + self.reservedField]
 
     # Pearson相关分析
-    def Pearson(self, inputFields, methodParam):
+    def Pearson(self, methodParam):
         # 保存字段名称对应系数值,用于返回热力图显示
         tempDict = {}
         # 筛选后的字段
         newColumns = []
-        # print(methodParam[0])
-        objectField = methodParam[0][0]
-        coefficientStandard = methodParam[0][1].split('>')[1]
+        print('============测试============')
+        print(methodParam)
+        objectField = methodParam[0]
+        selectedFeature = methodParam[1].split(',')
+        coefficientStandard = methodParam[2].split('>')[1]
+        # coefficientStandard = methodParam[0][1].split('>')[1]
         # print(pValue)
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
-        # print('============测试============')
-
         # 遍历输入变量进行pearson分析
-        # print(inputFields)
-        tempInputFields = [item for item in inputFields if item != '病害发生程度']
-        for temp in tempInputFields:
+        for temp in selectedFeature:
+            df_cleaned = newDataFrame[['上级单位', '测报站点', '年', temp, objectField]].dropna()
+            # print(df_cleaned)
             pearson_corr_value, a = stats.pearsonr(
-                newDataFrame[temp], newDataFrame[objectField])
+                df_cleaned[temp], df_cleaned[objectField])
             # print(pearson_corr_value)
             # print(coefficientStandard)
             tempDict[temp] = pearson_corr_value
@@ -147,4 +148,6 @@ class FeatureOptimizationMethod:
         # plt.rcParams['font.sans-serif'] = 'Microsoft Yahei'
         # sns.heatmap(pearson_corr, vmax=.8, square=True, annot=True)  # 画热力图   annot=True 显示系数
         # plt.show()
+        print(newDataFrame[self.reservedField + newColumns])
+        newDataFrame[self.reservedField + newColumns].to_excel(r'E:\a_python\program\diseaseForecastStreamlit\tests\test17\optimalResult.xlsx')
         return newDataFrame[self.reservedField + newColumns]

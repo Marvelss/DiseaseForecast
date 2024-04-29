@@ -110,9 +110,13 @@ def onRun():
     fields = pages_utils.TempDataSetField[3]["输入特征"].tolist()
     methodParam = pages_utils.TempDataSetField[3]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()
+    isHandledFlags = pages_utils.TempDataSetField[3]["处理状态"].tolist()
     # ===============根据名称匹配调用并执行各个处理方法===============
-    # 初始化特征计算方法
-    for tempMethod in methodList:
+    # 初始化特征优选方法
+    for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
+        # 检查方法是否已执行
+        if isHandled:
+            continue
         reservedField = pages_utils.TempDataSet[2].columns.tolist()
         afterHandleData = None
         # print(tempMethod)
@@ -123,7 +127,7 @@ def onRun():
         elif tempMethod == 'Pearson相关性分析':
             afterHandleData = FeatureOptimizationMethod(
                 pages_utils.TempDataSet[2], reservedField).Pearson(
-                fields[0], methodParam)
+                methodParam[indexT])
         elif tempMethod == 'Relief-F互相关分析':
             afterHandleData = FeatureOptimizationMethod(
                 pages_utils.TempDataSet[2], reservedField).ReliefF(
@@ -233,6 +237,9 @@ with dataPCM:
         option113 = st.selectbox(
             '目标变量',
             mergeArray(result1, result2, result3))
+        option1132 = st.multiselect(
+            '被比较变量',
+            mergeArray(result1, result2, result3))
         st.markdown('剔除条件')
         genre33 = st.radio(
             label='',
@@ -241,7 +248,8 @@ with dataPCM:
             options=['相关系数的绝对值<0.2', '相关系数的绝对值>0.8']
         )
         st.session_state["OptimizationMethodName"]['param1'] = option113
-        st.session_state["OptimizationMethodName"]['param2'] = genre33
+        st.session_state["OptimizationMethodName"]['param2'] = ','.join(option1132)
+        st.session_state["OptimizationMethodName"]['param3'] = genre33
 
     if genre1:
         option112 = st.selectbox(
