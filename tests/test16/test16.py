@@ -929,7 +929,7 @@ extracted_data = []
 # from sklearn.preprocessing import StandardScaler
 #
 # # 加载数据
-df = pd.read_excel('result.xlsx')
+df = pd.read_excel('result-去温度.xlsx')
 #
 # # 分离自变量和响应变量
 # X = data[['上级单位', '测报站点', '年', '01-21_01-31_降水累积量', '01-01_01-20_降水累积量', '温度']]
@@ -952,7 +952,7 @@ modelParam = [{'参数名': {0: 'n_estimators', 1: 'criterion', 2: 'gini'},
                '参数值': {0: '100', 1: 'gini', 2: '3'}}]
 evaluationIndicator = ['MSE', 'R方']
 evaluationResult, actualAndPredictResult = Model(
-    df, ['上级单位', '测报站点', '年', '01-21_01-31_降水累积量', '01-01_01-20_降水累积量', '温度'],
+    df, ['上级单位', '测报站点', '年', '01-21_01-31_降水累积量', '01-01_01-20_降水累积量'],
     ['病害峰值'], '2:8',
     modelParam,
     evaluationIndicator).onPLSR()
