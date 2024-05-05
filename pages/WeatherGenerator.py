@@ -100,14 +100,28 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
 # generatedYears2 = st.number_input('输入时间序列的截至年', value=1)
 # generatedYears3 = st.number_input('输入时间序列的截至月', value=1)
 st.markdown("##### 历史气象站点数据上传及模板下载注意事项")
+st.markdown("##### 选择地区")
+a, b = st.columns(2)
+with a:
+    st.selectbox(
+        label='province',
+        options=['上级单位'], label_visibility='collapsed')
+with b:
+    st.selectbox(
+        label='station',
+        options=['测报站点'],
+        label_visibility='collapsed')
 col123, col223 = st.columns(2)
 with col123:
+    st.markdown("##### 上传数据")
     # 上传历史气象数据
     uploadedHistoricalData = st.file_uploader(
         "上传数据",
         accept_multiple_files=False,
         type=['xlsx', 'xls'],
-        help='help')
+        help='help',
+        label_visibility='collapsed'
+    )
 with col223:
     warningMInfo = '''
     注意事项(待填)
