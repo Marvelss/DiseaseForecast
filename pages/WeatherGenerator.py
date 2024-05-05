@@ -235,8 +235,15 @@ if btn:
         )
 # =======================预测评价结果及数据下载=======================
 st.markdown("##### 模型评价指标结果及可视化")
-tab11, tab12 = st.tabs(['模型1', '模型2'])
-with tab11:
+# tab11, tab12 = st.tabs(['模型1', '模型2'])
+with st.container(height=700):
+    img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'weatherGeneratorEvaluateResult2.jpg'))
+    st.image(img)
+    co3, co4 = st.columns(2)
+    with co3:
+        st.metric("Dev_D", "0.0799")
+    with co4:
+        st.metric("Dev_D", "0.0899")
     # 评价指标结果示意图
     img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'weatherGeneratorEvaluateResult1.jpg'))
     st.image(img)
@@ -245,11 +252,3 @@ with tab11:
         st.metric("Dev_S", "0.0262")
     with co2:
         st.metric("Dev_S", "0.0888")
-with tab12:
-    img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'weatherGeneratorEvaluateResult2.jpg'))
-    st.image(img)
-    co3, co4 = st.columns(2)
-    with co3:
-        st.metric("Dev_D", "0.0799")
-    with co4:
-        st.metric("Dev_D", "0.0899")
