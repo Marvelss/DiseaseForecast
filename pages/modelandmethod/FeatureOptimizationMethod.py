@@ -137,4 +137,4 @@ class FeatureOptimizationMethod:
                 newDataColumn = self.getHandledField(temp)
                 newDataFrame[newDataColumn] = newDataFrame[temp]
                 newColumns.append(newDataColumn)
-        return newDataFrame[self.reservedField + newColumns]
+        return newDataFrame[self.reservedField + newColumns], newColumns

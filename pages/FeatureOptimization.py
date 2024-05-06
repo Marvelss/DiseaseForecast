@@ -111,6 +111,7 @@ def onRun():
     methodParam = pages_utils.TempDataSetField[3]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()
     isHandledFlags = pages_utils.TempDataSetField[3]["处理状态"].tolist()
+    newColumns = '错误'
     # ===============根据名称匹配调用并执行各个处理方法===============
     # 初始化特征优选方法
     for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
@@ -125,7 +126,7 @@ def onRun():
                 pages_utils.TempDataSet[2], reservedField).tTest(
                 fields[0], methodParam)
         elif tempMethod == 'Pearson相关性分析':
-            afterHandleData = FeatureOptimizationMethod(
+            afterHandleData, newColumns = FeatureOptimizationMethod(
                 pages_utils.TempDataSet[2], reservedField).Pearson(
                 methodParam[indexT])
         elif tempMethod == 'Relief-F互相关分析':
@@ -149,7 +150,7 @@ def onRun():
         # ===============更新左侧显示内容===============
         update_values = {
             # "数据类型": "气象数据", "输入特征": fields[0],
-            # "优选特征": fields[0],
+            "优选特征": newColumns,
             "大小": '1*' + str(row_size),
             # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
             "时间": datetime.datetime.now().time(),
@@ -295,7 +296,6 @@ with dataPCM:
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
             "输入特征": mergeArray(result1, result2, result3),
-            "优选特征": '降水',
             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
             "方法参数":
                 [value for key, value in st.session_state["OptimizationMethodName"].items() if key != 'checkBox'],
