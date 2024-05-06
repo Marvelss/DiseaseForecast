@@ -208,7 +208,8 @@ with dataPCV:
     #     '选择数据集',
     #     ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
     # 预处理后数据集表信息
-    weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled()
+    # weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled()
+    weatherNameT, plantNameT, agricultureNameT = pages_utils.TempDataSet[2].columns.tolist(), ['无1'], ['无2']
     # 数组元素去重
     weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
         set(agricultureNameT))
