@@ -29,6 +29,7 @@ class FeatureCalculationMethod:
         temp = None
         startDate = None
         endDate = None
+        newColumn = '降水累积量'
         inputField = inputFields[0]
         flag = timeRation[0]
         if timeRation[1]:
@@ -102,7 +103,7 @@ class FeatureCalculationMethod:
         # tempReservedField = [field for field in self.reservedField if field in temp.columns]
         # print(f'==============降水累积量-筛选特征{tempReservedField}================')
         # tempData = temp[list(set(tempReservedField + ['降水累积量']))]
-        return temp
+        return temp, newColumn
 
     # 计算降雨日数
     def rainfallDaysAccumulation(self, inputFields, param):

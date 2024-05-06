@@ -111,6 +111,7 @@ def onRun():
     print(methodList)
 
     afterHandleData = None
+    newColumn = '错误'
     # ===============根据名称匹配调用并执行各个处理方法===============
     # 初始化特征计算方法
     # methodTool = FeatureCalculationMethod(
@@ -130,7 +131,7 @@ def onRun():
                 pages_utils.TempDataSet[1], reservedField).rainfallDaysAccumulation(
                 fields[indexT], methodParam[indexT])
         elif tempMethod == '降水累积量计算':
-            afterHandleData = FeatureCalculationMethod(
+            afterHandleData, newColumn = FeatureCalculationMethod(
                 pages_utils.TempDataSet[1], reservedField).precipitationAccumulation(
                 fields[indexT], methodParam[indexT])
         elif tempMethod == '基于活动期积温的生育期计算':
@@ -150,14 +151,15 @@ def onRun():
         print('======================备选特征======================')
         print(pages_utils.TempDataSet[2])
 
-        pages_utils.TempDataSet[2].to_excel(
-            r'E:\a_python\program\testPlatform\demo\demo109\a' + str(indexT) + '.xlsx', index=False)
+        # pages_utils.TempDataSet[2].to_excel(
+        #     r'E:\a_python\program\testPlatform\demo\demo109\a' + str(indexT) + '.xlsx', index=False)
 
         # ===============更新左侧显示内容===============
         update_values = {
             # "数据类型": "气象数据", "输入特征": fields[0],
             # "备选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
             "大小": '1*' + str(row_size),
+            "备选特征": newColumn,
             # "特征计算方法": st.session_state["featureMethodName"]['checkBox'],
             "时间": datetime.datetime.now().time(),
             "处理状态": True}
@@ -329,7 +331,6 @@ with featureCCM:
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
             "输入特征": mergeArray(result1, result2, result3),
-            "备选特征": getFeatureName(getCheckboxName(st.session_state["featureMethodName"]['checkBox'])),
             "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]['checkBox']),
             "方法参数": [value for key, value in st.session_state["featureMethodName"].items() if key != 'checkBox'],
             "时间": datetime.datetime.now().time(),
