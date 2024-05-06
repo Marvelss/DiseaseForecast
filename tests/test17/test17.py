@@ -20,6 +20,21 @@ from sklearn.svm import SVR
 from skrebate import ReliefF
 
 
+# 获取模型
+def getModel(modelName):
+    modelPathRoot = os.path.join(r'E:\a_python\program\diseaseForecastStreamlit',
+                                 'resource',
+                                 'modelsResults',
+                                 'modelsStructure')
+    modelPath = os.path.join(modelPathRoot, modelName + '_structure.pkl')
+    print(modelPath)
+    if os.path.exists(modelPath):
+        # 加载已经训练好的模型
+        return joblib.load(modelPath)
+    else:
+        return None
+
+
 class FeatureOptimizationMethod:
     def __init__(self, dataFrame, reservedField):
         self.dataFrame = dataFrame
@@ -492,22 +507,47 @@ for indexT, tempMethod in enumerate(featureOptimalList):
             inputFeature2[0], modelParam2)
 
 # =========================提取有效值=========================
-# 使用groupby分组并提取每个分组的第一个非空值
-ultimateFeatures = afterHandleData.groupby(['上级单位', '测报站点', '年']).first().reset_index()
-# ******删除包含缺失值的行******
-df_cleaned = ultimateFeatures.dropna()
-# df_cleaned.to_excel('ultimateFeatures.xlsx')
+# # 使用groupby分组并提取每个分组的第一个非空值
+# ultimateFeatures = afterHandleData.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+# # ******删除包含缺失值的行******
+# df_cleaned = ultimateFeatures.dropna()
+# # df_cleaned.to_excel('ultimateFeatures.xlsx')
 
 # =========================模型构建及读取执行方法=========================
+df_cleaned = pd.read_excel('ultimateFeatures.xlsx')
 modelDF = pd.read_excel('模型记录.xlsx')
 
 models = modelDF["模型"].tolist()
-modelsParam = modelDF["模型参数"].tolist()
+# modelsParam = modelDF["模型参数"].tolist()
 feature = modelDF["特征"].tolist()
 label = modelDF["标签"].tolist()
-precision = modelDF["评价指标"].tolist()
-ratio = modelDF["数据集划分比例"].tolist()
+# precision = modelDF["评价指标"].tolist()
+# ratio = modelDF["数据集划分比例"].tolist()
+for indexT, (tempModel, tempFeature,
+             tempLabel) in enumerate(zip(models, feature, label)):
+    tempFeature = eval(tempFeature)
+    # 模型读取
+    model = getModel(tempModel)
+    inputDF = df_cleaned[tempFeature]
+    # 筛选出省份为'湖南省'和测报站点为'湘阴县'的所有行(不能删除,否则少特征)
+    # filtered_df = df_cleaned[(df_cleaned['上级单位'] == province) & (df_cleaned['测报站点'] == station)]
+    # 选取包含在 tempFeature 中的列
+    # inputDF = filtered_df[tempFeature]
+    print(model)
+    if '上级单位' and '测报站点' in tempFeature:
+        X = pd.get_dummies(inputDF, columns=['上级单位', '测报站点'])
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    # 接下来您可以使用 X_scaled 进行进一步的模型训练和预测
+    # model.predict() 方法需要接受和训练时相同的特征列
+    predictions = model.predict(X_scaled)
+    # 创建一个 DataFrame 包含预测值
+    predictions_df = pd.DataFrame(predictions, columns=['Predicted_value'])
 
+    # 合并特征数值和预测值到一个新的 DataFrame
+    result_df = pd.concat([df_cleaned, predictions_df], axis=1)
+    # 打印包含预测值和特征值的 DataFrame
+    result_df.to_excel('predicts' + str(tempModel) + '.xlsx')
 # print(models)
 # print(modelsParam)
 # print(feature)
@@ -515,36 +555,36 @@ ratio = modelDF["数据集划分比例"].tolist()
 # print(precision)
 # print(ratio)
 
-for indexT, (tempModel, tempModelsParam
-             , tempFeature,
-             tempLabel, tempPrecision, tempRatio) in enumerate(zip(
-    models, modelsParam, feature, label, precision, ratio)):
-    evaluationIndicator = list(eval(tempPrecision).keys())
-    tempFeature = eval(tempFeature)
-    tempLabel = eval(tempLabel)
-    tempModelsParam = [eval(tempModelsParam)]
-    if tempModel == 'PLSR':
-        evaluationResult, actualAndPredictResult = Model(
-            df_cleaned, tempFeature,
-            tempLabel, tempRatio,
-            tempModelsParam,
-            evaluationIndicator).onPLSR()
-        print('PLSR:')
-        print(evaluationResult)
-    elif tempModel == 'LR':
-        evaluationResult, actualAndPredictResult = Model(
-            df_cleaned, tempFeature,
-            tempLabel, tempRatio,
-            tempModelsParam,
-            evaluationIndicator).onLR()
-        print(evaluationResult)
-        # 显示模型训练结果信息
-    elif tempModel == 'SVR':
-        evaluationResult, actualAndPredictResult = Model(
-            df_cleaned, tempFeature,
-            tempLabel, tempRatio,
-            tempModelsParam,
-            evaluationIndicator).onSVR()
-        print('======测试返回模型评价结果======')
-        print('SVR:')
-        print(evaluationResult)
+# for indexT, (tempModel, tempModelsParam
+#              , tempFeature,
+#              tempLabel, tempPrecision, tempRatio) in enumerate(zip(
+#     models, modelsParam, feature, label, precision, ratio)):
+#     evaluationIndicator = list(eval(tempPrecision).keys())
+#     tempFeature = eval(tempFeature)
+#     tempLabel = eval(tempLabel)
+#     tempModelsParam = [eval(tempModelsParam)]
+#     if tempModel == 'PLSR':
+#         evaluationResult, actualAndPredictResult = Model(
+#             df_cleaned, tempFeature,
+#             tempLabel, tempRatio,
+#             tempModelsParam,
+#             evaluationIndicator).onPLSR()
+#         print('PLSR:')
+#         print(evaluationResult)
+#     elif tempModel == 'LR':
+#         evaluationResult, actualAndPredictResult = Model(
+#             df_cleaned, tempFeature,
+#             tempLabel, tempRatio,
+#             tempModelsParam,
+#             evaluationIndicator).onLR()
+#         print(evaluationResult)
+#         # 显示模型训练结果信息
+#     elif tempModel == 'SVR':
+#         evaluationResult, actualAndPredictResult = Model(
+#             df_cleaned, tempFeature,
+#             tempLabel, tempRatio,
+#             tempModelsParam,
+#             evaluationIndicator).onSVR()
+#         print('======测试返回模型评价结果======')
+#         print('SVR:')
+#         print(evaluationResult)
