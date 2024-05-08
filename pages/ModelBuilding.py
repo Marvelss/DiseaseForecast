@@ -111,52 +111,53 @@ def onTrain(temporaResolution):
     dataPartitioning = pages_utils.TempDataSetField[4]["数据集划分比例"].tolist()
     features = pages_utils.TempDataSetField[4]["特征"].tolist()
     targets = pages_utils.TempDataSetField[4]["标签"].tolist()
-    # ===============测试是否统一时间分辨率===============
-    # 若数据集行数不一致则提示
-    # if temporaResolution != 1:
-    #     st.toast('测试')
-    # ===============获取字段对应数据集===============
-    selected_datasets = []
-    inputDataSet = []
-    combinedGroupArray = []
-    # 合并特征和标签
-    for group1, group2 in zip(features, targets):
-        combinedArrayTemp = group1 + group2
-        combinedGroupArray.append(combinedArrayTemp)
-    # print('==========合并特征==========')
+    # # ===============测试是否统一时间分辨率===============
+    # # 若数据集行数不一致则提示
+    # # if temporaResolution != 1:
+    # #     st.toast('测试')
+    # # ===============获取字段对应数据集===============
+    # selected_datasets = []
+    # inputDataSet = []
+    # combinedGroupArray = []
+    # # 合并特征和标签
+    # for group1, group2 in zip(features, targets):
+    #     combinedArrayTemp = group1 + group2
+    #     combinedGroupArray.append(combinedArrayTemp)
+    # # print('==========合并特征==========')
+    # # print(combinedGroupArray)
+    # # 获取对应数据集
+    # for smallGroup in combinedGroupArray:
+    #     temp_selected = []
+    #     for field in smallGroup:
+    #         found = False  # 设置一个标志位
+    #         for n in range(3, -1, -1):
+    #             if field in pages_utils.TempDataSet[n].columns:
+    #                 # 判断数据集是否为空
+    #                 if len(pages_utils.TempDataSet[n]):
+    #                     print(f'添加了{field}')
+    #                     temp_selected.append(n)
+    #                     found = True  # 找到了feature，将标志位设置为True
+    #                     break  # 找到feature后跳出内循环
+    #         if not found:
+    #             # 如果没有找到任何数据集包含feature，可以在这里进行处理
+    #             pass
+    #     selected_datasets.append(temp_selected)
+    #
+    # # ===============抽取数据集===============
+    # print('============测试特征对应数据集==============')
+    # print(selected_datasets)
     # print(combinedGroupArray)
-    # 获取对应数据集
-    for smallGroup in combinedGroupArray:
-        temp_selected = []
-        for field in smallGroup:
-            found = False  # 设置一个标志位
-            for n in range(3, -1, -1):
-                if field in pages_utils.TempDataSet[n].columns:
-                    # 判断数据集是否为空
-                    if len(pages_utils.TempDataSet[n]):
-                        print(f'添加了{field}')
-                        temp_selected.append(n)
-                        found = True  # 找到了feature，将标志位设置为True
-                        break  # 找到feature后跳出内循环
-            if not found:
-                # 如果没有找到任何数据集包含feature，可以在这里进行处理
-                pass
-        selected_datasets.append(temp_selected)
-
-    # ===============抽取数据集===============
-    print('============测试特征对应数据集==============')
-    print(selected_datasets)
-    print(combinedGroupArray)
-    for fieldList, dataIndexList in zip(combinedGroupArray, selected_datasets):
-        merged_df = pd.DataFrame()
-        for field, dataIndex in zip(fieldList, dataIndexList):
-            # print(f'保留字段{field}')
-            # print(dataIndex)
-            tempData = pages_utils.TempDataSet[dataIndex][field]
-            temp_df = pd.DataFrame(tempData, columns=[field])  # 创建临时的DataFrame
-            merged_df = pd.concat([merged_df, temp_df], axis=1)  # 逐步合并数据
-        inputDataSet.append(merged_df)
+    # for fieldList, dataIndexList in zip(combinedGroupArray, selected_datasets):
+    #     merged_df = pd.DataFrame()
+    #     for field, dataIndex in zip(fieldList, dataIndexList):
+    #         # print(f'保留字段{field}')
+    #         # print(dataIndex)
+    #         tempData = pages_utils.TempDataSet[dataIndex][field]
+    #         temp_df = pd.DataFrame(tempData, columns=[field])  # 创建临时的DataFrame
+    #         merged_df = pd.concat([merged_df, temp_df], axis=1)  # 逐步合并数据
+    #     inputDataSet.append(merged_df)
     print('============测试抽取数据集==============')
+    inputDataSet = pages_utils.TempDataSet[4]
     print(inputDataSet)
 
     # ===============运行任务清单调用模型准备训练===============
@@ -165,7 +166,7 @@ def onTrain(temporaResolution):
         actualAndPredictResult = None
         if tempModel == 'SVM':
             evaluationResult, actualAndPredictResult = Model(
-                inputDataSet[tempIndex],
+                inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning, modelParam,
                 evaluationIndicator).onSVM()
@@ -180,7 +181,7 @@ def onTrain(temporaResolution):
                      icon='✅')
         elif tempModel == 'KNN':
             evaluationResult, actualAndPredictResult = Model(
-                inputDataSet[tempIndex],
+                inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning, modelParam,
                 evaluationIndicator).onKNN()
@@ -195,7 +196,7 @@ def onTrain(temporaResolution):
                      icon='✅')
         elif tempModel == 'FLDA':
             evaluationResult, actualAndPredictResult = Model(
-                inputDataSet[tempIndex],
+                inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning, modelParam,
                 evaluationIndicator).onFLDA()
@@ -210,7 +211,7 @@ def onTrain(temporaResolution):
                      icon='✅')
         elif tempModel == 'RF':
             evaluationResult, actualAndPredictResult = Model(
-                inputDataSet[tempIndex],
+                inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning, modelParam,
                 evaluationIndicator).onRF()
@@ -227,7 +228,7 @@ def onTrain(temporaResolution):
             print('======测试输入参数======')
             print(modelParam)
             evaluationResult, actualAndPredictResult = Model(
-                inputDataSet[tempIndex],
+                inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning, modelParam,
                 evaluationIndicator).onPLSR()
@@ -244,7 +245,7 @@ def onTrain(temporaResolution):
             print('======测试输入参数======')
             print(modelParam)
             evaluationResult, actualAndPredictResult = Model(
-                inputDataSet[tempIndex],
+                inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning, modelParam,
                 evaluationIndicator).onLR()
@@ -261,7 +262,7 @@ def onTrain(temporaResolution):
             print('======测试输入参数======')
             print(modelParam)
             evaluationResult, actualAndPredictResult = Model(
-                inputDataSet[tempIndex],
+                inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning, modelParam,
                 evaluationIndicator).onSVR()
@@ -493,6 +494,53 @@ with modelACM:
         column_order=["编号", "模型", "时间", '处理状态'],
         disabled=["时间", '处理状态'], num_rows="dynamic", )
     interval_col34, interval_col33 = st.columns([4, 1])
+    with interval_col34:
+        @st.experimental_dialog("准备模型训练", width='large')
+        def vote():
+            df11 = None
+            isExtract = st.checkbox('提取有效值')
+            for p in range(len(pages_utils.TempDataSet))[::-1]:
+                df11 = pages_utils.TempDataSet[p]
+                if not df11.empty:
+                    break
+            beforeDF = df11
+
+            # beforeDF = pd.DataFrame(
+            #     [
+            #         {"command": "st.selectbox", "rating": 4, "is_widget": True},
+            #         {"command": "st.balloons", "rating": 5, "is_widget": False},
+            #         {"command": "st.time_input", "rating": 3, "is_widget": True},
+            #     ]
+            # )
+            # 分组并提取每个分组的第一个非空值
+            result = beforeDF.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+            # ******删除包含缺失值的行******
+            df_cleaned = result.dropna()
+            # df_cleaned = pd.DataFrame(
+            #     [
+            #         {"command": "st.selectbox", "rating": 3, "is_widget": True},
+            #         {"command": "st.balloons", "rating": 6, "is_widget": False},
+            #         {"command": "st.time_input", "rating": 53, "is_widget": True},
+            #     ]
+            # )
+            if isExtract:
+                a = st.data_editor(df_cleaned, num_rows="dynamic", width=700, height=300)
+                pages_utils.TempDataSet[4] = df_cleaned
+            else:
+                b = st.data_editor(beforeDF, num_rows="dynamic", width=700, height=300)
+                pages_utils.TempDataSet[4] = beforeDF
+            # 选择后变化
+            if st.button("Submit"):
+                if isExtract:
+                    print('开始')
+                    print(df_cleaned)
+                # st.session_state.vote = {"item": item, "reason": reason}
+                st.rerun()
+
+
+        if st.button("准备模型训练"):
+            vote()
+
     with interval_col33:
         with st.popover("准备模型训练"):
             st.info('当前时间分辨率为:1天')
@@ -517,8 +565,10 @@ with modelACM:
                     # y_Predicted = actualAndPredictList[i]['actualLabel']
                     # print(f'=============可视化{y_Actual}{y_Predicted}=============')
                     # 创建模拟的混淆矩阵
-                    df1 = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\modelsResults\predictAndTestLabel\FLDA_testLabel.xlsx')
-                    df2 = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\modelsResults\predictAndTestLabel\FLDA_predictLabel.xlsx')
+                    df1 = pd.read_excel(
+                        r'E:\a_python\program\diseaseForecastStreamlit\resource\modelsResults\predictAndTestLabel\FLDA_testLabel.xlsx')
+                    df2 = pd.read_excel(
+                        r'E:\a_python\program\diseaseForecastStreamlit\resource\modelsResults\predictAndTestLabel\FLDA_predictLabel.xlsx')
                     conf_matrix = confusion_matrix(df1['发生程度'], df2['predictLabel'])
                     # 使用 seaborn 绘制混淆矩阵图
                     fig, ax = plt.subplots()

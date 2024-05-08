@@ -171,5 +171,6 @@ RawDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOf
 PreprocessedDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
 FeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
 OptimalFeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
+UltimateFeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
 TempDataSet = [RawDataSet, PreprocessedDataSet,
-               FeatureDataSet, OptimalFeatureDataSet, ModelSet]
+               FeatureDataSet, OptimalFeatureDataSet, OptimalFeatureDataSet]
