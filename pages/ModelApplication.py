@@ -20,7 +20,7 @@ with col2:
     st.markdown("##### 加载模型")
     uploaded_model = st.file_uploader("加载模型", label_visibility='collapsed')
 with col3:
-    st.markdown("##### 输入数据")
+    st.markdown("##### 输入原始数据")
     uploaded_parameter = st.file_uploader("输入原始字段", label_visibility='collapsed')
 st.markdown('---')
 col1112, col1113 = st.columns([0.6, 0.4])
@@ -31,7 +31,7 @@ with col1112:
         height=550, width=1500)
 with col1113:
     st.markdown("##### 各环节处理方法")
-    st.info("注意\n上传内容可直接从各环节导出", icon="ℹ️️")
+    st.info("注意:\n上传内容可直接从各环节导出", icon="ℹ️️")
     selectedTemplate = pills("选择数据处理步骤",
                              ['数据预处理',
                               '特征计算', '特征优选'])
@@ -41,7 +41,7 @@ with col1113:
         label_visibility='collapsed',
         type=['xlsx', 'csv', 'txt', 'xls'],
         help='help')
-    tab1, tab2, tab3 = st.tabs(["数据预处理", "特征计算", "特征优选"])
+    tab1, tab2, tab3, tab4 = st.tabs(["数据预处理", "特征计算", "特征优选", '模型'])
     with tab1:
         st.data_editor(
             pages_utils.TempDataSetField[1],
@@ -58,6 +58,11 @@ with col1113:
             pages_utils.TempDataSetField[3],
             height=220, width=800,
             column_order=['编号', '输入特征', '优选特征', '特征优选方法'])
+    with tab4:
+        st.data_editor(
+            pages_utils.TempDataSetField[4],
+            height=220, width=800,
+            column_order=['编号', '模型', '特征', '标签', "评价指标", "数据集划分比例"])
     interval_col34, interval_col33 = st.columns([5, 1])
     btn33 = interval_col33.button('运行')
 st.markdown('---')
