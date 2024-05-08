@@ -368,7 +368,7 @@ with modelACV:
                     elif st.session_state["leftTabs"][i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     elif st.session_state["leftTabs"][i] == '模型':
-                        column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
+                        column = ["编号", "模型", '模型参数', "评价指标", "数据集划分比例", "时间" ]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -447,7 +447,6 @@ with modelACM:
                     "特征": result1,
                     "标签": result2,
                     "时间": datetime.datetime.now().time(),
-                    "下载模型结构、结果和参数值": False,
                     "处理状态": False}
                 print('======================模型构建-添加模型======================')
                 print(new_data)
