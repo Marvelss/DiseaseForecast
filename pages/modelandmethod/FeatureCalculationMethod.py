@@ -6,6 +6,7 @@
 """
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 
 
@@ -156,3 +157,43 @@ class FeatureCalculationMethod:
             # 删除'月','旬' '日期'字段
             self.dataFrame = self.dataFrame.drop(['日期'], axis=1)
             return self.dataFrame
+
+    # 基于活动积温的生育期计算
+    def growthPeriodCalculation(self, inputFields, param):
+        # 复制新的变量
+        print('===========接收参数===========')
+        print(param)
+        print(inputFields)
+        growthPeriod = param[0]
+        start_day = param[1]
+        end_day = param[2]
+        threshold = int(param[3])
+        # 根据上级单位、测报站点、年分类
+        self.dataFrame['日期'] = pd.to_datetime(
+            self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
+
+        # 转换日期到年内的日期格式，忽略年份
+        self.dataFrame['年内日期'] = self.dataFrame['日期'].dt.strftime('%m-%d')
+
+        # 过滤数据，只保留在指定日期范围内的记录
+        date_filter = (self.dataFrame['年内日期'] >= start_day) & (self.dataFrame['年内日期'] <= end_day)
+        filtered_df = self.dataFrame.loc[date_filter]
+
+        grouped = filtered_df.groupby(['上级单位', '测报站点', '年'])
+        for (key, group) in grouped:
+
+            # Calculate the cumulative temperature for each day in the range
+            group['累计温度'] = np.cumsum(group['温度'])
+            mask = group['累计温度'] >= threshold
+            if mask.any():
+                # 获取mask为True的行索引
+                true_indices = group[mask].index[0]
+                # 获取true_indices对应的DayOfYear值
+                doy = group.loc[true_indices, 'DayOfYear']
+                # 为该组的'上级单位', '测报站点', '年'赋值
+                self.dataFrame.loc[(self.dataFrame['上级单位'] == key[0]) &
+                                   (self.dataFrame['测报站点'] == key[1]) &
+                                   (self.dataFrame['年'] == key[2]), growthPeriod] = doy
+        self.dataFrame = self.dataFrame.drop(['日期'], axis=1)
+
+        return self.dataFrame, growthPeriod

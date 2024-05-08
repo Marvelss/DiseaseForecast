@@ -135,7 +135,9 @@ def onRun():
                 pages_utils.TempDataSet[1], reservedField).precipitationAccumulation(
                 fields[indexT], methodParam[indexT])
         elif tempMethod == '基于活动期积温的生育期计算':
-            return '生育期'
+            afterHandleData, newColumn = FeatureCalculationMethod(
+                pages_utils.TempDataSet[1], reservedField).growthPeriodCalculation(
+                fields[indexT], methodParam[indexT])
         elif tempMethod == '时空抽取':
             return '时空抽取'
 
@@ -247,8 +249,7 @@ with featureCCM:
         option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1])
         option16 = st.checkbox('降水累积量计算', key='checkbox2', on_change=clear_other, args=[2])
     with col2:
-        option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3],
-                               disabled=True)
+        option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3])
         option18 = st.checkbox('时空抽取', key='checkbox4', on_change=clear_other, args=[4], disabled=True)
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
@@ -287,20 +288,27 @@ with featureCCM:
             st.session_state["featureMethodName"]['param3'] = ed1.strftime('%m-%d')
 
     if option17:
-        d1 = st.date_input("开始时间", value=None)
-        d2 = st.date_input("结束时间", value=None)
-        j4 = st.selectbox(
+        growthPeriod = st.selectbox(
             '生育期',
-            ('抽穗期', '孕穗期'))
-        if j4 == '抽穗期':
-            number = st.number_input(
-                "积温阈值温度(50-300℃)", value=50, step=50,
-                min_value=50, max_value=300)
-        if j4 == '孕穗期':
-            number = st.number_input(
-                "积温阈值温度(50-300℃)", value=100, step=50,
-                min_value=50, max_value=300)
+            ('抽穗期', '孕穗期', '移栽期'))
+        growthPeriodStartDate = st.date_input("开始时间", value='today')
+        growthPeriodEndDate = st.date_input("结束时间", value='today')
+        # 积温阈值默认为50
+        threshold = 50
+        if growthPeriod == '抽穗期':
+            threshold = 50
+        elif growthPeriod == '孕穗期':
+            threshold = 100
+        elif growthPeriod == '移栽期':
+            threshold = 150
+        growthPeriodNumber = st.number_input(
+            "积温阈值温度(50-300℃)", value=threshold, step=50,
+            min_value=50, max_value=300)
 
+        st.session_state["featureMethodName"]['param1'] = growthPeriod
+        st.session_state["featureMethodName"]['param2'] = growthPeriodStartDate.strftime('%m-%d')
+        st.session_state["featureMethodName"]['param3'] = growthPeriodEndDate.strftime('%m-%d')
+        st.session_state["featureMethodName"]['param4'] = str(growthPeriodNumber)
     if option18:
         option = st.selectbox(
             '抽取因子',
@@ -313,6 +321,7 @@ with featureCCM:
             ('基于活动积温的生育期计算', '指定日期'))
         if j3 == '指定日期':
             d3 = st.date_input("起始日期", value=None, label_visibility='collapsed')
+
         if j3 == '基于活动积温的生育期计算':
             pass
         d4 = st.date_input("结束日期", value=None)
