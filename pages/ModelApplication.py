@@ -1,16 +1,13 @@
-import datetime
-import io
 import os.path
-import pickle
 
 import joblib
-import scipy
 import streamlit as st
-import numpy as np
+import seaborn as sns
+
 import pandas as pd
+from matplotlib import pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from streamlit_pills import pills
-from modelandmethod.PretreatmentMethod import PretreatmentMethod
 
 import pages_utils
 from modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
@@ -40,11 +37,11 @@ def getModel(modelName):
                                  'resource',
                                  'modelsResults',
                                  'modelsStructure')
-    modelPath = os.path.join(modelPathRoot, modelName + '_structure.pkl')
-    print(modelPath)
-    if os.path.exists(modelPath):
+    modelPathTemp = os.path.join(modelPathRoot, modelName + '_structure.pkl')
+    print(modelPathTemp)
+    if os.path.exists(modelPathTemp):
         # 加载已经训练好的模型
-        return joblib.load(modelPath)
+        return joblib.load(modelPathTemp)
     else:
         return None
 
@@ -58,7 +55,6 @@ def onModelApplication(rawData, processedDataRecorderList):
     featureCalculateList = featureCalculateDF["特征计算方法"].tolist()
     modelParam1 = featureCalculateDF["方法参数"].tolist()
     print(modelParam1)
-    afterHandleData = None
     for indexT, tempMethod in enumerate(featureCalculateList):
         # 使用处理后最新的字段内容
         reservedField = rawData.columns.tolist()
@@ -74,25 +70,13 @@ def onModelApplication(rawData, processedDataRecorderList):
             rawData, newColumn = tool1.precipitationAccumulation(
                 [inputFeature1[indexT]], modelParam1[indexT].split(','))
 
-            # result2.to_excel('handled' + str(indexT) + '.xlsx')
-
-        # intersectionCols = pages_utils.getIntersectionCols(
-        #     rawData,
-        #     afterHandleData
-        # )
-        #
-        # rawData = pd.merge(
-        #     afterHandleData,
-        #     rawData,
-        #     on=intersectionCols,
-        #     how="left")
     print(f'=============特征字段计算完成=============')
     # rawData.to_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\featureCalculated.xlsx')
     # =========================特征优选及读取执行方法=========================
     featureOptimalDF = processedDataRecorderList[2]
 
     inputFeature2 = featureOptimalDF["输入特征"].tolist()
-    outputFeature2 = featureOptimalDF["优选特征"].tolist()
+    # outputFeature2 = featureOptimalDF["优选特征"].tolist()
     featureOptimalList = featureOptimalDF["特征优选方法"].tolist()
     modelParam2 = featureOptimalDF["方法参数"].tolist()
 
@@ -102,9 +86,6 @@ def onModelApplication(rawData, processedDataRecorderList):
     tool2 = FeatureOptimizationMethod(rawData, rawData.columns.tolist())
     # 初始化特征优选方法
     for indexT, tempMethod in enumerate(featureOptimalList):
-        reservedField = rawData.columns.tolist()
-        afterHandleData = None
-        # print(tempMethod)
         if tempMethod == 'Pearson相关性分析':
             print('=============Pearson相关性分析检测============')
             print(modelParam2[indexT].split(','))
@@ -112,16 +93,7 @@ def onModelApplication(rawData, processedDataRecorderList):
         elif tempMethod == 'Relief-F互相关分析':
             rawData, _ = tool2.ReliefF(
                 inputFeature2[0], modelParam2)
-        # intersectionCols = pages_utils.getIntersectionCols(
-        #     rawData,
-        #     afterHandleData
-        # )
-        #
-        # rawData = pd.merge(
-        #     afterHandleData,
-        #     rawData,
-        #     on=intersectionCols,
-        #     how="left")
+
     print(f'=============特征字段优选完成=============')
     # rawData.to_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\featureOptimized.xlsx')
 
@@ -134,7 +106,6 @@ def onModelApplication(rawData, processedDataRecorderList):
     # df_cleaned.to_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\ultimateFeatures.xlsx')
 
     # =========================模型构建及读取执行方法=========================
-    # df_cleaned = pd.read_excel('ultimateFeatures.xlsx')
     modelDF = processedDataRecorderList[3]
 
     models = modelDF["模型"].tolist()
@@ -156,6 +127,7 @@ def onModelApplication(rawData, processedDataRecorderList):
         # 选取包含在 tempFeature 中的列
         # inputDF = filtered_df[tempFeature]
         print(model)
+        X = None
         if '上级单位' and '测报站点' in tempFeature:
             X = pd.get_dummies(inputDF, columns=['上级单位', '测报站点'])
         scaler = StandardScaler()
@@ -166,20 +138,22 @@ def onModelApplication(rawData, processedDataRecorderList):
         # 创建一个 DataFrame 包含预测值
         predictions_df = pd.DataFrame(predictions, columns=['Predicted_value'])
 
+        # df_cleaned = df_cleaned[['上级单位', '测报站点', '年']]
         # 合并特征数值和预测值到一个新的 DataFrame
-        result_df = pd.concat([df_cleaned, predictions_df], axis=1)
+        # result_df = pd.concat([df_cleaned, predictions_df], axis=1)
         # 打印包含预测值和特征值的 DataFrame
-        result_df.to_excel(
+        predictions_df.to_excel(
             os.path.join(os.getcwd(),
                          'resource',
                          'modelsResults',
                          'modelsApplicationResult',
-                         str(tempModel) + '_applicationPredicts' + '.xlsx'))
+                         str(tempModel) +
+                         '_applicationPredicts' +
+                         '.xlsx'), index=False)
         st.toast(f'{tempModel}模型预测完毕', icon='✅')
         print('=========================完成模型应用=========================')
 
 
-# =======================可视化结果=======================
 print('---')
 col2, col3 = st.columns(2)
 with col2:
@@ -215,7 +189,6 @@ if uploaded_model:
     with open(modelPath, 'wb') as f:
         f.write(uploaded_model.read())
     st.session_state["trainedModel"][uploaded_model.name.split('_')[0]] = modelPath
-    st.markdown(st.session_state["trainedModel"])
 st.markdown('---')
 col1112, col1113 = st.columns([0.6, 0.4])
 with col1112:
@@ -272,40 +245,44 @@ with col1113:
             column_order=['编号', '模型', '特征', '标签', "评价指标", "数据集划分比例"])
     interval_col34, interval_col33 = st.columns([2.8, 1])
     # btn33 = interval_col33.button('运行')
-    st.markdown(st.session_state["processedDataRecorder"][0])
     with interval_col33:
         btn11 = st.button('运行')
         if btn11:
             onModelApplication(
                 st.session_state["dataSet"],
                 st.session_state["processedDataRecorder"])
-        # @st.experimental_dialog("准备模型训练", width='large')
-        # def vote():
-        #     beforeDF = st.session_state["dataSet"]
-        #     # isExtract = st.checkbox('提取有效值')
-        #     # # 分组并提取每个分组的第一个非空值
-        #     # result = beforeDF.groupby(['上级单位', '测报站点', '年']).first().reset_index()
-        #     # # ******删除包含缺失值的行******
-        #     # df_cleaned = result.dropna()
-        #     # if isExtract:
-        #     #     a = st.data_editor(df_cleaned, num_rows="dynamic", width=700, height=300)
-        #     #     pages_utils.TempDataSet[4] = df_cleaned
-        #     # else:
-        #     #     b = st.data_editor(beforeDF, num_rows="dynamic", width=700, height=300)
-        #     #     pages_utils.TempDataSet[4] = beforeDF
-        #     # 选择后变化
-        #     if st.button("Submit"):
-        #         if isExtract:
-        #             print('开始')
-        #             onModelApplication(st.session_state["dataSet"])
-        #         st.rerun()
-        #
-        #
-        # if st.button("准备模型应用"):
-        #     vote()
+            # Create the bar plot
+            plt.figure(figsize=(10, 5))
+            sns.barplot(data=pd.read_excel(
+                r'E:\a_python\program\diseaseForecastStreamlit\resource\modelsResults\modelsApplicationResult\PLSR_applicationPredicts.xlsx'),
+                x="测报站点",
+                y="Predicted_value",
+                hue="年",
+                dodge=True,
+                saturation=1)
+            plt.rcParams['font.sans-serif'] = 'SimHei'
+            # Set the labels and title
+            plt.xlabel("测报站点")
+            plt.ylabel("Predicted_value")
+            plt.title("Predicted_value by Station and Year")
+            # Display the plot in Streamlit
+            st.pyplot(plt)
 
-        st.markdown('---')
-        st.markdown("##### 可视化结果")
-        # if btn33:
-        #     chart_data = pd.DataFrame(np.cumsum(np.random.randint(0, 2, size=(365, 1))), columns=["病株率(%)"])
-        #     st.line_chart(chart_data)
+# =======================可视化结果=======================
+st.markdown('---')
+st.markdown("##### 可视化结果")
+# Create the bar plot
+plt.figure(figsize=(15, 5))
+sns.barplot(data=pd.read_excel(
+    r'E:\a_python\program\diseaseForecastStreamlit\tests\test21\PLSR_applicationPredicts.xlsx'),
+    x="测报站点",
+    y="Predicted_value",
+    hue="年",
+    dodge=True,
+    saturation=1)
+plt.rcParams['font.sans-serif'] = 'SimHei'
+# Set the labels and title
+plt.xlabel("测报站点")
+plt.ylabel("病害峰值率(%)")
+plt.title("各县市不同年份预测结果")
+st.pyplot(plt)
