@@ -41,6 +41,15 @@ if 'weatherSituationParams' not in st.session_state:
         '低温多雨': [-2.5, -3.0, 90, 95]
     }
 
+# 应用原始数据
+if "applicationDataSet" not in st.session_state:
+    st.session_state.applicationDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
+
+# 基于天气情景生成器的模型评价,包含xlsx结果路径和指标值
+# 模型名称+天气情景:[path,Dev_s]
+if 'modelSituationIndexResult' not in st.session_state:
+    st.session_state.modelSituationIndexResult = {}
+
 
 # 函数替换数据
 def replace_data(df1, df2):
@@ -163,7 +172,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
         weatherGeneratorStationSelected,
         generatedYears[0].year)
     df3T.to_excel('weatherSimulate.xlsx', index=False)
-    rawData = replace_data(pages_utils.TempDataSet[0], df3T)
+    rawData = replace_data(st.session_state.applicationDataSet, df3T)
     print('=========================替换后数据=========================')
     rawData.to_excel('weatherReplaced.xlsx', index=False)
     # =========================特征计算及读取执行方法=========================
@@ -225,7 +234,8 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
     ultimateFeatures = rawData.groupby(['上级单位', '测报站点', '年']).first().reset_index()
     # ******删除包含缺失值的行******
     df_cleaned = ultimateFeatures.dropna()
-    print(f'=============提取有效值=============')
+
+    print('=============提取有效值=============')
     # df_cleaned.to_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\ultimateFeatures.xlsx')
 
     # =========================模型构建及读取执行方法=========================
@@ -245,7 +255,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
         # 模型读取
         model = getModel(tempModel)
         inputDF = df_cleaned[tempFeature.split(',')]
-        print('=============测试数据集====')
+        # print('=============测试数据集====')
         print(inputDF)
         # 筛选出省份为'湖南省'和测报站点为'湘阴县'的所有行(不能删除,否则少特征)
         # filtered_df = df_cleaned[(df_cleaned['上级单位'] == province) & (df_cleaned['测报站点'] == station)]
@@ -262,15 +272,18 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
         predictions = model.predict(X_scaled)
         # 创建一个 DataFrame 包含预测值
         predictions_df = pd.DataFrame(predictions, columns=['Predicted_value'])
-        data = pd.concat([df_cleaned, predictions_df])
-        data.to_excel(
-            os.path.join(os.getcwd(),
-                         'resource',
-                         'modelsResults',
-                         'modelsApplicationResult',
-                         str(tempModel) +
-                         '_applicationPredicts' +
-                         '.xlsx'), index=False)
+        data = pd.concat([df_cleaned, predictions_df], axis=1)
+        # data.reset_index(drop=True, inplace=True)
+        resultTempPath = os.path.join(
+            os.getcwd(),
+            'resource',
+            'modelsResults',
+            'modelsSimulateWeatherIndexResult',
+            str(tempModel) + '_'
+            + '情景1' +
+            '_applicationPredicts' +
+            '.xlsx')
+        data.to_excel(resultTempPath, index=False)
         st.toast(f'{tempModel}模型预测完毕', icon='✅')
         # =========================计算静态偏差指标=========================
         # 输入真实植保数据(测试是否缺失)(输入原始特征中有),并结合上述模型输出预测数据
@@ -289,8 +302,10 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
         print(f"预测值与实际发生程度之差的均值: {mean_diff}")
         print(f"实际发生程度的标准差: {std_dev_B}")
         print(f'Dev_s:{mean_diff / std_dev_B}')
+        st.session_state.modelSituationIndexResult[str(tempModel) + '_' + '情景1'] = [
+            resultTempPath, round(mean_diff / std_dev_B, 3)]
 
-
+    print(st.session_state.modelSituationIndexResult)
 # ==============================界面==============================
 
 
@@ -322,23 +337,52 @@ with weatherGeneratorInfo:
         label='station',
         options=pages_utils.TempDataSet[4]['测报站点'].drop_duplicates().tolist(),
         label_visibility='collapsed')
+
+
+    @st.experimental_dialog("上传实际标签数据", width='large')
+    def uploadData():
+        st.info('根据以下原始上传数据集字段')
+        st.dataframe(pages_utils.TempDataSet[0].head(5),
+                     width=700, hide_index=True, height=200)
+        # 上传实际标签数据
+        uploadedActualLabelData = st.file_uploader(
+            "上传实际标签数据",
+            accept_multiple_files=False,
+            type=['xlsx', 'xls'],
+            help='help',
+            label_visibility='collapsed'
+        )
+        if uploadedActualLabelData:
+            bytes_data = uploadedActualLabelData.read()
+            st.session_state.applicationDataSet = pd.read_excel(bytes_data)
+
+        if st.button("Submit"):
+            st.rerun()
+
+
+    if st.button("上传实际标签数据"):
+        uploadData()
+
 with weatherGeneratorInstruction:
+    st.markdown("###### 参数说明")
     warningMInfo = '''
     设置参数说明(待填):选择上级单位、测报站点\n
 
     '''
     st.warning(warningMInfo, icon="⚠️")
+st.markdown('---')
 col123, col223 = st.columns(2)
 with col123:
-    st.markdown("##### 上传数据")
+    st.markdown("##### 上传历史气象站点数据")
     # 上传历史气象数据
     uploadedHistoricalData = st.file_uploader(
-        "上传数据",
+        "上传历史气象站点数据",
         accept_multiple_files=False,
         type=['xlsx', 'xls'],
         help='help',
         label_visibility='collapsed'
     )
+
 with col223:
     warningMInfo = '''
     注意事项(待填)
@@ -353,7 +397,6 @@ with col223:
             file_name="历史气象数据模板.xlsx",
             mime="application/octet-stream"
         )
-
 st.markdown("##### 生成数据长度")
 # ==============================时间长度==============================
 today = datetime.datetime.now()
