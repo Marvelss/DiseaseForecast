@@ -118,7 +118,7 @@ def delete_files_in_folder(folder_path):
         # 删除子文件夹
         for dir1 in dirs:
             dir_path = os.path.join(root, dir1)
-            os.rmdir(dir_path)
+            # os.rmdir(dir_path)
             shutil.rmtree(dir_path)
 
 

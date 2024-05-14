@@ -54,23 +54,32 @@ def replace_data(df1, df2):
 
 
 # 获取模拟气象数据(待修正)
-def getSimulateWeather(weatherSituation, startYear, province, station):
+def getSimulateWeather(weatherSituation, province, station, startYear):
     modelPathRoot = os.path.join(os.getcwd(),
                                  'resource',
                                  'weatherGeneratorOutput')
-    fileDirPath = os.path.join(modelPathRoot, weatherSituation)
-    merged_data = pd.DataFrame()
+    # weatherSituation[0]暂时先第一个场景
+    fileDirPath = os.path.join(modelPathRoot, weatherSituation[0])
+    merged_data = None
     for fileTemp in os.listdir(fileDirPath):
         # Get the file name
         file_name = os.path.join(fileDirPath, fileTemp)
         yearNum = fileTemp.split('年')[0].split('第')[1]
-
-        # Read the Excel file
         data = pd.read_excel(file_name)
-
-        # Merge the data using the 'left' method
-        merged_data = pd.merge(data, merged_data, how='left')
-    print(merged_data)
+        print(yearNum)
+        data['年'] = int(yearNum) + int(startYear)
+        if merged_data is None:
+            merged_data = data.copy()  # Initialize merged_data with the first file's data
+        # Read the Excel file
+        else:
+            print(merged_data)
+            # Merge the data using the 'left' method
+            merged_data = pd.merge(merged_data, data, how='outer')
+        # Add additional columns
+        merged_data['上级单位'] = province
+        merged_data['测报站点'] = station
+        # Calculate average temperature
+        merged_data['温度'] = (merged_data['最高温度'] + merged_data['最低温度']) / 2
     return merged_data
 
 
@@ -152,13 +161,16 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
         selectedWeatherScenesList,
         weatherGeneratorProvinceSelected,
         weatherGeneratorStationSelected,
-        generatedYears[0])
+        generatedYears[0].year)
+    df3T.to_excel('weatherSimulate.xlsx', index=False)
     rawData = replace_data(pages_utils.TempDataSet[0], df3T)
     print('=========================替换后数据=========================')
     rawData.to_excel('weatherReplaced.xlsx', index=False)
     # =========================特征计算及读取执行方法=========================
     # 读取记录
-    featureCalculateDF = pages_utils.TempDataSetField[1]
+    # featureCalculateDF = pages_utils.TempDataSetField[1]
+    featureCalculateDF = pd.read_excel(
+        r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型应用\特征计算记录.xlsx')
     inputFeature1 = featureCalculateDF["输入特征"].tolist()
     # outputFeature1 = featureCalculateDF["备选特征"].tolist()
     featureCalculateList = featureCalculateDF["特征计算方法"].tolist()
@@ -182,7 +194,9 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
     print(f'=============特征字段计算完成=============')
     # rawData.to_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\featureCalculated.xlsx')
     # =========================特征优选及读取执行方法=========================
-    featureOptimalDF = pages_utils.TempDataSetField[2]
+    # featureOptimalDF = pages_utils.TempDataSetField[2]
+    featureOptimalDF = pd.read_excel(
+        r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型应用\特征优选记录.xlsx')
 
     inputFeature2 = featureOptimalDF["输入特征"].tolist()
     # outputFeature2 = featureOptimalDF["优选特征"].tolist()
@@ -215,7 +229,9 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
     # df_cleaned.to_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\ultimateFeatures.xlsx')
 
     # =========================模型构建及读取执行方法=========================
-    modelDF = pages_utils.TempDataSetField[3]
+    # modelDF = pages_utils.TempDataSetField[3]
+    modelDF = pd.read_excel(
+        r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型应用\最后-模型记录.xlsx')
 
     models = modelDF["模型"].tolist()
     # modelsParam = modelDF["模型参数"].tolist()
@@ -246,7 +262,8 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
         predictions = model.predict(X_scaled)
         # 创建一个 DataFrame 包含预测值
         predictions_df = pd.DataFrame(predictions, columns=['Predicted_value'])
-        predictions_df.to_excel(
+        data = pd.concat([df_cleaned, predictions_df])
+        data.to_excel(
             os.path.join(os.getcwd(),
                          'resource',
                          'modelsResults',
@@ -260,7 +277,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
 
         # (单一气象场景)结果可视化(暂不处理)
         # 计算指标
-        data = pd.read_excel('predictsSVR.xlsx')
+        # data = predictions_df
         data_B = data['病害峰值']  # 实际
         data_A = data['Predicted_value']  # 预测
         # 计算两组数据相减的均值之和除以长度
@@ -287,14 +304,23 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
 # generatedYears3 = st.number_input('输入时间序列的截至月', value=1)
 st.markdown("##### 历史气象站点数据上传及模板下载注意事项")
 st.markdown("##### 选择地区")
+# 提取上级单位和测报站点的列
+# superior_units = pages_utils.TempDataSet[4]['上级单位']
+# measurement_stations = pages_utils.TempDataSet[4]['测报站点']
+
+# =================测试=================
+superior_units = ['湖南省']
+measurement_stations = ['湘阴县']
+
 weatherGeneratorInfo, weatherGeneratorInstruction = st.columns(2)
 with weatherGeneratorInfo:
     weatherGeneratorProvinceSelected = st.selectbox(
         label='province',
-        options=['上级单位'], label_visibility='collapsed')
+        options=pages_utils.TempDataSet[4]['上级单位'].drop_duplicates().tolist(),
+        label_visibility='collapsed')
     weatherGeneratorStationSelected = st.selectbox(
         label='station',
-        options=['测报站点'],
+        options=pages_utils.TempDataSet[4]['测报站点'].drop_duplicates().tolist(),
         label_visibility='collapsed')
 with weatherGeneratorInstruction:
     warningMInfo = '''
