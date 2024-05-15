@@ -291,7 +291,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
                 '_applicationPredicts' +
                 '.xlsx')
             filtered_df.to_excel(resultTempPath, index=False)
-            st.toast(f'{weatherScenes}---{tempModel}模型预测完毕', icon='✅')
+
             # =========================计算静态偏差指标=========================
             # 计算指标
             data_B = filtered_df['病害峰值']  # 实际
@@ -307,7 +307,8 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
             print(f'Dev_s:{mean_diff / std_dev_B}')
             st.session_state.modelSituationIndexResult[str(tempModel) + '_' + weatherScenes] = [
                 resultTempPath, round(mean_diff / std_dev_B, 3)]
-
+            st.toast(f'{weatherScenes}---{tempModel}模型评测完毕\n'
+                     f'Dev_s:{round(mean_diff / std_dev_B, 3)}', icon='✅')
     st.markdown(st.session_state.modelSituationIndexResult)
 
 
