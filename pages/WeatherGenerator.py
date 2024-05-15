@@ -57,8 +57,8 @@ def replace_data(df1, df2):
     for index, row in df2.iterrows():
         condition = (df1['上级单位'] == row['上级单位']) & (df1['测报站点'] == row['测报站点']) & \
                     (df1['年'] == row['年']) & (df1['DayOfYear'] == row['DayOfYear'])
-        df1.loc[condition, '降水'] = row['降水']
-        df1.loc[condition, '温度'] = row['温度']
+        df1.loc[condition, '降水'] = round(row['降水'], 2)
+        df1.loc[condition, '温度'] = round(row['温度'], 2)
     return df1
 
 
@@ -76,6 +76,7 @@ def getSimulateWeather(weatherSituation, province, station, startYear):
         yearNum = fileTemp.split('年')[0].split('第')[1]
         data = pd.read_excel(file_name)
         print(yearNum)
+        startYear = 2011  # 测试
         data['年'] = int(yearNum) + int(startYear)
         if merged_data is None:
             merged_data = data.copy()  # Initialize merged_data with the first file's data
@@ -275,9 +276,11 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
             # 重新调整表格索引,以确保predictions_df与df_cleaned合并大小一致
             df_cleaned_reset = df_cleaned.reset_index(drop=True)
             predictions_df_reset = predictions_df.reset_index(drop=True)
-
+            # 合并两表
             data = pd.concat([df_cleaned_reset, predictions_df_reset], axis=1)
-            # data.reset_index(drop=True)
+            # 提取指定区域的相关数据
+            filtered_df = data[(data['上级单位'] == '湖南省') & (data['测报站点'] == '湘阴县')]
+
             resultTempPath = os.path.join(
                 os.getcwd(),
                 'resource',
@@ -287,16 +290,12 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
                 + weatherScenes +
                 '_applicationPredicts' +
                 '.xlsx')
-            data.to_excel(resultTempPath, index=False)
+            filtered_df.to_excel(resultTempPath, index=False)
             st.toast(f'{weatherScenes}---{tempModel}模型预测完毕', icon='✅')
             # =========================计算静态偏差指标=========================
-            # 输入真实植保数据(测试是否缺失)(输入原始特征中有),并结合上述模型输出预测数据
-
-            # (单一气象场景)结果可视化(暂不处理)
             # 计算指标
-            # data = predictions_df
-            data_B = data['病害峰值']  # 实际
-            data_A = data['Predicted_value']  # 预测
+            data_B = filtered_df['病害峰值']  # 实际
+            data_A = filtered_df['Predicted_value']  # 预测
             # 计算两组数据相减的均值之和除以长度
             mean_diff = ((data_A - data_B).sum()) / len(data_A)
 
@@ -335,13 +334,21 @@ measurement_stations = ['湘阴县']
 
 weatherGeneratorInfo, weatherGeneratorInstruction = st.columns(2)
 with weatherGeneratorInfo:
+    # weatherGeneratorProvinceSelected = st.selectbox(
+    #     label='province',
+    #     options=pages_utils.TempDataSet[4]['上级单位'].drop_duplicates().tolist(),
+    #     label_visibility='collapsed')
+    # weatherGeneratorStationSelected = st.selectbox(
+    #     label='station',
+    #     options=pages_utils.TempDataSet[4]['测报站点'].drop_duplicates().tolist(),
+    #     label_visibility='collapsed')
     weatherGeneratorProvinceSelected = st.selectbox(
         label='province',
-        options=pages_utils.TempDataSet[4]['上级单位'].drop_duplicates().tolist(),
+        options=superior_units,
         label_visibility='collapsed')
     weatherGeneratorStationSelected = st.selectbox(
         label='station',
-        options=pages_utils.TempDataSet[4]['测报站点'].drop_duplicates().tolist(),
+        options=measurement_stations,
         label_visibility='collapsed')
 
 
