@@ -272,8 +272,12 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams):
             predictions = model.predict(X_scaled)
             # 创建一个 DataFrame 包含预测值
             predictions_df = pd.DataFrame(predictions, columns=['Predicted_value'])
-            data = pd.concat([df_cleaned, predictions_df], axis=1)
-            # data.reset_index(drop=True, inplace=True)
+            # 重新调整表格索引,以确保predictions_df与df_cleaned合并大小一致
+            df_cleaned_reset = df_cleaned.reset_index(drop=True)
+            predictions_df_reset = predictions_df.reset_index(drop=True)
+
+            data = pd.concat([df_cleaned_reset, predictions_df_reset], axis=1)
+            # data.reset_index(drop=True)
             resultTempPath = os.path.join(
                 os.getcwd(),
                 'resource',
