@@ -327,7 +327,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
 # generatedYears2 = st.number_input('输入时间序列的截至年', value=1)
 # generatedYears3 = st.number_input('输入时间序列的截至月', value=1)
 st.markdown("##### 历史气象站点数据上传及模板下载注意事项")
-st.markdown("##### 选择地区")
+st.markdown("###### 选择地区")
 # 提取上级单位和测报站点的列
 # superior_units = pages_utils.TempDataSet[4]['上级单位']
 # measurement_stations = pages_utils.TempDataSet[4]['测报站点']
@@ -388,10 +388,9 @@ with weatherGeneratorInstruction:
 
     '''
     st.warning(warningMInfo, icon="⚠️")
-st.markdown('---')
 col123, col223 = st.columns(2)
 with col123:
-    st.markdown("##### 上传历史气象站点数据")
+    st.markdown("###### 上传历史气象站点数据")
     # 上传历史气象数据
     uploadedHistoricalData = st.file_uploader(
         "上传历史气象站点数据",
@@ -415,17 +414,19 @@ with col223:
             file_name="历史气象数据模板.xlsx",
             mime="application/octet-stream"
         )
-st.markdown("##### 生成数据长度")
+st.markdown('---')
+st.markdown("##### 天气情景生成器参数设置")
 # ==============================时间长度==============================
 today = datetime.datetime.now()
 jan_1 = datetime.date(today.year - 13, 1, 1)
 dec_31 = datetime.date(today.year, 12, 31)
+st.markdown("###### 生成数据长度")
 generatedYears = st.date_input(
     "选择起止年月",
     (jan_1, datetime.date(today.year - 12, 1, 7)),
     jan_1,
     dec_31,
-    format="YYYY.MM.DD",
+    format="YYYY.MM.DD",label_visibility='collapsed'
 )
 year_difference = generatedYears[1].year - generatedYears[0].year
 print(year_difference)
@@ -437,9 +438,7 @@ print(year_difference)
 #         '* 1:高温多雨 2:高温常雨 3:高温少雨\n'
 #         '* 4:常温常雨 5:常温多雨 6:常温少雨\n'
 #         '* 7:低温少雨 8:低温常雨 9:低温多雨\n', icon="ℹ️")
-st.markdown(' ')
-st.markdown("##### 生成模拟气象情景")
-# st.markdown("##### 生成气象情景")
+st.markdown("###### 生成模拟气象情景")
 # ==============================生成气象情景==============================
 weatherScenesList = pages_utils.multiselect_all(
     st, '全选',
@@ -451,7 +450,7 @@ weatherScenesList = pages_utils.multiselect_all(
 if not weatherScenesList:
     weatherScenesList = ['高温少雨']
 
-st.markdown("##### 异常程度设置")
+st.markdown("###### 异常程度设置")
 # ==============================异常程度设置==============================
 # ============================气温标准差============================
 selectedWeather = pills("异常程度设置", weatherScenesList, label_visibility='collapsed')
@@ -487,7 +486,7 @@ st.session_state.weatherSituationParams[selectedWeather] = [number51, number52, 
 # 打印更新后的值
 # st.markdown(st.session_state.weatherSituationParams[selectedWeather])
 
-st.markdown("##### 指定评价模型")
+st.markdown("###### 指定评价模型")
 modelsList = pages_utils.multiselect_all(
     st, '全选-模型',
     pages_utils.TempDataSetField[4]['模型'].tolist(),
