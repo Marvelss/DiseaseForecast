@@ -90,7 +90,7 @@ with mainIndex:
     with modelECV:
         st.markdown("##### 数据与特征")
         st.markdown("###### 原始数据")
-        temp = tree_select(nodes)
+        # temp = tree_select(nodes)
         st.markdown('---')
         st.markdown("###### 预处理数据")
         temp1 = tree_select(nodes1)

@@ -34,7 +34,7 @@ warningAInfo = '''
 2. 删除示例数据后,添加新数据.
     '''
 # ==============================文件上传显示==============================
-dataSCM, dataSCR = st.columns([0.9, 0.4])
+dataSCM, dataSCR = st.columns([0.7, 0.4])
 with dataSCM:
     st.markdown("##### 上传数据集")
 

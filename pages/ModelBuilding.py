@@ -327,6 +327,9 @@ def onPrecision(*cboxList):
 def firstPage(): st.session_state.page = 0
 
 
+def backPage(): st.session_state.page15 = 0
+
+
 # ==============================界面==============================
 modelACV, modelACM = st.columns([0.5, 0.7])
 with modelACV:
@@ -368,7 +371,7 @@ with modelACV:
                     elif st.session_state["leftTabs"][i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     elif st.session_state["leftTabs"][i] == '模型':
-                        column = ["编号", "模型", '模型参数', "评价指标", "数据集划分比例", "时间" ]
+                        column = ["编号", "模型", '模型参数', "评价指标", "数据集划分比例", "时间"]
                     st.data_editor(
                         pages_utils.TempDataSetField[i],
                         height=220, width=800,
@@ -399,19 +402,22 @@ with modelACM:
     if st.session_state.page == 0:
         with ph.container():
             st.markdown("##### 建模方法")
-            colOption1, colOption2, colOption3 = st.columns(3)
+            colOption1, colOption2, colOption3, colOption4 = st.columns(4)
             with colOption1:
                 agree = st.checkbox('SVM', key='checkBoxModel0', on_change=clearOtherOption, args=[0])
-                agree1 = st.checkbox('RF', key='checkBoxModel1', on_change=clearOtherOption, args=[1])
                 agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
-            with colOption2:
-                agree2 = st.checkbox('KNN', key='checkBoxModel2', on_change=clearOtherOption, args=[2])
                 agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4],
                                      disabled=True)
+            with colOption2:
+                agree1 = st.checkbox('RF', key='checkBoxModel1', on_change=clearOtherOption, args=[1])
                 agree7 = st.checkbox('SVR', key='checkBoxModel7', on_change=clearOtherOption, args=[7])
+
             with colOption3:
                 agree3 = st.checkbox('FLDA', key='checkBoxModel3', on_change=clearOtherOption, args=[3])
                 agree5 = st.checkbox('PLSR', key='checkBoxModel5', on_change=clearOtherOption, args=[5])
+
+            with colOption4:
+                agree2 = st.checkbox('KNN', key='checkBoxModel2', on_change=clearOtherOption, args=[2])
                 # agree4 = st.checkbox('贝叶斯统计')
                 # agree5 = st.checkbox('模糊综合评价')
 
@@ -476,10 +482,39 @@ with modelACM:
     elif st.session_state.page == 2:
         # =======================添加验证与训练数据集划分=======================
         with ph.container():
-            st.markdown("###### 验证与训练数据集划分")
+            st.markdown("###### 数据集有效值提取及验证与训练数据划分")
+
+            @st.experimental_dialog("有效值提取", width='large')
+            def vote():
+                df11 = None
+                isExtract = st.checkbox('提取有效值')
+                for p in range(len(pages_utils.TempDataSet))[::-1]:
+                    df11 = pages_utils.TempDataSet[p]
+                    if not df11.empty:
+                        break
+                beforeDF = df11
+                # 分组并提取每个分组的第一个非空值
+                result = beforeDF.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+                # ******删除包含缺失值的行******
+                df_cleaned = result.dropna()
+
+                if isExtract:
+                    a = st.data_editor(df_cleaned, num_rows="dynamic", width=700, height=300)
+                    pages_utils.TempDataSet[4] = df_cleaned
+                else:
+                    b = st.data_editor(beforeDF, num_rows="dynamic", width=700, height=300)
+                    pages_utils.TempDataSet[4] = beforeDF
+                # 选择后变化
+                if st.button("Submit"):
+                    if isExtract:
+                        print('开始')
+                        print(df_cleaned)
+                    st.rerun()
+            if st.button("有效值提取"):
+                vote()
             option = st.selectbox(
                 label="划分比例",
-                options=("8:2", "7:3", "6:4"), label_visibility='collapsed'
+                options=("8:2", "7:3", "6:4")
             )
             for index, row in pages_utils.TempDataSetField[4].iterrows():
                 pages_utils.TempDataSetField[4].loc[index, '数据集划分比例'] = option
@@ -487,70 +522,26 @@ with modelACM:
             interval_col1.button("保存", on_click=firstPage)
 
     # =======================显示右下内容=======================
-    st.markdown('##### 任务清单')
-    edited_df28 = st.data_editor(
-        pages_utils.TempDataSetField[4], height=190, width=800,
-        column_order=["编号", "模型", "时间", '处理状态'],
-        disabled=["时间", '处理状态'], num_rows="dynamic", )
-    interval_col34, interval_col33 = st.columns([4, 1])
-    with interval_col34:
-        @st.experimental_dialog("准备模型训练", width='large')
-        def vote():
-            df11 = None
-            isExtract = st.checkbox('提取有效值')
-            for p in range(len(pages_utils.TempDataSet))[::-1]:
-                df11 = pages_utils.TempDataSet[p]
-                if not df11.empty:
-                    break
-            beforeDF = df11
-
-            # beforeDF = pd.DataFrame(
-            #     [
-            #         {"command": "st.selectbox", "rating": 4, "is_widget": True},
-            #         {"command": "st.balloons", "rating": 5, "is_widget": False},
-            #         {"command": "st.time_input", "rating": 3, "is_widget": True},
-            #     ]
-            # )
-            # 分组并提取每个分组的第一个非空值
-            result = beforeDF.groupby(['上级单位', '测报站点', '年']).first().reset_index()
-            # ******删除包含缺失值的行******
-            df_cleaned = result.dropna()
-            # df_cleaned = pd.DataFrame(
-            #     [
-            #         {"command": "st.selectbox", "rating": 3, "is_widget": True},
-            #         {"command": "st.balloons", "rating": 6, "is_widget": False},
-            #         {"command": "st.time_input", "rating": 53, "is_widget": True},
-            #     ]
-            # )
-            if isExtract:
-                a = st.data_editor(df_cleaned, num_rows="dynamic", width=700, height=300)
-                pages_utils.TempDataSet[4] = df_cleaned
-            else:
-                b = st.data_editor(beforeDF, num_rows="dynamic", width=700, height=300)
-                pages_utils.TempDataSet[4] = beforeDF
-            # 选择后变化
-            if st.button("Submit"):
-                if isExtract:
-                    print('开始')
-                    print(df_cleaned)
-                # st.session_state.vote = {"item": item, "reason": reason}
-                st.rerun()
-
-
-        if st.button("准备模型训练"):
-            vote()
-
-    with interval_col33:
-        with st.popover("准备模型训练"):
-            st.info('当前时间分辨率为:1天')
-            temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)
-            btn = st.button('开始模型训练',
-                            on_click=onTrain,
-                            args=[temporaResolutionNum])
-    placeholder1 = st.empty()
+    placeholder = st.empty()
+    if st.session_state.page15 == 0:
+        # =======================显示右下任务清单表格=======================
+        with placeholder.container():
+            st.markdown('##### 任务清单')
+            edited_df28 = st.data_editor(
+                pages_utils.TempDataSetField[4], height=190, width=800,
+                column_order=["编号", "模型", "时间", '处理状态'],
+                disabled=["时间", '处理状态'], num_rows="dynamic", )
+            interval_col34, interval_col33 = st.columns([4, 1])
+            with interval_col33:
+                # st.info('当前时间分辨率为:1天')
+                # temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)
+                btn = st.button('开始模型训练',
+                                on_click=onTrain,
+                                args=[1])
+    # placeholder1 = st.empty()
     # =======================显示右下可视化图表=======================
-    if st.session_state.page15 == 1:
-        with placeholder1.container():
+    elif st.session_state.page15 == 1:
+        with placeholder.container():
             st.markdown('---')
             st.write('###### 精度评价')
             models = pages_utils.TempDataSetField[4]["模型"].tolist()
@@ -586,3 +577,5 @@ with modelACM:
                         col2.metric(metrics[h][0], metrics[h][1])
                     for h in range(half, len(metrics)):
                         col1.metric(metrics[h][0], metrics[h][1])
+            interval_col34, interval_col33 = st.columns([5, 1])
+            btn3 = interval_col33.button('返回', on_click=backPage)

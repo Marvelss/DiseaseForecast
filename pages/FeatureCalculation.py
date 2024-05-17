@@ -231,32 +231,38 @@ with featureCCV:
     weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
         set(agricultureNameT))
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', weatherName,
+        st, '全选-特征', weatherName,
         'temp', 'collapsed')
-    result2 = pages_utils.multiselect_all(
-        st, '全选-植保数据', plantName,
-        'temp', 'collapsed')
-    result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', agricultureName,
-        'temp', 'collapsed')
+    st.checkbox('全选-植保数据', disabled=True)
+    st.checkbox('全选-农学数据', disabled=True)
+    result2 = []
+    result3 = []
+    # result2 = pages_utils.multiselect_all(
+    #     st, '全选-植保数据', plantName,
+    #     'temp', 'collapsed')
+    # result3 = pages_utils.multiselect_all(
+    #     st, '全选-农学数据', agricultureName,
+    #     'temp', 'collapsed')
 
 # ===============显示右上处理方法选项===============
 with featureCCM:
     st.markdown("##### 特征计算方法")
     col1, col2 = st.columns(2)
     with col1:
-        option14 = st.checkbox('时间(温度)分辨率转换', key='checkbox0', on_change=clear_other, args=[0], disabled=True)
+        # option14 = st.checkbox('时间(温度)分辨率转换', key='checkbox0', on_change=clear_other, args=[0], disabled=True)
         option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1])
         option16 = st.checkbox('降水累积量计算', key='checkbox2', on_change=clear_other, args=[2])
+        option14 = st.checkbox('待添加', key='checkbox0', on_change=clear_other, args=[0], disabled=True)
+
     with col2:
         option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3])
-        option18 = st.checkbox('时空抽取', key='checkbox4', on_change=clear_other, args=[4], disabled=True)
+        option18 = st.checkbox('时空抽取(待面状建模系统发布)', key='checkbox4', on_change=clear_other, args=[4], disabled=True)
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
-    if option14:
-        option1 = st.selectbox(
-            '分辨率转换',
-            ('日值温度', '旬平均温度', '月平均温度'))
+    # if option14:
+    #     option1 = st.selectbox(
+    #         '分辨率转换',
+    #         ('日值温度', '旬平均温度', '月平均温度'))
     if option15:
         d1 = st.date_input("开始时间", value=None)
         d2 = st.date_input("结束时间", value=None)

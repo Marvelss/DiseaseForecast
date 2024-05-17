@@ -244,14 +244,19 @@ with dataPCV:
     #     '选择数据集',
     #     ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', weatherName,
+        st, '全选-字段', weatherName,
         'temp', 'collapsed')
-    result2 = pages_utils.multiselect_all(
-        st, '全选-植保数据', plantName,
-        'temp', 'collapsed')
-    result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', agricultureName,
-        'temp', 'collapsed')
+    st.checkbox('全选-植保数据', disabled=True)
+    st.checkbox('全选-农学数据', disabled=True)
+    result2 = []
+    result3 = []
+    # result2 = pages_utils.multiselect_all(
+    #     st, '全选-植保数据', plantName,
+    #     'temp', 'collapsed')
+
+    # result3 = pages_utils.multiselect_all(
+    #     st, '全选-农学数据', agricultureName,
+    #     'temp', 'collapsed')
 
 # ===============显示右上预处理方法选项===============
 with dataPCM:

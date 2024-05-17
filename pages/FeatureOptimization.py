@@ -215,20 +215,24 @@ with dataPCV:
     weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
         set(agricultureNameT))
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', weatherName,
+        st, '全选-特征', weatherName,
         'temp', 'collapsed')
-    result2 = pages_utils.multiselect_all(
-        st, '全选-植保数据', plantName,
-        'temp', 'collapsed')
-    result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', agricultureName,
-        'temp', 'collapsed')
+    st.checkbox('全选-植保数据', disabled=True)
+    st.checkbox('全选-农学数据', disabled=True)
+    result2 = []
+    result3 = []
+    # result2 = pages_utils.multiselect_all(
+    #     st, '全选-植保数据', plantName,
+    #     'temp', 'collapsed')
+    # result3 = pages_utils.multiselect_all(
+    #     st, '全选-农学数据', agricultureName,
+    #     'temp', 'collapsed')
 # ===============显示右上处理方法选项===============
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
     with tab1:
         genre = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other, args=[0])
-        genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1])
+        genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1],disabled=True)
 
     with tab2:
         genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other, args=[2])
