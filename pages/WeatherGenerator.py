@@ -318,16 +318,8 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
 # ==============================界面==============================
 
 
-# with col3:
-# ex = st.expander('下载基于天气情景生成器生成的全年模拟气温和降水数据')
-# st.markdown("##### 天气情景生成器")
-# with ex:
-# generatedYears = st.number_input('输入时间序列的起始年', value=1)
-# generatedYears1 = st.number_input('输入时间序列的起始月', value=1)
-# generatedYears2 = st.number_input('输入时间序列的截至年', value=1)
-# generatedYears3 = st.number_input('输入时间序列的截至月', value=1)
-st.markdown("##### 历史气象站点数据上传及模板下载注意事项")
-st.markdown("###### 选择地区")
+st.markdown("##### 指定地区与模型及历史气象站点和实际标签数据上传")
+
 # 提取上级单位和测报站点的列
 # superior_units = pages_utils.TempDataSet[4]['上级单位']
 # measurement_stations = pages_utils.TempDataSet[4]['测报站点']
@@ -335,9 +327,18 @@ st.markdown("###### 选择地区")
 # =================测试=================
 # superior_units = ['湖南省']
 # measurement_stations = ['湘阴县']
+# weatherGeneratorProvinceSelected = st.selectbox(
+#     label='province',
+#     options=superior_units,
+#     label_visibility='collapsed')
+# weatherGeneratorStationSelected = st.selectbox(
+#     label='station',
+#     options=measurement_stations,
+#     label_visibility='collapsed')
 
 weatherGeneratorInfo, weatherGeneratorInstruction = st.columns(2)
 with weatherGeneratorInfo:
+    st.markdown("###### 选择地区")
     weatherGeneratorProvinceSelected = st.selectbox(
         label='province',
         options=pages_utils.TempDataSet[4]['上级单位'].drop_duplicates().tolist(),
@@ -347,16 +348,26 @@ with weatherGeneratorInfo:
         options=pages_utils.TempDataSet[4]['测报站点'].drop_duplicates().tolist(),
         label_visibility='collapsed')
 
+with weatherGeneratorInstruction:
+    st.markdown("###### 指定评价模型")
+    modelsList = pages_utils.multiselect_all(
+        st, '全选-模型',
+        pages_utils.TempDataSetField[4]['模型'].tolist(),
+        'tempModels', 'collapsed')
+col123, col223 = st.columns(2)
+with col123:
+    st.markdown("###### 上传历史气象站点数据")
+    # 上传历史气象数据
+    uploadedHistoricalData = st.file_uploader(
+        "上传历史气象站点数据",
+        accept_multiple_files=False,
+        type=['xlsx', 'xls'],
+        help='help',
+        label_visibility='collapsed'
+    )
 
-    # weatherGeneratorProvinceSelected = st.selectbox(
-    #     label='province',
-    #     options=superior_units,
-    #     label_visibility='collapsed')
-    # weatherGeneratorStationSelected = st.selectbox(
-    #     label='station',
-    #     options=measurement_stations,
-    #     label_visibility='collapsed')
 
+    # 上传实际标签数据
     @st.experimental_dialog("上传实际标签数据", width='large')
     def uploadData():
         st.info('根据以下原始上传数据集字段')
@@ -380,26 +391,6 @@ with weatherGeneratorInfo:
 
     if st.button("上传实际标签数据"):
         uploadData()
-
-with weatherGeneratorInstruction:
-    st.markdown("###### 参数说明")
-    warningMInfo = '''
-    设置参数说明(待填):选择上级单位、测报站点\n
-
-    '''
-    st.warning(warningMInfo, icon="⚠️")
-col123, col223 = st.columns(2)
-with col123:
-    st.markdown("###### 上传历史气象站点数据")
-    # 上传历史气象数据
-    uploadedHistoricalData = st.file_uploader(
-        "上传历史气象站点数据",
-        accept_multiple_files=False,
-        type=['xlsx', 'xls'],
-        help='help',
-        label_visibility='collapsed'
-    )
-
 with col223:
     warningMInfo = '''
     注意事项(待填)
@@ -426,7 +417,7 @@ generatedYears = st.date_input(
     (jan_1, datetime.date(today.year - 12, 1, 7)),
     jan_1,
     dec_31,
-    format="YYYY.MM.DD",label_visibility='collapsed'
+    format="YYYY.MM.DD", label_visibility='collapsed'
 )
 year_difference = generatedYears[1].year - generatedYears[0].year
 print(year_difference)
@@ -486,11 +477,7 @@ st.session_state.weatherSituationParams[selectedWeather] = [number51, number52, 
 # 打印更新后的值
 # st.markdown(st.session_state.weatherSituationParams[selectedWeather])
 
-st.markdown("###### 指定评价模型")
-modelsList = pages_utils.multiselect_all(
-    st, '全选-模型',
-    pages_utils.TempDataSetField[4]['模型'].tolist(),
-    'tempModels', 'collapsed')
+
 sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = number51, number53 * 0.01, number52, number54 * 0.01
 
 btn = st.button('运行程序', on_click=onRun,
@@ -509,6 +496,7 @@ if btn:
             mime="application/zip",
         )
 # =======================预测评价结果及数据下载=======================
+st.markdown('---')
 st.markdown("##### 模型评价指标结果及可视化")
 with st.popover("预览"):
     img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'weatherGeneratorEvaluateResult2.jpg'))
