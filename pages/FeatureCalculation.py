@@ -109,7 +109,6 @@ def onRun():
     print('===============获取任务清单内容===============')
     print(methodParam)
     print(methodList)
-
     afterHandleData = None
     newColumn = '错误'
     # ===============根据名称匹配调用并执行各个处理方法===============
@@ -121,6 +120,11 @@ def onRun():
         # 检查方法是否已执行
         if isHandled:
             continue
+        # 第一次使用预处理数据集,而后基于特征计算数据集多次处理
+        if pages_utils.TempDataSet[2].shape[0] == 0:
+            dataFrameTemp = pages_utils.TempDataSet[1]
+        else:
+            dataFrameTemp = pages_utils.TempDataSet[2]
         # 使用处理后最新的字段内容
         reservedField = pages_utils.TempDataSet[1].columns.tolist()
         print(f'=============测试保留字段-{reservedField}=============')
@@ -128,15 +132,15 @@ def onRun():
             pass
         elif tempMethod == '降雨日数计算':
             afterHandleData = FeatureCalculationMethod(
-                pages_utils.TempDataSet[1], reservedField).rainfallDaysAccumulation(
+                dataFrameTemp, reservedField).rainfallDaysAccumulation(
                 fields[indexT], methodParam[indexT])
         elif tempMethod == '降水累积量计算':
             afterHandleData, newColumn = FeatureCalculationMethod(
-                pages_utils.TempDataSet[1], reservedField).precipitationAccumulation(
+                dataFrameTemp, reservedField).precipitationAccumulation(
                 fields[indexT], methodParam[indexT])
         elif tempMethod == '基于活动期积温的生育期计算':
             afterHandleData, newColumn = FeatureCalculationMethod(
-                pages_utils.TempDataSet[1], reservedField).growthPeriodCalculation(
+                dataFrameTemp, reservedField).growthPeriodCalculation(
                 fields[indexT], methodParam[indexT])
         elif tempMethod == '时空抽取':
             return '时空抽取'
@@ -150,31 +154,19 @@ def onRun():
             afterHandleData, pages_utils.TempDataSet[2],
             on=intersection_cols, how="left")
 
-        print('======================备选特征======================')
-        print(pages_utils.TempDataSet[2])
-
-        # pages_utils.TempDataSet[2].to_excel(
-        #     r'E:\a_python\program\testPlatform\demo\demo109\a' + str(indexT) + '.xlsx', index=False)
-
+        # print('======================备选特征======================')
+        # print(pages_utils.TempDataSet[2])
         # ===============更新左侧显示内容===============
         update_values = {
-            # "数据类型": "气象数据", "输入特征": fields[0],
-            # "备选特征": getFeatureName(st.session_state["featureMethodName"]['checkBox']),
             "大小": '1*' + str(row_size),
             "备选特征": newColumn,
-            # "特征计算方法": st.session_state["featureMethodName"]['checkBox'],
             "时间": datetime.datetime.now().time(),
             "处理状态": True}
-        # 查找要更新的数据记录
+        # 根据字段名和索引来更新字段值
         for index, row in pages_utils.TempDataSetField[2].iterrows():
-            if row["编号"] == idNumber[0]:
+            if row["编号"] == idNumber[indexT]:
                 for key, value in update_values.items():
                     pages_utils.TempDataSetField[2].loc[index, key] = value
-                    # 根据字段名和索引来更新字段值
-    # ======================特征计算-保留字段======================
-    print('======================特征计算-保留字段======================')
-    tempReserved = afterHandleData.columns
-    pages_utils.TempDataSet[2] = pages_utils.TempDataSet[2][tempReserved]
 
 
 # ==============================界面==============================
@@ -256,7 +248,8 @@ with featureCCM:
 
     with col2:
         option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3])
-        option18 = st.checkbox('时空抽取(待面状建模系统发布)', key='checkbox4', on_change=clear_other, args=[4], disabled=True)
+        option18 = st.checkbox('时空抽取(待面状建模系统发布)', key='checkbox4', on_change=clear_other, args=[4],
+                               disabled=True)
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
     # if option14:

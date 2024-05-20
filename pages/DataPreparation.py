@@ -1,17 +1,15 @@
 import datetime
 import os
 
-from PIL import Image
-import streamlit as st
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
+import streamlit as st
+from PIL import Image
 from streamlit import switch_page
 
 import pages_utils
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-
 from modelandmethod.PretreatmentMethod import PretreatmentMethod
 
 # 处理方法内容记录(任务清单各项值)
@@ -118,40 +116,41 @@ def onRun():
     idNumber = pages_utils.TempDataSetField[1]["编号"]
     fields = pages_utils.TempDataSetField[1]["输入字段"]
     methodParam = pages_utils.TempDataSetField[1]["方法参数"]
+    isHandledFlags = pages_utils.TempDataSetField[1]["处理状态"]
     methodList = pages_utils.TempDataSetField[1]["预处理方法"]
     # ===============根据名称匹配调用并执行各个处理方法===============
     print('=========测试输入数据=========')
     print(fields)
-    # print(fields[0])
-    # print(fields[1])
     print(methodParam)
-    print(type(pages_utils.TempDataSetField[1]["编号"]))
 
     afterHandleData = None
-    for indexT, tempMethod in enumerate(methodList):
+    for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
+        # 检查方法是否已执行
+        if isHandled:
+            continue
+        # 第一次使用原始数据集,而后基于预处理后数据集多次处理
+        if pages_utils.TempDataSet[1].shape[0] == 0:
+            dataFrameTemp = pages_utils.TempDataSet[0]
+        else:
+            dataFrameTemp = pages_utils.TempDataSet[1]
         # 使用处理后最新的字段内容
         reservedField = pages_utils.TempDataSet[0].columns.tolist()
-        print(f'=============测试保留字段-{reservedField}=============')
-        # print(type(reservedField))
-        # print(tempMethod)
+        # print(f'=============测试保留字段-{reservedField}=============')
         newDataColumn = fields[indexT]
         if tempMethod == '缺失值插补':
             (afterHandleData, missingValueBefore, missingValueAfter,
              newDataColumn) = PretreatmentMethod(
-                pages_utils.TempDataSet[0],
+                dataFrameTemp,
                 fields[indexT], reservedField).linearInterpolation()
             # 显示填补信息
             st.toast(f'填补缺失值:{str(missingValueBefore - missingValueAfter)}' +
                      '\n' +
                      f'剩余缺失值:{missingValueAfter}', icon='✅')
         elif tempMethod == '剔除异常值':
-            print(f'执行任务==={fields[indexT]}-{methodParam[indexT]}')
             (afterHandleData, outlierNum, lengthAfter,
              newDataColumn) = PretreatmentMethod(
-                pages_utils.TempDataSet[0],
+                dataFrameTemp,
                 fields[indexT], reservedField).outlierEliminator(methodParam[indexT])
-            print('========执行完后数据')
-            print(len(afterHandleData[fields[indexT]]))
             # 显示填补信息
             st.toast(f'剔除异常值个数:{outlierNum}' +
                      '\n' +
@@ -168,6 +167,7 @@ def onRun():
         print('======================预处理后数据集======================')
 
         # ===============更新左侧显示内容===============
+        print(f'更新左侧显示内容:{newDataColumn}')
         update_values = {
             "预处理后字段": newDataColumn,
             "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
@@ -176,14 +176,9 @@ def onRun():
         }
         # 查找要更新的数据记录
         for index, row in pages_utils.TempDataSetField[1].iterrows():
-            if row["编号"] == idNumber[0]:
+            if row["编号"] == idNumber[indexT]:
                 for key1, value1 in update_values.items():
                     pages_utils.TempDataSetField[1].loc[index, key1] = value1
-
-    # ======================保留字段======================
-    print('======================保留字段======================')
-    tempReserved = afterHandleData.columns
-    pages_utils.TempDataSet[1] = pages_utils.TempDataSet[1][tempReserved]
 
 
 # ==============================界面==============================

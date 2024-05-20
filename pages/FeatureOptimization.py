@@ -118,20 +118,25 @@ def onRun():
         # 检查方法是否已执行
         if isHandled:
             continue
+        # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
+        if pages_utils.TempDataSet[3].shape[0] == 0:
+            dataFrameTemp = pages_utils.TempDataSet[2]
+        else:
+            dataFrameTemp = pages_utils.TempDataSet[3]
         reservedField = pages_utils.TempDataSet[2].columns.tolist()
         afterHandleData = None
         # print(tempMethod)
         if tempMethod == 't检验':
             afterHandleData = FeatureOptimizationMethod(
-                pages_utils.TempDataSet[2], reservedField).tTest(
+                dataFrameTemp, reservedField).tTest(
                 fields[0], methodParam)
         elif tempMethod == 'Pearson相关性分析':
             afterHandleData, newColumns = FeatureOptimizationMethod(
-                pages_utils.TempDataSet[2], reservedField).Pearson(
+                dataFrameTemp, reservedField).Pearson(
                 methodParam[indexT])
         elif tempMethod == 'Relief-F互相关分析':
             afterHandleData = FeatureOptimizationMethod(
-                pages_utils.TempDataSet[2], reservedField).ReliefF(
+                dataFrameTemp, reservedField).ReliefF(
                 fields[0], methodParam)
         print('=============返回数据=============')
         print(afterHandleData)
@@ -157,7 +162,7 @@ def onRun():
             "处理状态": True}
         # 查找要更新的数据记录
         for index, row in pages_utils.TempDataSetField[3].iterrows():
-            if row["编号"] == idNumber[0]:
+            if row["编号"] == idNumber[indexT]:
                 for key, value in update_values.items():
                     pages_utils.TempDataSetField[3].loc[index, key] = value
 
