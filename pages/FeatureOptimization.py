@@ -317,7 +317,7 @@ with dataPCM:
         # =======================显示右下任务清单表格=======================
         with placeholder.container():
             st.markdown('##### 任务清单')
-            edited_df28 = st.data_editor(
+            pages_utils.TempDataSetField[3] = st.data_editor(
                 pages_utils.TempDataSetField[3], height=190, width=800,
                 column_order=["编号", "数据类型", "输入特征", "优选特征", "特征优选方法", '时间', '处理状态'],
                 disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )

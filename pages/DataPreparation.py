@@ -365,7 +365,7 @@ with dataPCM:
             # want_to_contribute = st.button("跳转可视化")
             # if want_to_contribute:
             #     switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\ModelEvaluation.py")
-            edited_df28 = st.data_editor(
+            pages_utils.TempDataSetField[1] = st.data_editor(
                 pages_utils.TempDataSetField[1], height=190, width=800,
                 column_order=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", '时间', '处理状态'],
                 disabled=["数据类型", "输入字段", "预处理后字段", "时间", '处理状态'], num_rows="dynamic", )

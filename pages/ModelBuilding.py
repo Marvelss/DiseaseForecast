@@ -527,7 +527,7 @@ with modelACM:
         # =======================显示右下任务清单表格=======================
         with placeholder.container():
             st.markdown('##### 任务清单')
-            edited_df28 = st.data_editor(
+            pages_utils.TempDataSetField[4] = st.data_editor(
                 pages_utils.TempDataSetField[4], height=190, width=800,
                 column_order=["编号", "模型", "时间", '处理状态'],
                 disabled=["时间", '处理状态'], num_rows="dynamic", )
