@@ -43,8 +43,11 @@ class FeatureCalculationMethod:
             # 将月降水量总和合并回原始DataFrame
             temp = pd.merge(self.dataFrame, monthly_precipitation_sum, on=['年', '月'], how='left')
 
+            # 根据数据集提取月份列并去除重复值和排序
+            unique_months = sorted(temp['月'].drop_duplicates().to_numpy().tolist())
+
             # 将每月降水量总和作为新列
-            for month in range(1, 13):
+            for month in unique_months:
                 col_name = f'{month}月_累积降水量'
                 temp[col_name] = temp['降水累积量'].where(temp['月'] == month, None)
 
