@@ -23,6 +23,8 @@ checkBoxNum = 2
 st.set_page_config(
     layout="wide"
 )
+if 'page12' not in st.session_state:
+    st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
 
 # 模拟24小时气温数据

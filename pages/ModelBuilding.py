@@ -16,6 +16,8 @@ if 'page' not in st.session_state:
     st.session_state.page = 0
 if 'page15' not in st.session_state:
     st.session_state.page15 = 0
+if 'page12' not in st.session_state:
+    st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 # 处理方法内容记录(任务清单各项值)
 if "modelName" not in st.session_state:
     st.session_state["modelName"] = {

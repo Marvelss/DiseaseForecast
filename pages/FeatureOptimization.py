@@ -17,7 +17,8 @@ st.set_page_config(
 )
 if 'page14' not in st.session_state:
     st.session_state.page14 = 0
-
+if 'page12' not in st.session_state:
+    st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 checkBoxNum = 3
 if "OptimizationMethodName" not in st.session_state:
     st.session_state["OptimizationMethodName"] = {

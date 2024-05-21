@@ -8,10 +8,13 @@ import pages_utils
 from streamlit_pills import pills
 from warnings import simplefilter
 
+
 simplefilter(action="ignore", category=FutureWarning)
 st.set_page_config(
     layout="wide"
 )
+if 'page12' not in st.session_state:
+    st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 # 模板路径及注释信息
 path1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\气象数据-模板.xlsx'
 path2 = r'E:\a_python\program\diseaseForecastStreamlit\resource\植保数据-模板.xlsx'
