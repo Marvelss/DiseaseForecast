@@ -35,12 +35,6 @@ class Model:
         self.modelParam = modelParam
 
     def onSVM(self):
-        print('=============方法接收=============')
-        print(self.evaluationIndicator)
-        print(self.dataPartitioning)
-        print(self.featureVariable)
-        print(self.targetVariable)
-        print(self.dataFrame)
         # 训练模型
         # =======================获取数据集=======================
         df11 = self.dataFrame
@@ -54,11 +48,11 @@ class Model:
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
-        if self.dataPartitioning[0] == '8:2':
+        if self.dataPartitioning == '8:2':
             partition = 0.2
-        elif self.dataPartitioning[0] == '7:3':
+        elif self.dataPartitioning == '7:3':
             partition = 0.3
-        elif self.dataPartitioning[0] == '6:4':
+        elif self.dataPartitioning == '6:4':
             partition = 0.4
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
@@ -67,8 +61,8 @@ class Model:
         print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
-        param_names = array[0]['参数名']
-        param_values = array[0]['参数值']
+        param_names = array['参数名']
+        param_values = array['参数值']
         parameters_dict = {}
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
@@ -89,8 +83,10 @@ class Model:
         print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
-        if ',' in self.evaluationIndicator[0]:
-            tempIndicator = self.evaluationIndicator[0].split(',')
+        if ',' in self.evaluationIndicator:
+            tempIndicator = self.evaluationIndicator.split(',')
+        else:
+            tempIndicator = [tempIndicator]
         for temp in tempIndicator:
             # 计算均方误差
             if temp == 'MSE':
@@ -127,12 +123,7 @@ class Model:
         return precision, actualAndPredictResult
 
     def onKNN(self):
-        print('=============方法接收=============')
-        print(self.evaluationIndicator)
-        print(self.dataPartitioning)
-        print(self.featureVariable)
-        print(self.targetVariable)
-        print(self.dataFrame)
+
         # 训练模型
         # =======================获取数据集=======================
         df11 = self.dataFrame
@@ -146,11 +137,11 @@ class Model:
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
-        if self.dataPartitioning[0] == '8:2':
+        if self.dataPartitioning == '8:2':
             partition = 0.2
-        elif self.dataPartitioning[0] == '7:3':
+        elif self.dataPartitioning == '7:3':
             partition = 0.3
-        elif self.dataPartitioning[0] == '6:4':
+        elif self.dataPartitioning == '6:4':
             partition = 0.4
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
@@ -159,8 +150,8 @@ class Model:
         print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
-        param_names = array[0]['参数名']
-        param_values = array[0]['参数值']
+        param_names = array['参数名']
+        param_values = array['参数值']
         parameters_dict = {}
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
@@ -177,8 +168,10 @@ class Model:
         print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
-        if ',' in self.evaluationIndicator[0]:
-            tempIndicator = self.evaluationIndicator[0].split(',')
+        if ',' in self.evaluationIndicator:
+            tempIndicator = self.evaluationIndicator.split(',')
+        else:
+            tempIndicator = [tempIndicator]
         for temp in tempIndicator:
             # 计算均方误差
             if temp == 'MSE':
@@ -215,12 +208,6 @@ class Model:
         return precision, actualAndPredictResult
 
     def onFLDA(self):
-        print('=============方法接收=============')
-        print(self.evaluationIndicator)
-        print(self.dataPartitioning)
-        print(self.featureVariable)
-        print(self.targetVariable)
-        print(self.dataFrame)
         # 训练模型
         # =======================获取数据集=======================
         df11 = self.dataFrame
@@ -234,11 +221,11 @@ class Model:
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
-        if self.dataPartitioning[0] == '8:2':
+        if self.dataPartitioning == '8:2':
             partition = 0.2
-        elif self.dataPartitioning[0] == '7:3':
+        elif self.dataPartitioning == '7:3':
             partition = 0.3
-        elif self.dataPartitioning[0] == '6:4':
+        elif self.dataPartitioning == '6:4':
             partition = 0.4
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
@@ -247,8 +234,8 @@ class Model:
         print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
-        param_names = array[0]['参数名']
-        param_values = array[0]['参数值']
+        param_names = array['参数名']
+        param_values = array['参数值']
         parameters_dict = {}
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
@@ -261,19 +248,16 @@ class Model:
         y_pred = model1.predict(X_test)
         print('======================模型构建-精度指标======================')
         precision = {}
-        # actualAndPredictResult = [savePath1, savePath2]
         actualAndPredictResult = y_pred.tolist()
-        # 'predictLabel': ,
-        # 'actualLabel': }
         print(actualAndPredictResult)
-        # print('X_test:')
-        # print(X_test)
         print('y_pred:')
         # print(y_pred)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
-        if ',' in self.evaluationIndicator[0]:
-            tempIndicator = self.evaluationIndicator[0].split(',')
+        if ',' in self.evaluationIndicator:
+            tempIndicator = self.evaluationIndicator.split(',')
+        else:
+            tempIndicator = [tempIndicator]
         for temp in tempIndicator:
             # 计算均方误差
             if temp == 'MSE':
@@ -310,12 +294,6 @@ class Model:
         return precision, actualAndPredictResult
 
     def onRF(self):
-        print('=============方法接收=============')
-        print(self.evaluationIndicator)
-        print(self.dataPartitioning)
-        print(self.featureVariable)
-        print(self.targetVariable)
-        print(self.dataFrame)
         # 训练模型
         # =======================获取数据集=======================
         df11 = self.dataFrame
@@ -329,11 +307,11 @@ class Model:
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
-        if self.dataPartitioning[0] == '8:2':
+        if self.dataPartitioning == '8:2':
             partition = 0.2
-        elif self.dataPartitioning[0] == '7:3':
+        elif self.dataPartitioning == '7:3':
             partition = 0.3
-        elif self.dataPartitioning[0] == '6:4':
+        elif self.dataPartitioning == '6:4':
             partition = 0.4
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
@@ -342,8 +320,8 @@ class Model:
         print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
-        param_names = array[0]['参数名']
-        param_values = array[0]['参数值']
+        param_names = array['参数名']
+        param_values = array['参数值']
         parameters_dict = {}
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
@@ -360,8 +338,10 @@ class Model:
         print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
-        if ',' in self.evaluationIndicator[0]:
-            tempIndicator = self.evaluationIndicator[0].split(',')
+        if ',' in self.evaluationIndicator:
+            tempIndicator = self.evaluationIndicator.split(',')
+        else:
+            tempIndicator = [tempIndicator]
         for temp in tempIndicator:
             # 计算均方误差
             if temp == 'MSE':
@@ -550,12 +530,6 @@ class Model:
         return R2_List, RMSE, D
 
     def onPLSR(self):
-        # print('=============方法接收=============')
-        # print(self.evaluationIndicator)
-        # print(self.dataPartitioning)
-        # print(self.featureVariable)
-        # print(self.targetVariable)
-        # print(self.dataFrame)
         # 训练模型
         # =======================获取数据集=======================
         df11 = self.dataFrame
@@ -569,24 +543,26 @@ class Model:
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
-        if self.dataPartitioning[0] == '8:2':
+        if self.dataPartitioning == '8:2':
             partition = 0.2
-        elif self.dataPartitioning[0] == '7:3':
+        elif self.dataPartitioning == '7:3':
             partition = 0.3
-        elif self.dataPartitioning[0] == '6:4':
+        elif self.dataPartitioning == '6:4':
             partition = 0.4
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
         # =======================创建模型并开始训练=======================
         print('======================模型构建-开始训练======================')
-        # print(self.modelParam)
         # 合并参数名称和值
-        array = self.modelParam
-        param_names = array[0]['参数名']
-        param_values = array[0]['参数值']
+        params = self.modelParam
+        # print(params['参数名'].keys())
         parameters_dict = {}
-        for i in range(len(param_names)):
-            parameters_dict[param_names[i]] = param_values[i]
-        # print(parameters_dict)
+        for key in params['参数名']:
+            # Get the parameter name and value using the key
+            param_name = str(params['参数名'][key])
+            param_value = str(params['参数值'][key])
+            # Store them in the new dictionary
+            parameters_dict[param_name] = param_value
+        print(parameters_dict)
         # 使用PLSR回归模型进行拟合
         model1 = PLSRegression(n_components=2)
         model1.fit(X_train, y_train)
@@ -597,8 +573,10 @@ class Model:
         actualAndPredictResult = y_pred.tolist()
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
-        if ',' in self.evaluationIndicator[0]:
-            tempIndicator = self.evaluationIndicator[0].split(',')
+        if ',' in self.evaluationIndicator:
+            tempIndicator = self.evaluationIndicator.split(',')
+        else:
+            tempIndicator = [tempIndicator]
         for temp in tempIndicator:
             # 计算均方误差
             if temp == 'MSE':
@@ -635,12 +613,6 @@ class Model:
         return precision, actualAndPredictResult
 
     def onLR(self):
-        print('=============方法接收=============')
-        print(self.evaluationIndicator)
-        print(self.dataPartitioning)
-        print(self.featureVariable)
-        print(self.targetVariable)
-        print(self.dataFrame)
         # 训练模型
         # =======================获取数据集=======================
         df11 = self.dataFrame
@@ -654,11 +626,11 @@ class Model:
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
-        if self.dataPartitioning[0] == '8:2':
+        if self.dataPartitioning == '8:2':
             partition = 0.2
-        elif self.dataPartitioning[0] == '7:3':
+        elif self.dataPartitioning == '7:3':
             partition = 0.3
-        elif self.dataPartitioning[0] == '6:4':
+        elif self.dataPartitioning == '6:4':
             partition = 0.4
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
@@ -667,8 +639,8 @@ class Model:
         print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
-        param_names = array[0]['参数名']
-        param_values = array[0]['参数值']
+        param_names = array['参数名']
+        param_values = array['参数值']
         parameters_dict = {}
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
@@ -685,8 +657,10 @@ class Model:
         print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
-        if ',' in self.evaluationIndicator[0]:
-            tempIndicator = self.evaluationIndicator[0].split(',')
+        if ',' in self.evaluationIndicator:
+            tempIndicator = self.evaluationIndicator.split(',')
+        else:
+            tempIndicator = [tempIndicator]
         for temp in tempIndicator:
             # 计算均方误差
             if temp == 'MSE':
@@ -723,12 +697,6 @@ class Model:
         return precision, actualAndPredictResult
 
     def onSVR(self):
-        # print('=============方法接收=============')
-        # print(self.evaluationIndicator)
-        # print(self.dataPartitioning)
-        # print(self.featureVariable)
-        # print(self.targetVariable)
-        # print(self.dataFrame)
         # 训练模型
         # =======================获取数据集=======================
         df11 = self.dataFrame
@@ -742,11 +710,11 @@ class Model:
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
-        if self.dataPartitioning[0] == '8:2':
+        if self.dataPartitioning == '8:2':
             partition = 0.2
-        elif self.dataPartitioning[0] == '7:3':
+        elif self.dataPartitioning == '7:3':
             partition = 0.3
-        elif self.dataPartitioning[0] == '6:4':
+        elif self.dataPartitioning == '6:4':
             partition = 0.4
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
@@ -755,8 +723,8 @@ class Model:
         print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
-        param_names = array[0]['参数名']
-        param_values = array[0]['参数值']
+        param_names = array['参数名']
+        param_values = array['参数值']
         parameters_dict = {}
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
@@ -773,8 +741,10 @@ class Model:
         print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
-        if ',' in self.evaluationIndicator[0]:
-            tempIndicator = self.evaluationIndicator[0].split(',')
+        if ',' in self.evaluationIndicator:
+            tempIndicator = self.evaluationIndicator.split(',')
+        else:
+            tempIndicator = [tempIndicator]
         for temp in tempIndicator:
             # 计算均方误差
             if temp == 'MSE':

@@ -1,4 +1,6 @@
 import datetime
+import os.path
+
 import streamlit as st
 import pandas as pd
 from sklearn.metrics import confusion_matrix
@@ -111,67 +113,26 @@ def onTrain(temporaResolution):
     dataPartitioning = pages_utils.TempDataSetField[4]["数据集划分比例"].tolist()
     features = pages_utils.TempDataSetField[4]["特征"].tolist()
     targets = pages_utils.TempDataSetField[4]["标签"].tolist()
-    # # ===============测试是否统一时间分辨率===============
-    # # 若数据集行数不一致则提示
-    # # if temporaResolution != 1:
-    # #     st.toast('测试')
-    # # ===============获取字段对应数据集===============
-    # selected_datasets = []
-    # inputDataSet = []
-    # combinedGroupArray = []
-    # # 合并特征和标签
-    # for group1, group2 in zip(features, targets):
-    #     combinedArrayTemp = group1 + group2
-    #     combinedGroupArray.append(combinedArrayTemp)
-    # # print('==========合并特征==========')
-    # # print(combinedGroupArray)
-    # # 获取对应数据集
-    # for smallGroup in combinedGroupArray:
-    #     temp_selected = []
-    #     for field in smallGroup:
-    #         found = False  # 设置一个标志位
-    #         for n in range(3, -1, -1):
-    #             if field in pages_utils.TempDataSet[n].columns:
-    #                 # 判断数据集是否为空
-    #                 if len(pages_utils.TempDataSet[n]):
-    #                     print(f'添加了{field}')
-    #                     temp_selected.append(n)
-    #                     found = True  # 找到了feature，将标志位设置为True
-    #                     break  # 找到feature后跳出内循环
-    #         if not found:
-    #             # 如果没有找到任何数据集包含feature，可以在这里进行处理
-    #             pass
-    #     selected_datasets.append(temp_selected)
-    #
-    # # ===============抽取数据集===============
-    # print('============测试特征对应数据集==============')
-    # print(selected_datasets)
-    # print(combinedGroupArray)
-    # for fieldList, dataIndexList in zip(combinedGroupArray, selected_datasets):
-    #     merged_df = pd.DataFrame()
-    #     for field, dataIndex in zip(fieldList, dataIndexList):
-    #         # print(f'保留字段{field}')
-    #         # print(dataIndex)
-    #         tempData = pages_utils.TempDataSet[dataIndex][field]
-    #         temp_df = pd.DataFrame(tempData, columns=[field])  # 创建临时的DataFrame
-    #         merged_df = pd.concat([merged_df, temp_df], axis=1)  # 逐步合并数据
-    #     inputDataSet.append(merged_df)
-    print('============测试抽取数据集==============')
+    isHandledFlags = pages_utils.TempDataSetField[4]["处理状态"]
+    # print('============测试抽取数据集==============')
     inputDataSet = pages_utils.TempDataSet[4]
-    print(inputDataSet)
+    # print(inputDataSet)
 
     # ===============运行任务清单调用模型准备训练===============
-    for tempIndex, tempModel in enumerate(models):
+    for tempIndex, (tempModel, isHandled) in enumerate(zip(models, isHandledFlags)):
+        # 检查方法是否已执行
+        if isHandled:
+            continue
         evaluationResult = None
         actualAndPredictResult = None
         if tempModel == 'SVM':
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
-                dataPartitioning, modelParam,
-                evaluationIndicator).onSVM()
-            print('======测试返回模型评价结果======')
-            print(evaluationResult)
+                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                evaluationIndicator[tempIndex]).onSVM()
+            # print('======测试返回模型评价结果======')
+            # print(evaluationResult)
             # 显示模型训练结果信息
             info = ''
             for key, value in evaluationResult.items():
@@ -183,10 +144,9 @@ def onTrain(temporaResolution):
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
-                dataPartitioning, modelParam,
-                evaluationIndicator).onKNN()
-            print('======测试返回模型评价结果======')
-            print(evaluationResult)
+                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                evaluationIndicator[tempIndex]).onKNN()
+
             # 显示模型训练结果信息
             info = ''
             for key, value in evaluationResult.items():
@@ -198,10 +158,9 @@ def onTrain(temporaResolution):
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
-                dataPartitioning, modelParam,
-                evaluationIndicator).onFLDA()
-            print('======测试返回模型评价结果======')
-            print(evaluationResult)
+                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                evaluationIndicator[tempIndex]).onFLDA()
+
             # 显示模型训练结果信息
             info = ''
             for key, value in evaluationResult.items():
@@ -213,10 +172,9 @@ def onTrain(temporaResolution):
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
-                dataPartitioning, modelParam,
-                evaluationIndicator).onRF()
-            print('======测试返回模型评价结果======')
-            print(evaluationResult)
+                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                evaluationIndicator[tempIndex]).onRF()
+
             # 显示模型训练结果信息
             info = ''
             for key, value in evaluationResult.items():
@@ -225,13 +183,11 @@ def onTrain(temporaResolution):
             st.toast('RF训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
         elif tempModel == 'PLSR':
-            print('======测试输入参数======')
-            print(modelParam)
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
-                dataPartitioning, modelParam,
-                evaluationIndicator).onPLSR()
+                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                evaluationIndicator[tempIndex]).onPLSR()
             print('======测试返回模型评价结果======')
             print(evaluationResult)
             # 显示模型训练结果信息
@@ -247,8 +203,8 @@ def onTrain(temporaResolution):
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
-                dataPartitioning, modelParam,
-                evaluationIndicator).onLR()
+                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                evaluationIndicator[tempIndex]).onLR()
             print('======测试返回模型评价结果======')
             print(evaluationResult)
             # 显示模型训练结果信息
@@ -264,8 +220,8 @@ def onTrain(temporaResolution):
             evaluationResult, actualAndPredictResult = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
-                dataPartitioning, modelParam,
-                evaluationIndicator).onSVR()
+                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                evaluationIndicator[tempIndex]).onSVR()
             print('======测试返回模型评价结果======')
             print(evaluationResult)
             # 显示模型训练结果信息
@@ -290,7 +246,7 @@ def onTrain(temporaResolution):
                 for key, value in update_values.items():
                     pages_utils.TempDataSetField[4].at[index1, key] = value
 
-    print('==============更新后指标================')
+    # print('==============更新后指标================')
     # print(pages_utils.TempDataSetField[4])
 
 
@@ -484,6 +440,7 @@ with modelACM:
         with ph.container():
             st.markdown("###### 数据集有效值提取及验证与训练数据划分")
 
+
             @st.experimental_dialog("有效值提取", width='large')
             def vote():
                 df11 = None
@@ -510,6 +467,8 @@ with modelACM:
                         print('开始')
                         print(df_cleaned)
                     st.rerun()
+
+
             if st.button("有效值提取"):
                 vote()
             option = st.selectbox(
@@ -546,26 +505,49 @@ with modelACM:
             st.write('###### 精度评价')
             models = pages_utils.TempDataSetField[4]["模型"].tolist()
             evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
-            actualAndPredictList = pages_utils.TempDataSetField[4]["实际和预测值"].tolist()
+            targets = pages_utils.TempDataSetField[4]["标签"].tolist()
+            # actualAndPredictList = pages_utils.TempDataSetField[4]["实际和预测值"].tolist()
+            # print(print(actualAndPredictList))
             tt1 = st.tabs(models)
             for i in range(len(models)):
                 with tt1[i]:
-                    print(actualAndPredictList)
+                    # print(actualAndPredictList)
                     # y_Actual = actualAndPredictList[i]['predictLabel']
                     # y_Predicted = actualAndPredictList[i]['actualLabel']
                     # print(f'=============可视化{y_Actual}{y_Predicted}=============')
                     # 创建模拟的混淆矩阵
-                    df1 = pd.read_excel(
-                        r'E:\a_python\program\diseaseForecastStreamlit\resource\modelsResults\predictAndTestLabel\FLDA_testLabel.xlsx')
-                    df2 = pd.read_excel(
-                        r'E:\a_python\program\diseaseForecastStreamlit\resource\modelsResults\predictAndTestLabel\FLDA_predictLabel.xlsx')
-                    conf_matrix = confusion_matrix(df1['发生程度'], df2['predictLabel'])
-                    # 使用 seaborn 绘制混淆矩阵图
-                    fig, ax = plt.subplots()
-                    sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
-                    ax.set_xlabel('Predicted Label')
-                    ax.set_ylabel('True Label')
-                    st.pyplot(fig)
+                    # rootPath = os.path.join('resource',
+                    #                         'modelsResults',
+                    #                         'predictAndTestLabel')
+                    #
+                    # testLabelDF = pd.read_excel(
+                    #     os.path.join(rootPath,
+                    #                  models[i] + '_testLabel.xlsx'))
+                    # predictLabelDF = pd.read_excel(
+                    #     os.path.join(rootPath,
+                    #                  models[i] + '_predictLabel.xlsx'))
+                    # # 假设第一列包含要绘制的数据
+                    # actual_values = testLabelDF.iloc[:, 0]
+                    # predicted_values = predictLabelDF.iloc[:, 0]
+                    #
+                    # # 绘制散点图
+                    # plt.figure(figsize=(10, 6))
+                    # plt.rcParams['font.sans-serif'] = 'SimHei'
+                    # sns.scatterplot(x=actual_values, y=predicted_values)
+                    # plt.plot([actual_values.min(), actual_values.max()], [actual_values.min(), actual_values.max()],
+                    #          'r--')
+                    # plt.xlabel('实际峰值')
+                    # plt.ylabel('预测峰值')
+                    # plt.title('回归模型精度评价-散点图')
+                    # st.pyplot(fig)
+
+                    # conf_matrix = confusion_matrix(df1['发生程度'], df2['predictLabel'])
+                    # # 使用 seaborn 绘制混淆矩阵图
+                    # fig, ax = plt.subplots()
+                    # sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
+                    # ax.set_xlabel('Predicted Label')
+                    # ax.set_ylabel('True Label')
+                    # st.pyplot(fig)
                     # Populate the array with key-value pairs
                     metrics = []
                     for key, value in evaluationIndex[i].items():
@@ -577,5 +559,5 @@ with modelACM:
                         col2.metric(metrics[h][0], metrics[h][1])
                     for h in range(half, len(metrics)):
                         col1.metric(metrics[h][0], metrics[h][1])
-            interval_col34, interval_col33 = st.columns([5, 1])
-            btn3 = interval_col33.button('返回', on_click=backPage)
+                    interval_col34, interval_col33 = st.columns([5, 1])
+                    btn3 = interval_col33.button('返回', on_click=backPage)
