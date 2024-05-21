@@ -25,8 +25,10 @@ if "modelParamName" not in st.session_state:
     st.session_state["modelParamName"] = {}
 if "modelPrecisionName" not in st.session_state:
     st.session_state["modelPrecisionName"] = []
-checkBoxModelNum = 8
 
+checkBoxModelNum = 8
+# 显示可视化中文图例
+plt.rcParams['font.sans-serif'] = 'SimHei'
 # 初始化模型参数
 model_params = [
     {"模型名称": "SVM", 'C': '1.0', 'kernel': 'rbf', 'gamma': 'scale'},
@@ -533,7 +535,7 @@ with modelACM:
                     if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR':
                         # 绘制散点图
                         fig, ax = plt.subplots()
-                        plt.rcParams['font.sans-serif'] = 'SimHei'
+
                         sns.scatterplot(x=actual_values, y=predicted_values)
                         plt.plot([actual_values.min(), actual_values.max()], [actual_values.min(), actual_values.max()],
                                  'r--')
