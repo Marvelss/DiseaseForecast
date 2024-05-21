@@ -28,30 +28,28 @@ class FeatureCalculationMethod:
     # 降水累积量计算
     def precipitationAccumulation(self, inputFields, timeRation):
         temp = None
-        startDate = None
-        endDate = None
         newColumn = '降水累积量'
         inputField = inputFields[0]
         flag = timeRation[0]
-        if timeRation[1]:
-            startDate = timeRation[1]
-            endDate = timeRation[2]
         if flag == '月累积降水量':
             self.dataFrame['日期'] = pd.to_datetime(
                 self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
-
             # 提取月份
             self.dataFrame['月'] = self.dataFrame['日期'].dt.month
 
             # 计算每月降水量总和
             monthly_precipitation_sum = self.dataFrame.groupby(['年', '月'])[inputField].sum().reset_index(
                 name='降水累积量')
-
             # 将月降水量总和合并回原始DataFrame
-            # 使用左连接保证所有原始记录都被保留
             temp = pd.merge(self.dataFrame, monthly_precipitation_sum, on=['年', '月'], how='left')
+
+            # 将每月降水量总和作为新列
+            for month in range(1, 13):
+                col_name = f'{month}月_累积降水量'
+                temp[col_name] = temp['降水累积量'].where(temp['月'] == month, None)
+
             # 删除'月','旬' '日期'字段
-            temp = temp.drop(['月', '日期'], axis=1)
+            # temp = temp.drop(['月', '日期'], axis=1)
         elif flag == '旬累积降水量':
             # 转换DayOfYear为日期，以便提取月份
             self.dataFrame['日期'] = pd.to_datetime(
@@ -73,6 +71,8 @@ class FeatureCalculationMethod:
             # 删除'月','旬' '日期'字段
             temp = temp.drop(['旬', '日期'], axis=1)
         elif flag == '指定日期':
+            startDate = timeRation[1]
+            endDate = timeRation[2]
             # 指定日期范围（每年相同的日期）
             start_day = startDate
             end_day = endDate

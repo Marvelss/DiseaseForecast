@@ -278,7 +278,7 @@ with featureCCM:
     if option16:
         option3 = st.selectbox(
             '降水累积量计算',
-            ('月累积降水量', '指定日期', '旬累积降水量'))
+            ('月累积降水量', '指定日期'))
         st.session_state["featureMethodName"]['param1'] = option3
 
         if option3 == '指定日期':
