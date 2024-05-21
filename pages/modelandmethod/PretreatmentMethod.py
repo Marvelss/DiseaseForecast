@@ -4,6 +4,7 @@
 @File : PretreatmentMethod.py
 @Description : 预处理方法
 """
+import numpy as np
 
 
 class PretreatmentMethod:
@@ -22,8 +23,10 @@ class PretreatmentMethod:
             return (fieldName.split('后')[0] + '后' +
                     str(int(fieldName.split('后')[1]) + 1))
 
-    # 线性插补
-    def linearInterpolation(self):
+    # 缺失值插补
+    def linearInterpolation(self, methodParam):
+        print(f'预处理方法参数:{methodParam}')
+        missingValueBefore, missingValueAfter = None, None
         # 处理单个字段
         self.fieldName = self.fieldName[0]
         # 复制新的变量
@@ -31,11 +34,25 @@ class PretreatmentMethod:
         # 复制原处理字段,并在名称后添加_预处理后
         newDataColumn = self.getHandledField(self.fieldName)
         print(f'线性插补:{self.fieldName}-{newDataColumn}')
-
-        newDataFrame[newDataColumn] = newDataFrame[self.fieldName]
-        missingValueBefore = newDataFrame[newDataColumn].isnull().sum()
-        newDataFrame[newDataColumn] = newDataFrame[newDataColumn].interpolate()
-        missingValueAfter = newDataFrame[newDataColumn].isnull().sum()
+        # 线性插值
+        if methodParam[0] == '线性插值':
+            newDataFrame[newDataColumn] = newDataFrame[self.fieldName]
+            missingValueBefore = newDataFrame[newDataColumn].isnull().sum()
+            newDataFrame[newDataColumn] = newDataFrame[newDataColumn].interpolate()
+            missingValueAfter = newDataFrame[newDataColumn].isnull().sum()
+        # 自定义插值
+        elif methodParam[0] == '自定义':
+            missValue, filledValue = methodParam[1], methodParam[2]
+            newDataFrame[newDataColumn] = newDataFrame[self.fieldName]
+            # 若指定字段为空
+            if missValue == 'nan':
+                missingValueBefore = (newDataFrame[newDataColumn] == np.nan).sum()
+                newDataFrame[newDataColumn] = newDataFrame[newDataColumn].fillna(float(filledValue))
+                missingValueAfter = (newDataFrame[newDataColumn] == np.nan).sum()
+            else:
+                missingValueBefore = (newDataFrame[newDataColumn] == float(missValue)).sum()
+                newDataFrame[newDataColumn] = newDataFrame[newDataColumn].replace(float(missValue), float(filledValue))
+                missingValueAfter = (newDataFrame[newDataColumn] == float(missValue)).sum()
         # 检查是否还有缺失值
         tempData = newDataFrame
         # tempData = newDataFrame[self.reservedField + [self.fieldName + '_预处理后']]

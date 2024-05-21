@@ -141,7 +141,7 @@ def onRun():
             (afterHandleData, missingValueBefore, missingValueAfter,
              newDataColumn) = PretreatmentMethod(
                 dataFrameTemp,
-                fields[indexT], reservedField).linearInterpolation()
+                fields[indexT], reservedField).linearInterpolation(methodParam[indexT])
             # 显示填补信息
             st.toast(f'填补缺失值:{str(missingValueBefore - missingValueAfter)}' +
                      '\n' +
@@ -296,8 +296,10 @@ with dataPCM:
                 options=('线性插值', '自定义'))
             st.session_state["preMethodName"]['param1'] = option
             if option == '自定义':
-                num = st.text_input('输入数值')
+                num = st.text_input('缺失值', value=np.nan)
+                num1 = st.text_input('插补值')
                 st.session_state["preMethodName"]['param2'] = num
+                st.session_state["preMethodName"]['param3'] = num1
         with coll22:
             latext = '* 公式:' + r'''
             $$ 
