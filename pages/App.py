@@ -1,6 +1,9 @@
+import pandas as pd
 import streamlit as st
 
 from st_pages import Page, show_pages
+
+import pages_utils
 
 # add_page_title()
 
@@ -52,3 +55,31 @@ st.text("""
 4.实时预警和建议：系统具有实时监测功能，能够根据预测模型输出的结果，及时向农户或专业人士发出预警信息，提示可能的病虫害发生风险，并提供相应的防治建议。
 5.云端服务：由于使用基于WEB的技术，多场景病虫害预测系统可以部署在云端平台上，提供灵活的访问和使用方式，用户可以通过智能手机、平板电脑等设备随时随地获取相关信息。
 """)
+
+
+# 清空各环节初始化按钮
+def emptyValue():
+    pages_utils.TempDataSetField = [
+        pd.DataFrame(
+            columns=["编号", "数据类型", "文件名称", "字段", "传输状态", "上传时间"]),
+        pd.DataFrame(
+            columns=["编号", "数据类型", "输入字段", "预处理后字段", "大小", "预处理方法", "方法参数", '时间',
+                     "处理状态"]),
+        pd.DataFrame(
+            columns=["编号", "数据类型", "输入特征", "备选特征", "大小", "特征计算方法", "方法参数", "时间",
+                     "处理状态"]),
+        pd.DataFrame(
+            columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间",
+                     "处理状态"]),
+        pd.DataFrame(
+            columns=["编号", "模型", "模型参数", "特征", "标签", "评价指标", "数据集划分比例", "时间", "实际和预测值",
+                     "处理状态"])]
+    pages_utils.TempDataSet = [
+        pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"]),
+        pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"]),
+        pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"]),
+        pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"]),
+        pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])]
+
+
+st.button('清空数据', on_click=emptyValue)
