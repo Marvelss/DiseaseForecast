@@ -516,39 +516,44 @@ with modelACM:
                     # y_Predicted = actualAndPredictList[i]['actualLabel']
                     # print(f'=============可视化{y_Actual}{y_Predicted}=============')
                     # 创建模拟的混淆矩阵
-                    # rootPath = os.path.join('resource',
-                    #                         'modelsResults',
-                    #                         'predictAndTestLabel')
-                    #
-                    # testLabelDF = pd.read_excel(
-                    #     os.path.join(rootPath,
-                    #                  models[i] + '_testLabel.xlsx'))
-                    # predictLabelDF = pd.read_excel(
-                    #     os.path.join(rootPath,
-                    #                  models[i] + '_predictLabel.xlsx'))
-                    # # 假设第一列包含要绘制的数据
-                    # actual_values = testLabelDF.iloc[:, 0]
-                    # predicted_values = predictLabelDF.iloc[:, 0]
-                    #
-                    # # 绘制散点图
-                    # plt.figure(figsize=(10, 6))
-                    # plt.rcParams['font.sans-serif'] = 'SimHei'
-                    # sns.scatterplot(x=actual_values, y=predicted_values)
-                    # plt.plot([actual_values.min(), actual_values.max()], [actual_values.min(), actual_values.max()],
-                    #          'r--')
-                    # plt.xlabel('实际峰值')
-                    # plt.ylabel('预测峰值')
-                    # plt.title('回归模型精度评价-散点图')
-                    # st.pyplot(fig)
+                    rootPath = os.path.join(os.getcwd(), 'resource',
+                                            'modelsResults',
+                                            'predictAndTestLabel')
+                    testLabelDF = pd.read_excel(
+                        os.path.join(rootPath,
+                                     models[i] + '_testLabel.xlsx'))
+                    predictLabelDF = pd.read_excel(
+                        os.path.join(rootPath,
+                                     models[i] + '_predictLabel.xlsx'))
+                    # 假设第一列包含要绘制的数据
+                    actual_values = testLabelDF.iloc[:, 0]
+                    predicted_values = predictLabelDF.iloc[:, 0]
 
-                    # conf_matrix = confusion_matrix(df1['发生程度'], df2['predictLabel'])
-                    # # 使用 seaborn 绘制混淆矩阵图
-                    # fig, ax = plt.subplots()
-                    # sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
-                    # ax.set_xlabel('Predicted Label')
-                    # ax.set_ylabel('True Label')
-                    # st.pyplot(fig)
-                    # Populate the array with key-value pairs
+                    # 回归模型
+                    if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR':
+                        # 绘制散点图
+                        fig, ax = plt.subplots()
+                        plt.rcParams['font.sans-serif'] = 'SimHei'
+                        sns.scatterplot(x=actual_values, y=predicted_values)
+                        plt.plot([actual_values.min(), actual_values.max()], [actual_values.min(), actual_values.max()],
+                                 'r--')
+                        ax.set_xlabel('实际峰值(%)')
+                        ax.set_ylabel('预测峰值(%)')
+                        # plt.figure(figsize=(10, 6))
+                        plt.title('回归模型精度评价-散点图')
+                        st.pyplot(fig)
+
+                    # 分类模型
+                    elif models[i] == 'SVM' or models[i] == 'RF' or models[i] == 'FLDA' or models[i] == 'KNN':
+                        # 绘制混淆矩阵图
+                        fig, ax = plt.subplots()
+                        conf_matrix = confusion_matrix(testLabelDF, predictLabelDF)
+                        sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax)
+                        ax.set_xlabel('实际病害发生程度')
+                        ax.set_ylabel('预测病害发生程度')
+                        plt.title('分类模型精度评价-混淆矩阵')
+                        st.pyplot(fig)
+                        # Populate the array with key-value pairs
                     metrics = []
                     for key, value in evaluationIndex[i].items():
                         metrics.append((key, round(value, 3)))
@@ -559,5 +564,5 @@ with modelACM:
                         col2.metric(metrics[h][0], metrics[h][1])
                     for h in range(half, len(metrics)):
                         col1.metric(metrics[h][0], metrics[h][1])
-                    interval_col34, interval_col33 = st.columns([5, 1])
-                    btn3 = interval_col33.button('返回', on_click=backPage)
+            interval_col34, interval_col33 = st.columns([5, 1])
+            btn3 = interval_col33.button('返回', on_click=backPage)
