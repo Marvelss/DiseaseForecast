@@ -17,6 +17,8 @@ if "preMethodName" not in st.session_state:
     st.session_state["preMethodName"] = {
         'checkBox': None
     }
+if 'DPVisualInformation' not in st.session_state:
+    st.session_state["DPVisualInformation"] = []
 # 处理方法个数
 checkBoxNum = 2
 
@@ -139,6 +141,8 @@ def onRun():
         reservedField = pages_utils.TempDataSet[0].columns.tolist()
         # print(f'=============测试保留字段-{reservedField}=============')
         newDataColumn = fields[indexT]
+
+        DPVisualInformationTemp = {'before': dataFrameTemp[newDataColumn[0]]}
         if tempMethod == '缺失值插补':
             (afterHandleData, missingValueBefore, missingValueAfter,
              newDataColumn) = PretreatmentMethod(
@@ -170,6 +174,12 @@ def onRun():
 
         # ===============更新左侧显示内容===============
         print(f'更新左侧显示内容:{newDataColumn}')
+
+        DPVisualInformationTemp['after'] = pages_utils.TempDataSet[1][newDataColumn]
+        # 可视化信息添加
+        st.session_state["DPVisualInformation"].append(DPVisualInformationTemp)
+        print('=====================展示可视化内容======================')
+        print(st.session_state["DPVisualInformation"])
         update_values = {
             "预处理后字段": newDataColumn,
             "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
@@ -338,7 +348,7 @@ with dataPCM:
             "编号": pages_utils.generateID(),
             "数据类型": '原始数据集',
             "输入字段": mergeArray(result1, result2, result3),
-            "预处理后字段": mergeArray(result1, result2, result3),
+            "预处理后字段": None,
             "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
             "方法参数": [value for key, value in st.session_state["preMethodName"].items() if key != 'checkBox'],
             "时间": datetime.datetime.now().time(), "处理状态": False}
@@ -388,44 +398,45 @@ with dataPCM:
         with placeholder.container():
             st.markdown('##### 可视化')
             plt.rc("font", family='Microsoft YaHei')
-            tab1, tab2, tab3 = st.tabs(["1", "2", "3"])
-            with tab1:
-                # 模拟降水数据
-                precipitation_data = simulate_precipitation_data()
-                # 绘制最高温度和最低温度的折线图
-                plt.figure(figsize=(10, 5))
-                sns.lineplot(data=precipitation_data, x="Time", y="Precipitation", label="降水量")
-                plt.xlabel('日期')
-                plt.ylabel('降水量(mm)')
-                plt.title('预处理后降水量')
-                plt.legend()
-                st.pyplot(plt)
-                # 模拟气温数据
+            idNumberT = pages_utils.TempDataSetField[1]["编号"].tolist()
+            # 创建新的从 1 开始的编号列表
+            new_ids = list(range(0, len(idNumberT)))
 
-            with tab2:
-                pass
-                # temperature_data = simulate_temperature_data()
-            with tab3:
-                df111 = simulate_box_data()
-                # 绘制箱型图
-                fig, ax = plt.subplots()
-                sns.boxplot(x='day', y='Temperature', data=df111,
-                            linewidth=2,
-                            width=0.8,
-                            fliersize=3,
-                            # palette='hls',
-                            whis=1.5,
-                            notch=True,
-                            order=['Thur', 'Fri', 'Sat', 'Sun']
-                            )
-                ax.set_xlabel('Day')
-                ax.set_ylabel('Temperature')
-                plt.figure(figsize=(10, 6))
-                # sns.(x='', y='', data=df, palette='Set3')
-                plt.title('Boxplot of Temperature for Different Days')
-                st.pyplot(fig)
+            # 创建标签页并重新命名记录
+            # newName = str(new_id) for new_id in new_ids
+
+            tt1 = st.tabs(new_ids)
+            for o in range(len(idNumberT)):
+                with tt1[o]:
+                    # 示例数据
+                    data_before = st.session_state["DPVisualInformation"][o]['before']
+                    data_after = st.session_state["DPVisualInformation"][o]['after']
+                    # 创建两个子图
+                    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+                    # 绘制处理前的箱线图
+                    sns.boxplot(y=data_before, ax=axes[0])
+                    axes[0].set_ylabel(data_before.name)
+                    axes[0].set_title('剔除前')
+                    # axes[0].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
+                    # axes[0].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
+                    # axes[0].legend(loc='upper left')
+
+                    # 绘制处理后的箱线图
+                    sns.boxplot(y=data_after, ax=axes[1])
+                    axes[1].set_ylabel(data_after.name)
+                    axes[1].set_title('剔除后')
+                    # axes[1].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
+                    # axes[1].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
+                    # axes[1].legend(loc='upper left')
+                    # 设置主标题
+                    fig.suptitle(f'{data_before.name}字段预处理前后对比箱型图',
+                                 fontsize=16)
+                    st.pyplot(fig)
+                    # temperature_data = simulate_temperature_data()
+
             interval_col34, interval_col33 = st.columns([5, 1])
-            want_to_contribute = interval_col34.button("跳转至可视化界面")
-            if want_to_contribute:
-                switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\Visualization.py")
+            # want_to_contribute = interval_col34.button("跳转至可视化界面")
+            # if want_to_contribute:
+            #     switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\Visualization.py")
             btn3 = interval_col33.button('返回', on_click=firstPage)
