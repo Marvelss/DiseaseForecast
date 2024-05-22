@@ -318,7 +318,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
 # ==============================界面==============================
 
 
-st.markdown("##### 指定地区与模型及历史气象站点和实际标签数据上传")
+st.markdown("##### 指定地区与模型及数据上传")
 
 # 提取上级单位和测报站点的列
 # superior_units = pages_utils.TempDataSet[4]['上级单位']
@@ -365,46 +365,85 @@ with col123:
         help='help',
         label_visibility='collapsed'
     )
-
-
-    # 上传实际标签数据
-    @st.experimental_dialog("上传实际标签数据", width='large')
-    def uploadData():
-        st.info('根据以下原始上传数据集字段')
-        st.dataframe(pages_utils.TempDataSet[0].head(5),
-                     width=700, hide_index=True, height=200)
-        # 上传实际标签数据
-        uploadedActualLabelData = st.file_uploader(
-            "上传实际标签数据",
-            accept_multiple_files=False,
-            type=['xlsx', 'xls'],
-            help='help',
-            label_visibility='collapsed'
-        )
-        if uploadedActualLabelData:
-            bytes_data = uploadedActualLabelData.read()
-            st.session_state.applicationDataSet = pd.read_excel(bytes_data)
-
-        if st.button("Submit"):
-            st.rerun()
-
-
-    if st.button("上传实际标签数据"):
-        uploadData()
+    # # 上传实际标签数据
+    # @st.experimental_dialog("上传实际标签数据", width='large')
+    # def uploadData():
+    #     st.info('根据以下原始上传数据集字段')
+    #     st.dataframe(pages_utils.TempDataSet[0].head(5),
+    #                  width=700, hide_index=True, height=200)
+    #     # 上传实际标签数据
+    #     uploadedActualLabelData = st.file_uploader(
+    #         "上传实际标签数据",
+    #         accept_multiple_files=False,
+    #         type=['xlsx', 'xls'],
+    #         help='help',
+    #         label_visibility='collapsed'
+    #     )
+    #     if uploadedActualLabelData:
+    #         bytes_data = uploadedActualLabelData.read()
+    #         st.session_state.applicationDataSet = pd.read_excel(bytes_data)
+    #
+    #     if st.button("Submit"):
+    #         st.rerun()
+    #
+    #
+    # if st.button("上传实际标签数据"):
+    #     uploadData()
 with col223:
     warningMInfo = '''
-    注意事项(待填)
+    注意事项:目前只支持单个地区多年数据上传
     '''
     st.markdown("###### 模板下载")
-    st.warning(warningMInfo, icon="⚠️")
-    path2 = r'E:\a_python\program\diseaseForecastStreamlit\resource\上传历史数据集模板-测试.xlsx'
-    with open(path2, "rb") as file:
-        st.download_button(
-            label="下载历史站点气象数据模板",
-            data=file,
-            file_name="历史气象数据模板.xlsx",
-            mime="application/octet-stream"
-        )
+    col2331, col2332 = st.columns([2, 1])
+    with col2331:
+        st.warning(warningMInfo, icon="⚠️")
+    with col2332:
+        path2 = os.path.join(
+            os.getcwd(), 'resource', '上传历史数据集模板-测试.xlsx')
+        with open(path2, "rb") as file:
+            st.download_button(
+                label="下载历史站点气象数据模板",
+                data=file,
+                file_name="历史气象数据模板.xlsx",
+                mime="application/octet-stream"
+            )
+
+
+col12331, col22332 = st.columns(2)
+with col12331:
+    st.markdown("###### 上传实际标签数据")
+    # 上传实际标签数据
+    uploadedActualLabelData = st.file_uploader(
+        "上传实际标签数据",
+        accept_multiple_files=False,
+        type=['xlsx', 'xls'],
+        help='help',
+        label_visibility='collapsed'
+    )
+    if uploadedActualLabelData:
+        bytes_data = uploadedActualLabelData.read()
+        st.session_state.applicationDataSet = pd.read_excel(bytes_data)
+
+with col22332:
+    warningMInfo = '''
+    注意事项:根据原始数据集字段
+    '''
+    st.markdown("&nbsp;", unsafe_allow_html=True)
+    col233131, col233232 = st.columns([2, 1])
+    with col233131:
+        st.warning(warningMInfo, icon="⚠️")
+    with col233232:
+        path2 = os.path.join(
+            os.getcwd(), 'resource', '上传历史数据集模板-测试.xlsx')
+        with open(path2, "rb") as file:
+            st.download_button(
+                label="下载实际标签数据模板",
+                data=file,
+                file_name="a.xlsx",
+                mime="application/octet-stream"
+            )
+
+
 st.markdown('---')
 st.markdown("##### 天气情景生成器参数设置")
 # ==============================时间长度==============================
