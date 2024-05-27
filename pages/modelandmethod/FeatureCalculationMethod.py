@@ -123,6 +123,7 @@ class FeatureCalculationMethod:
         endM, endD = int(tempE[1]), int(tempE[2])
         rule = param[2]
         minNum = param[3]
+        newColumn = str(startM) + '-' + str(startD) + '_' + str(endM) + '-' + str(endD) + '_' + '降雨日数'
         # duration = param[0][4]  # 暂未使用,默认1天
         # print(self.fieldName)
         if rule == '单日降水量':
@@ -151,7 +152,7 @@ class FeatureCalculationMethod:
                 mask = (self.dataFrame['上级单位'] == key[0]) & (self.dataFrame['测报站点'] == key[1]) & (
                         self.dataFrame['日期'] >= start_date_range) & (
                                self.dataFrame['日期'] <= end_date_range)
-                self.dataFrame.loc[mask, '降雨日数'] = rainy_days_count
+                self.dataFrame.loc[mask, newColumn] = rainy_days_count
 
             # # 删除还没生成的字段
             # tempReservedField = [field for field in self.reservedField if field in self.dataFrame.columns]
@@ -159,7 +160,7 @@ class FeatureCalculationMethod:
             # tempData = self.dataFrame[list(set(tempReservedField + ['降雨日数']))]
             # 删除'月','旬' '日期'字段
             self.dataFrame = self.dataFrame.drop(['日期'], axis=1)
-            return self.dataFrame
+            return self.dataFrame, newColumn
 
     # 基于活动积温的生育期计算
     def growthPeriodCalculation(self, inputFields, param):

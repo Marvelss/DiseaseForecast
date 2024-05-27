@@ -133,7 +133,7 @@ def onRun():
         if tempMethod == '时间(温度)分辨率转换':
             pass
         elif tempMethod == '降雨日数计算':
-            afterHandleData = FeatureCalculationMethod(
+            afterHandleData, newColumn = FeatureCalculationMethod(
                 dataFrameTemp, reservedField).rainfallDaysAccumulation(
                 fields[indexT], methodParam[indexT])
         elif tempMethod == '降水累积量计算':
@@ -159,14 +159,14 @@ def onRun():
         # print('======================备选特征======================')
         # print(pages_utils.TempDataSet[2])
         # ===============更新左侧显示内容===============
-        DPVisualInformationTemp = {
+        FCVisualInformationTemp = {
             'before': None,
             'name': tempMethod,
             'column': newColumn,
             'after': afterHandleData[[newColumn, '上级单位', '测报站点', '年']]}
         # 可视化信息添加
-        st.session_state["FCVisualInformation"].append(DPVisualInformationTemp)
-        print(st.session_state["FCVisualInformation"])
+        st.session_state["FCVisualInformation"].append(FCVisualInformationTemp)
+        # print(st.session_state["FCVisualInformation"])
         update_values = {
             "大小": '1*' + str(row_size),
             "备选特征": newColumn,
@@ -418,8 +418,8 @@ with (featureCCM):
                         top_years = data_after['年'].value_counts().nlargest(3).index
                         df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
 
-                        # 绘制柱状图
-                        plt.figure(figsize=(12, 8))
+                        # 绘制折线图
+                        plt.figure(figsize=(10, 6))
                         sns.lineplot(
                             data=df_filtered,
                             x="测报站点",
@@ -430,7 +430,7 @@ with (featureCCM):
                         # 设置标签和标题
                         plt.xlabel("测报站点")
                         plt.ylabel(dataColumn)
-                        plt.title(f"部分县市与年份{dataColumn}", fontsize=16)
+                        plt.title(f"部分县市与各年份{dataColumn}", fontsize=16)
                         st.pyplot(plt)
                     elif idFMethods[o] == '降水累积量计算':
                         # 时期范围名称修剪
@@ -455,7 +455,32 @@ with (featureCCM):
                         # 设置标签和标题
                         plt.xlabel("测报站点")
                         plt.ylabel("降水累积量")
-                        plt.title(f"部分县市与年份{integratedDataColumn}")
+                        plt.title(f"部分县市与各年份{integratedDataColumn}")
+                        st.pyplot(plt)
+                    elif idFMethods[o] == '降雨日数计算':
+                        # 时期范围名称修剪
+                        integratedDataColumnRT = dataColumn.split('_')
+                        integratedDataColumnR = integratedDataColumnRT[0] + '至' + integratedDataColumnRT[1] + integratedDataColumnRT[2]
+                        # 选择最多8个测报站点
+                        top_stations = data_after['测报站点'].value_counts().nlargest(8).index
+                        df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
+
+                        # 选择最多3个年份
+                        top_years = data_after['年'].value_counts().nlargest(3).index
+                        df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+                        # 绘制折线图
+                        plt.figure(figsize=(10, 6))
+                        sns.lineplot(
+                            data=df_filtered,
+                            x="测报站点",
+                            y=dataColumn,
+                            hue="年",
+                            marker="o"
+                        )
+                        # 设置标签和标题
+                        plt.xlabel("测报站点")
+                        plt.ylabel("降雨日数")
+                        plt.title(f"部分县市与各年份{integratedDataColumnR}")
                         st.pyplot(plt)
             interval_col34, interval_col33 = st.columns([5, 1])
             btn3 = interval_col33.button('返回', on_click=firstPage)
