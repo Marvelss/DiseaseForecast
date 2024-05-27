@@ -3,7 +3,6 @@ import datetime
 import numpy as np
 import pandas as pd
 import streamlit as st
-from streamlit import switch_page
 
 import pages_utils
 from modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
@@ -54,7 +53,7 @@ def getCheckboxName(checkbox):
     elif checkbox == 'checkbox2':
         return '降水累积量计算'
     elif checkbox == 'checkbox3':
-        return '基于活动期积温的生育期计算'
+        return '基于活动积温的生育期计算'
     elif checkbox == 'checkbox4':
         return '时空抽取'
 
@@ -91,7 +90,7 @@ def getFeatureName(processName):
         return '降雨日数'
     elif processName == '降水累积量计算':
         return '降水累积量'
-    elif processName == '基于活动期积温的生育期计算':
+    elif processName == '基于活动积温的生育期计算':
         return '生育期'
     elif processName == '时空抽取':
         return '时空抽取'
@@ -105,7 +104,7 @@ def onRun():
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[2]["编号"].tolist()
     fields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
-    outFields = pages_utils.TempDataSetField[2]["备选特征"].tolist()
+    # outFields = pages_utils.TempDataSetField[2]["备选特征"].tolist()
     methodParam = pages_utils.TempDataSetField[2]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
     isHandledFlags = pages_utils.TempDataSetField[2]["处理状态"].tolist()
@@ -141,7 +140,7 @@ def onRun():
             afterHandleData, newColumn = FeatureCalculationMethod(
                 dataFrameTemp, reservedField).precipitationAccumulation(
                 fields[indexT], methodParam[indexT])
-        elif tempMethod == '基于活动期积温的生育期计算':
+        elif tempMethod == '基于活动积温的生育期计算':
             afterHandleData, newColumn = FeatureCalculationMethod(
                 dataFrameTemp, reservedField).growthPeriodCalculation(
                 fields[indexT], methodParam[indexT])
@@ -430,8 +429,8 @@ with (featureCCM):
                         )
                         # 设置标签和标题
                         plt.xlabel("测报站点")
-                        plt.ylabel("移栽期")
-                        plt.title("部分县市与年份移栽期", fontsize=16)
+                        plt.ylabel(dataColumn)
+                        plt.title(f"部分县市与年份{dataColumn}", fontsize=16)
                         st.pyplot(plt)
                     elif idFMethods[o] == '降水累积量计算':
                         # 时期范围名称修剪
