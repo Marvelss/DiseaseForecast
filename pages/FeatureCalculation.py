@@ -271,12 +271,13 @@ with (featureCCM):
         d2 = st.date_input("结束时间", value=None)
         option = st.selectbox(
             '计算阈值方式',
-            ('总降水量', '单日降水量'))
+            ('单日降水量', '总降水量'))
         st.session_state["featureMethodName"]['param1'] = str(d1)
         st.session_state["featureMethodName"]['param2'] = str(d2)
         st.session_state["featureMethodName"]['param3'] = option
         if option == '总降水量':
             number11 = st.number_input("总降水量数值(mm)", value=100)
+            st.toast('该方法未实现,请选择其他方法', icon="⚠️")
             st.session_state["featureMethodName"]['param4'] = str(number11)
         if option == '单日降水量':
             number2 = st.text_input("单日降水量数值(mm)", value=0.1)
