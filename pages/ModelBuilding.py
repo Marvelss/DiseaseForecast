@@ -235,6 +235,23 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('SVR训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
+        elif tempModel == 'SEIR机理模型':
+            print('======测试输入参数======')
+            print(modelParam)
+            evaluationResult, actualAndPredictResult = Model(
+                inputDataSet,
+                features[tempIndex], targets[tempIndex],
+                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                evaluationIndicator[tempIndex]).onSEIR()
+            print('======测试返回模型评价结果======')
+            print(evaluationResult)
+            # 显示模型训练结果信息
+            info = ''
+            for key, value in evaluationResult.items():
+                info += f'{key}:{str(round(value, 3))}' + '       '
+            # 显示精度结果
+            st.toast('SVR训练完成 \n' + '       ' + ' \n' + info,
+                     icon='✅')
         print('==============更新前================')
         print(pages_utils.TempDataSetField[4])
         # ===============更新左侧显示内容===============
@@ -367,7 +384,7 @@ with modelACM:
                 agree = st.checkbox('SVM', key='checkBoxModel0', on_change=clearOtherOption, args=[0])
                 agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
                 agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4],
-                                     disabled=True)
+                                     )
             with colOption2:
                 agree1 = st.checkbox('RF', key='checkBoxModel1', on_change=clearOtherOption, args=[1])
                 agree7 = st.checkbox('SVR', key='checkBoxModel7', on_change=clearOtherOption, args=[7])
@@ -443,6 +460,16 @@ with modelACM:
         # =======================添加验证与训练数据集划分=======================
         with ph.container():
             st.markdown("###### 数据集有效值提取及验证与训练数据划分")
+
+            # 检查是否有缺失值
+            for p in range(len(pages_utils.TempDataSet))[::-1]:
+                df11 = pages_utils.TempDataSet[p]
+                if not df11.empty:
+                    break
+            beforeDF = df11
+            missing_values = beforeDF.isnull().sum()
+            if missing_values.any():
+                st.toast('优选特征中含有缺失值,请点击下方按钮提取有效值', icon="⚠️")
 
 
             @st.experimental_dialog("有效值提取", width='large')
