@@ -238,7 +238,7 @@ with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
     with tab1:
         genre = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other, args=[0])
-        genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1],disabled=True)
+        genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1], disabled=True)
 
     with tab2:
         genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other, args=[2])
@@ -257,8 +257,10 @@ with dataPCM:
             label='',
             horizontal=True,
             label_visibility="collapsed",
-            options=['相关系数的绝对值<0.2', '相关系数的绝对值>0.8']
+            options=['相关系数的绝对值>0.8', '相关系数的绝对值<0.2']
         )
+        if genre33 == '相关系数的绝对值<0.2':
+            st.toast('该方法未实现,请选择其他方法', icon="⚠️")
         st.session_state["OptimizationMethodName"]['param1'] = option113
         st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1132)
         st.session_state["OptimizationMethodName"]['param3'] = genre33
