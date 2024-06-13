@@ -381,20 +381,58 @@ class Model:
         return precision, actualAndPredictResult
 
     def onSEIR(self):
-        print(self.dataFrame)
-        # self.targetVariable = targetVariable
-        # self.featureVariable = featureVariable
+        # print(self.dataFrame)
+        array = self.modelParam
+        # param_names = array['参数名']
+        param_values = array['参数值']
+        paramT = param_values
+        # parameters_dict = {}
+        # for i in range(len(param_names)):
+        #     parameters_dict[param_names[i]] = param_values[i]
+
+        print('------------测试参数------------')
+        print(self.modelParam)
+        # "min_coefficient_ka": "1", "max_coefficient_ka": "4",
+        # "min_coefficient_kb": "0", "max_coefficient_kb": "0.3", "min_coefficient_kc": "30",
+        # "max_coefficient_kc": "60", "min_coefficient_OPT_PRI": "10", "max_coefficient_OPT_PRI": "30",
+        # "min_coefficient_r": "10", "max_coefficient_r": "20",
+        #      "min_coefficient_q": "50", "max_coefficient_q": "90", "ω": "3",
+        #      "β0": "0.46", "optimumTEM": "28", "temStep": "3", "preStep": "5", "slideStep": "暂定",
+        #      "loopNumbers": "1", "popSize": "20", "chromLength": "10", "pc": "0.6", "pm": "0.001"
         self.evaluationIndicator = 'evaluationIndicator'
-        self.modelParam = 'modelParam'
-        loopNum = 1
-        popSize = 20
-        # 二进制编码长度
-        # v=10
-        chromlength = 10
+
+        min_coefficient_ka = float(paramT[0])
+        max_coefficient_ka = float(paramT[1])
+        min_coefficient_kb = float(paramT[2])
+        max_coefficient_kb = float(paramT[3])
+        min_coefficient_kc = float(paramT[4])
+        max_coefficient_kc = float(paramT[5])
+        # 感染期
+        min_coefficient_q = float(paramT[10])
+        max_coefficient_q = float(paramT[11])
+        min_coefficient_r = float(paramT[8])
+        max_coefficient_r = float(paramT[9])
+        min_coefficient_OPT_PRI = float(paramT[6])
+        max_coefficient_OPT_PRI = float(paramT[7])
+
+        w = float(paramT[12])
+        beta0 = float(paramT[13])
+        optimumTEM = float(paramT[14])
+        # 内置模块
+        temStep = float(paramT[15])
+        preStep = float(paramT[16])
+
+        slideStep = paramT[17]  # 后期若用添上float
+        # 遗传算法参数
+        loopNum = int(paramT[18])
+        popSize = int(paramT[19])
+        # 二进制编码长度(v=10)
+        chromlength = int(paramT[20])
         # 交叉概率
-        pc = 0.6
+        pc = float(paramT[21])
         # 变异概率
-        pm = 0.001
+        pm = float(paramT[22])
+
         # 初始种群
         pop_ka = initpop(popSize, chromlength)
         pop_kb = initpop(popSize, chromlength)
@@ -402,20 +440,8 @@ class Model:
         pop_q = initpop(popSize, chromlength)
         pop_r = initpop(popSize, chromlength)
         pop_OPT_PRI = initpop(popSize, chromlength)
-        min_coefficient_ka = 1
-        max_coefficient_ka = 4
-        min_coefficient_kb = 0
-        max_coefficient_kb = 0.3
-        min_coefficient_kc = 30
-        max_coefficient_kc = 60
-        min_coefficient_q = 50
-        # 感染期
-        max_coefficient_q = 90
-        min_coefficient_r = 10
-        max_coefficient_r = 20
-        min_coefficient_OPT_PRI = 10
-        max_coefficient_OPT_PRI = 30
 
+        # 编码
         pop2_ka_decimal2 = binary2decimal(pop_ka, min_coefficient_ka, max_coefficient_ka)  # 2进制转换为10进制
         pop2_kb_decimal2 = binary2decimal(pop_kb, min_coefficient_kb, max_coefficient_kb)
         pop2_kc_decimal2 = binary2decimal(pop_kc, min_coefficient_kc, max_coefficient_kc)
@@ -425,7 +451,9 @@ class Model:
 
         objvalue2 = cal_objvalue_run(pop2_ka_decimal2, pop2_kb_decimal2,
                                      pop2_kc_decimal2, pop2_q_decimal2,
-                                     pop2_r_decimal2, pop2_OPT_PRI_decimal2, self.dataFrame)
+                                     pop2_r_decimal2, pop2_OPT_PRI_decimal2,
+                                     w, beta0, optimumTEM, temStep, preStep,
+                                     slideStep, self.dataFrame)
         fitvalue2 = objvalue2
         [px, py] = pop_ka.shape
         bestindividual_ka = pop_ka[0, :]
@@ -446,7 +474,9 @@ class Model:
             pop2_OPT_PRI_decimal = binary2decimal(pop_OPT_PRI, min_coefficient_OPT_PRI, max_coefficient_OPT_PRI)
             objvalue1 = cal_objvalue_run(pop2_ka_decimal, pop2_kb_decimal,
                                          pop2_kc_decimal, pop2_q_decimal,
-                                         pop2_r_decimal, pop2_OPT_PRI_decimal, self.dataFrame)
+                                         pop2_r_decimal, pop2_OPT_PRI_decimal,
+                                         w, beta0, optimumTEM, temStep, preStep,
+                                         slideStep, self.dataFrame)
             fitvalue1 = objvalue1
 
             for j in range(0, px):
