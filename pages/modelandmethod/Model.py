@@ -7,7 +7,6 @@
 import os
 
 import joblib
-import numpy as np
 import pandas as pd
 from sklearn import svm
 from sklearn.cross_decomposition import PLSRegression
@@ -18,10 +17,14 @@ from sklearn.metrics import r2_score, mean_squared_error, accuracy_score, cohen_
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
-import math
-import operator
-from scipy.stats import norm
 from sklearn.svm import SVR
+
+from .seir_parameter_search.binary2decimal import binary2decimal
+from .seir_parameter_search.cal_objvalue import cal_objvalue_run
+from .seir_parameter_search.crossover import crossover
+from .seir_parameter_search.mutation import mutation
+from .seir_parameter_search.selection import selection
+from .seir_parameter_search.initpop import initpop
 
 
 class Model:
@@ -377,157 +380,147 @@ class Model:
             precisionResultDir, index=False)
         return precision, actualAndPredictResult
 
-    def onSEIR(self, ka, kb, kc, q, r, OPT_PRI, YZQ_num, YZQ_txt, YZQ_data, ZB_num, ZB_data, met_num, met_txt, met_data,
-               Jizhi_num, Jizhi_data):
-        [yzq_row, yzq_col] = YZQ_data.shape
-        D = []
-        # ==========================地点匹配==========================
-        for i in range(0, yzq_row):
-            ida = operator.eq(YZQ_data.values[i, 1], met_txt.values[:, 1])
-            aimrow = np.where(ida[:] == 1)  # 找到移栽期表格第i行地点对应的气象数据
-            # aimplace_met = []
-            aimplace_met_num = []
-            # gc.disable()
-            for j in aimrow[0]:
-                # aimplace_met.append(met_data.values[j, :])
-                aimplace_met_num.append(met_num.values[j, :])
-            # gc.enable()
-            # del aimrow
-            idb = operator.eq(YZQ_data.values[i, 1], ZB_data.values[:, 4])
-            idb = np.array(idb)
-            aimrow1 = np.where(idb[:] == 1)  # 找到移栽期表格第i行对应的植保数据
+    def onSEIR(self):
+        print(self.dataFrame)
+        # self.targetVariable = targetVariable
+        # self.featureVariable = featureVariable
+        self.evaluationIndicator = 'evaluationIndicator'
+        self.modelParam = 'modelParam'
+        loopNum = 1
+        popSize = 20
+        # 二进制编码长度
+        # v=10
+        chromlength = 10
+        # 交叉概率
+        pc = 0.6
+        # 变异概率
+        pm = 0.001
+        # 初始种群
+        pop_ka = initpop(popSize, chromlength)
+        pop_kb = initpop(popSize, chromlength)
+        pop_kc = initpop(popSize, chromlength)
+        pop_q = initpop(popSize, chromlength)
+        pop_r = initpop(popSize, chromlength)
+        pop_OPT_PRI = initpop(popSize, chromlength)
+        min_coefficient_ka = 1
+        max_coefficient_ka = 4
+        min_coefficient_kb = 0
+        max_coefficient_kb = 0.3
+        min_coefficient_kc = 30
+        max_coefficient_kc = 60
+        min_coefficient_q = 50
+        # 感染期
+        max_coefficient_q = 90
+        min_coefficient_r = 10
+        max_coefficient_r = 20
+        min_coefficient_OPT_PRI = 10
+        max_coefficient_OPT_PRI = 30
 
-            aimplace_ZB = []
-            aimplace_ZB_num = []
-            for p in aimrow1[0]:
-                aimplace_ZB.append(ZB_data.values[p, :])
-                aimplace_ZB_num.append(ZB_num.values[p, :])
-                # print(ZB_num)
-            idc = operator.eq(YZQ_data.values[i, 1], Jizhi_data.values[:, 1])
-            idc = np.array(idc)
-            aimrowjizhi = np.where(idc[:] == 1)  # 找到移栽期第i行对应的地点所有年份的极值
-            Jizhi4 = []
-            for p in aimrowjizhi[0]:
-                Jizhi4.append(Jizhi_num.values[p, :])
-            Jizhi4 = np.array(Jizhi4)
-            # ==========================时间匹配==========================
-            for ii in range(2010, 2017):
-                temp = np.array(aimplace_ZB_num)
-                # print(aimplace_ZB_num)
-                aimrow3 = np.where(temp[:, 0] == ii)
-                if np.size(aimrow3) != 0:
-                    temp1 = np.array(aimplace_met_num)
-                    aimrow2 = np.where(temp1[:, 0] == ii)
-                    aimplace_aimyear_met_num = []
+        pop2_ka_decimal2 = binary2decimal(pop_ka, min_coefficient_ka, max_coefficient_ka)  # 2进制转换为10进制
+        pop2_kb_decimal2 = binary2decimal(pop_kb, min_coefficient_kb, max_coefficient_kb)
+        pop2_kc_decimal2 = binary2decimal(pop_kc, min_coefficient_kc, max_coefficient_kc)
+        pop2_q_decimal2 = binary2decimal(pop_q, min_coefficient_q, max_coefficient_q)
+        pop2_r_decimal2 = binary2decimal(pop_r, min_coefficient_r, max_coefficient_r)
+        pop2_OPT_PRI_decimal2 = binary2decimal(pop_OPT_PRI, min_coefficient_OPT_PRI, max_coefficient_OPT_PRI)
 
-                    aimplace_aimyear_ZB = []
-                    aimplace_aimyear_ZB_num = []
-                    for p in aimrow2[0]:
-                        aimplace_aimyear_met_num.append(aimplace_met_num[p])
-                    for p in aimrow3[0]:
-                        aimplace_aimyear_ZB.append(aimplace_ZB[p])
-                        aimplace_aimyear_ZB_num.append(aimplace_ZB_num[p])
-                    aimpyzbnumrow = len(aimplace_aimyear_ZB_num)
-                    startday = YZQ_num.values[i, 2]
-                    endday = aimplace_aimyear_ZB_num[aimpyzbnumrow - 1][18]
-                    tmp = np.array(aimplace_aimyear_met_num)
-                    e1 = tmp[startday - 5:endday, :]  # 具体日期
-                    e = e1[:, [2, 3]]
-                    [erow, _] = e.shape
-                    # ==========================SEIR模型预测==========================
-                    # 潜伏期参数
-                    W = 1 / 3
-                    # 感染期参数
-                    U = 1 / q
-                    dt = 1  # 微分方程自变量梯度
-                    n = erow - 4  # 模型预测区间长度
-                    n1 = erow
-                    t = np.zeros([1, n])
-                    H = np.zeros([1, n])
-                    L = np.zeros([1, n])
-                    I = np.zeros([1, n])
-                    R = np.zeros([1, n])
-                    t[0, 0] = 0
-                    H[0, 0] = 0.9997  # H初始值
-                    L[0, 0] = 0.0001
-                    I[0, 0] = 0.0001
-                    R[0, 0] = 0.0001
-                    B = []
-                    # 若相对湿度>阈值，则赋值为1，否则赋值为0
-                    for k in range(5, n1 + 1):
-                        e1 = e[k - 5:k, 0]  # 前5天的降水
-                        e2 = e[k - 3:k, 1]  # 前3天，潜伏期为3天
-                        e_PRI = sum(e1)
-                        e_TEM = np.mean(e2)
-                        # logistic函数,取值在0.01-1
-                        PRI = 1 + (0.001 - 1) / (1 + math.exp((e_PRI - OPT_PRI) / r))
-                        # 基于正态分布函数确定温度的响应,各参数为函数横坐标取值范围
-                        x = np.linspace(0, 43, 44)
-                        # 生成均值为28,方差为kc的正态分布函数
-                        y = norm.pdf(x, 28, kc)  # 使用了SciPy中的norm函数，pdf表示概率密度函数。
-                        # 这一行代码计算了在均值为28，标准差为kc的正态分布下，
-                        # 对x中每一个值的概率密度函数值。
-                        # 这意味着y数组中的每个元素都代表了在给定正态分布下对应x值的概率密度
-                        MAX = max(y)
-                        MIN = min(y)
-                        # 对温度的响应进行归一化处理
-                        TEM = (y[math.floor(e_TEM)] - MIN) / (MAX - MIN)
-                        AGE = k / n  # 年龄的响应
-                        # 三个修正量将温度、湿度和作物生育期的影响纳入模型，分别为T、W和A
-                        # 对于下面参数TEM/PRI/AGE，详见张雪雪论文-式（4.3）
-                        B1 = ka * 0.46 * PRI * TEM * AGE + kb
-                        B.append(B1)  # 将每个时相对应的参数取值放到一个矩阵中
-                    # 模型的微分方程迭代计算
-                    for g in range(0, n - 1):
-                        # SEIR
-                        t[0, g + 1] = t[0, g] + dt
-                        H[0, g + 1] = H[0, g] + dt * (-B[g] * H[0, g] * I[0, g])
-                        L[0, g + 1] = L[0, g] + dt * (B[g] * H[0, g] * I[0, g] - W * L[0, g])
-                        I[0, g + 1] = I[0, g] + dt * (W * L[0, g] - U * I[0, g])
-                        R[0, g + 1] = R[0, g] + dt * (U * I[0, g])
-                    # 发病情况的组成
-                    y2 = (R + I)
-                    y1 = np.transpose(y2)  # 转置
-                    # 在某地点某年份的预测结果中提取与实际植保数据对应的预测数据
-                    aimplace_aimyear_row = len(aimplace_aimyear_ZB)
-                    # C = []
-                    for a in range(0, aimplace_aimyear_row):
-                        # 计算实际植保数据时相相对于移栽期的相对位置
-                        z = aimplace_aimyear_ZB_num[a][18] - YZQ_num.values[i, 2]
-                        if z > erow:
-                            z = erow - 1
-                        else:
-                            if z < 0 or z == 0:
-                                z = 0  # z=1
-                            else:
-                                z = z
-                        temp2 = np.array(Jizhi4)
-                        # 找到对应年份的目标地区峰值
-                        aimjzrow = np.where(temp2[:, 2] == ii)
-                        aimJizhi = Jizhi4[aimjzrow, 0]
-                        # 预测结果乘以权重（极值）
-                        D.append(y1[z, 0] * aimJizhi)
+        objvalue2 = cal_objvalue_run(pop2_ka_decimal2, pop2_kb_decimal2,
+                                     pop2_kc_decimal2, pop2_q_decimal2,
+                                     pop2_r_decimal2, pop2_OPT_PRI_decimal2, self.dataFrame)
+        fitvalue2 = objvalue2
+        [px, py] = pop_ka.shape
+        bestindividual_ka = pop_ka[0, :]
+        bestindividual_kb = pop_kb[0, :]
+        bestindividual_kc = pop_kc[0, :]
+        bestindividual_q = pop_q[0, :]
+        bestindividual_r = pop_r[0, :]
+        bestindividual_OPT_PRI = pop_OPT_PRI[0, :]
+        bestfit = fitvalue2[0]
 
-        # 计算R方和RMSE
-        ZB1 = ZB_num
-        R2_List = []
-        RMSE_List_Temp = []
-        [RowZB, ColZB] = ZB1.shape
-        for s in range(0, RowZB):
-            # 残差平方和
-            res_fenzi = np.power((ZB1.values[s, 14] - D[s]), 2)  # np.power((ZB1.values[s - 1, 14] - D[s]), 2)
-            # 平方和
-            average_Y = np.mean(ZB1.values[:, 14])  # 假设ZB1.values[:, 14]是你的观察值
-            SS_tot = sum(np.power(ZB1.values[:, 14] - average_Y, 2))
+        for i in range(0, loopNum):  # 50
+            print(f'--------------训练中:{str(i)}/{str(loopNum - 1)}--------------')
+            pop2_ka_decimal = binary2decimal(pop_ka, min_coefficient_ka, max_coefficient_ka)
+            pop2_kb_decimal = binary2decimal(pop_kb, min_coefficient_kb, max_coefficient_kb)
+            pop2_kc_decimal = binary2decimal(pop_kc, min_coefficient_kc, max_coefficient_kc)
+            pop2_q_decimal = binary2decimal(pop_q, min_coefficient_q, max_coefficient_q)
+            pop2_r_decimal = binary2decimal(pop_r, min_coefficient_r, max_coefficient_r)
+            pop2_OPT_PRI_decimal = binary2decimal(pop_OPT_PRI, min_coefficient_OPT_PRI, max_coefficient_OPT_PRI)
+            objvalue1 = cal_objvalue_run(pop2_ka_decimal, pop2_kb_decimal,
+                                         pop2_kc_decimal, pop2_q_decimal,
+                                         pop2_r_decimal, pop2_OPT_PRI_decimal, self.dataFrame)
+            fitvalue1 = objvalue1
 
-            R2_List.append(1 - res_fenzi / SS_tot)
-            RMSE_List_Temp.append(res_fenzi)
-        RMSE_FENZI = sum(RMSE_List_Temp)
-        RMSE = (RMSE_FENZI / RowZB) ** 0.5
-        # R3 = np.corrcoef(ZB1.values[:, 14], D)
-        # R2 = np.power(R3, 2)
+            for j in range(0, px):
+                # if fitvalue1[j] < bestfit:
+                # cal_objvalue_run中除了第一个元素,其他赋值都0
+                if fitvalue1[j] < bestfit and fitvalue1[j] != 0:
+                    bestindividual_ka = pop_ka[j, :]
+                    bestindividual_kb = pop_kb[j, :]
+                    bestindividual_kc = pop_kc[j, :]
+                    bestindividual_q = pop_q[j, :]
+                    bestindividual_r = pop_r[j, :]
+                    bestindividual_OPT_PRI = pop_OPT_PRI[j, :]
+                    bestfit = fitvalue1[j]
+            print(f'当前精度:{fitvalue1}')
+            # best_ka = binary2decimal(bestindividual_ka, min_coefficient_ka, max_coefficient_ka)
+            # best_kb = binary2decimal(bestindividual_kb, min_coefficient_kb, max_coefficient_kb)
+            # best_kc = binary2decimal(bestindividual_kc, min_coefficient_kc, max_coefficient_kc)
+            # best_q = binary2decimal(bestindividual_q, min_coefficient_q, max_coefficient_q)
+            # best_r = binary2decimal(bestindividual_r, min_coefficient_r, max_coefficient_r)
+            # best_OPT_PRI = binary2decimal(bestindividual_OPT_PRI, min_coefficient_OPT_PRI, max_coefficient_OPT_PRI)
+            # print('各项参数',
+            #       f'best_ka:{best_ka}',
+            #       f'best_kb:{best_kb}',
+            #       f'best_kc:{best_kc}',
+            #       f'best_q:{best_q}',
+            #       f'best_r:{best_r}',
+            #       f'best_OPT_PRI:{best_OPT_PRI}')
+            print(f'优选精度:{bestfit}')
 
-        return R2_List, RMSE, D
+            # 选择操作
+            newpop_ka = selection(pop_ka, fitvalue1)
+            newpop_kb = selection(pop_kb, fitvalue1)
+            newpop_kc = selection(pop_kc, fitvalue1)
+            newpop_q = selection(pop_q, fitvalue1)
+            newpop_r = selection(pop_r, fitvalue1)
+            newpop_OPT_PRI = selection(pop_OPT_PRI, fitvalue1)
+            # 交叉操作
+            newpop_ka = crossover(newpop_ka, pc)
+            newpop_kb = crossover(newpop_kb, pc)
+            newpop_kc = crossover(newpop_kc, pc)
+            newpop_q = crossover(newpop_q, pc)
+            newpop_r = crossover(newpop_r, pc)
+            newpop_OPT_PRI = crossover(newpop_OPT_PRI, pc)
+            # 变异操作
+            newpop_ka = mutation(newpop_ka, pm)
+            newpop_kb = mutation(newpop_kb, pm)
+            newpop_kc = mutation(newpop_kc, pm)
+            newpop_q = mutation(newpop_q, pm)
+            newpop_r = mutation(newpop_r, pm)
+            newpop_OPT_PRI = mutation(newpop_OPT_PRI, pm)
+            # 更新种群
+            pop_ka = newpop_ka
+            pop_kb = newpop_kb
+            pop_kc = newpop_kc
+            pop_q = newpop_q
+            pop_r = newpop_r
+            pop_OPT_PRI = newpop_OPT_PRI
+        best_ka = binary2decimal(bestindividual_ka, min_coefficient_ka, max_coefficient_ka)
+        best_kb = binary2decimal(bestindividual_kb, min_coefficient_kb, max_coefficient_kb)
+        best_kc = binary2decimal(bestindividual_kc, min_coefficient_kc, max_coefficient_kc)
+        best_q = binary2decimal(bestindividual_q, min_coefficient_q, max_coefficient_q)
+        best_r = binary2decimal(bestindividual_r, min_coefficient_r, max_coefficient_r)
+        best_OPT_PRI = binary2decimal(bestindividual_OPT_PRI, min_coefficient_OPT_PRI, max_coefficient_OPT_PRI)
+        print('The best X is --->>%5.2f\n',
+              f'best_ka:{best_ka}',
+              f'best_kb:{best_kb}',
+              f'best_kc:{best_kc}',
+              f'best_q:{best_q}',
+              f'best_r:{best_r}',
+              f'best_OPT_PRI:{best_OPT_PRI}',
+              f'bestfit:{bestfit}')
+        temp = [best_ka, best_kb, best_kc, best_q, best_r, best_OPT_PRI]
+        precision, actualAndPredictResult = bestfit, temp
+        return precision, actualAndPredictResult
 
     def onPLSR(self):
         # 训练模型
