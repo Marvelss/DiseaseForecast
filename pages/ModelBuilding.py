@@ -40,7 +40,12 @@ model_params = [
      "store_covariance": "True"},
     {"模型名称": "RF", "n_estimators": "100", "criterion": "gini",
      "min_samples_split": "3"},
-    {"模型名称": "SEIR机理模型"},
+    {"模型名称": "SEIR机理模型", "min_coefficient_ka": "1", "max_coefficient_ka": "4",
+     "min_coefficient_kb": "0", "max_coefficient_kb": "0.3", "min_coefficient_kc": "30",
+     "max_coefficient_kc": "60", "min_coefficient_OPT_PRI": "10", "max_coefficient_OPT_PRI": "30",
+     "min_coefficient_r": "10", "max_coefficient_r": "20", "ω": "3", "μ": "52.93",
+     "β0": "0.46", "optimumTEM": "28", "temStep": "3", "preStep": "5", "slideStep": "暂定",
+     "loopNumbers": "1", "popSize": "20", "chromLength": "10", "pc": "0.6", "pm": "0.001"},
     {"模型名称": "PLSR", "n_components": "2", "scale": "True", "max_iter": "500"},
     {"模型名称": "LR", "fit_intercept": "True", "normalize": "False", "alpha": "0.1"},
     {"模型名称": "SVR", "kernel": "linear", "C": "1.0", "epsilon": "0.1"}
@@ -243,8 +248,9 @@ def onTrain(temporaResolution):
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
                 evaluationIndicator[tempIndex]).onSEIR()
-            print('======测试返回模型评价结果======')
-            print(evaluationResult)
+            print('======测试返回SEIR模型评价结果======')
+            print(f'精度:{evaluationResult}')
+            print(f'最优参数:{actualAndPredictResult}')
             # 显示模型训练结果信息
             info = ''
             for key, value in evaluationResult.items():
@@ -383,8 +389,7 @@ with modelACM:
             with colOption1:
                 agree = st.checkbox('SVM', key='checkBoxModel0', on_change=clearOtherOption, args=[0])
                 agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
-                agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4],
-                                     )
+                agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4])
             with colOption2:
                 agree1 = st.checkbox('RF', key='checkBoxModel1', on_change=clearOtherOption, args=[1])
                 agree7 = st.checkbox('SVR', key='checkBoxModel7', on_change=clearOtherOption, args=[7])
@@ -401,7 +406,7 @@ with modelACM:
             st.markdown('---')
 
             # ===============显示和处理右中各个模型参数(主要添加模型时加入checkbox名称)===============
-            if agree or agree1 or agree2 or agree2 or agree3 or agree5 or agree6 or agree7:
+            if agree or agree1 or agree2 or agree2 or agree3 or agree4 or agree5 or agree6 or agree7:
                 model = getCheckboxName()
                 # print(f'--{model}--')
                 # 获取SVM模型的参数
