@@ -59,40 +59,42 @@ class FeatureOptimizationMethod:
         target = methodParam[0][0]
         name = methodParam[0][1]
         proportion = methodParam[0][2]
-        print(f'接收参数-{target}-{name}-{proportion}-'
-              f'{inputFields.to_list()}')
-        newList = [item for item in inputFields.to_list() if item != '发生程度']
-        print(self.dataFrame['发生程度'].value_counts())
         # 准备数据
-        X = self.dataFrame.drop(columns=['发生程度'])  # 假设我们已经从df中删除了目标列和不需要的列
-        y = self.dataFrame[['发生程度']]
+        X = self.dataFrame[inputFields].drop(columns=[target])  # 假设我们已经从df中删除了目标列和不需要的列
+        y = self.dataFrame[target]
+        # print('设置检查和处理缺失值')
+        # print(X.index)
+        # X = X.dropna()
+        # print(X.index)
+        # y = y.loc[X.index]  # 保持 y 和 X 的索引一致
 
-        print(X)
-        print(y)
-        # 对分类变量进行one-hot编码
-        if '上级单位' and '测报站点' in self.dataFrame.columns.tolist():
-            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        # 确保所有列的数据类型一致
+        # X = X.astype(float)
+        # 找到包含缺失值的行
+        # missing_rows = X.isnull().any(axis=1)
+        # 数据标准化
+        # scaler = StandardScaler()
+        # X_scaled = scaler.fit_transform(X)
+        # print(X_scaled)
         # 划分训练集和测试集
-        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, stratify=y, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
-        # 初始化ReliefF算法
-        fs = ReliefF(n_neighbors=4)  # n_neighbors参数根据数据集大小调整，n_features_to_keep是你想要保留的特征数量
-
-        # 修改优选特征名称
-        newDataColumn = self.getHandledField(inputFields)
+        # 重置索引并转换为NumPy数组
+        X_train = X_train.reset_index(drop=True).to_numpy()
+        y_train = y_train.reset_index(drop=True).to_numpy()
+        fs = ReliefF(n_features_to_select=len(X.columns))
 
         # 训练ReliefF模型以找到最重要的特征
         fs.fit(X_train, y_train)
         # 假设 fs.feature_importances_ 包含了特征的重要性得分
         feature_scores = fs.feature_importances_
-        print(feature_scores)
+        print(f'特征重要性:{feature_scores}')
+
         selected_features_indices = None
         # 按照Top百分比选取特征
         if name == '按百分比选取':
             # 计算得分阈值，只选择前30%的特征
-            q = proportion
+            q = 100 - int(proportion)
             threshold = np.percentile(feature_scores, q)  # 100% - 30% = 70%，因为是选择前30%
             # 选取得分高于阈值的特征
             selected_features_indices = np.where(feature_scores >= threshold)[0]
@@ -103,10 +105,14 @@ class FeatureOptimizationMethod:
             # 选取得分高于阈值的特征
             selected_features_indices = np.where(feature_scores > score_threshold)[0]
             # 使用选定的特征来转换数据集
-        # X_train_transformed = X_train[:, selected_features_indices]
-        # X_test_transformed = X_test[:, selected_features_indices]
+
         selected_features = self.dataFrame.columns[selected_features_indices]
-        return self.dataFrame[selected_features + self.reservedField]
+        newColumnsList = []
+        for feature in selected_features:
+            new_column_name = self.getHandledField(feature)
+            self.dataFrame[new_column_name] = self.dataFrame[feature]
+            newColumnsList.append(new_column_name)
+        return self.dataFrame, ','.join(newColumnsList)
 
     # Pearson相关分析
     def Pearson(self, methodParam):

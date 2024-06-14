@@ -136,7 +136,7 @@ def onRun():
                 dataFrameTemp, reservedField).Pearson(
                 methodParam[indexT])
         elif tempMethod == 'Relief-F互相关分析':
-            afterHandleData = FeatureOptimizationMethod(
+            afterHandleData, newColumns = FeatureOptimizationMethod(
                 dataFrameTemp, reservedField).ReliefF(
                 fields[0], methodParam)
         print('=============返回数据=============')
