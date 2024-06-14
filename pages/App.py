@@ -74,6 +74,7 @@ def emptyValue():
         pd.DataFrame(
             columns=["编号", "模型", "模型参数", "特征", "标签", "评价指标", "数据集划分比例", "时间", "实际和预测值",
                      "处理状态"])]
+
     pages_utils.TempDataSet = [
         pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"]),
         pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"]),
@@ -81,5 +82,12 @@ def emptyValue():
         pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"]),
         pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])]
 
+    # 预处理界面初始化(使用系统界面右上角界面clear cache自动清空)
+    # st.session_state["preMethodName"] = {'checkBox': None}
+    # st.session_state["DPVisualInformation"] = []
+    # st.session_state["leftTabs"] = ['原始数据']
+    # st.session_state.page12 = 0
 
-st.button('清空数据', on_click=emptyValue)
+
+if st.button('初始化数据', on_click=emptyValue):
+    st.toast("初始化完毕", icon="ℹ️️")
