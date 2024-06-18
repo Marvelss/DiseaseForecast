@@ -303,6 +303,8 @@ def onPrecision(*cboxList):
         st.session_state["modelPrecisionName"].append('MSE')
     if cboxList[3]:
         st.session_state["modelPrecisionName"].append('R方')
+    if cboxList[4]:
+        st.session_state["modelPrecisionName"].append('RMSE')
     # print(st.session_state["modelPrecisionName"])
     pages_utils.TempDataSetField[4]['评价指标'] = ','.join(st.session_state["modelPrecisionName"])
     st.session_state.page += 1
@@ -453,13 +455,14 @@ with modelACM:
             with tempCol2:
                 agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
                 agree9 = st.checkbox('R方', key='checkBoxPrecision3')
+                agree10 = st.checkbox('RMSE', key='checkBoxPrecision4')
             interval_col1, interval_col2 = st.columns([5, 1])
             # 传入指标
             # tempArgs =
             btn21 = interval_col1.button(
                 "下一步",
                 on_click=onPrecision,
-                args=[agree6, agree7, agree8, agree9])
+                args=[agree6, agree7, agree8, agree9, agree10])
 
     # Page 2
     elif st.session_state.page == 2:
