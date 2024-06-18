@@ -41,7 +41,7 @@ dataSCM, dataSCR = st.columns([0.7, 0.4])
 with dataSCM:
     st.markdown("##### 上传数据集")
 
-    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '农学数据'], ["🌨️️", "🌾", "☣️"])
+    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据(勿选)', '农学数据(勿选)'], ["🌨️️", "🌾", "☣️"])
     uploaded_files = st.file_uploader(
         "上传数据集",
         accept_multiple_files=False,
