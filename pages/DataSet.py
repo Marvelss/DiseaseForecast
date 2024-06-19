@@ -8,7 +8,6 @@ import pages_utils
 from streamlit_pills import pills
 from warnings import simplefilter
 
-
 simplefilter(action="ignore", category=FutureWarning)
 st.set_page_config(
     layout="wide"
@@ -41,12 +40,12 @@ dataSCM, dataSCR = st.columns([0.7, 0.4])
 with dataSCM:
     st.markdown("##### 上传数据集")
 
-    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据(勿选)', '农学数据(勿选)'], ["🌨️️", "🌾", "☣️"])
+    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据(未开放)', '农学数据(未开放)'], ["🌨️️", "🌾", "☣️"])
     uploaded_files = st.file_uploader(
         "上传数据集",
         accept_multiple_files=False,
         label_visibility='collapsed',
-        type=['xlsx', 'csv', 'txt', 'xls'],
+        type=['xlsx', 'csv', 'txt', 'xls', 'zip'],
         help='help')
 
     # st.markdown('''
@@ -91,6 +90,7 @@ with dataSCM:
                 )
     # ==============================控制文件上传逻辑==============================
     if uploaded_files:
+        print(uploaded_files)
         bytes_data = uploaded_files.read()
         data33 = pd.read_excel(bytes_data)
         # st.markdown(data33)
