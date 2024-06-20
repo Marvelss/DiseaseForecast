@@ -280,11 +280,11 @@ with dataPCM:
 
     with col1:
         agree = st.checkbox('剔除异常值', key='checkbox0', on_change=clear_other, args=[0])
-        agree11 = st.checkbox("空间数据重采样", key='checkbox2', on_change=clear_other, args=[2])
-        agree12 = st.checkbox("点面数据转化", key='checkbox3', on_change=clear_other, args=[3])
+        agree11 = st.checkbox("空间数据重采样(待发布)", key='checkbox2', on_change=clear_other, args=[2],disabled=True)
+        agree12 = st.checkbox("点面数据转化(待发布)", key='checkbox3', on_change=clear_other, args=[3],disabled=True)
     with col2:
         agree10 = st.checkbox("缺失值插补", key='checkbox1', on_change=clear_other, args=[1])
-        agree13 = st.checkbox("点面数据关联", key='checkbox4', on_change=clear_other, args=[4])
+        agree13 = st.checkbox("点面数据关联(待发布)", key='checkbox4', on_change=clear_other, args=[4],disabled=True)
     st.markdown('---')
 
     # ===============显示和处理右中各个处理方法设置参数===============

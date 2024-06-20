@@ -262,13 +262,14 @@ with (featureCCM):
         # option14 = st.checkbox('时间(温度)分辨率转换', key='checkbox0', on_change=clear_other, args=[0], disabled=True)
         option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1])
         option16 = st.checkbox('降水累积量计算', key='checkbox2', on_change=clear_other, args=[2])
-        option21 = st.checkbox('植保指数计算', key='checkbox5', on_change=clear_other, args=[5], disabled=True)
-        option14 = st.checkbox('待添加', key='checkbox0', on_change=clear_other, args=[0], disabled=True)
+        option21 = st.checkbox('植被指数计算(待发布)', key='checkbox5', on_change=clear_other, args=[5], disabled=True)
+        option14 = st.checkbox('待添加', key='checkbox0', on_change=clear_other, args=[0], disabled=True,
+                               label_visibility='hidden')
     with col2:
         option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3])
-        option18 = st.checkbox('时空抽取(待面状建模系统发布)', key='checkbox4', on_change=clear_other, args=[4],
+        option18 = st.checkbox('时空抽取(待发布)', key='checkbox4', on_change=clear_other, args=[4],
                                disabled=True)
-        option20 = st.checkbox('景观指数计算', key='checkbox6', on_change=clear_other, args=[6], disabled=True)
+        option20 = st.checkbox('景观指数计算(待发布)', key='checkbox6', on_change=clear_other, args=[6], disabled=True)
 
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
@@ -446,7 +447,8 @@ with (featureCCM):
                     elif idFMethods[o] == '降水累积量计算':
                         # 时期范围名称修剪
                         integratedDataColumnT = dataColumn.split('_')
-                        integratedDataColumn = integratedDataColumnT[0] + '至' + integratedDataColumnT[1] + integratedDataColumnT[2]
+                        integratedDataColumn = integratedDataColumnT[0] + '至' + integratedDataColumnT[1] + \
+                                               integratedDataColumnT[2]
                         # 选择最多8个测报站点
                         top_stations = data_after['测报站点'].value_counts().nlargest(8).index
                         df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
@@ -471,7 +473,8 @@ with (featureCCM):
                     elif idFMethods[o] == '降雨日数计算':
                         # 时期范围名称修剪
                         integratedDataColumnRT = dataColumn.split('_')
-                        integratedDataColumnR = integratedDataColumnRT[0] + '至' + integratedDataColumnRT[1] + integratedDataColumnRT[2]
+                        integratedDataColumnR = integratedDataColumnRT[0] + '至' + integratedDataColumnRT[1] + \
+                                                integratedDataColumnRT[2]
                         # 选择最多8个测报站点
                         top_stations = data_after['测报站点'].value_counts().nlargest(8).index
                         df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
