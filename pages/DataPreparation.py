@@ -8,7 +8,6 @@ import seaborn as sns
 import streamlit as st
 from PIL import Image
 
-
 import pages_utils
 from modelandmethod.PretreatmentMethod import PretreatmentMethod
 
@@ -80,6 +79,12 @@ def getCheckboxName(checkbox):
         return '剔除异常值'
     elif checkbox == 'checkbox1':
         return '缺失值插补'
+    elif checkbox == 'checkbox2':
+        return '空间数据重采样'
+    elif checkbox == 'checkbox3':
+        return '点面数据转化'
+    elif checkbox == 'checkbox4':
+        return '点面数据关联'
 
 
 def mergeArray(list1, list2, list3):
@@ -181,7 +186,7 @@ def onRun():
         # 可视化信息添加
         st.session_state["DPVisualInformation"].append(DPVisualInformationTemp)
         print('=====================展示可视化内容======================')
-        print(st.session_state["DPVisualInformation"])
+        # print(st.session_state["DPVisualInformation"])
         update_values = {
             "预处理后字段": newDataColumn,
             "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
@@ -275,9 +280,11 @@ with dataPCM:
 
     with col1:
         agree = st.checkbox('剔除异常值', key='checkbox0', on_change=clear_other, args=[0])
-        # agree5 = st.checkbox('剔除数据5')
+        agree11 = st.checkbox("空间数据重采样", key='checkbox2', on_change=clear_other, args=[2])
+        agree12 = st.checkbox("点面数据转化", key='checkbox3', on_change=clear_other, args=[3])
     with col2:
         agree10 = st.checkbox("缺失值插补", key='checkbox1', on_change=clear_other, args=[1])
+        agree13 = st.checkbox("点面数据关联", key='checkbox4', on_change=clear_other, args=[4])
     st.markdown('---')
 
     # ===============显示和处理右中各个处理方法设置参数===============
@@ -573,9 +580,10 @@ with dataPCM:
                         # 取第一个缺失值对应前15行和后15行'上级单位', '测报站点', '年'数据
                         missing_rows = \
                             pages_utils.TempDataSet[1].loc[
-                                missing_indices, ['上级单位', '测报站点', '年']].to_dict(
+                                missing_indices, ['上级单位', '测报站点', '年', 'DayOfYear']].to_dict(
                                 'records')[0]
                         province, station, year = missing_rows['上级单位'], missing_rows['测报站点'], missing_rows['年']
+                        print(missing_rows['DayOfYear'])
                         # 整理前后15天dayOfYear为x轴
                         figure_x = pd.DataFrame({'DayOfYear': pages_utils.TempDataSet[1]['DayOfYear']}).iloc[
                                    start_index:end_index]
