@@ -27,6 +27,9 @@ if "modelParamName" not in st.session_state:
     st.session_state["modelParamName"] = {}
 if "modelPrecisionName" not in st.session_state:
     st.session_state["modelPrecisionName"] = []
+# 控制下一步按钮显隐
+if "nextBtnShow" not in st.session_state:
+    st.session_state.nextBtnShow = 0
 
 checkBoxModelNum = 8
 # 显示可视化中文图例
@@ -101,6 +104,9 @@ def getModelName(temp1):
 
 # 取消其他选项按钮
 def clearOtherOption(key1):
+    # 显示添加模型按钮
+    st.session_state.nextBtnShow = 0 if st.session_state.nextBtnShow == 1 else 1
+
     # st.markdown(key)
     for h in range(checkBoxModelNum):
         if h != key1:
@@ -426,23 +432,28 @@ with modelACM:
                 st.session_state["modelParamName"] = edited_df.to_dict()
 
             # =======================准备任务清单内容=======================
-            interval_col1, interval_col2 = st.columns([5, 1])
-            btn1 = interval_col2.button("下一步", on_click=onModel)
-            btn = interval_col1.button("添加模型", on_click=onAddModel)
-            # =======================添加模型=======================
-            if btn:
-                new_data = {
-                    "编号": pages_utils.generateID(),
-                    "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
-                    "模型参数": st.session_state["modelParamName"],
-                    "特征": result1,
-                    "标签": result2,
-                    "时间": datetime.datetime.now().time(),
-                    "处理状态": False}
-                print('======================模型构建-添加模型======================')
-                print(new_data)
-                pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_data
-                st.rerun()
+            if st.session_state.nextBtnShow == 0:
+                interval_col1, interval_col2 = st.columns([5, 1])
+                btn1 = interval_col2.button("下一步", on_click=onModel)
+            else:
+                interval_col1, interval_col2 = st.columns([5, 1])
+                btn = interval_col2.button("添加模型", on_click=onAddModel)
+                # =======================添加模型=======================
+                if btn:
+                    # 隐藏添加模型按钮
+                    st.session_state.nextBtnShow = 0
+                    new_data = {
+                        "编号": pages_utils.generateID(),
+                        "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
+                        "模型参数": st.session_state["modelParamName"],
+                        "特征": result1,
+                        "标签": result2,
+                        "时间": datetime.datetime.now().time(),
+                        "处理状态": False}
+                    print('======================模型构建-添加模型======================')
+                    print(new_data)
+                    pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_data
+                    st.rerun()
     # Page 1
     elif st.session_state.page == 1:
         # =======================添加评价指标=======================
