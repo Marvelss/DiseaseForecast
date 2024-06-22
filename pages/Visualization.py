@@ -27,7 +27,7 @@ def convert_df(df):
 
 
 # with tab1:
-tab1, tab2 = st.tabs(['数据及下载', '可视化'])
+tab1, tab2 = st.tabs(['数据下载', '可视化(待完成)'])
 
 with tab1:
     col1, col2 = st.columns([0.7, 0.2])
