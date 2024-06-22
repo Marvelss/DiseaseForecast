@@ -112,6 +112,11 @@ def onRun():
     methodParam = pages_utils.TempDataSetField[3]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()
     isHandledFlags = pages_utils.TempDataSetField[3]["处理状态"].tolist()
+
+    # 若为空则跳过该步骤
+    if not idNumber:
+        pages_utils.TempDataSet[3] = pages_utils.TempDataSet[2]
+
     newColumns = '错误'
     # ===============根据名称匹配调用并执行各个处理方法===============
     # 初始化特征优选方法
@@ -257,7 +262,7 @@ with dataPCM:
             label='',
             horizontal=True,
             label_visibility="collapsed",
-            options=['相关系数的绝对值>0.8', '相关系数的绝对值<0.2']
+            options=['相关系数的绝对值>0.8']
         )
         if genre33 == '相关系数的绝对值<0.2':
             st.toast('该方法未实现,请选择其他方法', icon="⚠️")
@@ -348,6 +353,10 @@ with dataPCM:
         # =======================显示右下可视化图表=======================
         with placeholder.container():
             st.markdown('##### 可视化')
+
+            # 若无方法处理,则直接跳过该环节
+            if len([]):
+                pass
             tab1, tab2 = st.tabs(["1", "2"])
             with tab1:
                 # 模拟气温数据

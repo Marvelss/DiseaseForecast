@@ -119,6 +119,11 @@ def onRun():
     print('===============获取任务清单内容===============')
     print(methodParam)
     print(methodList)
+
+    # 若为空则跳过该步骤
+    if not idNumber:
+        pages_utils.TempDataSet[2] = pages_utils.TempDataSet[1]
+
     afterHandleData = None
     newColumn = '错误'
     # ===============根据名称匹配调用并执行各个处理方法===============
@@ -404,97 +409,100 @@ with (featureCCM):
             plt.rc("font", family='Microsoft YaHei')
             idFMethods = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
             # inputFields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
-            # 创建新的从 1 开始的编号列表
-            new_ids = list(range(0, len(idFMethods)))
-            # 创建标签页并重新命名记录
-            new_ids = [f'记录编号_{h}' for h in new_ids]
 
-            tt1 = st.tabs(new_ids)
-            for o in range(len(idFMethods)):
-                with tt1[o]:
-                    # 创建DataFrame
-                    data_after = st.session_state["FCVisualInformation"][o]['after']
-                    # 特征名称
-                    dataColumn = st.session_state["FCVisualInformation"][o]['column']
-                    # 删除含有缺失值的行
-                    data_after = data_after.dropna()
-                    # 去除重复值
-                    data_after = data_after.drop_duplicates()
+            # 若无方法处理,则直接跳过该环节
+            if len(idFMethods):
+                # 创建新的从 1 开始的编号列表
+                new_ids = list(range(0, len(idFMethods)))
+                # 创建标签页并重新命名记录
+                new_ids = [f'记录编号_{h}' for h in new_ids]
 
-                    if idFMethods[o] == '基于活动积温的生育期计算':
-                        # 选择最多8个测报站点
-                        top_stations = data_after['测报站点'].value_counts().nlargest(8).index
-                        df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
+                tt1 = st.tabs(new_ids)
+                for o in range(len(idFMethods)):
+                    with tt1[o]:
+                        # 创建DataFrame
+                        data_after = st.session_state["FCVisualInformation"][o]['after']
+                        # 特征名称
+                        dataColumn = st.session_state["FCVisualInformation"][o]['column']
+                        # 删除含有缺失值的行
+                        data_after = data_after.dropna()
+                        # 去除重复值
+                        data_after = data_after.drop_duplicates()
 
-                        # 选择最多3个年份
-                        top_years = data_after['年'].value_counts().nlargest(3).index
-                        df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+                        if idFMethods[o] == '基于活动积温的生育期计算':
+                            # 选择最多8个测报站点
+                            top_stations = data_after['测报站点'].value_counts().nlargest(8).index
+                            df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
 
-                        # 绘制折线图
-                        plt.figure(figsize=(10, 6))
-                        sns.lineplot(
-                            data=df_filtered,
-                            x="测报站点",
-                            y=dataColumn,
-                            hue="年",
-                            marker="o"
-                        )
-                        # 设置标签和标题
-                        plt.xlabel("测报站点")
-                        plt.ylabel(dataColumn)
-                        plt.title(f"部分县市与各年份{dataColumn}", fontsize=16)
-                        st.pyplot(plt)
-                    elif idFMethods[o] == '降水累积量计算':
-                        # 时期范围名称修剪
-                        integratedDataColumnT = dataColumn.split('_')
-                        integratedDataColumn = integratedDataColumnT[0] + '至' + integratedDataColumnT[1] + \
-                                               integratedDataColumnT[2]
-                        # 选择最多8个测报站点
-                        top_stations = data_after['测报站点'].value_counts().nlargest(8).index
-                        df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
-                        # 选择最多5个年份
-                        top_years = data_after['年'].value_counts().nlargest(5).index
-                        df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                        # 绘制柱状图
-                        plt.figure(figsize=(10, 6))
-                        sns.barplot(
-                            data=df_filtered,
-                            x="测报站点",
-                            y=dataColumn,
-                            hue="年",
-                            dodge=True,
-                            saturation=1
-                        )
-                        # 设置标签和标题
-                        plt.xlabel("测报站点")
-                        plt.ylabel("降水累积量")
-                        plt.title(f"部分县市与各年份{integratedDataColumn}")
-                        st.pyplot(plt)
-                    elif idFMethods[o] == '降雨日数计算':
-                        # 时期范围名称修剪
-                        integratedDataColumnRT = dataColumn.split('_')
-                        integratedDataColumnR = integratedDataColumnRT[0] + '至' + integratedDataColumnRT[1] + \
-                                                integratedDataColumnRT[2]
-                        # 选择最多8个测报站点
-                        top_stations = data_after['测报站点'].value_counts().nlargest(8).index
-                        df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
+                            # 选择最多3个年份
+                            top_years = data_after['年'].value_counts().nlargest(3).index
+                            df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
 
-                        # 选择最多3个年份
-                        top_years = data_after['年'].value_counts().nlargest(3).index
-                        df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                        # 绘制折线图
-                        plt.figure(figsize=(10, 6))
-                        sns.lineplot(
-                            data=df_filtered,
-                            x="测报站点",
-                            y=dataColumn,
-                            hue="年",
-                            marker="o"
-                        )
-                        # 设置标签和标题
-                        plt.xlabel("测报站点")
-                        plt.ylabel("降雨日数")
-                        plt.title(f"部分县市与各年份{integratedDataColumnR}")
-                        st.pyplot(plt)
+                            # 绘制折线图
+                            plt.figure(figsize=(10, 6))
+                            sns.lineplot(
+                                data=df_filtered,
+                                x="测报站点",
+                                y=dataColumn,
+                                hue="年",
+                                marker="o"
+                            )
+                            # 设置标签和标题
+                            plt.xlabel("测报站点")
+                            plt.ylabel(dataColumn)
+                            plt.title(f"部分县市与各年份{dataColumn}", fontsize=16)
+                            st.pyplot(plt)
+                        elif idFMethods[o] == '降水累积量计算':
+                            # 时期范围名称修剪
+                            integratedDataColumnT = dataColumn.split('_')
+                            integratedDataColumn = integratedDataColumnT[0] + '至' + integratedDataColumnT[1] + \
+                                                   integratedDataColumnT[2]
+                            # 选择最多8个测报站点
+                            top_stations = data_after['测报站点'].value_counts().nlargest(8).index
+                            df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
+                            # 选择最多5个年份
+                            top_years = data_after['年'].value_counts().nlargest(5).index
+                            df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+                            # 绘制柱状图
+                            plt.figure(figsize=(10, 6))
+                            sns.barplot(
+                                data=df_filtered,
+                                x="测报站点",
+                                y=dataColumn,
+                                hue="年",
+                                dodge=True,
+                                saturation=1
+                            )
+                            # 设置标签和标题
+                            plt.xlabel("测报站点")
+                            plt.ylabel("降水累积量")
+                            plt.title(f"部分县市与各年份{integratedDataColumn}")
+                            st.pyplot(plt)
+                        elif idFMethods[o] == '降雨日数计算':
+                            # 时期范围名称修剪
+                            integratedDataColumnRT = dataColumn.split('_')
+                            integratedDataColumnR = integratedDataColumnRT[0] + '至' + integratedDataColumnRT[1] + \
+                                                    integratedDataColumnRT[2]
+                            # 选择最多8个测报站点
+                            top_stations = data_after['测报站点'].value_counts().nlargest(8).index
+                            df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
+
+                            # 选择最多3个年份
+                            top_years = data_after['年'].value_counts().nlargest(3).index
+                            df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+                            # 绘制折线图
+                            plt.figure(figsize=(10, 6))
+                            sns.lineplot(
+                                data=df_filtered,
+                                x="测报站点",
+                                y=dataColumn,
+                                hue="年",
+                                marker="o"
+                            )
+                            # 设置标签和标题
+                            plt.xlabel("测报站点")
+                            plt.ylabel("降雨日数")
+                            plt.title(f"部分县市与各年份{integratedDataColumnR}")
+                            st.pyplot(plt)
             interval_col34, interval_col33 = st.columns([5, 1])
             btn3 = interval_col33.button('返回', on_click=firstPage)

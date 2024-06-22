@@ -134,6 +134,10 @@ def onRun():
     print(fields)
     print(methodParam)
 
+    # 若为空则跳过该步骤
+    if idNumber.empty:
+        pages_utils.TempDataSet[1] = pages_utils.TempDataSet[0]
+
     afterHandleData = None
     for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
         # 检查方法是否已执行
@@ -280,11 +284,11 @@ with dataPCM:
 
     with col1:
         agree = st.checkbox('剔除异常值', key='checkbox0', on_change=clear_other, args=[0])
-        agree11 = st.checkbox("空间数据重采样(待发布)", key='checkbox2', on_change=clear_other, args=[2],disabled=True)
-        agree12 = st.checkbox("点面数据转化(待发布)", key='checkbox3', on_change=clear_other, args=[3],disabled=True)
+        agree11 = st.checkbox("空间数据重采样(待发布)", key='checkbox2', on_change=clear_other, args=[2], disabled=True)
+        agree12 = st.checkbox("点面数据转化(待发布)", key='checkbox3', on_change=clear_other, args=[3], disabled=True)
     with col2:
         agree10 = st.checkbox("缺失值插补", key='checkbox1', on_change=clear_other, args=[1])
-        agree13 = st.checkbox("点面数据关联(待发布)", key='checkbox4', on_change=clear_other, args=[4],disabled=True)
+        agree13 = st.checkbox("点面数据关联(待发布)", key='checkbox4', on_change=clear_other, args=[4], disabled=True)
     st.markdown('---')
 
     # ===============显示和处理右中各个处理方法设置参数===============
@@ -409,225 +413,229 @@ with dataPCM:
             plt.rc("font", family='Microsoft YaHei')
             idPreMethods = pages_utils.TempDataSetField[1]["预处理方法"].tolist()
             inputFields = pages_utils.TempDataSetField[1]["输入字段"].tolist()
-            # 创建新的从 1 开始的编号列表
-            new_ids = list(range(0, len(idPreMethods)))
+            # 若无方法处理,则直接跳过该环节
+            if len(idPreMethods):
+                # 创建新的从 1 开始的编号列表
+                new_ids = list(range(0, len(idPreMethods)))
 
-            # 创建标签页并重新命名记录
-            new_ids = [f'记录编号_{h}' for h in new_ids]
+                # 创建标签页并重新命名记录
+                new_ids = [f'记录编号_{h}' for h in new_ids]
 
-            tt1 = st.tabs(new_ids)
-            for o in range(len(idPreMethods)):
-                with tt1[o]:
-                    # # 模拟气温和降水数据
-                    # def simulate_weather_data():
-                    #     np.random.seed(42)
-                    #     date_range = pd.date_range(start='2024-01-01', end='2024-02-20')
-                    #     temperature = np.random.normal(loc=15, scale=5, size=len(date_range))
-                    #     precipitation = np.random.normal(loc=5, scale=2, size=len(date_range))
-                    #     continuous_rain_days = np.random.randint(0, 10, size=len(date_range))
-                    #
-                    #     data = pd.DataFrame({
-                    #         'Date': date_range,
-                    #         '温度': temperature,
-                    #         'Precipitation': precipitation,
-                    #         '01-21_01-31_降雨日数': continuous_rain_days
-                    #     })
-                    #     return data
-                    #
-                    #
-                    # # 生成累计降水量特征
-                    # def generate_cumulative_precipitation_features(df):
-                    #     df['01-21_01-31_累计降水量'] = df['Precipitation'].rolling(window=11, min_periods=1).sum()
-                    #     df['01-01_01-20_累计降水量'] = df['Precipitation'].rolling(window=20, min_periods=1).sum()
-                    #     df['02-01_02-20_累计降水量'] = df['Precipitation'].rolling(window=20, min_periods=1).sum()
-                    #     return df
-                    #
-                    #
-                    # # 模拟气温和降水数据
-                    # df = simulate_weather_data()
-                    # plt.rcParams['font.sans-serif'] = 'SimHei'
-                    #
-                    # # 生成累计降水量特征
-                    # df = generate_cumulative_precipitation_features(df)
-                    #
-                    # # 随机生成目标变量
-                    # df['Target'] = np.random.choice([0, 1], size=len(df))
-                    #
-                    # # 划分特征和目标
-                    # X = df.drop(['Date', 'Precipitation', 'Target'], axis=1)
-                    # y = df['Target']
-                    #
-                    # # 使用随机森林模型拟合数据
-                    # rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
-                    # rf_model.fit(X, y)
-                    #
-                    # # 获取特征重要性
-                    # feature_importance = rf_model.feature_importances_
-                    #
-                    # # 创建特征重要性数据框
-                    # feature_importance_df = pd.DataFrame(
-                    #     {'Feature': X.columns,
-                    #      'Importance': feature_importance})
-                    #
-                    # # 排序特征重要性
-                    # feature_importance_df = feature_importance_df.sort_values(by='Importance', ascending=False)
-                    #
-                    # # 创建子图和轴
-                    # fig, ax = plt.subplots(figsize=(10, 6))
-                    #
-                    # # 使用Seaborn的barplot生成特征重要性图
-                    # sns.barplot(x='Feature', y='Importance', data=feature_importance_df, ax=ax)
-                    #
-                    # # 设置图形标题和轴标签
-                    # plt.title('基于Relief-F算法的各特征因子权值排序图', fontsize=16)
-                    # plt.xlabel('')
-                    # plt.ylabel('特征权值')
-                    # plt.xticks(rotation=90)
-                    # st.pyplot(plt)
+                tt1 = st.tabs(new_ids)
+                for o in range(len(idPreMethods)):
+                    with tt1[o]:
+                        # # 模拟气温和降水数据
+                        # def simulate_weather_data():
+                        #     np.random.seed(42)
+                        #     date_range = pd.date_range(start='2024-01-01', end='2024-02-20')
+                        #     temperature = np.random.normal(loc=15, scale=5, size=len(date_range))
+                        #     precipitation = np.random.normal(loc=5, scale=2, size=len(date_range))
+                        #     continuous_rain_days = np.random.randint(0, 10, size=len(date_range))
+                        #
+                        #     data = pd.DataFrame({
+                        #         'Date': date_range,
+                        #         '温度': temperature,
+                        #         'Precipitation': precipitation,
+                        #         '01-21_01-31_降雨日数': continuous_rain_days
+                        #     })
+                        #     return data
+                        #
+                        #
+                        # # 生成累计降水量特征
+                        # def generate_cumulative_precipitation_features(df):
+                        #     df['01-21_01-31_累计降水量'] = df['Precipitation'].rolling(window=11, min_periods=1).sum()
+                        #     df['01-01_01-20_累计降水量'] = df['Precipitation'].rolling(window=20, min_periods=1).sum()
+                        #     df['02-01_02-20_累计降水量'] = df['Precipitation'].rolling(window=20, min_periods=1).sum()
+                        #     return df
+                        #
+                        #
+                        # # 模拟气温和降水数据
+                        # df = simulate_weather_data()
+                        # plt.rcParams['font.sans-serif'] = 'SimHei'
+                        #
+                        # # 生成累计降水量特征
+                        # df = generate_cumulative_precipitation_features(df)
+                        #
+                        # # 随机生成目标变量
+                        # df['Target'] = np.random.choice([0, 1], size=len(df))
+                        #
+                        # # 划分特征和目标
+                        # X = df.drop(['Date', 'Precipitation', 'Target'], axis=1)
+                        # y = df['Target']
+                        #
+                        # # 使用随机森林模型拟合数据
+                        # rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+                        # rf_model.fit(X, y)
+                        #
+                        # # 获取特征重要性
+                        # feature_importance = rf_model.feature_importances_
+                        #
+                        # # 创建特征重要性数据框
+                        # feature_importance_df = pd.DataFrame(
+                        #     {'Feature': X.columns,
+                        #      'Importance': feature_importance})
+                        #
+                        # # 排序特征重要性
+                        # feature_importance_df = feature_importance_df.sort_values(by='Importance', ascending=False)
+                        #
+                        # # 创建子图和轴
+                        # fig, ax = plt.subplots(figsize=(10, 6))
+                        #
+                        # # 使用Seaborn的barplot生成特征重要性图
+                        # sns.barplot(x='Feature', y='Importance', data=feature_importance_df, ax=ax)
+                        #
+                        # # 设置图形标题和轴标签
+                        # plt.title('基于Relief-F算法的各特征因子权值排序图', fontsize=16)
+                        # plt.xlabel('')
+                        # plt.ylabel('特征权值')
+                        # plt.xticks(rotation=90)
+                        # st.pyplot(plt)
 
-                    # 移栽期
-                    # # 创建DataFrame
-                    # df = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\tests\test26\2024-05-22T11-04_export.xlsx')
-                    #
-                    # # 删除含有缺失值的行
-                    # df = df.dropna()
-                    #
-                    # # 去除重复值
-                    # df = df.drop_duplicates()
-                    # plt.rcParams['font.sans-serif'] = 'SimHei'
-                    #
-                    # # 选择最多8个测报站点
-                    # top_stations = df['测报站点'].value_counts().nlargest(8).index
-                    # df_filtered_stations = df[df['测报站点'].isin(top_stations)]
-                    #
-                    # # 选择最多3个年份
-                    # top_years = df['年'].value_counts().nlargest(3).index
-                    # df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                    #
-                    # # 绘制柱状图
-                    # plt.figure(figsize=(12, 8))
-                    # sns.lineplot(
-                    #     data=df_filtered,
-                    #     x="测报站点",
-                    #     y="移栽期",
-                    #     hue="年",
-                    #     marker="o"
-                    # )
-                    # # 设置标签和标题
-                    # plt.xlabel("测报站点")
-                    # plt.ylabel("移栽期")
-                    # plt.title("部分县市不同年份移栽期", fontsize=16)
-                    #
-                    # st.pyplot(plt)
+                        # 移栽期
+                        # # 创建DataFrame
+                        # df = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\tests\test26\2024-05-22T11-04_export.xlsx')
+                        #
+                        # # 删除含有缺失值的行
+                        # df = df.dropna()
+                        #
+                        # # 去除重复值
+                        # df = df.drop_duplicates()
+                        # plt.rcParams['font.sans-serif'] = 'SimHei'
+                        #
+                        # # 选择最多8个测报站点
+                        # top_stations = df['测报站点'].value_counts().nlargest(8).index
+                        # df_filtered_stations = df[df['测报站点'].isin(top_stations)]
+                        #
+                        # # 选择最多3个年份
+                        # top_years = df['年'].value_counts().nlargest(3).index
+                        # df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+                        #
+                        # # 绘制柱状图
+                        # plt.figure(figsize=(12, 8))
+                        # sns.lineplot(
+                        #     data=df_filtered,
+                        #     x="测报站点",
+                        #     y="移栽期",
+                        #     hue="年",
+                        #     marker="o"
+                        # )
+                        # # 设置标签和标题
+                        # plt.xlabel("测报站点")
+                        # plt.ylabel("移栽期")
+                        # plt.title("部分县市不同年份移栽期", fontsize=16)
+                        #
+                        # st.pyplot(plt)
 
-                    # # 创建DataFrame
-                    # df = pd.read_excel(
-                    #     r'E:\a_python\program\diseaseForecastStreamlit\tests\test26\预测病害峰值-降水累积量.xlsx')
-                    #
-                    # # 删除含有缺失值的行
-                    # df = df.dropna()
-                    #
-                    # # 去除重复值
-                    # df = df.drop_duplicates()
-                    # plt.rcParams['font.sans-serif'] = 'SimHei'
-                    #
-                    # # 选择最多8个测报站点
-                    # top_stations = df['测报站点'].value_counts().nlargest(8).index
-                    # df_filtered_stations = df[df['测报站点'].isin(top_stations)]
-                    #
-                    # # 选择最多5个年份
-                    # top_years = df['年'].value_counts().nlargest(5).index
-                    # df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                    #
-                    # # 绘制柱状图
-                    # plt.figure(figsize=(10, 6))
-                    # sns.barplot(
-                    #     data=df_filtered,
-                    #     x="测报站点",
-                    #     y="01-01_01-20_降水累积量",
-                    #     hue="年",
-                    #     dodge=True,
-                    #     saturation=1
-                    # )
-                    # # 设置标签和标题
-                    # plt.xlabel("测报站点")
-                    # plt.ylabel("降水累积量")
-                    # plt.title("部分县市不同年份01-01至01-20降水累积量")
-                    # st.pyplot(plt)
+                        # # 创建DataFrame
+                        # df = pd.read_excel(
+                        #     r'E:\a_python\program\diseaseForecastStreamlit\tests\test26\预测病害峰值-降水累积量.xlsx')
+                        #
+                        # # 删除含有缺失值的行
+                        # df = df.dropna()
+                        #
+                        # # 去除重复值
+                        # df = df.drop_duplicates()
+                        # plt.rcParams['font.sans-serif'] = 'SimHei'
+                        #
+                        # # 选择最多8个测报站点
+                        # top_stations = df['测报站点'].value_counts().nlargest(8).index
+                        # df_filtered_stations = df[df['测报站点'].isin(top_stations)]
+                        #
+                        # # 选择最多5个年份
+                        # top_years = df['年'].value_counts().nlargest(5).index
+                        # df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+                        #
+                        # # 绘制柱状图
+                        # plt.figure(figsize=(10, 6))
+                        # sns.barplot(
+                        #     data=df_filtered,
+                        #     x="测报站点",
+                        #     y="01-01_01-20_降水累积量",
+                        #     hue="年",
+                        #     dodge=True,
+                        #     saturation=1
+                        # )
+                        # # 设置标签和标题
+                        # plt.xlabel("测报站点")
+                        # plt.ylabel("降水累积量")
+                        # plt.title("部分县市不同年份01-01至01-20降水累积量")
+                        # st.pyplot(plt)
 
-                    if idPreMethods[o] == '缺失值插补':
-                        data_before_temp = st.session_state["DPVisualInformation"][o]['before']
-                        data_after_temp = st.session_state["DPVisualInformation"][o]['after']
-                        # print(inputFields[o][0])
-                        data_before = pd.DataFrame({inputFields[o][0]: data_before_temp})
-                        data_after = pd.DataFrame({inputFields[o][0]: data_after_temp})
-                        # 查找缺失值的索引
-                        missing_indices = data_before[data_before[inputFields[o][0]].isna()].index
+                        if idPreMethods[o] == '缺失值插补':
+                            data_before_temp = st.session_state["DPVisualInformation"][o]['before']
+                            data_after_temp = st.session_state["DPVisualInformation"][o]['after']
+                            # print(inputFields[o][0])
+                            data_before = pd.DataFrame({inputFields[o][0]: data_before_temp})
+                            data_after = pd.DataFrame({inputFields[o][0]: data_after_temp})
+                            # 查找缺失值的索引
+                            missing_indices = data_before[data_before[inputFields[o][0]].isna()].index
 
-                        # 获取第一个缺失值的索引
-                        first_missing_index = missing_indices[0]
+                            # 获取第一个缺失值的索引
+                            first_missing_index = missing_indices[0]
 
-                        # 计算前15行和后15行的起始和结束索引
-                        start_index = max(first_missing_index - 15, 0)
-                        end_index = min(first_missing_index + 15 + 1, len(data_before))
+                            # 计算前15行和后15行的起始和结束索引
+                            start_index = max(first_missing_index - 15, 0)
+                            end_index = min(first_missing_index + 15 + 1, len(data_before))
 
-                        # 取第一个缺失值对应前15行和后15行预处理数据
-                        data_before_surrounding_data = data_before.iloc[start_index:end_index]
-                        data_after_surrounding_data = data_after.iloc[start_index:end_index]
-                        # 绘制对比折线图
-                        plt.figure(figsize=(10, 6))
-                        # print(pages_utils.TempDataSet[1]['DayOfYear'])
-                        # 取第一个缺失值对应前15行和后15行'上级单位', '测报站点', '年'数据
-                        missing_rows = \
-                            pages_utils.TempDataSet[1].loc[
-                                missing_indices, ['上级单位', '测报站点', '年', 'DayOfYear']].to_dict(
-                                'records')[0]
-                        province, station, year = missing_rows['上级单位'], missing_rows['测报站点'], missing_rows['年']
-                        print(missing_rows['DayOfYear'])
-                        # 整理前后15天dayOfYear为x轴
-                        figure_x = pd.DataFrame({'DayOfYear': pages_utils.TempDataSet[1]['DayOfYear']}).iloc[
-                                   start_index:end_index]
-                        # 绘制插补前的折线图
-                        plt.plot(figure_x, data_before_surrounding_data[inputFields[o][0]],
-                                 label='原始数据',
-                                 color='black',
-                                 linestyle='-', marker='o')
+                            # 取第一个缺失值对应前15行和后15行预处理数据
+                            data_before_surrounding_data = data_before.iloc[start_index:end_index]
+                            data_after_surrounding_data = data_after.iloc[start_index:end_index]
+                            # 绘制对比折线图
+                            plt.figure(figsize=(10, 6))
+                            # print(pages_utils.TempDataSet[1]['DayOfYear'])
+                            # 取第一个缺失值对应前15行和后15行'上级单位', '测报站点', '年'数据
+                            missing_rows = \
+                                pages_utils.TempDataSet[1].loc[
+                                    missing_indices, ['上级单位', '测报站点', '年', 'DayOfYear']].to_dict(
+                                    'records')[0]
+                            province, station, year = missing_rows['上级单位'], missing_rows['测报站点'], missing_rows[
+                                '年']
+                            print(missing_rows['DayOfYear'])
+                            # 整理前后15天dayOfYear为x轴
+                            figure_x = pd.DataFrame({'DayOfYear': pages_utils.TempDataSet[1]['DayOfYear']}).iloc[
+                                       start_index:end_index]
+                            # 绘制插补前的折线图
+                            plt.plot(figure_x, data_before_surrounding_data[inputFields[o][0]],
+                                     label='原始数据',
+                                     color='black',
+                                     linestyle='-', marker='o')
 
-                        # 绘制插补后的折线图
-                        plt.plot(figure_x, data_after_surrounding_data[inputFields[o][0]],
-                                 label='插补后数据', color='blue',
-                                 linestyle='--',
-                                 marker='o', alpha=0.3)
-                        plt.xlabel('Day of Year')
-                        plt.ylabel(inputFields[o][0])
-                        plt.title(f'{province}{station}{year}年部分{inputFields[o][0]}数据插补前后对比图', fontsize=16)
-                        plt.legend()
-                        st.pyplot(plt)
-                    elif idPreMethods[o] == '剔除异常值':
-                        # 剔除异常值-箱型图
-                        data_before = st.session_state["DPVisualInformation"][o]['before']
-                        data_after = st.session_state["DPVisualInformation"][o]['after']
-                        # 创建两个子图
-                        fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-                        # 绘制处理前的箱线图
-                        sns.boxplot(y=data_before, ax=axes[0])
-                        axes[0].set_ylabel(data_before.name)
-                        axes[0].set_title('预处理后')
-                        # axes[0].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
-                        # axes[0].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
-                        # axes[0].legend(loc='upper left')
+                            # 绘制插补后的折线图
+                            plt.plot(figure_x, data_after_surrounding_data[inputFields[o][0]],
+                                     label='插补后数据', color='blue',
+                                     linestyle='--',
+                                     marker='o', alpha=0.3)
+                            plt.xlabel('Day of Year')
+                            plt.ylabel(inputFields[o][0])
+                            plt.title(f'{province}{station}{year}年部分{inputFields[o][0]}数据插补前后对比图',
+                                      fontsize=16)
+                            plt.legend()
+                            st.pyplot(plt)
+                        elif idPreMethods[o] == '剔除异常值':
+                            # 剔除异常值-箱型图
+                            data_before = st.session_state["DPVisualInformation"][o]['before']
+                            data_after = st.session_state["DPVisualInformation"][o]['after']
+                            # 创建两个子图
+                            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+                            # 绘制处理前的箱线图
+                            sns.boxplot(y=data_before, ax=axes[0])
+                            axes[0].set_ylabel(data_before.name)
+                            axes[0].set_title('预处理后')
+                            # axes[0].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
+                            # axes[0].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
+                            # axes[0].legend(loc='upper left')
 
-                        # 绘制处理后的箱线图
-                        sns.boxplot(y=data_after, ax=axes[1])
-                        axes[1].set_ylabel(data_after.name)
-                        axes[1].set_title('预处理后')
-                        # axes[1].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
-                        # axes[1].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
-                        # axes[1].legend(loc='upper left')
-                        # 设置主标题
-                        fig.suptitle(f'{data_before.name}数据剔除前后对比箱型图',
-                                     fontsize=16)
-                        st.pyplot(fig)
+                            # 绘制处理后的箱线图
+                            sns.boxplot(y=data_after, ax=axes[1])
+                            axes[1].set_ylabel(data_after.name)
+                            axes[1].set_title('预处理后')
+                            # axes[1].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
+                            # axes[1].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
+                            # axes[1].legend(loc='upper left')
+                            # 设置主标题
+                            fig.suptitle(f'{data_before.name}数据剔除前后对比箱型图',
+                                         fontsize=16)
+                            st.pyplot(fig)
 
             interval_col34, interval_col33 = st.columns([5, 1])
             # want_to_contribute = interval_col34.button("跳转至可视化界面")
