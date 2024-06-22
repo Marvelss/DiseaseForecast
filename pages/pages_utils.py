@@ -133,6 +133,19 @@ def zip_folder(folder_path, output_path):
                 zipf.write(str(file_path), arcname=os.path.relpath(str(file_path), start=folder_path))
 
 
+# 文件压缩
+def zip_files(file_paths, output_path):
+    # 创建 ZIP 文件并将文件写入其中
+    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for file_path in file_paths:
+            # 检查每个文件是否存在
+            if not os.path.isfile(file_path):
+                raise FileNotFoundError(f"文件 {file_path} 未找到")
+            # 确定要写入的文件相对于其所在目录的相对路径
+            arcname = os.path.basename(file_path)
+            zipf.write(file_path, arcname=arcname)
+
+
 # 天气情景转换为对应数字
 def getWeatherNum(situations):
     weatherMap = {
@@ -160,7 +173,9 @@ FeatureDataSetField = pd.DataFrame(
 OptimalFeatureDataSetField = pd.DataFrame(
     columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间", "处理状态"])
 ModelSet = pd.DataFrame(
-    columns=["编号", "模型", "模型参数", "特征", "标签", "评价指标", "数据集划分比例", "时间", "实际和预测值", "处理状态"])
+    columns=["编号", "模型", "模型参数", "特征", "标签", "评价指标", "数据集划分比例", "模型结构", "模型训练结果",
+             "时间",
+             "处理状态"])
 TempDataSetField = [RawDataSetField, PreprocessedDataSetField,
                     FeatureDataSetField, OptimalFeatureDataSetField,
                     ModelSet]

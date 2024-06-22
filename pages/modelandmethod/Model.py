@@ -106,12 +106,14 @@ class Model:
 
         # =======================保存结果-模型结构+预测结果+评价指标结果=======================
         # 保存模型
+        modelStruct = 'SVM_structure.pkl'
         rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
         joblib.dump(model1, os.path.join(
-            rootPath, 'modelsStructure', 'SVM_structure.pkl'))
+            rootPath, 'modelsStructure', modelStruct))
         # 保存预测结果
+        actualAndPredictResult = 'SVM_predictLabel.xlsx'
         savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
-        savePath1 = os.path.join(savePathDir, 'SVM_predictLabel.xlsx')
+        savePath1 = os.path.join(savePathDir, actualAndPredictResult)
         savePath2 = os.path.join(savePathDir, 'SVM_testLabel.xlsx')
         pd.DataFrame(y_pred,
                      columns=['predictLabel']).to_excel(
@@ -123,7 +125,7 @@ class Model:
         pd.DataFrame(precision.items(),
                      columns=['evaluationIndex', 'value']).to_excel(
             precisionResultDir, index=False)
-        return precision, actualAndPredictResult
+        return precision, actualAndPredictResult, modelStruct
 
     def onKNN(self):
 
@@ -191,12 +193,14 @@ class Model:
 
         # =======================保存结果-模型结构+预测结果+评价指标结果=======================
         # 保存模型
+        modelStruct = 'KNN_structure.pkl'
         rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
         joblib.dump(model1, os.path.join(
-            rootPath, 'modelsStructure', 'KNN_structure.pkl'))
+            rootPath, 'modelsStructure', modelStruct))
         # 保存预测结果
+        actualAndPredictResult = 'KNN_predictLabel.xlsx'
         savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
-        savePath1 = os.path.join(savePathDir, 'KNN_predictLabel.xlsx')
+        savePath1 = os.path.join(savePathDir, actualAndPredictResult)
         savePath2 = os.path.join(savePathDir, 'KNN_testLabel.xlsx')
         pd.DataFrame(y_pred,
                      columns=['predictLabel']).to_excel(
@@ -208,7 +212,7 @@ class Model:
         pd.DataFrame(precision.items(),
                      columns=['evaluationIndex', 'value']).to_excel(
             precisionResultDir, index=False)
-        return precision, actualAndPredictResult
+        return precision, actualAndPredictResult, modelStruct
 
     def onFLDA(self):
         # 训练模型
@@ -277,12 +281,14 @@ class Model:
 
         # =======================保存结果-模型结构+预测结果+评价指标结果=======================
         # 保存模型
+        modelStruct = 'FLDA_structure.pkl'
         rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
         joblib.dump(model1, os.path.join(
-            rootPath, 'modelsStructure', 'FLDA_structure.pkl'))
+            rootPath, 'modelsStructure', modelStruct))
         # 保存预测结果
+        actualAndPredictResult = 'FLDA_predictLabel.xlsx'
         savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
-        savePath1 = os.path.join(savePathDir, 'FLDA_predictLabel.xlsx')
+        savePath1 = os.path.join(savePathDir, )
         savePath2 = os.path.join(savePathDir, 'FLDA_testLabel.xlsx')
         pd.DataFrame(y_pred,
                      columns=['predictLabel']).to_excel(
@@ -294,7 +300,7 @@ class Model:
         pd.DataFrame(precision.items(),
                      columns=['evaluationIndex', 'value']).to_excel(
             precisionResultDir, index=False)
-        return precision, actualAndPredictResult
+        return precision, actualAndPredictResult, modelStruct
 
     def onRF(self):
         # 训练模型
@@ -361,12 +367,14 @@ class Model:
 
         # =======================保存结果-模型结构+预测结果+评价指标结果=======================
         # 保存模型
+        modelStruct = 'RF_structure.pkl'
         rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
         joblib.dump(model1, os.path.join(
-            rootPath, 'modelsStructure', 'RF_structure.pkl'))
+            rootPath, 'modelsStructure', modelStruct))
         # 保存预测结果
+        actualAndPredictResult = 'RF_predictLabel.xlsx'
         savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
-        savePath1 = os.path.join(savePathDir, 'RF_predictLabel.xlsx')
+        savePath1 = os.path.join(savePathDir, actualAndPredictResult)
         savePath2 = os.path.join(savePathDir, 'RF_testLabel.xlsx')
         pd.DataFrame(y_pred,
                      columns=['predictLabel']).to_excel(
@@ -378,7 +386,7 @@ class Model:
         pd.DataFrame(precision.items(),
                      columns=['evaluationIndex', 'value']).to_excel(
             precisionResultDir, index=False)
-        return precision, actualAndPredictResult
+        return precision, actualAndPredictResult, modelStruct
 
     def onSEIR(self):
         # print(self.dataFrame)
@@ -593,7 +601,7 @@ class Model:
         y_pred = model1.predict(X_test)
         print('======================模型构建-精度指标======================')
         precision = {}
-        actualAndPredictResult = y_pred.tolist()
+        # actualAndPredictResult = y_pred.tolist()
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
         if ',' in self.evaluationIndicator:
@@ -616,12 +624,14 @@ class Model:
 
         # =======================保存结果-模型结构+预测结果+评价指标结果=======================
         # 保存模型
+        modelStruct = 'PLSR_structure.pkl'
         rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
         joblib.dump(model1, os.path.join(
-            rootPath, 'modelsStructure', 'PLSR_structure.pkl'))
+            rootPath, 'modelsStructure', modelStruct))
         # 保存预测结果
+        actualAndPredictResult = 'PLSR_predictLabel.xlsx'
         savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
-        savePath1 = os.path.join(savePathDir, 'PLSR_predictLabel.xlsx')
+        savePath1 = os.path.join(savePathDir, actualAndPredictResult)
         savePath2 = os.path.join(savePathDir, 'PLSR_testLabel.xlsx')
         pd.DataFrame(y_pred,
                      columns=['predictLabel']).to_excel(
@@ -633,7 +643,7 @@ class Model:
         pd.DataFrame(precision.items(),
                      columns=['evaluationIndex', 'value']).to_excel(
             precisionResultDir, index=False)
-        return precision, actualAndPredictResult
+        return precision, actualAndPredictResult, modelStruct
 
     def onLR(self):
         # 训练模型
@@ -675,9 +685,9 @@ class Model:
         y_pred = model1.predict(X_test)
         print('======================模型构建-精度指标======================')
         precision = {}
-        actualAndPredictResult = y_pred.tolist()
-        print('y_pred:')
-        print(actualAndPredictResult)
+        # actualAndPredictResult = y_pred.tolist()
+        # print('y_pred:')
+        # print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
         if ',' in self.evaluationIndicator:
@@ -700,12 +710,14 @@ class Model:
 
         # =======================保存结果-模型结构+预测结果+评价指标结果=======================
         # 保存模型
+        modelStruct = 'LR_structure.pkl'
         rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
         joblib.dump(model1, os.path.join(
-            rootPath, 'modelsStructure', 'LR_structure.pkl'))
+            rootPath, 'modelsStructure', modelStruct))
         # 保存预测结果
+        actualAndPredictResult = 'LR_predictLabel.xlsx'
         savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
-        savePath1 = os.path.join(savePathDir, 'LR_predictLabel.xlsx')
+        savePath1 = os.path.join(savePathDir, actualAndPredictResult)
         savePath2 = os.path.join(savePathDir, 'LR_testLabel.xlsx')
         pd.DataFrame(y_pred,
                      columns=['predictLabel']).to_excel(
@@ -717,7 +729,7 @@ class Model:
         pd.DataFrame(precision.items(),
                      columns=['evaluationIndex', 'value']).to_excel(
             precisionResultDir, index=False)
-        return precision, actualAndPredictResult
+        return precision, actualAndPredictResult, modelStruct
 
     def onSVR(self):
         # 训练模型
@@ -784,12 +796,14 @@ class Model:
 
         # =======================保存结果-模型结构+预测结果+评价指标结果=======================
         # 保存模型
+        modelStruct = 'SVR_structure.pkl'
         rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
         joblib.dump(model1, os.path.join(
-            rootPath, 'modelsStructure', 'SVR_structure.pkl'))
+            rootPath, 'modelsStructure', modelStruct))
         # 保存预测结果
+        actualAndPredictResult = 'SVR_predictLabel.xlsx'
         savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
-        savePath1 = os.path.join(savePathDir, 'SVR_predictLabel.xlsx')
+        savePath1 = os.path.join(savePathDir, actualAndPredictResult)
         savePath2 = os.path.join(savePathDir, 'SVR_testLabel.xlsx')
         pd.DataFrame(y_pred,
                      columns=['predictLabel']).to_excel(
@@ -801,4 +815,4 @@ class Model:
         pd.DataFrame(precision.items(),
                      columns=['evaluationIndex', 'value']).to_excel(
             precisionResultDir, index=False)
-        return precision, actualAndPredictResult
+        return precision, actualAndPredictResult, modelStruct

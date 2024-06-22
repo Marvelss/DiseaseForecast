@@ -4,6 +4,9 @@
 @File : Visualization.py
 @Description : 数据可视化
 """
+import os
+import zipfile
+
 import pandas as pd
 import streamlit as st
 from matplotlib import pyplot as plt
@@ -29,63 +32,99 @@ tab1, tab2 = st.tabs(['数据及下载', '可视化'])
 with tab1:
     col1, col2 = st.columns([0.7, 0.2])
     with col2:
-        st.markdown('###### 选择下载内容')
-        option55 = st.radio("选择下载内容",
-                            options=['数据集', '各环节方法执行记录'],
-                            label_visibility='collapsed')
-        st.markdown('---')
-        column = ['无数据']
-        data = pd.DataFrame(columns=['无数据'])
-
-        # 从第二个元素开始获取
-        if not st.session_state["leftTabs"][1:]:
-            downloadList = ['空']
-        else:
-            downloadList = st.session_state["leftTabs"][1:]
-        option55 = pills("选择下载数据集类型或各环节数据名称", options=downloadList)
-        st.markdown('---')
-        if option55 == '模型':
-            result1 = pages_utils.multiselect_all(
-                st, '全选',
-                pages_utils.TempDataSetField[4]['模型'],
-                'temp11', 'collapsed')
-            btn11 = st.button('下载特征和标签、模型结构及训练结果')
-        elif option55 == '预处理后数据集':
-            column = pages_utils.TempDataSet[1].columns.tolist()
-            data = pages_utils.TempDataSet[1]
-        elif option55 == '备选特征':
-            column = pages_utils.TempDataSet[2].columns.tolist()
-            data = pages_utils.TempDataSet[2]
-        elif option55 == '优选特征':
-            column = pages_utils.TempDataSet[3].columns.tolist()
-            data = pages_utils.TempDataSet[3]
+        st.markdown('###### 模型下载')
+        # option55 = st.radio("选择下载内容",
+        #                     options=['数据集', '各环节方法执行记录'],
+        #                     label_visibility='collapsed')
+        # st.markdown('---')
+        # column = ['无数据']
+        # data = pd.DataFrame(columns=['无数据'])
+        #
+        # # 从第二个元素开始获取
+        # if not st.session_state["leftTabs"][1:]:
+        #     downloadList = ['空']
+        # else:
+        #     downloadList = st.session_state["leftTabs"][1:]
+        # option55 = pills("选择下载数据集类型或各环节数据名称", options=downloadList)
+        # st.markdown('---')
+        # if option55 == '模型':
+        #     result1 = pages_utils.multiselect_all(
+        #         st, '全选',
+        #         pages_utils.TempDataSetField[4]['模型'],
+        #         'temp11', 'collapsed')
+        #     btn11 = st.button('下载特征和标签、模型结构及训练结果')
+        # elif option55 == '预处理后数据集':
+        #     column = pages_utils.TempDataSet[1].columns.tolist()
+        #     data = pages_utils.TempDataSet[1]
+        # elif option55 == '备选特征':
+        #     column = pages_utils.TempDataSet[2].columns.tolist()
+        #     data = pages_utils.TempDataSet[2]
+        # elif option55 == '优选特征':
+        #     column = pages_utils.TempDataSet[3].columns.tolist()
+        #     data = pages_utils.TempDataSet[3]
         result1 = pages_utils.multiselect_all(
             st, '全选',
-            column,
+            pages_utils.TempDataSetField[4]['模型'],
             'temp111', 'collapsed')
-        # 下载指定字段数据
-        file = data[result1]
-        csv = convert_df(file)
-        st.download_button(
-            label="下载",
-            data=csv,
-            file_name="导出数据.csv",
-            mime='text/csv'
-        )
+
+        models = pages_utils.TempDataSetField[4]['模型'].tolist()
+        modelsStruct = pages_utils.TempDataSetField[4]['模型结构'].tolist()
+        modelResult = pages_utils.TempDataSetField[4]['模型训练结果'].tolist()
+
+        zipPath = os.path.join(
+            os.getcwd(), 'resource', 'modelsResults', '模型结构与训练结果.zip')
+
+        with zipfile.ZipFile(zipPath, 'w') as zipf:
+            pass  # 不添加任何文件
+        # 输入压缩包的文件路径
+        zipFilesPath = []
+        for model in result1:
+            row = pages_utils.TempDataSetField[4][pages_utils.TempDataSetField[4]['模型'] == model]
+            if not row.empty:
+                model_structure = row['模型结构'].values[0]
+                model_training_result = row['模型训练结果'].values[0]
+                # print(f"匹配到模型: {model}")
+                # print(f"模型结构: {model_structure}")
+                # print(f"模型训练结果: {model_training_result}\n")
+
+                rootPathTemp = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+
+                modelStructurePath = os.path.join(rootPathTemp,
+                                                  'modelsStructure', model_structure)
+                # 保存预测结果
+                modelResultPath = os.path.join(rootPathTemp,
+                                               'predictAndTestLabel',
+                                               model_training_result)
+                # print(modelStructurePath)
+                # print(modelResultPath)
+                zipFilesPath.append(modelStructurePath)
+                zipFilesPath.append(modelResultPath)
+            else:
+                print(f"模型 {model} 未找到\n")
+
+        pages_utils.zip_files(zipFilesPath, zipPath)
+        with open(zipPath, "rb") as file:
+            st.download_button(
+                label="下载",
+                data=file,
+                file_name="模型结构与训练结果.zip",
+                mime="application/zip",
+            )
 
     with col1:
         st.markdown('###### 数据集')
+        arr1 = st.session_state["leftTabs"]
         tt1 = st.tabs(st.session_state["leftTabs"])
         for i in range(len(st.session_state["leftTabs"])):
             with tt1[i]:
-                st.data_editor(
+                st.dataframe(
                     pages_utils.TempDataSet[i],
                     height=250, width=1500)
         st.markdown('###### 各环节方法执行记录')
         tt2 = st.tabs(st.session_state["leftTabs"])
         for j in range(len(st.session_state["leftTabs"])):
             with tt2[j]:
-                st.data_editor(
+                st.dataframe(
                     pages_utils.TempDataSetField[j],
                     height=250, width=1500)
 with col2:
@@ -125,7 +164,7 @@ with col2:
             if btn:
                 if option1 == '散点图':
                     # 取x,y轴数据
-                    file = data[option3]
+                    # file = data[option3]
                     print(option2)
                     print(option3)
                     print(file)

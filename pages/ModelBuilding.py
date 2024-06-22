@@ -140,9 +140,10 @@ def onTrain(temporaResolution):
         if isHandled:
             continue
         evaluationResult = None
+        modelStruct = None
         actualAndPredictResult = None
         if tempModel == 'SVM':
-            evaluationResult, actualAndPredictResult = Model(
+            evaluationResult, actualAndPredictResult, modelStruct = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
@@ -157,7 +158,7 @@ def onTrain(temporaResolution):
             st.toast('SVM训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
         elif tempModel == 'KNN':
-            evaluationResult, actualAndPredictResult = Model(
+            evaluationResult, actualAndPredictResult, modelStruct = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
@@ -171,7 +172,7 @@ def onTrain(temporaResolution):
             st.toast('KNN训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
         elif tempModel == 'FLDA':
-            evaluationResult, actualAndPredictResult = Model(
+            evaluationResult, actualAndPredictResult, modelStruct = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
@@ -185,7 +186,7 @@ def onTrain(temporaResolution):
             st.toast('FLDA训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
         elif tempModel == 'RF':
-            evaluationResult, actualAndPredictResult = Model(
+            evaluationResult, actualAndPredictResult, modelStruct = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
@@ -199,7 +200,7 @@ def onTrain(temporaResolution):
             st.toast('RF训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
         elif tempModel == 'PLSR':
-            evaluationResult, actualAndPredictResult = Model(
+            evaluationResult, actualAndPredictResult, modelStruct = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
@@ -216,7 +217,7 @@ def onTrain(temporaResolution):
         elif tempModel == 'LR':
             print('======测试输入参数======')
             print(modelParam)
-            evaluationResult, actualAndPredictResult = Model(
+            evaluationResult, actualAndPredictResult, modelStruct = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
@@ -233,7 +234,7 @@ def onTrain(temporaResolution):
         elif tempModel == 'SVR':
             print('======测试输入参数======')
             print(modelParam)
-            evaluationResult, actualAndPredictResult = Model(
+            evaluationResult, actualAndPredictResult, modelStruct = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
                 dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
@@ -272,8 +273,9 @@ def onTrain(temporaResolution):
         update_values = {
             "时间": datetime.datetime.now().time(),
             "评价指标": evaluationResult,
-            "处理状态": True}
-        # "实际和预测值": actualAndPredictResult}
+            "处理状态": True,
+            "模型训练结果": actualAndPredictResult,
+            "模型结构": modelStruct}
         # 查找要更新的数据记录
         for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
             if row1["编号"] == idNumber[tempIndex]:
@@ -557,7 +559,7 @@ with modelACM:
             models = pages_utils.TempDataSetField[4]["模型"].tolist()
             evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
             targets = pages_utils.TempDataSetField[4]["标签"].tolist()
-            # actualAndPredictList = pages_utils.TempDataSetField[4]["实际和预测值"].tolist()
+            # actualAndPredictList = pages_utils.TempDataSetField[4]["模型训练结果"].tolist()
             # print(print(actualAndPredictList))
             tt1 = st.tabs(models)
             for i in range(len(models)):
