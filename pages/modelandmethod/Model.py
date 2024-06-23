@@ -585,13 +585,13 @@ class Model:
 
         # 保存模型结果
         modelStructPath = 'SEIR_structure.xlsx'
-        rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+        rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults', 'modelsStructure')
         # 对应的标签
-        labels = ['ka', 'kb', 'kc', 'q', 'r', 'pri', 'rmse', 'r2']
+        labels = ['ka', 'kb', 'kc', 'q', 'r', 'OPT_PRI', 'RMSE', 'R方']
         data = {label: result[0] for label, result in zip(labels, modelStruct)}
         # 创建 DataFrame
         df = pd.DataFrame([data])
-        df.to_excel(modelStructPath, index=False)
+        df.to_excel(rootPath, index=False)
 
         # 保存预测结果
         actualAndPredictResult = 'SEIR机理模型_predictLabel.xlsx'
