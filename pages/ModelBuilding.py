@@ -251,20 +251,22 @@ def onTrain(temporaResolution):
         elif tempModel == 'SEIR机理模型':
             print('======测试输入参数======')
             print(modelParam)
-            evaluationResult, actualAndPredictResult = Model(
-                inputDataSet,
-                features[tempIndex], targets[tempIndex],
-                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
-                evaluationIndicator[tempIndex]).onSEIR()
+            with st.status("正在运行SEIR机理模型"):
+                evaluationResult, actualAndPredictResult, modelStruct = Model(
+                    inputDataSet,
+                    features[tempIndex], targets[tempIndex],
+                    dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                    evaluationIndicator[tempIndex]).onSEIR()
             print('======测试返回SEIR模型评价结果======')
             print(f'精度:{evaluationResult}')
             print(f'最优参数:{actualAndPredictResult}')
+            print(f'模型结构:{modelStruct}')
             # 显示模型训练结果信息
             info = ''
             for key, value in evaluationResult.items():
                 info += f'{key}:{str(round(value, 3))}' + '       '
             # 显示精度结果
-            st.toast('SVR训练完成 \n' + '       ' + ' \n' + info,
+            st.toast('SEIR机理模型训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
         print('==============更新前================')
         print(pages_utils.TempDataSetField[4])
@@ -583,7 +585,7 @@ with modelACM:
                     predicted_values = predictLabelDF.iloc[:, 0]
 
                     # 回归模型
-                    if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR':
+                    if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or 'SEIR机理模型':
                         # 绘制散点图
                         fig, ax = plt.subplots()
 

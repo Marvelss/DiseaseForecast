@@ -389,17 +389,21 @@ class Model:
         return precision, actualAndPredictResult, modelStruct
 
     def onSEIR(self):
-        # print(self.dataFrame)
+
+        tempIndicator = self.evaluationIndicator
+        # print(tempIndicator)
+        precision = {}
+        if ',' in self.evaluationIndicator:
+            tempIndicator = self.evaluationIndicator.split(',')
+        else:
+            tempIndicator = [tempIndicator]
+
         array = self.modelParam
-        # param_names = array['参数名']
         param_values = array['参数值']
         paramT = param_values
-        # parameters_dict = {}
-        # for i in range(len(param_names)):
-        #     parameters_dict[param_names[i]] = param_values[i]
+        # print('------------测试参数------------')
+        # print(self.modelParam)
 
-        print('------------测试参数------------')
-        print(self.modelParam)
         # "min_coefficient_ka": "1", "max_coefficient_ka": "4",
         # "min_coefficient_kb": "0", "max_coefficient_kb": "0.3", "min_coefficient_kc": "30",
         # "max_coefficient_kc": "60", "min_coefficient_OPT_PRI": "10", "max_coefficient_OPT_PRI": "30",
@@ -457,11 +461,12 @@ class Model:
         pop2_r_decimal2 = binary2decimal(pop_r, min_coefficient_r, max_coefficient_r)
         pop2_OPT_PRI_decimal2 = binary2decimal(pop_OPT_PRI, min_coefficient_OPT_PRI, max_coefficient_OPT_PRI)
 
-        objvalue2 = cal_objvalue_run(pop2_ka_decimal2, pop2_kb_decimal2,
-                                     pop2_kc_decimal2, pop2_q_decimal2,
-                                     pop2_r_decimal2, pop2_OPT_PRI_decimal2,
-                                     w, beta0, optimumTEM, temStep, preStep,
-                                     slideStep, self.dataFrame)
+        objvalue2, objvalueR2First, allPredictList, allActualResultList = cal_objvalue_run(
+            pop2_ka_decimal2, pop2_kb_decimal2,
+            pop2_kc_decimal2, pop2_q_decimal2,
+            pop2_r_decimal2, pop2_OPT_PRI_decimal2,
+            w, beta0, optimumTEM, temStep, preStep,
+            slideStep, self.dataFrame)
         fitvalue2 = objvalue2
         [px, py] = pop_ka.shape
         bestindividual_ka = pop_ka[0, :]
@@ -471,6 +476,9 @@ class Model:
         bestindividual_r = pop_r[0, :]
         bestindividual_OPT_PRI = pop_OPT_PRI[0, :]
         bestfit = fitvalue2[0]
+        bestfitR2 = objvalueR2First[0]
+        predictResult = allPredictList[0]
+        # ActualResultList = allActualResultList
 
         for i in range(0, loopNum):  # 50
             print(f'--------------训练中:{str(i)}/{str(loopNum - 1)}--------------')
@@ -480,13 +488,14 @@ class Model:
             pop2_q_decimal = binary2decimal(pop_q, min_coefficient_q, max_coefficient_q)
             pop2_r_decimal = binary2decimal(pop_r, min_coefficient_r, max_coefficient_r)
             pop2_OPT_PRI_decimal = binary2decimal(pop_OPT_PRI, min_coefficient_OPT_PRI, max_coefficient_OPT_PRI)
-            objvalue1 = cal_objvalue_run(pop2_ka_decimal, pop2_kb_decimal,
-                                         pop2_kc_decimal, pop2_q_decimal,
-                                         pop2_r_decimal, pop2_OPT_PRI_decimal,
-                                         w, beta0, optimumTEM, temStep, preStep,
-                                         slideStep, self.dataFrame)
+            objvalue1, objvalueR2, allPredictList2, _ = cal_objvalue_run(
+                pop2_ka_decimal, pop2_kb_decimal,
+                pop2_kc_decimal, pop2_q_decimal,
+                pop2_r_decimal, pop2_OPT_PRI_decimal,
+                w, beta0, optimumTEM, temStep, preStep,
+                slideStep, self.dataFrame)
             fitvalue1 = objvalue1
-
+            fitvalueR2 = objvalueR2
             for j in range(0, px):
                 # if fitvalue1[j] < bestfit:
                 # cal_objvalue_run中除了第一个元素,其他赋值都0
@@ -498,7 +507,12 @@ class Model:
                     bestindividual_r = pop_r[j, :]
                     bestindividual_OPT_PRI = pop_OPT_PRI[j, :]
                     bestfit = fitvalue1[j]
-            print(f'当前精度:{fitvalue1}')
+                    bestfitR2 = fitvalueR2[j]
+                    predictResult = allPredictList2[j]
+                    # ActualResultList = allActualResultList
+            print('-------------当前精度-------------')
+            print(f'RMSE:{fitvalue1}')
+            print(f'R方:{fitvalueR2}')
             # best_ka = binary2decimal(bestindividual_ka, min_coefficient_ka, max_coefficient_ka)
             # best_kb = binary2decimal(bestindividual_kb, min_coefficient_kb, max_coefficient_kb)
             # best_kc = binary2decimal(bestindividual_kc, min_coefficient_kc, max_coefficient_kc)
@@ -512,7 +526,8 @@ class Model:
             #       f'best_q:{best_q}',
             #       f'best_r:{best_r}',
             #       f'best_OPT_PRI:{best_OPT_PRI}')
-            print(f'优选精度:{bestfit}')
+            print(f'优选精度RMSE:{bestfit}')
+            print(f'优选精度R方:{bestfitR2}')
 
             # 选择操作
             newpop_ka = selection(pop_ka, fitvalue1)
@@ -555,10 +570,42 @@ class Model:
               f'best_q:{best_q}',
               f'best_r:{best_r}',
               f'best_OPT_PRI:{best_OPT_PRI}',
-              f'bestfit:{bestfit}')
-        temp = [best_ka, best_kb, best_kc, best_q, best_r, best_OPT_PRI]
-        precision, actualAndPredictResult = bestfit, temp
-        return precision, actualAndPredictResult
+              f'bestfit:{bestfit}',
+              f'bestfitR2:{bestfitR2}')
+        temp = [best_ka, best_kb, best_kc, best_q, best_r, best_OPT_PRI, bestfitR2]
+        RMSE, R2, modelStruct = bestfit, bestfitR2, temp
+
+        for temp in tempIndicator:
+            # 计算均方误差
+            if temp == 'RMSE':
+                precision['RMSE'] = RMSE[0]
+            # 计算R方
+            elif temp == 'R方':
+                precision['R方'] = R2[0]
+
+        # 保存模型结果
+        modelStructPath = 'SEIR_structure.xlsx'
+        rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+        # 对应的标签
+        labels = ['ka', 'kb', 'kc', 'q', 'r', 'pri', 'rmse', 'r2']
+        data = {label: result[0] for label, result in zip(labels, modelStruct)}
+        # 创建 DataFrame
+        df = pd.DataFrame([data])
+        df.to_excel(modelStructPath, index=False)
+
+        # 保存预测结果
+        actualAndPredictResult = 'SEIR机理模型_predictLabel.xlsx'
+        savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
+        savePath1 = os.path.join(savePathDir, actualAndPredictResult)
+        savePath2 = os.path.join(savePathDir, 'SEIR机理模型_testLabel.xlsx')
+        pd.DataFrame(predictResult,
+                     columns=['predictLabel']).to_excel(
+            savePath1, index=False)
+        pd.DataFrame(allActualResultList,
+                     columns=['实际病株率']).to_excel(
+            savePath2, index=False)
+
+        return precision, actualAndPredictResult, modelStructPath
 
     def onPLSR(self):
         # 训练模型
