@@ -144,8 +144,8 @@ def onRun():
             afterHandleData, newColumns = FeatureOptimizationMethod(
                 dataFrameTemp, reservedField).ReliefF(
                 fields[0], methodParam)
-        print('=============返回数据=============')
-        print(afterHandleData)
+        # print('=============返回数据=============')
+        # print(afterHandleData)
         # ===============合并处理后数据集===============
         row_size = len(afterHandleData)
         # print('-------优选特征-------')
@@ -156,8 +156,6 @@ def onRun():
             afterHandleData, pages_utils.TempDataSet[3],
             on=intersection_cols, how="left")
 
-        print('======================优选特征======================')
-        print(pages_utils.TempDataSet[3])
         # ===============更新左侧显示内容===============
         update_values = {
             # "数据类型": "气象数据", "输入特征": fields[0],
@@ -171,6 +169,9 @@ def onRun():
             if row["编号"] == idNumber[indexT]:
                 for key, value in update_values.items():
                     pages_utils.TempDataSetField[3].loc[index, key] = value
+
+    print('======================优选特征集======================')
+    print(pages_utils.TempDataSet[3])
 
 
 # ==============================界面==============================
@@ -187,7 +188,7 @@ with dataPCV:
             if not tempLeftTabs:
                 tempLeftTabs = ['待进行特征计算']
                 column = ['空']
-            print(f'f=========测试{tempLeftTabs}================')
+            # print(f'f=========测试{tempLeftTabs}================')
             tt1 = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
                 with tt1[i]:
@@ -203,7 +204,7 @@ with dataPCV:
     if st.session_state.page12 == 1:
         with placeholder1.container():
             tempLeftTabs = st.session_state["leftTabs"][2:]
-            print(f'f=========测试{tempLeftTabs}================')
+            # print(f'f=========测试{tempLeftTabs}================')
             tt = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
                 with tt[i]:

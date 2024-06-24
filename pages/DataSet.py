@@ -90,7 +90,7 @@ with dataSCM:
                 )
     # ==============================控制文件上传逻辑==============================
     if uploaded_files:
-        print(uploaded_files)
+        # print(uploaded_files)
         bytes_data = uploaded_files.read()
         data33 = pd.read_excel(bytes_data)
         # st.markdown(data33)
@@ -114,7 +114,7 @@ with dataSCM:
             pages_utils.TempDataSet[0] = pd.merge(
                 data33, pages_utils.TempDataSet[0],
                 on=intersection_cols, how="outer")
-        print('======================实时原始数据集======================')
+        print('======================原始数据集======================')
         print(pages_utils.TempDataSet[0])
 # ==============================右侧文件上传状态显示==============================
 with dataSCR:

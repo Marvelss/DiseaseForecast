@@ -130,9 +130,9 @@ def onRun():
     isHandledFlags = pages_utils.TempDataSetField[1]["处理状态"]
     methodList = pages_utils.TempDataSetField[1]["预处理方法"]
     # ===============根据名称匹配调用并执行各个处理方法===============
-    print('=========测试输入数据=========')
-    print(fields)
-    print(methodParam)
+    # print('=========测试输入数据=========')
+    # print(fields)
+    # print(methodParam)
 
     # 若为空则跳过该步骤
     if idNumber.empty:
@@ -181,15 +181,15 @@ def onRun():
         pages_utils.TempDataSet[1] = pd.merge(
             afterHandleData, pages_utils.TempDataSet[1],
             on=intersection_cols, how="left")
-        print('======================预处理后数据集======================')
+        # print('======================预处理后数据集======================')
 
         # ===============更新左侧显示内容===============
-        print(f'更新左侧显示内容:{newDataColumn}')
+        # print(f'更新左侧显示内容:{newDataColumn}')
         DPVisualInformationTemp['name'] = tempMethod
         DPVisualInformationTemp['after'] = pages_utils.TempDataSet[1][newDataColumn]
         # 可视化信息添加
         st.session_state["DPVisualInformation"].append(DPVisualInformationTemp)
-        print('=====================展示可视化内容======================')
+        # print('=====================展示可视化内容======================')
         # print(st.session_state["DPVisualInformation"])
         update_values = {
             "预处理后字段": newDataColumn,
@@ -202,7 +202,8 @@ def onRun():
             if row["编号"] == idNumber[indexT]:
                 for key1, value1 in update_values.items():
                     pages_utils.TempDataSetField[1].loc[index, key1] = value1
-
+    print('===================预处理数据集===================')
+    print(pages_utils.TempDataSet[1])
 
 # ==============================界面==============================
 # 界面名称+布局+布局内容
@@ -355,8 +356,8 @@ with dataPCM:
     btn = interval_col2.button('添加处理', on_click=clearOption)
     if btn:
         # update dataframe state
-        print('=======获取预处理方法=====')
-        print(getCheckboxName(st.session_state["preMethodName"]['checkBox']))
+        # print('=======获取预处理方法=====')
+        # print(getCheckboxName(st.session_state["preMethodName"]['checkBox']))
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": '原始数据集',

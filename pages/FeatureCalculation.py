@@ -116,9 +116,9 @@ def onRun():
     methodParam = pages_utils.TempDataSetField[2]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
     isHandledFlags = pages_utils.TempDataSetField[2]["处理状态"].tolist()
-    print('===============获取任务清单内容===============')
-    print(methodParam)
-    print(methodList)
+    # print('===============获取任务清单内容===============')
+    # print(methodParam)
+    # print(methodList)
 
     # 若为空则跳过该步骤
     if not idNumber:
@@ -142,7 +142,7 @@ def onRun():
             dataFrameTemp = pages_utils.TempDataSet[2]
         # 使用处理后最新的字段内容
         reservedField = pages_utils.TempDataSet[1].columns.tolist()
-        print(f'=============测试保留字段-{reservedField}=============')
+        # print(f'=============测试保留字段-{reservedField}=============')
         if tempMethod == '时间(温度)分辨率转换':
             pass
         elif tempMethod == '降雨日数计算':
@@ -190,6 +190,9 @@ def onRun():
             if row["编号"] == idNumber[indexT]:
                 for key, value in update_values.items():
                     pages_utils.TempDataSetField[2].loc[index, key] = value
+
+    print('===================特征计算数据集===================')
+    print(pages_utils.TempDataSet[2])
 
 
 # ==============================界面==============================

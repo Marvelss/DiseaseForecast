@@ -215,8 +215,8 @@ def onTrain(temporaResolution):
             st.toast('PLSR训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
         elif tempModel == 'LR':
-            print('======测试输入参数======')
-            print(modelParam)
+            # print('======测试输入参数======')
+            # print(modelParam)
             evaluationResult, actualAndPredictResult, modelStruct = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
@@ -232,8 +232,8 @@ def onTrain(temporaResolution):
             st.toast('LR训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
         elif tempModel == 'SVR':
-            print('======测试输入参数======')
-            print(modelParam)
+            # print('======测试输入参数======')
+            # print(modelParam)
             evaluationResult, actualAndPredictResult, modelStruct = Model(
                 inputDataSet,
                 features[tempIndex], targets[tempIndex],
@@ -249,8 +249,8 @@ def onTrain(temporaResolution):
             st.toast('SVR训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
         elif tempModel == 'SEIR机理模型':
-            print('======测试输入参数======')
-            print(modelParam)
+            # print('======测试输入参数======')
+            # print(modelParam)
             with st.status("正在运行SEIR机理模型"):
                 evaluationResult, actualAndPredictResult, modelStruct = Model(
                     inputDataSet,

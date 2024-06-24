@@ -60,8 +60,8 @@ class Model:
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
         # =======================创建模型并开始训练=======================
-        print('======================模型构建-开始训练======================')
-        print(self.modelParam)
+        # print('======================模型构建-开始训练======================')
+        # print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
         param_names = array['参数名']
@@ -79,11 +79,11 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-        print('======================模型构建-精度指标======================')
+        # print('======================模型构建-精度指标======================')
         precision = {}
         actualAndPredictResult = y_pred.tolist()
-        print('y_pred:')
-        print(actualAndPredictResult)
+        # print('y_pred:')
+        # print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
         if ',' in self.evaluationIndicator:
@@ -151,8 +151,8 @@ class Model:
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
         # =======================创建模型并开始训练=======================
-        print('======================模型构建-开始训练======================')
-        print(self.modelParam)
+        # print('======================模型构建-开始训练======================')
+        # print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
         param_names = array['参数名']
@@ -166,11 +166,11 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-        print('======================模型构建-精度指标======================')
+        # print('======================模型构建-精度指标======================')
         precision = {}
         actualAndPredictResult = y_pred.tolist()
-        print('y_pred:')
-        print(actualAndPredictResult)
+        # print('y_pred:')
+        # print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
         if ',' in self.evaluationIndicator:
@@ -237,8 +237,8 @@ class Model:
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
         # =======================创建模型并开始训练=======================
-        print('======================模型构建-开始训练======================')
-        print(self.modelParam)
+        # print('======================模型构建-开始训练======================')
+        # print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
         param_names = array['参数名']
@@ -253,11 +253,11 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-        print('======================模型构建-精度指标======================')
+        # print('======================模型构建-精度指标======================')
         precision = {}
         actualAndPredictResult = y_pred.tolist()
-        print(actualAndPredictResult)
-        print('y_pred:')
+        # print(actualAndPredictResult)
+        # print('y_pred:')
         # print(y_pred)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
@@ -325,8 +325,8 @@ class Model:
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
         # =======================创建模型并开始训练=======================
-        print('======================模型构建-开始训练======================')
-        print(self.modelParam)
+        # print('======================模型构建-开始训练======================')
+        # print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
         param_names = array['参数名']
@@ -340,11 +340,11 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-        print('======================模型构建-精度指标======================')
+        # print('======================模型构建-精度指标======================')
         precision = {}
         actualAndPredictResult = y_pred.tolist()
-        print('y_pred:')
-        print(actualAndPredictResult)
+        # print('y_pred:')
+        # print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
         if ',' in self.evaluationIndicator:
@@ -629,7 +629,7 @@ class Model:
             partition = 0.4
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
         # =======================创建模型并开始训练=======================
-        print('======================模型构建-开始训练======================')
+        # print('======================模型构建-开始训练======================')
         # 合并参数名称和值
         params = self.modelParam
         # print(params['参数名'].keys())
@@ -646,7 +646,7 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-        print('======================模型构建-精度指标======================')
+        # print('======================模型构建-精度指标======================')
         precision = {}
         # actualAndPredictResult = y_pred.tolist()
         tempIndicator = self.evaluationIndicator
@@ -715,8 +715,8 @@ class Model:
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
         # =======================创建模型并开始训练=======================
-        print('======================模型构建-开始训练======================')
-        print(self.modelParam)
+        # print('======================模型构建-开始训练======================')
+        # print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
         param_names = array['参数名']
@@ -730,7 +730,7 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-        print('======================模型构建-精度指标======================')
+        # print('======================模型构建-精度指标======================')
         precision = {}
         # actualAndPredictResult = y_pred.tolist()
         # print('y_pred:')
@@ -801,8 +801,8 @@ class Model:
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=partition, random_state=42)
 
         # =======================创建模型并开始训练=======================
-        print('======================模型构建-开始训练======================')
-        print(self.modelParam)
+        # print('======================模型构建-开始训练======================')
+        # print(self.modelParam)
         # 合并参数名称和值
         array = self.modelParam
         param_names = array['参数名']
@@ -816,11 +816,11 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
-        print('======================模型构建-精度指标======================')
+        # print('======================模型构建-精度指标======================')
         precision = {}
         actualAndPredictResult = y_pred.tolist()
-        print('y_pred:')
-        print(actualAndPredictResult)
+        # print('y_pred:')
+        # print(actualAndPredictResult)
         tempIndicator = self.evaluationIndicator
         # print(tempIndicator)
         if ',' in self.evaluationIndicator:

@@ -59,9 +59,14 @@ class FeatureOptimizationMethod:
         target = methodParam[0][0]
         name = methodParam[0][1]
         proportion = methodParam[0][2]
+        # =========================提取有效值=========================
+        # 使用groupby分组并提取每个分组的第一个非空值
+        ultimateFeatures = self.dataFrame.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+        # ******删除包含缺失值的行******
+        df_cleaned = ultimateFeatures.dropna()
         # 准备数据
-        X = self.dataFrame[inputFields].drop(columns=[target])  # 假设我们已经从df中删除了目标列和不需要的列
-        y = self.dataFrame[target]
+        X = df_cleaned[inputFields].drop(columns=[target])  # 假设我们已经从df中删除了目标列和不需要的列
+        y = df_cleaned[target]
         # print('设置检查和处理缺失值')
         # print(X.index)
         # X = X.dropna()
@@ -138,6 +143,7 @@ class FeatureOptimizationMethod:
             # print(coefficientStandard)
             tempDict[temp] = pearson_corr_value
             # 判断是否符合筛选条件
+            print(pearson_corr_value)
             if pearson_corr_value < float(coefficientStandard):
                 # 字段名称添加_优选
                 newDataColumn = self.getHandledField(temp)
