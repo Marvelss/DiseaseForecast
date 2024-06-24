@@ -510,9 +510,9 @@ class Model:
                     bestfitR2 = fitvalueR2[j]
                     predictResult = allPredictList2[j]
                     # ActualResultList = allActualResultList
-            print('-------------当前精度-------------')
-            print(f'RMSE:{fitvalue1}')
-            print(f'R方:{fitvalueR2}')
+            # print('-------------当前精度-------------')
+            # print(f'RMSE:{fitvalue1}')
+            # print(f'R方:{fitvalueR2}')
             # best_ka = binary2decimal(bestindividual_ka, min_coefficient_ka, max_coefficient_ka)
             # best_kb = binary2decimal(bestindividual_kb, min_coefficient_kb, max_coefficient_kb)
             # best_kc = binary2decimal(bestindividual_kc, min_coefficient_kc, max_coefficient_kc)
@@ -585,13 +585,14 @@ class Model:
 
         # 保存模型结果
         modelStructPath = 'SEIR_structure.xlsx'
-        rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults', 'modelsStructure')
+        rootPath = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+        modelStructPathT = os.path.join(rootPath, 'modelsStructure', modelStructPath)
         # 对应的标签
         labels = ['ka', 'kb', 'kc', 'q', 'r', 'OPT_PRI', 'RMSE', 'R方']
         data = {label: result[0] for label, result in zip(labels, modelStruct)}
         # 创建 DataFrame
         df = pd.DataFrame([data])
-        df.to_excel(rootPath, index=False)
+        df.to_excel(modelStructPathT, index=False)
 
         # 保存预测结果
         actualAndPredictResult = 'SEIR机理模型_predictLabel.xlsx'
