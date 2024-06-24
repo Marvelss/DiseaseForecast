@@ -41,6 +41,7 @@ with dataSCM:
     st.markdown("##### 上传数据集")
 
     selectedTemplate = pills("选择数据集", ['气象数据', '植保数据(未开放)', '农学数据(未开放)'], ["🌨️️", "🌾", "☣️"])
+
     uploaded_files = st.file_uploader(
         "上传数据集",
         accept_multiple_files=False,
@@ -91,29 +92,40 @@ with dataSCM:
     # ==============================控制文件上传逻辑==============================
     if uploaded_files:
         # print(uploaded_files)
-        bytes_data = uploaded_files.read()
-        data33 = pd.read_excel(bytes_data)
-        # st.markdown(data33)
-        new_data = {
-            "编号": pages_utils.generateID(),
-            "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "已上传",
-            "上传时间": datetime.now().strftime("%H:%M:%S"),
-            "字段": data33.columns.tolist()}
+        try:
+            bytes_data = uploaded_files.read()
+            data33 = pd.read_excel(bytes_data)
 
-        # 防止重复添加
-        if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():
-            pass
-        else:
-            # 添加并合并至原始数据集
+            # st.markdown(data33)
+            new_data = {
+                "编号": pages_utils.generateID(),
+                "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "已上传",
+                "上传时间": datetime.now().strftime("%H:%M:%S"),
+                "字段": data33.columns.tolist()}
+
+            # 防止重复添加
+            if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():
+                pass
+            else:
+                # 添加并合并至原始数据集
+                pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
+                # 获取两个DataFrame列名的交集
+                intersection_cols = pages_utils.getIntersectionCols(
+                    data33, pages_utils.TempDataSet[0]
+                )
+                # 合并数据
+                pages_utils.TempDataSet[0] = pd.merge(
+                    data33, pages_utils.TempDataSet[0],
+                    on=intersection_cols, how="outer")
+        # 上传出错提示
+        except BaseException as e:
+            st.toast('上传错误,请检测文件内容及格式无误后重新上传', icon="⚠️")
+            new_data = {
+                "编号": pages_utils.generateID(),
+                "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "上传出错",
+                "上传时间": datetime.now().strftime("%H:%M:%S"),
+                "字段": '未识别'}
             pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
-            # 获取两个DataFrame列名的交集
-            intersection_cols = pages_utils.getIntersectionCols(
-                data33, pages_utils.TempDataSet[0]
-            )
-            # 合并数据
-            pages_utils.TempDataSet[0] = pd.merge(
-                data33, pages_utils.TempDataSet[0],
-                on=intersection_cols, how="outer")
         print('======================原始数据集======================')
         print(pages_utils.TempDataSet[0])
 # ==============================右侧文件上传状态显示==============================
