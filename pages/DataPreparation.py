@@ -205,6 +205,7 @@ def onRun():
     print('===================预处理数据集===================')
     print(pages_utils.TempDataSet[1])
 
+
 # ==============================界面==============================
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
@@ -265,8 +266,15 @@ with dataPCV:
     result1 = pages_utils.multiselect_all(
         st, '全选-字段', weatherName,
         'temp', 'collapsed')
-    st.checkbox('全选-植保数据', disabled=True)
-    st.checkbox('全选-农学数据', disabled=True)
+    # st.checkbox('全选-植保数据', disabled=True)
+    # st.checkbox('全选-农学数据', disabled=True)
+    selection = st.dataframe(
+        pages_utils.TempDataSet[0], height=190, width=800, on_select="rerun", selection_mode="multi-row")
+    # st.markdown(selection['上级单位'])
+    people = selection.selection.rows
+    # filtered_df = df.iloc[people]
+    st.markdown(people)
+
     result2 = []
     result3 = []
     # result2 = pages_utils.multiselect_all(
