@@ -257,10 +257,10 @@ def onTrain(temporaResolution):
                     features[tempIndex], targets[tempIndex],
                     dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
                     evaluationIndicator[tempIndex]).onSEIR()
-            print('======测试返回SEIR模型评价结果======')
-            print(f'精度:{evaluationResult}')
-            print(f'最优参数:{actualAndPredictResult}')
-            print(f'模型结构:{modelStruct}')
+            # print('======测试返回SEIR模型评价结果======')
+            # print(f'精度:{evaluationResult}')
+            # print(f'最优参数:{actualAndPredictResult}')
+            # print(f'模型结构:{modelStruct}')
             # 显示模型训练结果信息
             info = ''
             for key, value in evaluationResult.items():
@@ -268,10 +268,10 @@ def onTrain(temporaResolution):
             # 显示精度结果
             st.toast('SEIR机理模型训练完成 \n' + '       ' + ' \n' + info,
                      icon='✅')
-        print('==============更新前================')
-        print(pages_utils.TempDataSetField[4])
+        # print('==============更新前================')
+        # print(pages_utils.TempDataSetField[4])
         # ===============更新左侧显示内容===============
-        print(actualAndPredictResult)
+        # print(actualAndPredictResult)
         update_values = {
             "时间": datetime.datetime.now().time(),
             "评价指标": evaluationResult,
@@ -463,18 +463,20 @@ with modelACM:
         # =======================添加评价指标=======================
         with ph.container():
             st.markdown("###### 评价指标")
-            tempCol1, tempCol2 = st.columns(2)
+            tempCol1, tempCol2, tempCol3 = st.columns(3)
             with tempCol1:
-                agree6 = st.checkbox('OA', key='checkBoxPrecision0')
-                agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
-            with tempCol2:
-                agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
-                agree9 = st.checkbox('R方', key='checkBoxPrecision3')
                 agree10 = st.checkbox('RMSE', key='checkBoxPrecision4')
+                agree6 = st.checkbox('OA', key='checkBoxPrecision0')
+            with tempCol2:
+                agree9 = st.checkbox('R方', key='checkBoxPrecision3')
+                agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
+            with tempCol3:
+                agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
+
             interval_col1, interval_col2 = st.columns([5, 1])
             # 传入指标
             # tempArgs =
-            btn21 = interval_col1.button(
+            btn21 = interval_col2.button(
                 "下一步",
                 on_click=onPrecision,
                 args=[agree6, agree7, agree8, agree9, agree10])
@@ -483,7 +485,7 @@ with modelACM:
     elif st.session_state.page == 2:
         # =======================添加验证与训练数据集划分=======================
         with ph.container():
-            st.markdown("###### 数据集有效值提取及验证与训练数据划分")
+            st.markdown("###### 有效特征集提取")
 
             # 检查是否有缺失值
             for p in range(len(pages_utils.TempDataSet))[::-1]:
@@ -491,49 +493,48 @@ with modelACM:
                 if not df11.empty:
                     break
             beforeDF = df11
-            missing_values = beforeDF.isnull().sum()
+            pages_utils.TempDataSet[4] = beforeDF
+            missing_values = pages_utils.TempDataSet[4].isnull().sum()
             if missing_values.any():
-                st.toast('优选特征中含有缺失值,请点击下方按钮提取有效值', icon="⚠️")
+                st.toast('优选特征中含有缺失值,请选中下方选项以提取有效值', icon="⚠️")
 
+            isExtract = st.checkbox('提取有效值')
+            # 分组并提取每个分组的第一个非空值
+            result = beforeDF.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+            # ******删除包含缺失值的行******
+            df_cleaned = result.dropna()
 
-            @st.experimental_dialog("有效值提取", width='large')
-            def vote():
-                df11 = None
-                isExtract = st.checkbox('提取有效值')
-                for p in range(len(pages_utils.TempDataSet))[::-1]:
-                    df11 = pages_utils.TempDataSet[p]
-                    if not df11.empty:
-                        break
-                beforeDF = df11
-                # 分组并提取每个分组的第一个非空值
-                result = beforeDF.groupby(['上级单位', '测报站点', '年']).first().reset_index()
-                # ******删除包含缺失值的行******
-                df_cleaned = result.dropna()
+            if isExtract:
+                pages_utils.TempDataSet[4] = df_cleaned
+                st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
+            else:
+                st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
+                pages_utils.TempDataSet[4] = beforeDF
 
-                if isExtract:
-                    a = st.data_editor(df_cleaned, num_rows="dynamic", width=700, height=300)
-                    pages_utils.TempDataSet[4] = df_cleaned
-                else:
-                    b = st.data_editor(beforeDF, num_rows="dynamic", width=700, height=300)
-                    pages_utils.TempDataSet[4] = beforeDF
-                # 选择后变化
-                if st.button("Submit"):
-                    if isExtract:
-                        print('开始')
-                        print(df_cleaned)
-                    st.rerun()
+            st.markdown('---')
+            st.markdown("###### 训练与验证数据集划分")
+            colOP1, colOP2 = st.columns(2)
+            with colOP1:
+                option1 = st.selectbox(
+                    label="训练与验证数据集划分", label_visibility='collapsed',
+                    options=("按比例划分", "按年份划分(未实现)")
+                )
+            with colOP2:
+                if option1 == '按比例划分':
+                    option = st.selectbox(
+                        label="比例", label_visibility='collapsed',
+                        options=("8:2", "7:3", "6:4")
+                    )
+                elif option1 == '按年份划分(未实现)':
+                    option = st.selectbox(
+                        label="年", label_visibility='collapsed',
+                        options=('待实现', '')
+                    )
 
-
-            if st.button("有效值提取"):
-                vote()
-            option = st.selectbox(
-                label="划分比例",
-                options=("8:2", "7:3", "6:4")
-            )
             for index, row in pages_utils.TempDataSetField[4].iterrows():
                 pages_utils.TempDataSetField[4].loc[index, '数据集划分比例'] = option
             interval_col1, interval_col2 = st.columns([5, 1])
-            interval_col1.button("保存", on_click=firstPage)
+            interval_col2.button("保存", on_click=firstPage)
 
     # =======================显示右下内容=======================
     placeholder = st.empty()
