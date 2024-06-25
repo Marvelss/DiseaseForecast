@@ -304,25 +304,44 @@ with dataPCM:
             st.session_state["OptimizationMethodName"]['param3'] = str(number2)
 
     # =======================添加处理至任务清单=======================
-    interval_col1, interval_col2 = st.columns([5, 1])
-    btn = interval_col2.button('添加处理', on_click=clear_all)
-    if btn:
-        for key11, value11 in st.session_state["OptimizationMethodName"].items():
-            pass
-            # print(f"Key: {key11}, Value: {value11}")
-        new_data = {
-            "编号": pages_utils.generateID(),
-            "数据类型": '气象数据',
-            "输入特征": mergeArray(result1, result2, result3),
-            "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
-            "方法参数":
-                [value for key, value in st.session_state["OptimizationMethodName"].items() if key != 'checkBox'],
-            "时间": datetime.datetime.now().time(),
-            "处理状态": False}
-        print('======================特征优选-添加任务清单记录======================')
-        print(new_data)
-        pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
-        st.rerun()
+    interval_col1, interval_col2 = st.columns([4, 1])
+    with interval_col2:
+        with st.popover("预览"):
+            # 选择需要计算相关性的列
+            df = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\demo\demo18\2024-06-25T12-08_export.xlsx')
+            columns_of_interest = ['01-01_01-30_降水累积量', '年', '病害峰值', '7-19_8-9_降雨日数']  # 替换为你感兴趣的列名
+            data = df[columns_of_interest]
+
+            # 计算相关性矩阵
+            correlation_matrix = data.corr()
+
+            # 使用Seaborn绘制热图
+            plt.figure(figsize=(10, 8))
+            sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', center=0)
+            plt.title('Correlation Matrix')
+            st.pyplot(plt)
+            st.multiselect('预期删除特征:',
+                           options=['a', 'b', 'c'],
+                           default=['a', 'b', 'c'])
+            btn = st.button('添加处理', on_click=clear_all)
+            if btn:
+                for key11, value11 in st.session_state["OptimizationMethodName"].items():
+                    pass
+                    # print(f"Key: {key11}, Value: {value11}")
+                new_data = {
+                    "编号": pages_utils.generateID(),
+                    "数据类型": '气象数据',
+                    "输入特征": mergeArray(result1, result2, result3),
+                    "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
+                    "方法参数":
+                        [value for key, value in st.session_state["OptimizationMethodName"].items() if
+                         key != 'checkBox'],
+                    "时间": datetime.datetime.now().time(),
+                    "处理状态": False}
+                print('======================特征优选-添加任务清单记录======================')
+                print(new_data)
+                pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
+                st.rerun()
     st.markdown('---')
 
     # =======================显示右下内容=======================
@@ -354,48 +373,50 @@ with dataPCM:
         # =======================显示右下可视化图表=======================
         with placeholder.container():
             st.markdown('##### 可视化')
+            plt.rc("font", family='Microsoft YaHei')
+            idFMethods = pages_utils.TempDataSetField[2]["特征优选方法"].tolist()
 
             # 若无方法处理,则直接跳过该环节
-            if len([]):
-                pass
-            tab1, tab2 = st.tabs(["1", "2"])
-            with tab1:
-                # 模拟气温数据
-                df1 = simulate_temperature_data1()
-                # 划分特征和目标
-                X = df1.drop('Target', axis=1)
-                y = df1['Target']
+            if len(idFMethods):
+                # 创建新的从 1 开始的编号列表
+                new_ids = list(range(0, len(idFMethods)))
+                # 创建标签页并重新命名记录
+                new_ids = [f'记录编号_{h}' for h in new_ids]
 
-                # 使用随机森林模型拟合数据
-                rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
-                rf_model.fit(X, y)
+                tt1 = st.tabs(new_ids)
+                for o in range(len(idFMethods)):
+                    with tt1[o]:
+                        # 创建DataFrame
+                        data_after = st.session_state["FCVisualInformation"][o]['after']
+                        # 特征名称
+                        dataColumn = st.session_state["FCVisualInformation"][o]['column']
+                        if idFMethods[o] == 't检验':
+                            # 选择最多8个测报站点
+                            top_stations = data_after['测报站点'].value_counts().nlargest(8).index
+                            df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
 
-                # 获取特征重要性
-                feature_importance = rf_model.feature_importances_
+                            # 选择最多3个年份
+                            top_years = data_after['年'].value_counts().nlargest(3).index
+                            df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
 
-                # 创建特征重要性数据框
-                feature_importance_df = pd.DataFrame(
-                    {'Feature': ['temperature', 'precipitation', 'Continuous Rain Days'],
-                     'Importance': feature_importance})
-
-                # 排序特征重要性
-                feature_importance_df = feature_importance_df.sort_values(by='Importance', ascending=False)
-
-                # 创建子图和轴
-                fig, ax = plt.subplots()
-
-                # 使用Seaborn的barplot生成特征重要性图
-                sns.barplot(x='Importance', y='Feature', data=feature_importance_df, ax=ax)
-
-                # 设置图形标题
-                plt.title('Feature Importance Plot')
-                st.pyplot(fig)
-            with tab2:
-                df = simulate_temperature_data()
-                fig, ax = plt.subplots()
-                sns.scatterplot(x='Temperature1', y='Temperature2', hue='Target', data=df)
-                plt.title('Scatter Plot of Selected Features')
-                st.pyplot(fig)
+                            # 绘制折线图
+                            plt.figure(figsize=(10, 6))
+                            sns.lineplot(
+                                data=df_filtered,
+                                x="测报站点",
+                                y=dataColumn,
+                                hue="年",
+                                marker="o"
+                            )
+                            # 设置标签和标题
+                            plt.xlabel("测报站点")
+                            plt.ylabel(dataColumn)
+                            plt.title(f"部分县市与各年份{dataColumn}", fontsize=16)
+                            st.pyplot(plt)
+                        elif idFMethods[o] == 'Pearson相关性分析':
+                            pass
+                        elif idFMethods[o] == 'Relief-F互相关分析':
+                            pass
             interval_col34, interval_col33 = st.columns([5, 1])
             want_to_contribute = interval_col34.button("跳转至可视化界面")
             if want_to_contribute:
