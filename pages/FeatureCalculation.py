@@ -12,11 +12,11 @@ import seaborn as sns
 st.set_page_config(
     layout="wide"
 )
-
 if 'page13' not in st.session_state:
     st.session_state.page13 = 0
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
+    st.switch_page("App.py")
 checkBoxNum = 5
 if "featureMethodName" not in st.session_state:
     st.session_state["featureMethodName"] = {
