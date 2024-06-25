@@ -321,8 +321,8 @@ with dataPCM:
             plt.title('Correlation Matrix')
             st.pyplot(plt)
             st.multiselect('预期删除特征:',
-                           options=['a', 'b', 'c'],
-                           default=['a', 'b', 'c'])
+                           options=['01-01_01-30_降水累积量', '年'],
+                           default=['01-01_01-30_降水累积量', '年'])
             btn = st.button('添加处理', on_click=clear_all)
             if btn:
                 for key11, value11 in st.session_state["OptimizationMethodName"].items():
