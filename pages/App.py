@@ -4,6 +4,8 @@ import streamlit as st
 from st_pages import Page, show_pages
 
 import pages_utils
+import itertools
+import ui
 
 # add_page_title()
 
@@ -41,20 +43,6 @@ if "leftTabs" not in st.session_state:
 
 # 设置网页标题
 st.title('多场景病虫害预测系统')
-st.subheader('简介')
-# # 纯文本
-st.text("""
-基于WEB的多场景病虫害预测系统是指利用网络技术搭建的用于预测农作物病虫害发生和蔓延情况的系统。这类系统通常结合了农业领域的专业知识、气象数据、植物病虫害生态学等多方面的信息，以实现对病虫害的准确预测和预警。
-
-""")
-st.subheader('关键功能和特点')
-st.text("""
-1.数据收集和整合：系统通过网络技术实时获取气象数据、农作物生长数据、土壤状况等相关信息，并对这些数据进行整合和存储。
-2.多场景模型建立：系统利用机器学习、数据挖掘等技术建立病虫害预测模型，这些模型可以基于不同的场景和地区进行灵活调整，以适应不同作物和环境条件下的病虫害预测需求。
-3.可视化展示和分析：系统提供直观的图表展示和数据分析功能，将预测结果以可视化的方式呈现给用户，帮助用户快速了解病虫害发生的可能性和趋势。
-4.实时预警和建议：系统具有实时监测功能，能够根据预测模型输出的结果，及时向农户或专业人士发出预警信息，提示可能的病虫害发生风险，并提供相应的防治建议。
-5.云端服务：由于使用基于WEB的技术，多场景病虫害预测系统可以部署在云端平台上，提供灵活的访问和使用方式，用户可以通过智能手机、平板电脑等设备随时随地获取相关信息。
-""")
 
 
 # 清空各环节初始化按钮
@@ -91,3 +79,261 @@ def emptyValue():
 
 if st.button('初始化数据', on_click=emptyValue):
     st.toast("初始化完毕", icon="ℹ️️")
+
+
+def navbar():
+    """Shows a sticky navigation bar with links to other apps at the top of the page."""
+    st.write(
+        """
+        <style>
+            /* Add a black background color to the top navigation */
+            .topnav-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 3.5rem;
+                /* border-bottom: 1px solid rgba(38, 39, 48, 0.2); */
+                /* padding-left: 60px; */
+                /* padding-top: 0.5rem;
+                padding-bottom: 0.5rem; */
+                /* padding-right: 100px; */
+                background-color: white;
+                z-index: 98;
+
+                line-height: 3.5rem;
+
+                flex: 1 1 0%;
+
+            }
+
+            .topnav {
+                overflow: hidden;
+                /* position: relative;
+                top: -50px; */
+                padding-left: 1rem;
+                padding-right: 1rem;
+
+                max-width: 730px;
+                margin: 0 auto;
+
+                display: flex;
+                /*justify-content: space-between;*/
+                justify-content: center;
+                align-items: center;
+
+                vertical-align: middle;
+            }
+
+            /* Style the links inside the navigation bar */
+            .topnav a {
+                color: rgb(38, 39, 48);
+                text-align: center;
+                text-decoration: none;
+                /* font-size: 17px; */
+            }
+
+            /* Change the color of links on hover */
+            .topnav a:hover {
+                color: #e24768;
+            }
+
+            /* Add a color to the active/current link */
+            .topnav a.active {
+                color: #e24768;
+            }
+
+            /*.topnav-right a {
+                margin-left: 3rem;
+            }*/
+
+            .topnav-right {
+                display: none;
+            }
+
+            @media screen and (max-width: 800px) {
+                .topnav-right {
+                    display: none;
+                }
+
+                .topnav {
+                    justify-content: center;
+                }
+            }
+
+            .topnav-title {
+                margin-left: 1rem;
+                font-weight: 500;
+            }
+        </style>
+
+        <div class="topnav-container">
+            <nav class="topnav">
+                <div class="topnav-left">
+                    <a href="https://share.streamlit.io/jrieke/st-frontpage/main">
+                        <img src="https://streamlit.io/images/brand/streamlit-mark-color.png" width=35>
+                        <span class="topnav-title">View all apps</span>
+                    </a>
+                </div>
+                <div class="topnav-right">
+                    <a href="https://share.streamlit.io/jrieke/st-frontpage/main">View all apps</a>
+                    <a href="https://share.streamlit.io/" target="_blank"><img src="https://screenshots.imgix.net/mui-org/material-ui-icons/account-circle-outlined/~v=3.9.2/e6ffca0e-87fa-4e5b-92ca-05c6079b5f9e.png?ixlib=js-1.2.0&s=c0f87e872aac058178a34a41422a425d" width=35 style="border-radius: 100%; margin-left: 1rem;"></a>
+                </div>
+            </nav>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+# st.image("https://streamlit.io/images/brand/streamlit-mark-color.png", width=100)
+# st.title("Snowflake Summit Demo Apps")
+
+st.markdown(
+    """
+    <style>
+        .screenshot {
+            border: 1px solid rgba(38, 39, 48, 0.2);
+            border-radius: 0.25rem;
+        }
+
+        h3 {
+            padding-top: 1rem;
+        }
+
+        h3 a {
+            color: var(--text-color) !important;
+            text-decoration: none;
+        }
+
+        small a {
+            color: var(--text-color) !important;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: none;
+        }
+    </style>
+
+    <!-- Open links in new tabs by default. Required for Streamlit sharing to not open links within the iframe. -->
+    <base target="_blank">
+    """,
+    unsafe_allow_html=True,
+)
+
+category_colors_cycle = itertools.cycle(
+    [
+        # ui.color("red-70"),
+        ui.color("orange-70"),
+        ui.color("light-blue-70"),
+        ui.color("blue-green-70"),
+        ui.color("blue-70"),
+        ui.color("violet-70"),
+        ui.color("red-70"),
+        ui.color("green-70"),
+    ]
+)
+
+
+def category(name, description=None):
+    # if current_category_index != 0:
+    # st.write("---")
+    # st.write("")
+    # pass
+    # ui.colored_header(name, "rgba(38, 39, 48, 0.6)")
+    ui.colored_header(name, next(category_colors_cycle), description)
+    # st.header(name)
+    st.write("")
+
+    # current_category_index += 1
+
+
+@st.experimental_dialog("有效值提取", width='large')
+def vote():
+    isExtract = st.checkbox('提取有效值')
+    # 分组并提取每个分组的第一个非空值
+    # a = st.data_editor(pd.DataFrame([]), num_rows="dynamic", width=700, height=300)
+
+    # 选择后变化
+    if st.button("Submit"):
+        if isExtract:
+            print('开始')
+        st.rerun()
+
+
+def app(image, link, name, description, developer, repo_link):
+    ui.linked_image(image, link)
+    # st.subheader(f"[{name}]({link})")
+    st.subheader(f"{name}")
+    st.write(f"{description}")
+    #     st.caption(f"[{description}]({link})")
+    # clone_code = "git clone {} ".format(repo_link)
+    # st.text(clone_code)
+    #     repo_link = "https://github.com/streamlit/{0}/".format(repo_name)
+    # st.write(f"[View App]({link})")
+    # st.write("[View GitHub Repo](%s)" % repo_link)
+    st.caption(f"开发人员：[{developer}](%s)" % repo_link)
+
+    # st.write("[调用接口](%s)" % repo_link)
+    if st.button(f"调用API:{name}"):
+        vote()
+        st.markdown(link)
+    # st.text("[调用该接口](%s)" % repo_link)
+
+    st.write("")
+
+
+category("🗣️ 各项特征计算方法API")
+col1, col2, col3 = st.columns(3)
+with col1:
+    app("pages/images/GPTLab.png",
+        '#',
+        "降雨日数计算",
+        "基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数",
+        "Vagrant",
+        "https://github.com/Marvelss",
+        )
+
+with col2:
+    app("pages/images/AskMyPDF.png",
+        '#',
+        "降水累积量计算",
+        "累加某个时间段内降雨量以计算降水累积量",
+        "Vagrant",
+        "https://github.com/Marvelss",
+        )
+with col3:
+    app("pages/images/HugChat.png",
+        '#',
+        "基于活动积温的生育期计算",
+        "基于每日累积温度达到特定积温阈值的时间即为相应生育期",
+        "Vagrant",
+        "https://github.com/Marvelss",
+        )
+col21, col22, col23 = st.columns(3)
+with col21:
+    app("pages/images/KnowledgeGPT.png",
+        '#',
+        "时空抽取",
+        "待补充",
+        "Vagrant",
+        "https://github.com/Marvelss",
+        )
+
+with col22:
+    app("pages/images/NYC.png",
+        '#',
+        "植被指数计算",
+        "待补充",
+        "Vagrant",
+        "https://github.com/Marvelss",
+        )
+with col23:
+    app("pages/images/Roadmap.png",
+        '#',
+        "景观指数计算",
+        "待补充",
+        "Landscapemetrics",
+        "https://github.com/r-spatialecology/landscapemetrics",
+        )
