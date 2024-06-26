@@ -452,8 +452,8 @@ with (featureCCM):
                             )
                             # 设置标签和标题
                             plt.xlabel("测报站点")
-                            plt.ylabel(dataColumn)
-                            plt.title(f"部分县市与各年份{dataColumn}", fontsize=16)
+                            plt.ylabel(f'{dataColumn}(Day Of Year)')
+                            plt.title(f"部分县市各年份{dataColumn}", fontsize=16)
                             st.pyplot(plt)
                         elif idFMethods[o] == '降水累积量计算':
                             # 时期范围名称修剪
@@ -478,8 +478,8 @@ with (featureCCM):
                             )
                             # 设置标签和标题
                             plt.xlabel("测报站点")
-                            plt.ylabel("降水累积量")
-                            plt.title(f"部分县市与各年份{integratedDataColumn}")
+                            plt.ylabel("降水累积量(mm)")
+                            plt.title(f"部分县市各年份{integratedDataColumn}")
                             st.pyplot(plt)
                         elif idFMethods[o] == '降雨日数计算':
                             # 时期范围名称修剪
@@ -504,8 +504,8 @@ with (featureCCM):
                             )
                             # 设置标签和标题
                             plt.xlabel("测报站点")
-                            plt.ylabel("降雨日数")
-                            plt.title(f"部分县市与各年份{integratedDataColumnR}")
+                            plt.ylabel("降雨日数(天)")
+                            plt.title(f"部分县市各年份{integratedDataColumnR}")
                             st.pyplot(plt)
             interval_col34, interval_col33 = st.columns([5, 1])
             btn3 = interval_col33.button('返回', on_click=firstPage)
