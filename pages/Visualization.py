@@ -32,7 +32,7 @@ tab1, tab2 = st.tabs(['数据下载', '可视化(待完成)'])
 with tab1:
     col1, col2 = st.columns([0.7, 0.2])
     with col2:
-        st.markdown('###### 模型下载')
+        st.markdown('###### 模型结构与训练结果下载')
         # option55 = st.radio("选择下载内容",
         #                     options=['数据集', '各环节方法执行记录'],
         #                     label_visibility='collapsed')
@@ -66,50 +66,50 @@ with tab1:
             st, '全选',
             pages_utils.TempDataSetField[4]['模型'],
             'temp111', 'collapsed')
+        if not pages_utils.TempDataSetField[4].empty:
+            models = pages_utils.TempDataSetField[4]['模型'].tolist()
+            modelsStruct = pages_utils.TempDataSetField[4]['模型结构'].tolist()
+            modelResult = pages_utils.TempDataSetField[4]['模型训练结果'].tolist()
 
-        models = pages_utils.TempDataSetField[4]['模型'].tolist()
-        modelsStruct = pages_utils.TempDataSetField[4]['模型结构'].tolist()
-        modelResult = pages_utils.TempDataSetField[4]['模型训练结果'].tolist()
+            zipPath = os.path.join(
+                os.getcwd(), 'resource', 'modelsResults', '模型结构与训练结果.zip')
 
-        zipPath = os.path.join(
-            os.getcwd(), 'resource', 'modelsResults', '模型结构与训练结果.zip')
+            with zipfile.ZipFile(zipPath, 'w') as zipf:
+                pass  # 不添加任何文件
+            # 输入压缩包的文件路径
+            zipFilesPath = []
+            for model in result1:
+                row = pages_utils.TempDataSetField[4][pages_utils.TempDataSetField[4]['模型'] == model]
+                if not row.empty:
+                    model_structure = row['模型结构'].values[0]
+                    model_training_result = row['模型训练结果'].values[0]
+                    # print(f"匹配到模型: {model}")
+                    # print(f"模型结构: {model_structure}")
+                    # print(f"模型训练结果: {model_training_result}\n")
 
-        with zipfile.ZipFile(zipPath, 'w') as zipf:
-            pass  # 不添加任何文件
-        # 输入压缩包的文件路径
-        zipFilesPath = []
-        for model in result1:
-            row = pages_utils.TempDataSetField[4][pages_utils.TempDataSetField[4]['模型'] == model]
-            if not row.empty:
-                model_structure = row['模型结构'].values[0]
-                model_training_result = row['模型训练结果'].values[0]
-                # print(f"匹配到模型: {model}")
-                # print(f"模型结构: {model_structure}")
-                # print(f"模型训练结果: {model_training_result}\n")
+                    rootPathTemp = os.path.join(os.getcwd(), 'resource', 'modelsResults')
 
-                rootPathTemp = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+                    modelStructurePath = os.path.join(rootPathTemp,
+                                                      'modelsStructure', model_structure)
+                    # 保存预测结果
+                    modelResultPath = os.path.join(rootPathTemp,
+                                                   'predictAndTestLabel',
+                                                   model_training_result)
+                    # print(modelStructurePath)
+                    # print(modelResultPath)
+                    zipFilesPath.append(modelStructurePath)
+                    zipFilesPath.append(modelResultPath)
+                else:
+                    print(f"模型 {model} 未找到\n")
 
-                modelStructurePath = os.path.join(rootPathTemp,
-                                                  'modelsStructure', model_structure)
-                # 保存预测结果
-                modelResultPath = os.path.join(rootPathTemp,
-                                               'predictAndTestLabel',
-                                               model_training_result)
-                # print(modelStructurePath)
-                # print(modelResultPath)
-                zipFilesPath.append(modelStructurePath)
-                zipFilesPath.append(modelResultPath)
-            else:
-                print(f"模型 {model} 未找到\n")
-
-        pages_utils.zip_files(zipFilesPath, zipPath)
-        with open(zipPath, "rb") as file:
-            st.download_button(
-                label="下载",
-                data=file,
-                file_name="模型结构与训练结果.zip",
-                mime="application/zip",
-            )
+            pages_utils.zip_files(zipFilesPath, zipPath)
+            with open(zipPath, "rb") as file:
+                st.download_button(
+                    label="下载",
+                    data=file,
+                    file_name="模型结构与训练结果.zip",
+                    mime="application/zip",
+                )
 
     with col1:
         st.markdown('###### 数据集')
