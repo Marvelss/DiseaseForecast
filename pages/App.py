@@ -31,7 +31,8 @@ show_pages(
         Page("pages/WeatherGenerator.py", '基于天气情景生成器的模型评价'),
         Page("pages/Visualization.py", '可视化及数据下载'),
         Page("pages/ModelApplication.py", '模型应用'),
-        Page("pages/ModelEvaluation.py", "测试界面")
+        Page("pages/ModelEvaluation.py", "测试界面"),
+        Page("pages/DataPreparationFacet.py", "数据预处理-面状")
     ]
 )
 # 初始化控制各环节左侧内容展示
