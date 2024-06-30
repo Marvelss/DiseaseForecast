@@ -32,7 +32,8 @@ show_pages(
         Page("pages/Visualization.py", '可视化及数据下载'),
         Page("pages/ModelApplication.py", '模型应用'),
         Page("pages/ModelEvaluation.py", "测试界面"),
-        Page("pages/DataPreparationFacet.py", "数据预处理-面状")
+        Page("pages/DataPreparationFacet.py", "数据预处理-面状"),
+        Page("pages/FeatureCalculationFacet.py", "特征计算-面状"),
     ]
 )
 # 初始化控制各环节左侧内容展示

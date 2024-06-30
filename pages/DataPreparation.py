@@ -206,7 +206,7 @@ def onRun():
     print(pages_utils.TempDataSet[1])
 
 
-on = st.toggle("点面切换", help='切换')
+on = st.toggle("点状", help='点面数据界面切换')
 
 if on:
     st.switch_page('DataPreparationFacet.py')

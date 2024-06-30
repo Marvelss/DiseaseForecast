@@ -195,6 +195,11 @@ def onRun():
     print(pages_utils.TempDataSet[2])
 
 
+on = st.toggle("点状", help='点面数据界面切换')
+
+if on:
+    st.switch_page('FeatureCalculationFacet.py')
+
 # ==============================界面==============================
 featureCCV, featureCCM = st.columns([0.5, 0.7])
 with featureCCV:

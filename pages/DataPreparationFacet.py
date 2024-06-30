@@ -13,8 +13,8 @@ import leafmap.foliumap as leafmap
 
 import pages_utils
 
-on = st.toggle("点面切换", help='点面状数据处理界面切换')
-if on:
+on = st.toggle("面状", help='点面数据界面切换', value=True)
+if not on:
     st.switch_page('DataPreparation.py')
 col1, col2, col3 = st.columns([0.2, 0.9, 0.3])
 with col1:
