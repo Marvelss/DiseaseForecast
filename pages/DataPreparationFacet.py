@@ -49,19 +49,7 @@ with col1:
     ]
     temp = tree_select(nodes1)
 with col2:
-    # m = folium.Map(location=[30.314207, 120.343200], zoom_start=16)
-
-    # m = leafmap.Map(
-    #     location=[30.314207, 120.343200],
-    #     zoom_start=16, locate_control=True,
-    #     minimap_control=True)
-    # m.add_basemap('HYBRID')
-    # m.split_map()
-    # m.add_legend(title='ESA Land Cover')
-    # folium.Marker(
-    #     [30.314207, 120.343200], popup="Liberty Bell", tooltip="Liberty Bell"
-    # ).add_to(m)
-
+    # 初始化地图
     m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
 
     # in_geojson = "https://raw.githubusercontent.com/opengeos/leafmap/master/examples/data/cable_geo.geojson"
@@ -76,25 +64,42 @@ with col2:
     with open(in_geojsonP1, 'r', encoding='utf-8') as file:
         in_geojson2 = json.load(file)
 
-    # 加载json格式的矢量数据
-    # m.add_geojson(in_geojson, layer_name="Cable points")
-    # m.add_geojson(in_geojson2, layer_name="Cable lines")
+        # 加载json格式的矢量数据
+        # m.add_geojson(in_geojson, layer_name="Cable points")
+        # m.add_geojson(in_geojson2, layer_name="Cable lines")
 
-    # 加载栅格数据
-    dem = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\DayOfYear-ActiveAccumulatedTemperature.tif'
-    m.add_raster(dem, colormap="RdYlGn_r", layer_name="DEM", nodata=0)
+        # 加载栅格数据
+    DOY = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\DayOfYear-ActiveAccumulatedTemperature.tif'
+    SET = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\SpatiotemporalExtractionResult.tif'
+
+    m.add_raster(DOY, colormap="RdYlGn_r", layer_name="DOY", nodata=0)
+    m.add_raster(SET, colormap="RdYlGn_r", layer_name="SET", nodata=0)
+
     m.add_layer_control()
+
     # 图例
-    labels = ["0", "20", "40", "60", "90"]
-    # color can be defined using either hex code or RGB (0-255, 0-255, 0-255)
-    colors = ["#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3"]
-    # colors = [(255, 0, 0), (127, 255, 0), (127, 18, 25), (36, 70, 180), (96, 68, 123)]
+    # 定义图例标签和颜色（从最大值到最小值）
+    # labels = ["10", "8", "6", "4", "2", "0"]
+    # colors = ["#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#4DAF4A"]
+    #
+    # m.add_legend(title="Legend", labels=labels, colors=colors)
 
-    m.add_legend(title="Legend", labels=labels, colors=colors)
+    params = {
+        "width": 2,
+        "height": 0.3,
+        "vmin": 0,
+        "vmax": 100,
+        "cmap": "terrain",
+        "label": "Elevation (m)",
+        "orientation": "horizontal",
+        "transparent": True,
+    }
+    m.add_colormap(position=(75, 5), **params)
 
+    # 或通过图片添加色带
+    image = "https://i.imgur.com/SpmE7Cs.png"
+    # m.add_image(image, position="bottomright")
     m.to_streamlit()
-    # call to render Folium map in Streamlit
-    # st_data = st_folium(m, width=950, height=600)
 
 with col3:
     st.markdown("##### 预处理方法")
