@@ -9,6 +9,7 @@ import numpy as np
 import streamlit as st
 from streamlit_folium import st_folium
 from streamlit_tree_select import tree_select
+import leafmap.foliumap as leafmap
 
 import pages_utils
 
@@ -17,7 +18,7 @@ if on:
     st.switch_page('DataPreparation.py')
 col1, col2, col3 = st.columns([0.2, 0.9, 0.3])
 with col1:
-    st.markdown("##### 数据")
+    st.markdown("##### 数据与特征")
     nodes1 = [
         {"label": "气象数据", "value": "气象数据"},
         {
@@ -48,13 +49,53 @@ with col1:
     ]
     temp = tree_select(nodes1)
 with col2:
-    m = folium.Map(location=[30.314207, 120.343200], zoom_start=16)
-    folium.Marker(
-        [30.314207, 120.343200], popup="Liberty Bell", tooltip="Liberty Bell"
-    ).add_to(m)
+    # m = folium.Map(location=[30.314207, 120.343200], zoom_start=16)
 
+    # m = leafmap.Map(
+    #     location=[30.314207, 120.343200],
+    #     zoom_start=16, locate_control=True,
+    #     minimap_control=True)
+    # m.add_basemap('HYBRID')
+    # m.split_map()
+    # m.add_legend(title='ESA Land Cover')
+    # folium.Marker(
+    #     [30.314207, 120.343200], popup="Liberty Bell", tooltip="Liberty Bell"
+    # ).add_to(m)
+
+    m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+
+    # in_geojson = "https://raw.githubusercontent.com/opengeos/leafmap/master/examples/data/cable_geo.geojson"
+    in_geojsonP = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\SpatiotemporalExtractionResult.json'
+    in_geojsonP1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test.json'
+    import json
+
+    # 打开并读取JSON文件
+    with open(in_geojsonP, 'r', encoding='utf-8') as file:
+        in_geojson = json.load(file)
+    # 打开并读取JSON文件
+    with open(in_geojsonP1, 'r', encoding='utf-8') as file:
+        in_geojson2 = json.load(file)
+
+    # 加载json格式的矢量数据
+    # m.add_geojson(in_geojson, layer_name="Cable points")
+    # m.add_geojson(in_geojson2, layer_name="Cable lines")
+
+    # 加载栅格数据
+    dem = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\DayOfYear-ActiveAccumulatedTemperature.tif'
+    m.add_raster(dem, colormap="RdYlGn_r", layer_name="DEM", nodata=0)
+    m.add_layer_control()
+    # 图例
+    labels = ["0", "20", "40", "60", "90"]
+    # color can be defined using either hex code or RGB (0-255, 0-255, 0-255)
+    colors = ["#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3"]
+    # colors = [(255, 0, 0), (127, 255, 0), (127, 18, 25), (36, 70, 180), (96, 68, 123)]
+
+    m.add_legend(title="Legend", labels=labels, colors=colors)
+
+    m.to_streamlit()
     # call to render Folium map in Streamlit
-    st_data = st_folium(m, width=950, height=600)
+    # st_data = st_folium(m, width=950, height=600)
+
 with col3:
     st.markdown("##### 预处理方法")
     col12, col22 = st.columns(2)
