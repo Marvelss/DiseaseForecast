@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from streamlit import switch_page
-
 import pages_utils
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -24,6 +23,9 @@ if "OptimizationMethodName" not in st.session_state:
     st.session_state["OptimizationMethodName"] = {
         'checkBox': None
     }
+# 获取当前选中的方法名称
+if "nowMethodName" not in st.session_state:
+    st.session_state.nowMethodName = ''
 
 
 # 获取选项值对应名称
@@ -91,6 +93,7 @@ def clear_all():
 
 # 取消其他选项按钮
 def clear_other(key):
+    st.session_state.nowMethodName = f'checkbox{key}'
     for h in range(checkBoxNum):
         if h != key:
             st.session_state[f'checkbox{h}'] = False
@@ -99,6 +102,67 @@ def clear_other(key):
 
 # 控制左侧表格不同数据集显示
 def firstPage(): st.session_state.page14 = 0
+
+
+@st.experimental_dialog("预览", width='large')
+# 预览运行结果
+def onPreviewResults():
+    afterHandleData, tempResultP, optimalFeatureList = None, None, None
+    tempMethod = getCheckboxName(st.session_state.nowMethodName)
+    methodParam = [value for key, value in st.session_state["OptimizationMethodName"].items() if
+                   key != 'checkBox']
+
+    # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
+    if pages_utils.TempDataSet[3].shape[0] == 0:
+        dataFrameTemp = pages_utils.TempDataSet[2]
+    else:
+        dataFrameTemp = pages_utils.TempDataSet[3]
+    if tempMethod == 't检验':
+        print('-------t检验-测试-------')
+        print(methodParam)
+        afterHandleData = FeatureOptimizationMethod(
+            dataFrameTemp.copy(), None).tTest(
+            methodParam)
+    elif tempMethod == 'Pearson相关性分析':
+        afterHandleData, tempResultP, optimalFeatureList = FeatureOptimizationMethod(
+            dataFrameTemp.copy(), None).Pearson(
+            methodParam)
+
+        # 可视化
+        # 使用Seaborn绘制热图
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(tempResultP, annot=True, cmap='coolwarm', center=0)
+        plt.title('Correlation Matrix')
+        st.pyplot(plt)
+        st.multiselect('预期删除特征:',
+                       options=optimalFeatureList,
+                       default=optimalFeatureList)
+    elif tempMethod == 'Relief-F互相关分析':
+        afterHandleData, newColumns = FeatureOptimizationMethod(
+            dataFrameTemp.copy(), None).ReliefF(
+            None, methodParam)
+    # 选择后变化
+    if st.button("添加处理", on_click=clear_all):
+        # btn = st.button('添加处理', on_click=clear_all)
+        # if btn:
+        for key11, value11 in st.session_state["OptimizationMethodName"].items():
+            pass
+            # print(f"Key: {key11}, Value: {value11}")
+        new_data = {
+            "编号": pages_utils.generateID(),
+            "数据类型": '气象数据',
+            "输入特征": mergeArray(result1, result2, result3),
+            "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
+            "方法参数":
+                [value for key, value in st.session_state["OptimizationMethodName"].items() if
+                 key != 'checkBox'],
+            "时间": datetime.datetime.now().time(),
+            "处理状态": False}
+        print('======================特征优选-添加任务清单记录======================')
+        print(new_data)
+        pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
+        st.rerun()
+    # st.rerun()
 
 
 def onRun():
@@ -133,17 +197,25 @@ def onRun():
         afterHandleData = None
         # print(tempMethod)
         if tempMethod == 't检验':
+            print('-------t检验-测试-------')
+            # print(fields[0])
+            print(methodParam[indexT])
             afterHandleData = FeatureOptimizationMethod(
                 dataFrameTemp, reservedField).tTest(
-                fields[0], methodParam)
+                methodParam[indexT])
         elif tempMethod == 'Pearson相关性分析':
+            print('-------Pearson相关性分析-测试-------')
+            print(methodParam[indexT])
             afterHandleData, newColumns = FeatureOptimizationMethod(
                 dataFrameTemp, reservedField).Pearson(
                 methodParam[indexT])
         elif tempMethod == 'Relief-F互相关分析':
+            print('-------Pearson相关性分析-测试-------')
+            print(fields[0])
+            print(methodParam[indexT])
             afterHandleData, newColumns = FeatureOptimizationMethod(
                 dataFrameTemp, reservedField).ReliefF(
-                fields[0], methodParam)
+                fields[0], methodParam[indexT])
         # print('=============返回数据=============')
         # print(afterHandleData)
         # ===============合并处理后数据集===============
@@ -255,16 +327,6 @@ with dataPCM:
         option1132 = st.multiselect(
             '变量',
             mergeArray(result1, result2, result3))
-        # option1132 = st.multiselect(
-        #     '被比较变量',
-        #     mergeArray(result1, result2, result3))
-        # st.markdown('剔除条件')
-        # genre33 = st.radio(
-        #     label='',
-        #     horizontal=True,
-        #     label_visibility="collapsed",
-        #     options=['相关系数的绝对值>0.8']
-        # )
         number33 = st.number_input("剔除相关系数阈值(R)",
                                    value=0.8,
                                    min_value=0.1,
@@ -274,7 +336,7 @@ with dataPCM:
         #     st.toast('该方法未实现,请选择其他方法', icon="⚠️")
         # st.session_state["OptimizationMethodName"]['param1'] = option113
         st.session_state["OptimizationMethodName"]['param1'] = ' '.join(option1132)
-        st.session_state["OptimizationMethodName"]['param2'] = number33
+        st.session_state["OptimizationMethodName"]['param2'] = str(number33)
 
     if genre1:
         option112 = st.selectbox(
@@ -297,7 +359,7 @@ with dataPCM:
                                     step=0.01)
         st.session_state["OptimizationMethodName"]['param1'] = option112
         st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1122)
-        st.session_state["OptimizationMethodName"]['param3'] = number112
+        st.session_state["OptimizationMethodName"]['param3'] = str(number112)
     # st.markdown('---')
     if genre3:
         # st.markdown('提取条件')
@@ -325,42 +387,8 @@ with dataPCM:
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([4, 1])
     with interval_col2:
-        with st.popover("预览"):
-            # 选择需要计算相关性的列
-            df = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\demo\demo18\2024-06-25T12-08_export.xlsx')
-            columns_of_interest = ['01-01_01-30_降水累积量', '年', '病害峰值', '7-19_8-9_降雨日数']  # 替换为你感兴趣的列名
-            data = df[columns_of_interest]
-
-            # 计算相关性矩阵
-            correlation_matrix = data.corr()
-
-            # 使用Seaborn绘制热图
-            plt.figure(figsize=(10, 8))
-            sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', center=0)
-            plt.title('Correlation Matrix')
-            st.pyplot(plt)
-            st.multiselect('预期删除特征:',
-                           options=['01-01_01-30_降水累积量', '年'],
-                           default=['01-01_01-30_降水累积量', '年'])
-            btn = st.button('添加处理', on_click=clear_all)
-            if btn:
-                for key11, value11 in st.session_state["OptimizationMethodName"].items():
-                    pass
-                    # print(f"Key: {key11}, Value: {value11}")
-                new_data = {
-                    "编号": pages_utils.generateID(),
-                    "数据类型": '气象数据',
-                    "输入特征": mergeArray(result1, result2, result3),
-                    "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
-                    "方法参数":
-                        [value for key, value in st.session_state["OptimizationMethodName"].items() if
-                         key != 'checkBox'],
-                    "时间": datetime.datetime.now().time(),
-                    "处理状态": False}
-                print('======================特征优选-添加任务清单记录======================')
-                print(new_data)
-                pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
-                st.rerun()
+        if st.button("结果预览"):
+            onPreviewResults()
     st.markdown('---')
 
     # =======================显示右下内容=======================

@@ -28,31 +28,36 @@ class FeatureOptimizationMethod:
                     str(int(fieldName.split('征')[1]) + 1))
 
     # t检验
-    def tTest(self, inputFields, methodParam):
-        pValue = methodParam[0][1]
-        # print(pValue)
+    def tTest(self, methodParam):
+        # param:['年', 'DayOfYear 上级单位 测报站点', '0.02']
+        # param1:目标变量
+        # param2:被比较变量
+        # param3:提取条件
+        targetVariable = methodParam[0]
+        comparedVariableList = methodParam[1].split(' ')
+        condition = methodParam[2]
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
-        print('============测试============')
-        print(newDataFrame)
-        print(inputFields[0])
-        print(inputFields[1])
-        # 创建一个空列表来存储显著的降水特征
-        # significant_features = []
-        # 计算 t 检验的 p 值，并选择 p < 0.05 的特征
-        # print(fieldName)
-        # print('--------------fieldName--------------')
-        # 修改优选特征名称
-        newDataColumn = self.getHandledField(inputFields)
-        if pValue == '0.05':
-            pass
-        t_stat, p_value = stats.ttest_ind(
-            newDataFrame[inputFields[0]],
-            newDataFrame[inputFields[1]])
-        print('======================特征优选-t检验结果======================')
-        print(t_stat, p_value)
-        tempData = newDataFrame[self.reservedField + inputFields]
-        return tempData
+        tempResult = {}
+        # t检验并获取每个变量p-value结果
+        for feature in comparedVariableList:
+            rainfall = np.array(newDataFrame[feature].tolist())
+            disease = np.array(newDataFrame[targetVariable].tolist())
+            t_stat, p_value = stats.ttest_ind(
+                rainfall,
+                disease)
+            tempResult[feature] = p_value
+
+        # 删选p-value符合条件的特征
+        filtered_data = {key: value for key, value in tempResult.items() if value <= condition}
+        # 获取优选特征集
+        optimalFeatureList = list(filtered_data.keys())
+        newColumnsList = []
+        for feature in optimalFeatureList:
+            new_column_name = self.getHandledField(feature)
+            self.dataFrame[new_column_name] = self.dataFrame[feature]
+            newColumnsList.append(new_column_name)
+        return self.dataFrame, tempResult, newColumnsList
 
     # RF互相关分析
     def ReliefF(self, inputFields, methodParam):
@@ -121,32 +126,57 @@ class FeatureOptimizationMethod:
 
     # Pearson相关分析
     def Pearson(self, methodParam):
+        # param:['年 DayOfYear 上级单位 测报站点', '0.9']
+        # param1:所有变量
+        # param2:提取条件
+
         # 保存字段名称对应系数值,用于返回热力图显示
         tempDict = {}
         # 筛选后的字段
         newColumns = []
         print('============测试============')
         print(methodParam)
-        objectField = methodParam[0]
-        selectedFeature = methodParam[1].split(' ')
-        coefficientStandard = methodParam[2].split('>')[1]
+        fieldList = methodParam[0].split(' ')
+        condition = methodParam[1]
         # print(pValue)
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
         # 遍历输入变量进行pearson分析
-        for temp in selectedFeature:
-            df_cleaned = newDataFrame[['上级单位', '测报站点', '年', temp, objectField]].dropna()
-            # print(df_cleaned)
-            pearson_corr_value, a = stats.pearsonr(
-                df_cleaned[temp], df_cleaned[objectField])
-            # print(pearson_corr_value)
-            # print(coefficientStandard)
-            tempDict[temp] = pearson_corr_value
-            # 判断是否符合筛选条件
-            print(pearson_corr_value)
-            if pearson_corr_value < float(coefficientStandard):
-                # 字段名称添加_优选
-                newDataColumn = self.getHandledField(temp)
-                newDataFrame[newDataColumn] = newDataFrame[temp]
-                newColumns.append(newDataColumn)
-        return newDataFrame[self.reservedField + newColumns], newColumns
+        tempResultP = {}
+        # 选择需要计算相关性的列
+        data = newDataFrame[fieldList]
+
+        # 计算相关性矩阵
+        correlation_matrix = data.corr()
+
+        for i in range(len(fieldList)):
+            for j in range(i + 1, len(fieldList)):
+                var1 = fieldList[i]
+                var2 = fieldList[j]
+                correlation = correlation_matrix.loc[var1, var2]
+                # print(f"变量 '{var1}' 和 '{var2}' 之间的相关系数: {correlation}")
+                tempResultP[(var1, var2)] = correlation
+
+        # 删选p-value符合条件的特征
+        # 提取所有特征
+        features = set()
+        for key_pair in tempResultP.keys():
+            features.update(key_pair)
+
+        # 初始化保留的特征集合
+        selected_features = set(features)
+
+        # 遍历相关系数字典，移除相关系数大于(0.8)的特征
+        for (feature1, feature2), correlation in tempResultP.items():
+            if abs(correlation) > float(condition):
+                # 默认移除后一个特征
+                if feature2 in selected_features:
+                    selected_features.remove(feature2)
+        # 获取优选特征集
+        newColumnsList = []
+        selected_features_list = list(selected_features)
+        for feature in selected_features_list:
+            new_column_name = self.getHandledField(feature)
+            self.dataFrame[new_column_name] = self.dataFrame[feature]
+            newColumnsList.append(new_column_name)
+        return self.dataFrame, correlation_matrix, newColumnsList
