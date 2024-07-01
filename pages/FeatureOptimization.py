@@ -118,11 +118,23 @@ def onPreviewResults():
     else:
         dataFrameTemp = pages_utils.TempDataSet[3]
     if tempMethod == 't检验':
-        print('-------t检验-测试-------')
-        print(methodParam)
-        afterHandleData = FeatureOptimizationMethod(
+        afterHandleData, tempResult, optimalFeatureList = FeatureOptimizationMethod(
             dataFrameTemp.copy(), None).tTest(
             methodParam)
+        # 可视化
+        keys = list(tempResult.keys())
+        values = list(tempResult.values())
+        # 创建柱状图
+        plt.figure(figsize=(10, 6))
+        plt.bar(keys, values, color='blue')
+        # 添加标题和标签
+        plt.title('敏感性结果可视化')
+        plt.xlabel('特征')
+        plt.ylabel('p-value')
+        # 显示图表
+        plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
+        plt.tight_layout()  # 调整布局以防止标签重叠
+        st.pyplot(plt)
     elif tempMethod == 'Pearson相关性分析':
         afterHandleData, tempResultP, optimalFeatureList = FeatureOptimizationMethod(
             dataFrameTemp.copy(), None).Pearson(
@@ -132,9 +144,9 @@ def onPreviewResults():
         # 使用Seaborn绘制热图
         plt.figure(figsize=(10, 8))
         sns.heatmap(tempResultP, annot=True, cmap='coolwarm', center=0)
-        plt.title('Correlation Matrix')
+        plt.title('互相关分析矩阵')
         st.pyplot(plt)
-        st.multiselect('预期删除特征:',
+        st.multiselect('预期保留特征:',
                        options=optimalFeatureList,
                        default=optimalFeatureList)
     elif tempMethod == 'Relief-F互相关分析':
@@ -143,11 +155,6 @@ def onPreviewResults():
             None, methodParam)
     # 选择后变化
     if st.button("添加处理", on_click=clear_all):
-        # btn = st.button('添加处理', on_click=clear_all)
-        # if btn:
-        for key11, value11 in st.session_state["OptimizationMethodName"].items():
-            pass
-            # print(f"Key: {key11}, Value: {value11}")
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
@@ -162,7 +169,6 @@ def onPreviewResults():
         print(new_data)
         pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
         st.rerun()
-    # st.rerun()
 
 
 def onRun():
