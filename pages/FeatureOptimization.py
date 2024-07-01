@@ -131,6 +131,8 @@ def onPreviewResults():
         plt.title('敏感性结果可视化')
         plt.xlabel('特征')
         plt.ylabel('p-value')
+        # 基准线
+        plt.axhline(y=float(methodParam[2]), color='red', linestyle='--', linewidth=1, label='基准线 (p=0.01)')
         # 显示图表
         plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
         plt.tight_layout()  # 调整布局以防止标签重叠
@@ -203,16 +205,13 @@ def onRun():
         afterHandleData = None
         # print(tempMethod)
         if tempMethod == 't检验':
-            print('-------t检验-测试-------')
-            # print(fields[0])
-            print(methodParam[indexT])
-            afterHandleData = FeatureOptimizationMethod(
+            afterHandleData, _, newColumns = FeatureOptimizationMethod(
                 dataFrameTemp, reservedField).tTest(
                 methodParam[indexT])
         elif tempMethod == 'Pearson相关性分析':
             print('-------Pearson相关性分析-测试-------')
             print(methodParam[indexT])
-            afterHandleData, newColumns = FeatureOptimizationMethod(
+            afterHandleData, _, newColumns = FeatureOptimizationMethod(
                 dataFrameTemp, reservedField).Pearson(
                 methodParam[indexT])
         elif tempMethod == 'Relief-F互相关分析':
@@ -242,6 +241,10 @@ def onRun():
             # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
             "时间": datetime.datetime.now().time(),
             "处理状态": True}
+        print(update_values)
+        print(type(newColumns))
+        print(len(idNumber))
+        print(len(pages_utils.TempDataSetField[3]))
         # 查找要更新的数据记录
         for index, row in pages_utils.TempDataSetField[3].iterrows():
             if row["编号"] == idNumber[indexT]:
@@ -338,9 +341,6 @@ with dataPCM:
                                    min_value=0.1,
                                    max_value=0.9,
                                    step=0.1)
-        # if genre33 == '相关系数的绝对值<0.2':
-        #     st.toast('该方法未实现,请选择其他方法', icon="⚠️")
-        # st.session_state["OptimizationMethodName"]['param1'] = option113
         st.session_state["OptimizationMethodName"]['param1'] = ' '.join(option1132)
         st.session_state["OptimizationMethodName"]['param2'] = str(number33)
 
@@ -351,13 +351,6 @@ with dataPCM:
         option1122 = st.multiselect(
             '被比较变量',
             mergeArray(result1, result2, result3))
-        # st.markdown('提取条件')
-        # genre2 = st.radio(
-        #     label='',
-        #     horizontal=True,
-        #     label_visibility="collapsed",
-        #     options=['p-value<0.001', 'p-value<0.005', 'p-value<0.01']
-        # )
         number112 = st.number_input("提取敏感性阈值(p-value)",
                                     value=0.01,
                                     min_value=0.01,
@@ -471,8 +464,8 @@ with dataPCM:
             #                 pass
             #             elif idFMethods[o] == 'Relief-F互相关分析':
             #                 pass
-            # interval_col34, interval_col33 = st.columns([5, 1])
+            interval_col34, interval_col33 = st.columns([5, 1])
             # want_to_contribute = interval_col34.button("跳转至可视化界面")
             # if want_to_contribute:
             #     switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\Visualization.py")
-            # btn3 = interval_col33.button('返回', on_click=firstPage)
+            btn3 = interval_col33.button('返回', on_click=firstPage)
