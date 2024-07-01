@@ -49,7 +49,7 @@ class FeatureOptimizationMethod:
             tempResult[feature] = p_value
 
         # 删选p-value符合条件的特征
-        filtered_data = {key: value for key, value in tempResult.items() if value <= condition}
+        filtered_data = {key: value for key, value in tempResult.items() if value <= float(condition)}
         # 获取优选特征集
         optimalFeatureList = list(filtered_data.keys())
         newColumnsList = []
