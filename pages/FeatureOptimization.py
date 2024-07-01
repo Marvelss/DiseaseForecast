@@ -244,7 +244,7 @@ with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
     with tab1:
         genre = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other, args=[0])
-        genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1], disabled=True)
+        genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1])
 
     with tab2:
         genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other, args=[2])
@@ -252,56 +252,75 @@ with dataPCM:
 
     # ===============显示和处理右中各个处理方法设置参数===============
     if genre:
-        option113 = st.selectbox(
-            '目标变量',
-            mergeArray(result1, result2, result3))
         option1132 = st.multiselect(
-            '被比较变量',
+            '变量',
             mergeArray(result1, result2, result3))
-        st.markdown('剔除条件')
-        genre33 = st.radio(
-            label='',
-            horizontal=True,
-            label_visibility="collapsed",
-            options=['相关系数的绝对值>0.8']
-        )
-        if genre33 == '相关系数的绝对值<0.2':
-            st.toast('该方法未实现,请选择其他方法', icon="⚠️")
-        st.session_state["OptimizationMethodName"]['param1'] = option113
-        st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1132)
-        st.session_state["OptimizationMethodName"]['param3'] = genre33
+        # option1132 = st.multiselect(
+        #     '被比较变量',
+        #     mergeArray(result1, result2, result3))
+        # st.markdown('剔除条件')
+        # genre33 = st.radio(
+        #     label='',
+        #     horizontal=True,
+        #     label_visibility="collapsed",
+        #     options=['相关系数的绝对值>0.8']
+        # )
+        number33 = st.number_input("剔除相关系数阈值(R)",
+                                   value=0.8,
+                                   min_value=0.1,
+                                   max_value=0.9,
+                                   step=0.1)
+        # if genre33 == '相关系数的绝对值<0.2':
+        #     st.toast('该方法未实现,请选择其他方法', icon="⚠️")
+        # st.session_state["OptimizationMethodName"]['param1'] = option113
+        st.session_state["OptimizationMethodName"]['param1'] = ' '.join(option1132)
+        st.session_state["OptimizationMethodName"]['param2'] = number33
 
     if genre1:
         option112 = st.selectbox(
             '目标变量',
             mergeArray(result1, result2, result3))
-        st.markdown('提取条件')
-        genre2 = st.radio(
-            label='',
-            horizontal=True,
-            label_visibility="collapsed",
-            options=['p-value<0.001', 'p-value<0.005', 'p-value<0.01']
-        )
+        option1122 = st.multiselect(
+            '被比较变量',
+            mergeArray(result1, result2, result3))
+        # st.markdown('提取条件')
+        # genre2 = st.radio(
+        #     label='',
+        #     horizontal=True,
+        #     label_visibility="collapsed",
+        #     options=['p-value<0.001', 'p-value<0.005', 'p-value<0.01']
+        # )
+        number112 = st.number_input("提取敏感性阈值(p-value)",
+                                    value=0.01,
+                                    min_value=0.01,
+                                    max_value=0.05,
+                                    step=0.01)
         st.session_state["OptimizationMethodName"]['param1'] = option112
-        st.session_state["OptimizationMethodName"]['param2'] = genre2
+        st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1122)
+        st.session_state["OptimizationMethodName"]['param3'] = number112
     # st.markdown('---')
     if genre3:
         # st.markdown('提取条件')
         option111 = st.selectbox(
             '目标变量',
             mergeArray(result1, result2, result3))
-        st.session_state["OptimizationMethodName"]['param1'] = option111
+        option11122 = st.multiselect(
+            '被比较变量',
+            mergeArray(result1, result2, result3))
         option = st.selectbox(
             '提取条件',
             ('按百分比选取', '按权重值计算'))
         if option == '按百分比选取':
-            st.session_state["OptimizationMethodName"]['param2'] = option
+            st.session_state["OptimizationMethodName"]['param3'] = option
             number1 = st.number_input("TOP(%)", value=5, min_value=5, step=5)
-            st.session_state["OptimizationMethodName"]['param3'] = str(number1)
+            st.session_state["OptimizationMethodName"]['param4'] = str(number1)
         if option == '按权重值计算':
-            st.session_state["OptimizationMethodName"]['param2'] = option
+            st.session_state["OptimizationMethodName"]['param3'] = option
             number2 = st.number_input("权重阈值", value=10, min_value=10)
-            st.session_state["OptimizationMethodName"]['param3'] = str(number2)
+            st.session_state["OptimizationMethodName"]['param4'] = str(number2)
+
+        st.session_state["OptimizationMethodName"]['param1'] = option111
+        st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option11122)
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([4, 1])
@@ -373,52 +392,53 @@ with dataPCM:
         # =======================显示右下可视化图表=======================
         with placeholder.container():
             st.markdown('##### 可视化')
-            plt.rc("font", family='Microsoft YaHei')
-            idFMethods = pages_utils.TempDataSetField[2]["特征优选方法"].tolist()
-
-            # 若无方法处理,则直接跳过该环节
-            if len(idFMethods):
-                # 创建新的从 1 开始的编号列表
-                new_ids = list(range(0, len(idFMethods)))
-                # 创建标签页并重新命名记录
-                new_ids = [f'记录编号_{h}' for h in new_ids]
-
-                tt1 = st.tabs(new_ids)
-                for o in range(len(idFMethods)):
-                    with tt1[o]:
-                        # 创建DataFrame
-                        data_after = st.session_state["FCVisualInformation"][o]['after']
-                        # 特征名称
-                        dataColumn = st.session_state["FCVisualInformation"][o]['column']
-                        if idFMethods[o] == 't检验':
-                            # 选择最多8个测报站点
-                            top_stations = data_after['测报站点'].value_counts().nlargest(8).index
-                            df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
-
-                            # 选择最多3个年份
-                            top_years = data_after['年'].value_counts().nlargest(3).index
-                            df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-
-                            # 绘制折线图
-                            plt.figure(figsize=(10, 6))
-                            sns.lineplot(
-                                data=df_filtered,
-                                x="测报站点",
-                                y=dataColumn,
-                                hue="年",
-                                marker="o"
-                            )
-                            # 设置标签和标题
-                            plt.xlabel("测报站点")
-                            plt.ylabel(dataColumn)
-                            plt.title(f"部分县市与各年份{dataColumn}", fontsize=16)
-                            st.pyplot(plt)
-                        elif idFMethods[o] == 'Pearson相关性分析':
-                            pass
-                        elif idFMethods[o] == 'Relief-F互相关分析':
-                            pass
-            interval_col34, interval_col33 = st.columns([5, 1])
-            want_to_contribute = interval_col34.button("跳转至可视化界面")
-            if want_to_contribute:
-                switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\Visualization.py")
-            btn3 = interval_col33.button('返回', on_click=firstPage)
+            st.markdown('待优化中')
+            # plt.rc("font", family='Microsoft YaHei')
+            # # idFMethods = pages_utils.TempDataSetField[2]["特征优选方法"].tolist()
+            #
+            # # 若无方法处理,则直接跳过该环节
+            # if len(idFMethods):
+            #     # 创建新的从 1 开始的编号列表
+            #     new_ids = list(range(0, len(idFMethods)))
+            #     # 创建标签页并重新命名记录
+            #     new_ids = [f'记录编号_{h}' for h in new_ids]
+            #
+            #     tt1 = st.tabs(new_ids)
+            #     for o in range(len(idFMethods)):
+            #         with tt1[o]:
+            #             # 创建DataFrame
+            #             data_after = st.session_state["FCVisualInformation"][o]['after']
+            #             # 特征名称
+            #             dataColumn = st.session_state["FCVisualInformation"][o]['column']
+            #             if idFMethods[o] == 't检验':
+            #                 # 选择最多8个测报站点
+            #                 top_stations = data_after['测报站点'].value_counts().nlargest(8).index
+            #                 df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
+            #
+            #                 # 选择最多3个年份
+            #                 top_years = data_after['年'].value_counts().nlargest(3).index
+            #                 df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+            #
+            #                 # 绘制折线图
+            #                 plt.figure(figsize=(10, 6))
+            #                 sns.lineplot(
+            #                     data=df_filtered,
+            #                     x="测报站点",
+            #                     y=dataColumn,
+            #                     hue="年",
+            #                     marker="o"
+            #                 )
+            #                 # 设置标签和标题
+            #                 plt.xlabel("测报站点")
+            #                 plt.ylabel(dataColumn)
+            #                 plt.title(f"部分县市与各年份{dataColumn}", fontsize=16)
+            #                 st.pyplot(plt)
+            #             elif idFMethods[o] == 'Pearson相关性分析':
+            #                 pass
+            #             elif idFMethods[o] == 'Relief-F互相关分析':
+            #                 pass
+            # interval_col34, interval_col33 = st.columns([5, 1])
+            # want_to_contribute = interval_col34.button("跳转至可视化界面")
+            # if want_to_contribute:
+            #     switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\Visualization.py")
+            # btn3 = interval_col33.button('返回', on_click=firstPage)
