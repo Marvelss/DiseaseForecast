@@ -278,6 +278,8 @@ def onTrain(temporaResolution):
             "处理状态": True,
             "模型训练结果": actualAndPredictResult,
             "模型结构": modelStruct}
+        print('======更新指标======')
+        print(update_values)
         # 查找要更新的数据记录
         for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
             if row1["编号"] == idNumber[tempIndex]:
