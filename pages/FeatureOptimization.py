@@ -118,7 +118,7 @@ def onPreviewResults():
     else:
         dataFrameTemp = pages_utils.TempDataSet[3]
     if tempMethod == 't检验':
-        afterHandleData, tempResult, optimalFeatureList = FeatureOptimizationMethod(
+        afterHandleData, tempResult, optimalFeatureListT = FeatureOptimizationMethod(
             dataFrameTemp.copy(), None).tTest(
             methodParam)
         # 可视化
@@ -137,6 +137,9 @@ def onPreviewResults():
         plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
         plt.tight_layout()  # 调整布局以防止标签重叠
         st.pyplot(plt)
+        st.multiselect('预期保留特征:',
+                       options=optimalFeatureListT,
+                       default=optimalFeatureListT)
     elif tempMethod == 'Pearson相关性分析':
         afterHandleData, tempResultP, optimalFeatureList = FeatureOptimizationMethod(
             dataFrameTemp.copy(), None).Pearson(
@@ -152,9 +155,42 @@ def onPreviewResults():
                        options=optimalFeatureList,
                        default=optimalFeatureList)
     elif tempMethod == 'Relief-F互相关分析':
-        afterHandleData, newColumns = FeatureOptimizationMethod(
+        afterHandleData, tempResultR, optimalFeatureListR = FeatureOptimizationMethod(
             dataFrameTemp.copy(), None).ReliefF(
-            None, methodParam)
+            methodParam)
+        # 可视化
+        keys = list(tempResultR.keys())
+        values = list(tempResultR.values())
+        # 创建柱状图
+        plt.figure(figsize=(10, 6))
+        plt.bar(keys, values, color='blue')
+        # 添加标题和标签
+        plt.title('基于Relief-F特征因子权值排序图')
+        plt.xlabel('特征')
+        plt.ylabel('特征权值')
+
+        standard = 0.5
+        if methodParam[2] == '按百分比选取':
+            # 计算TOP元素的数量,向上取整
+            num_top_percent = int(np.ceil(len(values) * float(methodParam[3]) * 0.01))
+            # 提取TOP的元素值
+            top_percent_values = values[:num_top_percent + 1]
+            # 获取前40%元素的最大值
+            threshold_value = top_percent_values[-1]
+            # print(num_top_percent)
+            # print(threshold_value)
+            standard = threshold_value
+        if methodParam[2] == '按权重值选取':
+            standard = float(methodParam[3])
+        # 基准线
+        plt.axhline(y=standard, color='red', linestyle='--', linewidth=1, label='基准线')
+        # 显示图表
+        plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
+        plt.tight_layout()  # 调整布局以防止标签重叠
+        st.pyplot(plt)
+        st.multiselect('预期保留特征:',
+                       options=optimalFeatureListR,
+                       default=optimalFeatureListR)
     # 选择后变化
     if st.button("添加处理", on_click=clear_all):
         new_data = {
@@ -209,18 +245,17 @@ def onRun():
                 dataFrameTemp, reservedField).tTest(
                 methodParam[indexT])
         elif tempMethod == 'Pearson相关性分析':
-            print('-------Pearson相关性分析-测试-------')
-            print(methodParam[indexT])
+            # print('-------Pearson相关性分析-测试-------')
+            # print(methodParam[indexT])
             afterHandleData, _, newColumns = FeatureOptimizationMethod(
                 dataFrameTemp, reservedField).Pearson(
                 methodParam[indexT])
         elif tempMethod == 'Relief-F互相关分析':
-            print('-------Pearson相关性分析-测试-------')
-            print(fields[0])
-            print(methodParam[indexT])
-            afterHandleData, newColumns = FeatureOptimizationMethod(
-                dataFrameTemp, reservedField).ReliefF(
-                fields[0], methodParam[indexT])
+            # print('-------Pearson相关性分析-测试-------')
+            # print(fields[0])
+            # print(methodParam[indexT])
+            afterHandleData, _, newColumns = FeatureOptimizationMethod(
+                dataFrameTemp, reservedField).ReliefF(methodParam[indexT])
         # print('=============返回数据=============')
         # print(afterHandleData)
         # ===============合并处理后数据集===============
@@ -236,7 +271,7 @@ def onRun():
         # ===============更新左侧显示内容===============
         update_values = {
             # "数据类型": "气象数据", "输入特征": fields[0],
-            "优选特征": newColumns,
+            "优选特征": ','.join(newColumns),
             "大小": '1*' + str(row_size),
             # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
             "时间": datetime.datetime.now().time(),
@@ -368,20 +403,19 @@ with dataPCM:
         option11122 = st.multiselect(
             '被比较变量',
             mergeArray(result1, result2, result3))
+        st.session_state["OptimizationMethodName"]['param1'] = option111
+        st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option11122)
         option = st.selectbox(
             '提取条件',
-            ('按百分比选取', '按权重值计算'))
+            ('按百分比选取', '按权重值选取'))
         if option == '按百分比选取':
             st.session_state["OptimizationMethodName"]['param3'] = option
             number1 = st.number_input("TOP(%)", value=5, min_value=5, step=5)
             st.session_state["OptimizationMethodName"]['param4'] = str(number1)
-        if option == '按权重值计算':
+        if option == '按权重值选取':
             st.session_state["OptimizationMethodName"]['param3'] = option
             number2 = st.number_input("权重阈值", value=10, min_value=10)
             st.session_state["OptimizationMethodName"]['param4'] = str(number2)
-
-        st.session_state["OptimizationMethodName"]['param1'] = option111
-        st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option11122)
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([4, 1])
