@@ -98,42 +98,11 @@ with col1:
     st.markdown(temp)
 with col2:
     # 初始化地图
-    m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+    pe = st.empty()
+    with pe:
+        m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
 
-    # in_geojson = "https://raw.githubusercontent.com/opengeos/leafmap/master/examples/data/cable_geo.geojson"
-    in_geojsonP = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\SpatiotemporalExtractionResult.json'
-    in_geojsonP1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test.json'
-    import json
-
-    # 打开并读取JSON文件
-    with open(in_geojsonP, 'r', encoding='utf-8') as file:
-        in_geojson = json.load(file)
-    # 打开并读取JSON文件
-    with open(in_geojsonP1, 'r', encoding='utf-8') as file:
-        in_geojson2 = json.load(file)
-
-        # 加载json格式的矢量数据
-    m.add_geojson(in_geojson, layer_name="Cable points")
-    m.add_geojson(in_geojson2, layer_name="Cable lines")
-
-    m.add_layer_control()
-
-    params = {
-        "width": 2,
-        "height": 0.3,
-        "vmin": 0,
-        "vmax": 100,
-        "cmap": "terrain",
-        "label": "Elevation (m)",
-        "orientation": "horizontal",
-        "transparent": True,
-    }
-    m.add_colormap(position=(75, 5), **params)
-
-    # 或通过图片添加色带
-    image = "https://i.imgur.com/SpmE7Cs.png"
-    # m.add_image(image, position="bottomright")
-    m.to_streamlit()
+        m.to_streamlit()
 
 with col3:
     st.markdown("##### 特征计算方法")
@@ -177,8 +146,49 @@ with col3:
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([1.5, 1])
-    btn = interval_col2.button('添加处理', on_click=clear_all)
+    # btn = interval_col2.button('添加处理', on_click=clear_all)
+    btn = interval_col2.button('预览', on_click=clear_all)
+
     if btn:
+
+        with pe:
+            m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+
+            # in_geojson = "https://raw.githubusercontent.com/opengeos/leafmap/master/examples/data/cable_geo.geojson"
+            in_geojsonP = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\SpatiotemporalExtractionResult.json'
+            in_geojsonP1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test.json'
+            import json
+
+            # 打开并读取JSON文件
+            with open(in_geojsonP, 'r', encoding='utf-8') as file:
+                in_geojson = json.load(file)
+            # 打开并读取JSON文件
+            with open(in_geojsonP1, 'r', encoding='utf-8') as file:
+                in_geojson2 = json.load(file)
+
+                # 加载json格式的矢量数据
+            m.add_geojson(in_geojson, layer_name="Cable points")
+            m.add_geojson(in_geojson2, layer_name="Cable lines")
+
+            m.add_layer_control()
+
+            params = {
+                "width": 2,
+                "height": 0.3,
+                "vmin": 0,
+                "vmax": 100,
+                "cmap": "terrain",
+                "label": "Elevation (m)",
+                "orientation": "horizontal",
+                "transparent": True,
+            }
+            m.add_colormap(position=(75, 5), **params)
+
+            # 或通过图片添加色带
+            image = "https://i.imgur.com/SpmE7Cs.png"
+            # m.add_image(image, position="bottomright")
+            m.to_streamlit()
+
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["featureMethodFacetName"].items():
             pass
@@ -197,4 +207,3 @@ with col3:
         print(new_data)
         # pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_data
         # st.rerun()
-    st.markdown('---')
