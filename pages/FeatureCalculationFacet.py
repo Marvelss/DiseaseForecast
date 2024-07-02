@@ -10,12 +10,16 @@ import streamlit as st
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 import pages_utils
+from modelmethodfacet.FeatureCalculationMethodFacet import FeatureCalculationMethodFacet
 
 checkBoxNum = 7
 if "featureMethodFacetName" not in st.session_state:
     st.session_state["featureMethodFacetName"] = {
         'checkBox': None
     }
+# 获取当前选中的方法名称
+if "nowFFacetMethodName" not in st.session_state:
+    st.session_state.nowFFacetMethodName = ''
 
 
 # 获取选项值对应名称
@@ -38,6 +42,7 @@ def getCheckboxName(checkbox):
 
 # 取消其他选项按钮
 def clear_other(key):
+    st.session_state.nowFFacetMethodName = f'checkbox{key}'
     for h in range(checkBoxNum):
         if h != key:
             st.session_state[f'checkbox{h}'] = False
@@ -56,8 +61,8 @@ def clear_all():
 on = st.toggle("面状", help='点面数据界面切换', value=True)
 if not on:
     st.switch_page('FeatureCalculation.py')
-col1, col2, col3 = st.columns([0.2, 0.9, 0.3])
-with col1:
+colFCF1, colFCF2, colFCF3 = st.columns([0.2, 0.9, 0.3])
+with colFCF1:
     st.markdown("##### 数据与特征")
     nodes1 = [
         {"label": "植保数据", "value": "气象数据"},
@@ -96,7 +101,7 @@ with col1:
     ]
     temp = tree_select(nodes1)
     st.markdown(temp)
-with col2:
+with colFCF2:
     # 初始化地图
     pe = st.empty()
     with pe:
@@ -104,7 +109,7 @@ with col2:
 
         m.to_streamlit()
 
-with col3:
+with colFCF3:
     st.markdown("##### 特征计算方法")
     col1, col2 = st.columns(2)
     with col1:
@@ -115,6 +120,7 @@ with col3:
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
     if option18:
+        # 注意:温度文件名称按照实际day of year顺序排序从小到大即可
         weatherDataDir = st.selectbox(
             '选择含温度文件夹',
             ('气象数据', '植保数据', '农学数据'))
@@ -133,7 +139,7 @@ with col3:
             '计算方式',
             ('平均值', '累计值'))
         savedFile = st.text_input(
-            label='savedFile',
+            label='保存文件名称',
             value='spatiotemporalExtraction.tif')
 
         st.session_state["featureMethodFacetName"]['param1'] = str(weatherDataDir)
@@ -147,47 +153,39 @@ with col3:
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([1.5, 1])
     # btn = interval_col2.button('添加处理', on_click=clear_all)
-    btn = interval_col2.button('预览', on_click=clear_all)
+    btn = interval_col2.button('预览并添加处理', on_click=clear_all)
+    FTool = FeatureCalculationMethodFacet()
 
     if btn:
+        tempMethod = getCheckboxName(st.session_state.nowFFacetMethodName)
+        methodParam = [value for key, value in st.session_state["featureMethodFacetName"].items() if
+                       key != 'checkBox']
+        if tempMethod == '时空抽取':
+            with st.spinner('正在计算时空抽取,预计耗时1分半'):
+                resultFilePathList = FTool.spatiotemporalExtraction(
+                    methodParam)
+                print(resultFilePathList)
+            with pe:
+                m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
 
-        with pe:
-            m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
+                m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
 
-            # in_geojson = "https://raw.githubusercontent.com/opengeos/leafmap/master/examples/data/cable_geo.geojson"
-            in_geojsonP = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\SpatiotemporalExtractionResult.json'
-            in_geojsonP1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test.json'
-            import json
+                m.add_layer_control()
 
-            # 打开并读取JSON文件
-            with open(in_geojsonP, 'r', encoding='utf-8') as file:
-                in_geojson = json.load(file)
-            # 打开并读取JSON文件
-            with open(in_geojsonP1, 'r', encoding='utf-8') as file:
-                in_geojson2 = json.load(file)
+                params = {
+                    "width": 2,
+                    "height": 0.3,
+                    "vmin": 0,
+                    "vmax": 100,
+                    "cmap": "terrain",
+                    "label": "Elevation (m)",
+                    "orientation": "horizontal",
+                    "transparent": True,
+                }
+                m.add_colormap(position=(75, 5), **params)
 
-                # 加载json格式的矢量数据
-            m.add_geojson(in_geojson, layer_name="Cable points")
-            m.add_geojson(in_geojson2, layer_name="Cable lines")
-
-            m.add_layer_control()
-
-            params = {
-                "width": 2,
-                "height": 0.3,
-                "vmin": 0,
-                "vmax": 100,
-                "cmap": "terrain",
-                "label": "Elevation (m)",
-                "orientation": "horizontal",
-                "transparent": True,
-            }
-            m.add_colormap(position=(75, 5), **params)
-
-            # 或通过图片添加色带
-            image = "https://i.imgur.com/SpmE7Cs.png"
-            # m.add_image(image, position="bottomright")
-            m.to_streamlit()
+                m.to_streamlit()
 
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["featureMethodFacetName"].items():
