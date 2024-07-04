@@ -115,7 +115,7 @@ class Model:
         savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
         savePath1 = os.path.join(savePathDir, actualAndPredictResult)
         savePath2 = os.path.join(savePathDir, 'SVM_testLabel.xlsx')
-        pd.DataFrame(y_pred,
+        pd.DataFrame(pd.concat([X_test, y_pred]),
                      columns=['predictLabel']).to_excel(
             savePath1, index=False)
         y_test.to_excel(
@@ -767,9 +767,13 @@ class Model:
         savePathDir = os.path.join(rootPath, 'predictAndTestLabel')
         savePath1 = os.path.join(savePathDir, actualAndPredictResult)
         savePath2 = os.path.join(savePathDir, 'LR_testLabel.xlsx')
+        # 将 y_pred 转换为一个 Series 并命名为 'predictLabel'
+        # y_pred = pd.Series(y_pred.flatten(), name='predictLabel', index=X_test.index)
+        # 合并 X_test 和 y_pred
+        # result = pd.concat([X_test, y_pred], axis=1)
+        # 将合并后的 DataFrame 保存为 Excel 文件
         pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(
-            savePath1, index=False)
+                     columns=['predictLabel']).to_excel(savePath1, index=False)
         y_test.to_excel(
             savePath2, index=False)
         # 保存评价指标
