@@ -400,23 +400,38 @@ with modelACM:
     if st.session_state.page == 0:
         with ph.container():
             st.markdown("##### 建模方法")
+            # 按模型分类显示
+            st.markdown("###### 分类模型")
             colOption1, colOption2, colOption3, colOption4 = st.columns(4)
             with colOption1:
                 agree = st.checkbox('SVM', key='checkBoxModel0', on_change=clearOtherOption, args=[0])
-                agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
-                agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4])
+                # agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
             with colOption2:
                 agree1 = st.checkbox('RF', key='checkBoxModel1', on_change=clearOtherOption, args=[1])
-                agree7 = st.checkbox('SVR', key='checkBoxModel7', on_change=clearOtherOption, args=[7])
 
             with colOption3:
                 agree3 = st.checkbox('FLDA', key='checkBoxModel3', on_change=clearOtherOption, args=[3])
-                agree5 = st.checkbox('PLSR', key='checkBoxModel5', on_change=clearOtherOption, args=[5])
 
             with colOption4:
                 agree2 = st.checkbox('KNN', key='checkBoxModel2', on_change=clearOtherOption, args=[2])
                 # agree4 = st.checkbox('贝叶斯统计')
                 # agree5 = st.checkbox('模糊综合评价')
+            st.markdown("###### 回归模型")
+            colOption21, colOption22, colOption23, colOption24 = st.columns(4)
+            with colOption21:
+                agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
+            with colOption22:
+                agree7 = st.checkbox('SVR', key='checkBoxModel7', on_change=clearOtherOption, args=[7])
+            with colOption23:
+                agree5 = st.checkbox('PLSR', key='checkBoxModel5', on_change=clearOtherOption, args=[5])
+            with colOption4:
+                pass
+            st.markdown("###### 机理模型")
+            colOption31, colOption32, = st.columns(2)
+            with colOption31:
+                agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4])
+            with colOption32:
+                pass
 
             st.markdown('---')
 
@@ -464,17 +479,24 @@ with modelACM:
     elif st.session_state.page == 1:
         # =======================添加评价指标=======================
         with ph.container():
-            st.markdown("###### 评价指标")
+            st.markdown("##### 评价指标")
+            st.markdown('###### 回归指标')
             tempCol1, tempCol2, tempCol3 = st.columns(3)
             with tempCol1:
                 agree10 = st.checkbox('RMSE', key='checkBoxPrecision4')
-                agree6 = st.checkbox('OA', key='checkBoxPrecision0')
             with tempCol2:
                 agree9 = st.checkbox('R方', key='checkBoxPrecision3')
-                agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
             with tempCol3:
                 agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
 
+            st.markdown('###### 分类指标')
+            tempCol21, tempCol22, tempCol23 = st.columns(3)
+            with tempCol21:
+                agree6 = st.checkbox('OA', key='checkBoxPrecision0')
+            with tempCol22:
+                agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
+            with tempCol23:
+                pass
             interval_col1, interval_col2 = st.columns([5, 1])
             # 传入指标
             # tempArgs =
