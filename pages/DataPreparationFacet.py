@@ -7,11 +7,23 @@
 import folium
 import numpy as np
 import streamlit as st
+from st_pages import hide_pages
 from streamlit_folium import st_folium
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 
 import pages_utils
+
+# 隐藏页面
+hide_pages(
+    [
+        "测试界面",
+        "原始数据",
+        "数据预处理",
+        "特征计算",
+        "特征优选",
+    ]
+)
 
 on = st.toggle("面状", help='点面数据界面切换', value=True)
 if not on:
@@ -64,17 +76,20 @@ with col2:
     with open(in_geojsonP1, 'r', encoding='utf-8') as file:
         in_geojson2 = json.load(file)
 
-        # 加载json格式的矢量数据
-        # m.add_geojson(in_geojson, layer_name="Cable points")
-        # m.add_geojson(in_geojson2, layer_name="Cable lines")
+    # 加载json格式的矢量数据
+    m.add_geojson(in_geojson, layer_name="Cable points")
+    m.add_geojson(in_geojson2, layer_name="Cable lines")
 
-        # 加载栅格数据
-    DOY = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\DayOfYear-ActiveAccumulatedTemperature.tif'
-    SET = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\SpatiotemporalExtractionResult.tif'
-
-    m.add_raster(DOY, colormap="RdYlGn_r", layer_name="DOY", nodata=0)
-    m.add_raster(SET, colormap="RdYlGn_r", layer_name="SET", nodata=0)
-
+    # 加载栅格数据
+    # DOY = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\DayOfYear-ActiveAccumulatedTemperature.tif'
+    SET = r'E:\a_python\program\testPlatform\demo\demo111-112\T51RTP_20240303T023611_TCI_10m_NDVI.tif'
+    resample = r'E:\a_python\program\testPlatform\demo\demo136\output_resample.tif'
+    resampleGRA_Average = r'E:\a_python\program\testPlatform\demo\demo136\outputResampleGRA_Average.tif'
+    # m.add_raster(DOY, colormap="RdYlGn_r", layer_name="DOY", nodata=0)
+    m.add_raster(SET, colormap="RdYlGn_r", layer_name="NDVI", nodata=0)
+    m.add_raster(resample, colormap="RdYlGn_r", layer_name="resample", nodata=0)
+    m.add_raster(resampleGRA_Average, colormap="RdYlGn_r", layer_name="resampleGRA_Average", nodata=0)
+    m.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
     m.add_layer_control()
 
     # 图例

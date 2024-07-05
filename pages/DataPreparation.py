@@ -7,9 +7,27 @@ import pandas as pd
 import seaborn as sns
 import streamlit as st
 from PIL import Image
+from st_pages import hide_pages
 
 import pages_utils
 from modelandmethod.PretreatmentMethod import PretreatmentMethod
+
+st.set_page_config(
+    layout="wide"
+)
+if 'page12' not in st.session_state:
+    st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
+
+# 隐藏页面
+hide_pages(
+    [
+        "测试界面",
+        "原始数据-面状",
+        "数据预处理-面状",
+        "特征计算-面状",
+        "特征优选-面状",
+    ]
+)
 
 # 处理方法内容记录(任务清单各项值)
 if "preMethodName" not in st.session_state:
@@ -23,11 +41,6 @@ checkBoxNum = 2
 # 设置可视化图表中文
 plt.rcParams['font.sans-serif'] = 'SimHei'
 
-st.set_page_config(
-    layout="wide"
-)
-if 'page12' not in st.session_state:
-    st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
 
 # 模拟24小时气温数据

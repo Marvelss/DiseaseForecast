@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import streamlit as st
+from st_pages import hide_pages
 
 import pages_utils
 from modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
@@ -17,6 +18,17 @@ if 'page13' not in st.session_state:
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
     st.switch_page("App.py")
+# 隐藏页面
+hide_pages(
+    [
+        "测试界面",
+        "原始数据-面状",
+        "数据预处理-面状",
+        "特征计算-面状",
+        "特征优选-面状",
+    ]
+)
+
 checkBoxNum = 5
 if "featureMethodName" not in st.session_state:
     st.session_state["featureMethodName"] = {
@@ -291,7 +303,10 @@ with (featureCCM):
     #         '分辨率转换',
     #         ('日值温度', '旬平均温度', '月平均温度'))
     if option15:
-        d1 = st.date_input("开始时间", value=None)
+        d1 = st.date_input("开始时间(默认处理各年数据集)",
+                           value=datetime.date(1990, 7, 6),
+                           format='MM/DD/YYYY',
+                           )
         d2 = st.date_input("结束时间", value=None)
         option = st.selectbox(
             '计算阈值方式',
@@ -354,7 +369,9 @@ with (featureCCM):
             '起始日期',
             ('基于活动积温的生育期计算', '指定日期'))
         if j3 == '指定日期':
-            d3 = st.date_input("起始日期", value=None, label_visibility='collapsed')
+            d3 = st.date_input("起始日期",
+                               value=None,
+                               label_visibility='collapsed')
 
         if j3 == '基于活动积温的生育期计算':
             pass

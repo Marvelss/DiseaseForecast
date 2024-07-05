@@ -4,6 +4,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from st_pages import hide_pages
 from streamlit import switch_page
 import pages_utils
 import seaborn as sns
@@ -18,6 +19,16 @@ if 'page14' not in st.session_state:
     st.session_state.page14 = 0
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
+# 隐藏页面
+hide_pages(
+    [
+        "测试界面",
+        "原始数据-面状",
+        "数据预处理-面状",
+        "特征计算-面状",
+        "特征优选-面状",
+    ]
+)
 checkBoxNum = 3
 if "OptimizationMethodName" not in st.session_state:
     st.session_state["OptimizationMethodName"] = {

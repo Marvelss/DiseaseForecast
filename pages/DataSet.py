@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pandas as pd
 import streamlit as st
+from st_pages import hide_pages
 
 import pages_utils
 from streamlit_pills import pills
@@ -14,6 +15,17 @@ st.set_page_config(
 )
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
+
+# 隐藏页面
+hide_pages(
+    [
+        "测试界面",
+        "原始数据-面状",
+        "数据预处理-面状",
+        "特征计算-面状",
+        "特征优选-面状",
+    ]
+)
 # 模板路径及注释信息
 path1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\气象数据-模板.xlsx'
 path2 = r'E:\a_python\program\diseaseForecastStreamlit\resource\植保数据-模板.xlsx'

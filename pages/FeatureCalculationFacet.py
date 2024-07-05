@@ -7,10 +7,22 @@
 import datetime
 
 import streamlit as st
+from st_pages import hide_pages
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 import pages_utils
 from modelmethodfacet.FeatureCalculationMethodFacet import FeatureCalculationMethodFacet
+
+# 隐藏页面
+hide_pages(
+    [
+        "测试界面",
+        "原始数据",
+        "数据预处理",
+        "特征计算",
+        "特征优选",
+    ]
+)
 
 checkBoxNum = 7
 if "featureMethodFacetName" not in st.session_state:
