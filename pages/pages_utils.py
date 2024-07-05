@@ -188,3 +188,46 @@ OptimalFeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "�
 UltimateFeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
 TempDataSet = [RawDataSet, PreprocessedDataSet,
                FeatureDataSet, OptimalFeatureDataSet, OptimalFeatureDataSet]
+
+# 面状内容
+
+
+# 创建字典
+RawDataSetFieldFacet = {
+    "编号": [], "文件名称": [], "数据类型": [], "数据格式": [],
+    "字段": [], "传输状态": [], "上传时间": []
+}
+
+PreprocessedDataSetFieldFacet = {
+    "编号": [], "数据类型": [], "输入字段": [], "预处理后字段": [], "大小": [],
+    "预处理方法": [], "方法参数": [], "时间": [], "处理状态": []
+}
+
+FeatureDataSetFieldFacet = {
+    "编号": [], "数据类型": [], "输入特征": [], "备选特征": [], "大小": [],
+    "特征计算方法": [], "方法参数": [], "时间": [], "处理状态": []
+}
+
+OptimalFeatureDataSetFieldFacet = {
+    "编号": [], "数据类型": [], "输入特征": [], "优选特征": [], "大小": [],
+    "特征优选方法": [], "方法参数": [], "时间": [], "处理状态": []
+}
+
+ModelSetFacet = {
+    "编号": [], "模型": [], "模型参数": [], "特征": [], "标签": [], "评价指标": [],
+    "数据集划分比例": [], "模型结构": [], "模型训练结果": [], "时间": [], "处理状态": []
+}
+
+# 存储字典列表
+TempDataSetFieldFacet = [
+    RawDataSetFieldFacet, PreprocessedDataSetFieldFacet,
+    FeatureDataSetFieldFacet, OptimalFeatureDataSetFieldFacet, ModelSetFacet]
+
+# 特征值
+RawDataSetFacet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+PreprocessedDataSetFacet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+FeatureDataSetFacet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+OptimalFeatureDataSetFacet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+UltimateFeatureDataSetFacet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+TempDataSetFacet = [RawDataSetFacet, PreprocessedDataSetFacet,
+                    FeatureDataSetFacet, OptimalFeatureDataSetFacet, OptimalFeatureDataSetFacet]
