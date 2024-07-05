@@ -27,41 +27,52 @@ if 'page12' not in st.session_state:
 if 'count' not in st.session_state:
     st.session_state.count = 0
 
+# json1 = [
+#         {"label": "原始数据集", "value": "原始数据集"},
+#         {
+#             "label": "预处理数据集",
+#             "value": "预处理数据集",
+#             "children": [
+#                 {"label": "temperature_1", "value": "temperature_1_2024"},
+#                 {"label": "temperature_2", "value": "temperature_2_2024"},
+#                 {"label": "temperature_3", "value": "temperature_3_2024"},
+#             ],
+#         },
+#         {
+#             "label": "特征计算数据集",
+#             "value": "特征计算数据集",
+#             "children": [
+#                 {"label": "晚稻移栽期", "value": "sub_d"},
+#                 {
+#                     "label": "预测峰值",
+#                     "value": "sub_e",
+#                     "children": [
+#                         {"label": "测报站点", "value": "sub_sub4"},
+#                         {"label": "生化指标", "value": "sub_s5"},
+#                     ],
+#                 },
+#                 {"label": "生化指标", "value": "sub_f"},
+#             ],
+#         },
+#         {"label": "特征优选数据集",
+#          "value": "特征优选数据集",
+#          "children": [
+#              {"label": "模板文件", "value": "模板文件"},
+#              {"label": "待提取特征文件", "value": "待提取特征文件"},
+#          ],
+#          },
+#     ]
 if 'leftBars' not in st.session_state:
     st.session_state.leftBars = [
-        {"label": "原始数据集", "value": "原始数据集"},
         {
-            "label": "预处理数据集",
-            "value": "预处理数据集",
+            "label": "原始数据集",
+            "value": "原始数据集",
             "children": [
                 {"label": "temperature_1", "value": "temperature_1_2024"},
                 {"label": "temperature_2", "value": "temperature_2_2024"},
                 {"label": "temperature_3", "value": "temperature_3_2024"},
             ],
         },
-        {
-            "label": "特征计算数据集",
-            "value": "特征计算数据集",
-            "children": [
-                {"label": "晚稻移栽期", "value": "sub_d"},
-                {
-                    "label": "预测峰值",
-                    "value": "sub_e",
-                    "children": [
-                        {"label": "测报站点", "value": "sub_sub4"},
-                        {"label": "生化指标", "value": "sub_s5"},
-                    ],
-                },
-                {"label": "生化指标", "value": "sub_f"},
-            ],
-        },
-        {"label": "特征优选数据集",
-         "value": "特征优选数据集",
-         "children": [
-             {"label": "模板文件", "value": "模板文件"},
-             {"label": "待提取特征文件", "value": "待提取特征文件"},
-         ],
-         },
     ]
 # 隐藏页面
 hide_pages(
@@ -93,6 +104,36 @@ def savedFile(uploadedFile):
     # 模型文件保存到本地
     with open(filePath, 'wb') as f:
         f.write(uploadedFile.read())
+
+
+# 更新左侧目标显示
+def updateLeftBars(raw_data_facet):
+    # 初始化 leftBars 从 RawDataSetFieldFacet 获取数据
+    left_bars = []
+    structure = {}
+
+    for i in range(len(raw_data_facet["编号"])):
+        root = raw_data_facet["根节点"][i]
+        child = raw_data_facet["子节点"][i]
+        file_name1 = raw_data_facet["文件名称"][i]
+        file_value = f"{file_name1}.{raw_data_facet['数据格式'][i]}"
+
+        if root not in structure:
+            structure[root] = {}
+
+        if child not in structure[root]:
+            structure[root][child] = []
+
+        structure[root][child].append({"label": file_name1, "value": file_value})
+
+    for root, children in structure.items():
+        root_node = {"label": root, "value": root, "children": []}
+        for child, files in children.items():
+            child_node = {"label": child, "value": child, "children": files}
+            root_node["children"].append(child_node)
+        left_bars.append(root_node)
+
+    return left_bars
 
 
 empty1 = st.empty()
@@ -130,7 +171,7 @@ with dataSCR:
     st.markdown("##### 上传数据集")
 
     selectedTemplate = pills("选择数据集", ['气象数据', '植保数据(未开放)', '农学数据(未开放)'], ["🌨️️", "🌾", "☣️"])
-
+    suuDirName = st.text_input(label='子文件夹名称', value='文件夹名称')
     uploaded_files = st.file_uploader(
         "上传数据集",
         accept_multiple_files=True,
@@ -193,11 +234,13 @@ with dataSCR:
                 fileFormat = tempNF[1]
                 # 防止重复添加
                 if fileName in existing_file_names:
-                    st.toast(f"文件 {fileName} 已存在,跳过上传", icon="⚠️")
+                    # st.toast(f"文件 {fileName} 已存在,跳过上传", icon="⚠️")
                     continue
                 new_entry = {
                     "编号": pages_utils.generateID(),
                     "数据类型": selectedTemplate,
+                    "根节点": '原始数据集',
+                    "子节点": suuDirName,
                     "文件名称": fileName,
                     "数据格式": fileFormat,
                     "传输状态": "已上传",
@@ -206,9 +249,13 @@ with dataSCR:
                 # 添加到TempDataSetFieldFacet[0]
                 for key in pages_utils.TempDataSetFieldFacet[0].keys():
                     pages_utils.TempDataSetFieldFacet[0][key].append(new_entry[key])
+
+                # 更新左侧目标显示
+                st.session_state.leftBars = updateLeftBars(pages_utils.RawDataSetFieldFacet)
             # 上传出错提示
             except BaseException as e:
                 st.toast('上传错误,请检测文件内容及格式无误后重新上传', icon="⚠️")
                 raise e
         print('======================原始数据集======================')
         st.markdown(pages_utils.TempDataSetFieldFacet[0])
+        st.markdown(len(pages_utils.TempDataSetFieldFacet[0]['文件名称']))
