@@ -49,15 +49,13 @@ def mergeArray(list1, list2, list3):
 # 获取选项值对应名称
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
-        return '时间(温度)分辨率转换'
+        return '活动积温计算'
     elif checkbox == 'checkbox1':
         return '降雨日数计算'
     elif checkbox == 'checkbox2':
         return '降水累积量计算'
     elif checkbox == 'checkbox3':
         return '基于活动积温的生育期计算'
-    elif checkbox == 'checkbox4':
-        return '活动积温计算'
 
 
 # 取消所有选项按钮
@@ -82,16 +80,14 @@ def firstPage(): st.session_state.page13 = 0
 
 # 获取输出特征名称
 def getFeatureName(processName):
-    if processName == '时间(温度)分辨率转换':
-        return ''
+    if processName == '活动积温计算':
+        return '活动积温'
     elif processName == '降雨日数计算':
         return '降雨日数'
     elif processName == '降水累积量计算':
         return '降水累积量'
     elif processName == '基于活动积温的生育期计算':
         return '生育期'
-    elif processName == '活动积温计算':
-        return '活动积温'
 
 
 def onRun():
@@ -257,12 +253,11 @@ with (featureCCM):
     st.markdown("##### 特征计算方法")
     col1, col2 = st.columns(2)
     with col1:
-        # option14 = st.checkbox('时间(温度)分辨率转换', key='checkbox0', on_change=clear_other, args=[0], disabled=True)
         option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1])
         option16 = st.checkbox('降水累积量计算', key='checkbox2', on_change=clear_other, args=[2])
     with col2:
         option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3])
-        option18 = st.checkbox('活动积温计算(待发布)', key='checkbox4', on_change=clear_other, args=[4], disabled=True)
+        option14 = st.checkbox('活动积温计算(待发布)', key='checkbox0', on_change=clear_other, args=[0], disabled=True)
 
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
