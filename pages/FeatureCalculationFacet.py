@@ -24,7 +24,37 @@ hide_pages(
     ]
 )
 
-checkBoxNum = 7
+
+# 更新左侧目标显示(可添加至pages_utils)
+def updateLeftBars(raw_data_facet):
+    # 初始化 leftBars 从 RawDataSetFieldFacet 获取数据
+    left_bars = []
+    structure = {}
+
+    for i in range(len(raw_data_facet["编号"])):
+        root = raw_data_facet["根节点"][i]
+        child = raw_data_facet["子节点"][i]
+        file_name1 = raw_data_facet["文件名称"][i]
+        file_value = f"{file_name1}.{raw_data_facet['数据格式'][i]}"
+
+        if root not in structure:
+            structure[root] = {}
+
+        if child not in structure[root]:
+            structure[root][child] = []
+
+        structure[root][child].append({"label": file_name1, "value": file_value})
+
+    for root, children in structure.items():
+        root_node = {"label": root, "value": root, "children": []}
+        for child, files in children.items():
+            child_node = {"label": child, "value": child, "children": files}
+            root_node["children"].append(child_node)
+        left_bars.append(root_node)
+
+    return left_bars
+
+
 if "featureMethodFacetName" not in st.session_state:
     st.session_state["featureMethodFacetName"] = {
         'checkBox': None
@@ -33,23 +63,19 @@ if "featureMethodFacetName" not in st.session_state:
 if "nowFFacetMethodName" not in st.session_state:
     st.session_state.nowFFacetMethodName = ''
 
+checkBoxNum = 4
+
 
 # 获取选项值对应名称
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
-        return '时间(温度)分辨率转换'
-    elif checkbox == 'checkbox1':
-        return '降雨日数计算'
-    elif checkbox == 'checkbox2':
-        return '降水累积量计算'
-    elif checkbox == 'checkbox3':
-        return '基于活动积温的生育期计算'
-    elif checkbox == 'checkbox4':
         return '时空抽取'
-    elif checkbox == 'checkbox5':
-        return '遥感指数计算'
-    elif checkbox == 'checkbox6':
+    elif checkbox == 'checkbox1':
+        return '植被指数计算'
+    elif checkbox == 'checkbox2':
         return '景观指数计算'
+    elif checkbox == 'checkbox3':
+        return '空间点提取'
 
 
 # 取消其他选项按钮
@@ -73,61 +99,24 @@ def clear_all():
 colFCF1, colFCF2, colFCF3 = st.columns([0.2, 0.9, 0.3])
 with colFCF1:
     st.markdown("##### 数据与特征")
-    nodes1 = [
-        {"label": "植保数据", "value": "气象数据"},
-        {
-            "label": "气象数据",
-            "value": "气象数据文件夹",
-            "children": [
-                {"label": "temperature_1", "value": "temperature_1_2024"},
-                {"label": "temperature_2", "value": "temperature_2_2024"},
-                {"label": "temperature_3", "value": "temperature_3_2024"},
-            ],
-        },
-        {
-            "label": "农学数据",
-            "value": "folder_c",
-            "children": [
-                {"label": "晚稻移栽期", "value": "sub_d"},
-                {
-                    "label": "预测峰值",
-                    "value": "sub_e",
-                    "children": [
-                        {"label": "测报站点", "value": "sub_sub4"},
-                        {"label": "生化指标", "value": "sub_s5"},
-                    ],
-                },
-                {"label": "生化指标", "value": "sub_f"},
-            ],
-        },
-        {"label": "其他",
-         "value": "其他",
-         "children": [
-             {"label": "模板文件", "value": "模板文件"},
-             {"label": "待提取特征文件", "value": "待提取特征文件"},
-         ],
-         },
-    ]
-    temp = tree_select(nodes1)
-    st.markdown(temp)
+    temp = tree_select(st.session_state.leftBars)
 with colFCF2:
     # 初始化地图
     pe = st.empty()
     with pe:
         m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-
         m.to_streamlit()
 
 with colFCF3:
     st.markdown("##### 特征计算方法")
     col1, col2 = st.columns(2)
     with col1:
-        option21 = st.checkbox('植被指数计算(待发布)', key='checkbox5', on_change=clear_other, args=[5])
-        option20 = st.checkbox('景观指数计算(待发布)', key='checkbox6', on_change=clear_other, args=[6])
+        option21 = st.checkbox('植被指数计算(待发布)', key='checkbox1', on_change=clear_other, args=[1])
+        option20 = st.checkbox('景观指数计算(待发布)', key='checkbox2', on_change=clear_other, args=[2])
 
     with col2:
-        option18 = st.checkbox('时空抽取(待发布)', key='checkbox4', on_change=clear_other, args=[4])
-        option22 = st.checkbox('空间点提取(待发布)', key='checkbox7', on_change=clear_other, args=[7])
+        option18 = st.checkbox('时空抽取(待发布)', key='checkbox0', on_change=clear_other, args=[0])
+        option22 = st.checkbox('空间点提取(待发布)', key='checkbox3', on_change=clear_other, args=[3])
 
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
@@ -204,9 +193,15 @@ with colFCF3:
             pass
             # print('============测试方法参数正确性============')
             # print(f"Key: {key11}, Value: {value11}")
-        new_data = {
+        new_entry = {
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
+            "根节点": '备选特征集',
+            "子节点": 'test1',
+            "文件名称": 'testName1' + pages_utils.generateID()[-4:],
+            "数据格式": 'testFormat1',
+            "备选特征": None,
+            "大小": 'testSize1',
             "输入特征": None,
             "特征计算方法": getCheckboxName(st.session_state["featureMethodFacetName"]['checkBox']),
             "方法参数": [value for key, value in st.session_state["featureMethodFacetName"].items() if
@@ -214,6 +209,18 @@ with colFCF3:
             "时间": datetime.datetime.now().time(),
             "处理状态": False}
         print('======================特征计算-添加任务清单记录======================')
-        print(new_data)
-        # pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_data
-        # st.rerun()
+        print(new_entry)
+
+        for key in pages_utils.TempDataSetFieldFacet[2].keys():
+            pages_utils.TempDataSetFieldFacet[2][key].append(new_entry[key])
+
+        # 合并原始和预处理数据集记录
+
+        featureCalculation_data_structure = updateLeftBars(pages_utils.FeatureDataSetFieldFacet)
+        preprocessed_data_structure = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
+        preprocessed_data_structure.extend(featureCalculation_data_structure)
+
+        st.session_state.leftBars = preprocessed_data_structure
+        # st.session_state.leftBars = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
+        # 更新左侧目标显示
+        st.markdown(st.session_state.leftBars)

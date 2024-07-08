@@ -16,6 +16,7 @@ import leafmap.foliumap as leafmap
 
 import pages_utils
 from modelmethodfacet.PretreatmentMethodFacet import PretreatmentMethodFacet
+from modelmethodfacet.FeatureCalculationMethodFacet import FeatureCalculationMethodFacet
 
 st.set_page_config(
     layout="wide"
@@ -83,11 +84,9 @@ if "preMethodFacetName" not in st.session_state:
 if "nowPFacetMethodName" not in st.session_state:
     st.session_state.nowPFacetMethodName = ''
 
-
 col1, col2, col3 = st.columns([0.2, 0.9, 0.3])
 with col1:
     st.markdown("##### 数据与特征")
-
     temp = tree_select(st.session_state.leftBars)
 with col2:
     # 初始化地图
@@ -152,9 +151,9 @@ with col3:
     col12, col22 = st.columns(2)
     with col12:
         # agree = st.checkbox('剔除异常值', key='checkbox0', args=[0])
-        agree11 = st.checkbox("空间数据重采样(待发布)", key='checkbox2', args=[2], disabled=True)
+        agree11 = st.checkbox("空间数据重采样(待发布)", key='checkbox2', args=[2])
     with col22:
-        agree12 = st.checkbox("空间数据插值(待发布)", key='checkbox3', args=[3], disabled=True)
+        agree12 = st.checkbox("空间数据插值(待发布)", key='checkbox3', args=[3])
         # agree10 = st.checkbox("缺失值插补", key='checkbox1', args=[1])
         # agree13 = st.checkbox("点面数据关联(待发布)", key='checkbox4', args=[4], disabled=True)
     st.markdown('---')
@@ -219,7 +218,7 @@ with col3:
         tempMethod = getCheckboxName(st.session_state.nowPFacetMethodName)
         methodParam = [value for key, value in st.session_state["preMethodFacetName"].items() if
                        key != 'checkBox']
-        if tempMethod == '时空抽取':
+        if tempMethod == 'a':
             with st.spinner('正在计算时空抽取,预计耗时1分半'):
                 resultFilePathList = FTool.spatiotemporalExtraction(
                     methodParam)
@@ -268,12 +267,15 @@ with col3:
             "处理状态": False}
         print('======================预处理方法-添加任务清单记录======================')
         print(new_entry)
-        # 添加到TempDataSetFieldFacet[0]
+        # 添加到TempDataSetFieldFacet[1]
         for key in pages_utils.TempDataSetFieldFacet[1].keys():
             pages_utils.TempDataSetFieldFacet[1][key].append(new_entry[key])
 
-        # pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_data
-        # st.rerun()
+        # 合并原始和预处理数据集记录
+        preprocessed_data_structure = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
+        row_data_structure = updateLeftBars(pages_utils.RawDataSetFieldFacet)
+        row_data_structure.extend(preprocessed_data_structure)
+        st.session_state.leftBars = row_data_structure
+        # st.session_state.leftBars = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
         # 更新左侧目标显示
         st.markdown(st.session_state.leftBars)
-        st.session_state.leftBars = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
