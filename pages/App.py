@@ -131,12 +131,14 @@ if st.button('初始化数据', on_click=emptyValue):
 # }
 # </style>
 # """, unsafe_allow_html=True)
+colAppBtn1, colAppBtn2, = st.columns([0.4, 0.6])
 
-if st.button('点状数据建模'):
-    switch_page("DataSet.py")
+with colAppBtn2:
+    if st.button('点状数据建模'):
+        switch_page("DataSet.py")
 
-if st.button('面状数据建模'):
-    switch_page("DataSetFacet.py")
+    if st.button('面状数据建模'):
+        switch_page("DataSetFacet.py")
 
 
 def navbar():
