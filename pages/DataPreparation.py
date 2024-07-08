@@ -42,62 +42,12 @@ checkBoxNum = 2
 plt.rcParams['font.sans-serif'] = 'SimHei'
 
 
-
-# 模拟24小时气温数据
-def simulate_temperature_data():
-    now = datetime.datetime.now()
-    hours = pd.date_range(start=now, periods=24, freq='H')
-    temperatures = np.random.randint(10, 30, size=24)
-    data1 = {'Time': hours, 'Temperature': temperatures}
-    df = pd.DataFrame(data1)
-    return df
-
-
-# 模拟24小时降水数据
-def simulate_precipitation_data():
-    now = datetime.datetime.now()
-    hours = pd.date_range(start=now, periods=24, freq='H')
-    precipitation = np.random.uniform(0, 10, size=24)
-    data1 = {'Time': hours, 'Precipitation': precipitation}
-    df = pd.DataFrame(data1)
-    return df
-
-
-def simulate_box_data():
-    # 模拟生成温度数据
-    N = 500
-    temperature1 = np.random.normal(loc=20, scale=2, size=(N,))
-    temperature2 = np.random.normal(loc=25, scale=4, size=(N,))
-    temperature3 = np.random.normal(loc=18, scale=1.5, size=(N,))
-    temperature4 = np.random.normal(loc=22, scale=3, size=(N,))
-
-    # 创建DataFrame
-    df1 = pd.DataFrame(temperature1, columns=['Temperature'])
-    df1['day'] = 'Thur'
-    df2 = pd.DataFrame(temperature2, columns=['Temperature'])
-    df2['day'] = 'Fri'
-    df3 = pd.DataFrame(temperature3, columns=['Temperature'])
-    df3['day'] = 'Sat'
-    df4 = pd.DataFrame(temperature4, columns=['Temperature'])
-    df4['day'] = 'Sun'
-
-    # 合并数据
-    df = pd.concat([df1, df2, df3, df4], axis=0)
-    return df
-
-
 # 获取选项值对应名称
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
         return '剔除异常值'
     elif checkbox == 'checkbox1':
         return '缺失值插补'
-    elif checkbox == 'checkbox2':
-        return '空间数据重采样'
-    elif checkbox == 'checkbox3':
-        return '点面数据转化'
-    elif checkbox == 'checkbox4':
-        return '点面数据关联'
 
 
 def mergeArray(list1, list2, list3):
@@ -219,11 +169,6 @@ def onRun():
     print(pages_utils.TempDataSet[1])
 
 
-on = st.toggle("点状", help='点面数据界面切换')
-
-if on:
-    st.switch_page('DataPreparationFacet.py')
-
 # ==============================界面==============================
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
@@ -311,11 +256,8 @@ with dataPCM:
 
     with col1:
         agree = st.checkbox('剔除异常值', key='checkbox0', on_change=clear_other, args=[0])
-        agree11 = st.checkbox("空间数据重采样(待发布)", key='checkbox2', on_change=clear_other, args=[2], disabled=True)
-        agree12 = st.checkbox("点面数据转化(待发布)", key='checkbox3', on_change=clear_other, args=[3], disabled=True)
     with col2:
         agree10 = st.checkbox("缺失值插补", key='checkbox1', on_change=clear_other, args=[1])
-        agree13 = st.checkbox("点面数据关联(待发布)", key='checkbox4', on_change=clear_other, args=[4], disabled=True)
     st.markdown('---')
 
     # ===============显示和处理右中各个处理方法设置参数===============

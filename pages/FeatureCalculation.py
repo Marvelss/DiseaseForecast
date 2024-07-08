@@ -29,7 +29,7 @@ hide_pages(
     ]
 )
 
-checkBoxNum = 5
+checkBoxNum = 4
 if "featureMethodName" not in st.session_state:
     st.session_state["featureMethodName"] = {
         'checkBox': None
@@ -42,18 +42,8 @@ def mergeArray4(list1, list2, list3, list4):
     return list(set().union(*[list1, list2, list3, list4]))
 
 
-# 模拟月降水量数据
-def simulate_month_precipitation():
-    # 生成一个包含一整年每个月第一天的日期时间序列
-    months = pd.date_range(start='2023-01-01', end='2023-12-01', freq='MS')
-
-    # 生成12个随机的降水量数据
-    precipitation = np.random.uniform(0, 100, size=12)
-
-    # 创建包含月份和降水量的数据框
-    data = {'Month': months, 'Precipitation': precipitation}
-    df = pd.DataFrame(data)
-    return df
+def mergeArray(list1, list2, list3):
+    return list(set().union(*[list1, list2, list3]))
 
 
 # 获取选项值对应名称
@@ -67,15 +57,7 @@ def getCheckboxName(checkbox):
     elif checkbox == 'checkbox3':
         return '基于活动积温的生育期计算'
     elif checkbox == 'checkbox4':
-        return '时空抽取'
-    elif checkbox == 'checkbox5':
-        return '遥感指数计算'
-    elif checkbox == 'checkbox6':
-        return '景观指数计算'
-
-
-def mergeArray(list1, list2, list3):
-    return list(set().union(*[list1, list2, list3]))
+        return '活动积温计算'
 
 
 # 取消所有选项按钮
@@ -108,12 +90,8 @@ def getFeatureName(processName):
         return '降水累积量'
     elif processName == '基于活动积温的生育期计算':
         return '生育期'
-    elif processName == '时空抽取':
-        return '时空抽取'
-    elif processName == '遥感指数计算':
-        return '遥感指数计算'
-    elif processName == '景观指数计算':
-        return '景观指数计算'
+    elif processName == '活动积温计算':
+        return '活动积温'
 
 
 def onRun():
@@ -207,11 +185,6 @@ def onRun():
     print(pages_utils.TempDataSet[2])
 
 
-on = st.toggle("点状", help='点面数据界面切换')
-
-if on:
-    st.switch_page('FeatureCalculationFacet.py')
-
 # ==============================界面==============================
 featureCCV, featureCCM = st.columns([0.5, 0.7])
 with featureCCV:
@@ -287,14 +260,9 @@ with (featureCCM):
         # option14 = st.checkbox('时间(温度)分辨率转换', key='checkbox0', on_change=clear_other, args=[0], disabled=True)
         option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1])
         option16 = st.checkbox('降水累积量计算', key='checkbox2', on_change=clear_other, args=[2])
-        option21 = st.checkbox('植被指数计算(待发布)', key='checkbox5', on_change=clear_other, args=[5], disabled=True)
-        option14 = st.checkbox('待添加', key='checkbox0', on_change=clear_other, args=[0], disabled=True,
-                               label_visibility='hidden')
     with col2:
         option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3])
-        option18 = st.checkbox('时空抽取(待发布)', key='checkbox4', on_change=clear_other, args=[4],
-                               disabled=True)
-        option20 = st.checkbox('景观指数计算(待发布)', key='checkbox6', on_change=clear_other, args=[6], disabled=True)
+        option18 = st.checkbox('活动积温计算(待发布)', key='checkbox4', on_change=clear_other, args=[4], disabled=True)
 
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
@@ -358,7 +326,7 @@ with (featureCCM):
         st.session_state["featureMethodName"]['param2'] = growthPeriodStartDate.strftime('%m-%d')
         st.session_state["featureMethodName"]['param3'] = growthPeriodEndDate.strftime('%m-%d')
         st.session_state["featureMethodName"]['param4'] = str(growthPeriodNumber)
-    if option18:
+    if option17:
         option = st.selectbox(
             '抽取因子',
             ('降水', '温度'))

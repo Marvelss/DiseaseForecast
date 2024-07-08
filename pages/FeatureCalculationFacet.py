@@ -70,7 +70,6 @@ def clear_all():
     return
 
 
-
 colFCF1, colFCF2, colFCF3 = st.columns([0.2, 0.9, 0.3])
 with colFCF1:
     st.markdown("##### 数据与特征")
