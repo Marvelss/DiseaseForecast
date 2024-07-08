@@ -1,7 +1,8 @@
 import pandas as pd
 import streamlit as st
 
-from st_pages import Page, show_pages
+from st_pages import Page, show_pages, hide_pages
+from streamlit import switch_page
 
 import pages_utils
 import itertools
@@ -38,6 +39,20 @@ show_pages(
         Page("pages/FeatureOptimizationFacet.py", "特征优选-面状"),
     ]
 )
+
+# 隐藏页面
+hide_pages(
+    ["原始数据", "数据预处理", "特征计算",
+     "特征优选", "模型构建", "基于天气情景生成器的模型评价", "可视化及数据下载",
+     "模型应用",
+     "测试界面",
+     "原始数据-面状",
+     "数据预处理-面状",
+     "特征计算-面状",
+     "特征优选-面状",
+     ]
+)
+
 # 初始化控制各环节左侧内容展示
 if 'page12' not in st.session_state:
     st.session_state.page12 = 0
@@ -105,6 +120,23 @@ def emptyValue():
 
 if st.button('初始化数据', on_click=emptyValue):
     st.toast("初始化完毕", icon="ℹ️️")
+
+# st.markdown("""
+# <style>
+# button {
+#     height: 150px;
+#     width: 200px;
+#     color: blue;
+# border-radius: 25px; /* Optional: for rounded buttons */
+# }
+# </style>
+# """, unsafe_allow_html=True)
+
+if st.button('点状数据建模'):
+    switch_page("DataSet.py")
+
+if st.button('面状数据建模'):
+    switch_page("DataSetFacet.py")
 
 
 def navbar():
