@@ -70,9 +70,7 @@ def clear_all():
     return
 
 
-on = st.toggle("面状", help='点面数据界面切换', value=True)
-if not on:
-    st.switch_page('FeatureCalculation.py')
+
 colFCF1, colFCF2, colFCF3 = st.columns([0.2, 0.9, 0.3])
 with colFCF1:
     st.markdown("##### 数据与特征")
@@ -126,9 +124,12 @@ with colFCF3:
     col1, col2 = st.columns(2)
     with col1:
         option21 = st.checkbox('植被指数计算(待发布)', key='checkbox5', on_change=clear_other, args=[5])
+        option20 = st.checkbox('景观指数计算(待发布)', key='checkbox6', on_change=clear_other, args=[6])
+
     with col2:
         option18 = st.checkbox('时空抽取(待发布)', key='checkbox4', on_change=clear_other, args=[4])
-        option20 = st.checkbox('景观指数计算(待发布)', key='checkbox6', on_change=clear_other, args=[6])
+        option22 = st.checkbox('空间点提取(待发布)', key='checkbox7', on_change=clear_other, args=[7])
+
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
     if option18:

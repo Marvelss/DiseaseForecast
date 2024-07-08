@@ -143,22 +143,6 @@ with dataSCM:
     # with empty1.container():
     temp = tree_select(st.session_state.leftBars)
     st.markdown(temp)
-
-btn = st.button('上传')
-
-if btn:
-    new_node = {
-        "label": f"新数据节点{st.session_state.count}",
-        "value": f"新数据值{st.session_state.count}",
-        "children": [
-            {"label": f"子节点{st.session_state.count}",
-             "value": f"子节点{st.session_state.count}值"},
-        ]
-    }
-    st.session_state.count += 1
-    # 将新节点添加到现有的leftBars列表中
-    st.session_state.leftBars.append(new_node)
-    st.rerun()
 with dataSCMap:
     pass
     # # 初始化地图
