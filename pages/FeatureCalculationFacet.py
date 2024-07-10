@@ -116,10 +116,26 @@ with colFCF3:
 
     with col2:
         option18 = st.checkbox('时空抽取(待发布)', key='checkbox0', on_change=clear_other, args=[0])
-        option22 = st.checkbox('空间点提取(待发布)', key='checkbox3', on_change=clear_other, args=[3])
+        option22 = st.checkbox('空间点提取', key='checkbox3', on_change=clear_other, args=[3])
 
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
+    if option22:
+        extractFileList = pages_utils.multiselect_all(
+            st, '全选-待提取文件',
+            ['遥感数据', '气象数据'],
+            'tempModels', 'collapsed')
+        extractValue = st.selectbox(
+            '待提取字段名称',
+            ('value', 'value1'))
+        # 获取年和day of year
+        numDate = st.date_input(label='日期')
+        standardFile = st.selectbox(
+            '基准文件',
+            ('野外调查数据', '专业植保站调查数据'))
+        extractMethod = st.selectbox(
+            '提取方法',
+            ('最近邻插值法', '双线性插值法', '三次样条插值法'))
     if option18:
         # 注意:温度文件名称按照实际day of year顺序排序从小到大即可
         weatherDataDir = st.selectbox(
@@ -187,7 +203,12 @@ with colFCF3:
                 m.add_colormap(position=(75, 5), **params)
 
                 m.to_streamlit()
+        elif tempMethod == '空间点提取':
+            # 根据参数内容存入表
+            # 待提取字段名称、年、DayOfYear、基准文件
 
+            pages_utils.TempDataSetFacet[
+                2] = r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型构建\2024-05-06T01-24_export.xlsx'
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["featureMethodFacetName"].items():
             pass
@@ -223,4 +244,4 @@ with colFCF3:
         st.session_state.leftBars = preprocessed_data_structure
         # st.session_state.leftBars = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
         # 更新左侧目标显示
-        st.markdown(st.session_state.leftBars)
+        # st.markdown(st.session_state.leftBars)
