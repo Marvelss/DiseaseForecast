@@ -63,19 +63,25 @@ def updateLeftBars(raw_data_facet):
     return left_bars
 
 
+checkBoxNum = 2
+
+
 # 获取选项值对应名称
 def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
-        return '剔除异常值'
+        return '重采样'
     elif checkbox == 'checkbox1':
-        return '缺失值插补'
-    elif checkbox == 'checkbox2':
-        return '空间数据重采样'
-    elif checkbox == 'checkbox3':
-        return '空间数据插值'
+        return '空间插值'
 
 
-checkBoxNum = 7
+# 取消其他选项按钮
+def clear_other(key):
+    for h in range(checkBoxNum):
+        if h != key:
+            st.session_state[f'checkbox{h}'] = False
+    return
+
+
 if "preMethodFacetName" not in st.session_state:
     st.session_state["preMethodFacetName"] = {
         'checkBox': None
@@ -151,9 +157,9 @@ with col3:
     col12, col22 = st.columns(2)
     with col12:
         # agree = st.checkbox('剔除异常值', key='checkbox0', args=[0])
-        agree11 = st.checkbox("空间数据重采样(待发布)", key='checkbox2', args=[2])
+        agree11 = st.checkbox("重采样(待发布)", key='checkbox0', on_change=clear_other, args=[0])
     with col22:
-        agree12 = st.checkbox("空间数据插值(待发布)", key='checkbox3', args=[3])
+        agree12 = st.checkbox("空间插值(待发布)", key='checkbox1', on_change=clear_other, args=[1])
         # agree10 = st.checkbox("缺失值插补", key='checkbox1', args=[1])
         # agree13 = st.checkbox("点面数据关联(待发布)", key='checkbox4', args=[4], disabled=True)
     st.markdown('---')
@@ -278,4 +284,4 @@ with col3:
         st.session_state.leftBars = row_data_structure
         # st.session_state.leftBars = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
         # 更新左侧目标显示
-        st.markdown(st.session_state.leftBars)
+        # st.markdown(st.session_state.leftBars)

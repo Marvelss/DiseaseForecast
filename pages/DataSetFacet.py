@@ -68,9 +68,7 @@ if 'leftBars' not in st.session_state:
             "label": "原始数据集",
             "value": "原始数据集",
             "children": [
-                {"label": "temperature_1", "value": "temperature_1_2024"},
-                {"label": "temperature_2", "value": "temperature_2_2024"},
-                {"label": "temperature_3", "value": "temperature_3_2024"},
+                {"label": "test", "value": "test"}
             ],
         },
     ]
@@ -142,7 +140,7 @@ dataSCM, dataSCMap, dataSCR = st.columns([0.2, 0.7, 0.4])
 with dataSCM:
     # with empty1.container():
     temp = tree_select(st.session_state.leftBars)
-    st.markdown(temp)
+    # st.markdown(temp)
 with dataSCMap:
     pass
     # # 初始化地图
@@ -241,5 +239,5 @@ with dataSCR:
                 st.toast('上传错误,请检测文件内容及格式无误后重新上传', icon="⚠️")
                 raise e
         print('======================原始数据集======================')
-        st.markdown(pages_utils.TempDataSetFieldFacet[0])
-        st.markdown(len(pages_utils.TempDataSetFieldFacet[0]['文件名称']))
+        # st.markdown(pages_utils.TempDataSetFieldFacet[0])
+        # st.markdown(len(pages_utils.TempDataSetFieldFacet[0]['文件名称']))
