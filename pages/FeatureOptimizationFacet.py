@@ -88,10 +88,10 @@ def onPreviewResults():
                    key != 'checkBox']
 
     # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
-    if pages_utils.TempDataSet[3].shape[0] == 0:
-        dataFrameTemp = pages_utils.TempDataSet[2]
+    if pages_utils.TempDataSetFacet[3].shape[0] == 0:
+        dataFrameTemp = pages_utils.TempDataSetFacet[2]
     else:
-        dataFrameTemp = pages_utils.TempDataSet[3]
+        dataFrameTemp = pages_utils.TempDataSetFacet[3]
     if tempMethod == 't检验':
         afterHandleData, tempResult, optimalFeatureListT = FeatureOptimizationMethod(
             dataFrameTemp.copy(), None).tTest(
@@ -124,7 +124,7 @@ def onPreviewResults():
         # 使用Seaborn绘制热图
         plt.figure(figsize=(10, 8))
         sns.heatmap(tempResultP, annot=True, cmap='coolwarm', center=0)
-        plt.title('互相关分析矩阵')
+        plt.title('Pearson互相关性分析矩阵')
         st.pyplot(plt)
         st.multiselect('预期保留特征:',
                        options=optimalFeatureList,
@@ -180,25 +180,25 @@ def onPreviewResults():
             "处理状态": False}
         print('======================特征优选-添加任务清单记录======================')
         print(new_data)
-        pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
+        pages_utils.TempDataSetFieldFacet[3].loc[len(pages_utils.TempDataSetFieldFacet[3])] = new_data
         st.rerun()
 
 
 def onRun():
-    if '优选特征' not in st.session_state["leftTabs"]:
-        st.session_state["leftTabs"].append('优选特征')
+    if '优选特征' not in st.session_state.leftTabsOpt:
+        st.session_state.leftTabsOpt.append('优选特征')
     st.session_state.page14 += 1
 
     # ===============获取任务清单内容===============
-    idNumber = pages_utils.TempDataSetField[3]["编号"].tolist()
-    fields = pages_utils.TempDataSetField[3]["输入特征"].tolist()
-    methodParam = pages_utils.TempDataSetField[3]["方法参数"].tolist()
-    methodList = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()
-    isHandledFlags = pages_utils.TempDataSetField[3]["处理状态"].tolist()
+    idNumber = pages_utils.TempDataSetFieldFacet[3]["编号"].tolist()
+    fields = pages_utils.TempDataSetFieldFacet[3]["输入特征"].tolist()
+    methodParam = pages_utils.TempDataSetFieldFacet[3]["方法参数"].tolist()
+    methodList = pages_utils.TempDataSetFieldFacet[3]["特征优选方法"].tolist()
+    isHandledFlags = pages_utils.TempDataSetFieldFacet[3]["处理状态"].tolist()
 
     # 若为空则跳过该步骤
     if not idNumber:
-        pages_utils.TempDataSet[3] = pages_utils.TempDataSet[2]
+        pages_utils.TempDataSetFacet[3] = pages_utils.TempDataSetFacet[2]
 
     newColumns = '错误'
     # ===============根据名称匹配调用并执行各个处理方法===============
@@ -208,11 +208,11 @@ def onRun():
         if isHandled:
             continue
         # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
-        if pages_utils.TempDataSet[3].shape[0] == 0:
-            dataFrameTemp = pages_utils.TempDataSet[2]
+        if pages_utils.TempDataSetFacet[3].shape[0] == 0:
+            dataFrameTemp = pages_utils.TempDataSetFacet[2]
         else:
-            dataFrameTemp = pages_utils.TempDataSet[3]
-        reservedField = pages_utils.TempDataSet[2].columns.tolist()
+            dataFrameTemp = pages_utils.TempDataSetFacet[3]
+        reservedField = pages_utils.TempDataSetFacet[2].columns.tolist()
         afterHandleData = None
         # print(tempMethod)
         if tempMethod == 't检验':
@@ -237,10 +237,10 @@ def onRun():
         row_size = len(afterHandleData)
         # print('-------优选特征-------')
         intersection_cols = pages_utils.getIntersectionCols(
-            pages_utils.TempDataSet[3], afterHandleData
+            pages_utils.TempDataSetFacet[3], afterHandleData
         )
-        pages_utils.TempDataSet[3] = pd.merge(
-            afterHandleData, pages_utils.TempDataSet[3],
+        pages_utils.TempDataSetFacet[3] = pd.merge(
+            afterHandleData, pages_utils.TempDataSetFacet[3],
             on=intersection_cols, how="left")
 
         # ===============更新左侧显示内容===============
@@ -254,15 +254,15 @@ def onRun():
         print(update_values)
         print(type(newColumns))
         print(len(idNumber))
-        print(len(pages_utils.TempDataSetField[3]))
+        print(len(pages_utils.TempDataSetFieldFacet[3]))
         # 查找要更新的数据记录
-        for index, row in pages_utils.TempDataSetField[3].iterrows():
+        for index, row in pages_utils.TempDataSetFieldFacet[3].iterrows():
             if row["编号"] == idNumber[indexT]:
                 for key, value in update_values.items():
-                    pages_utils.TempDataSetField[3].loc[index, key] = value
+                    pages_utils.TempDataSetFieldFacet[3].loc[index, key] = value
 
     print('======================优选特征集======================')
-    print(pages_utils.TempDataSet[3])
+    print(pages_utils.TempDataSetFacet[3])
 
 
 # ==============================界面==============================
@@ -277,9 +277,9 @@ with dataPCV:
         with placeholder1.container():
             # tempLeftTabs = pages_utils.TempDataSetFacet[2]
             # if tempLeftTabs.empty:
-            tempLeftTabs = ['备选特征']
+            st.session_state.leftTabsOpt = ['备选特征']
             # column = ['空']
-            print(f'f=========测试面状特征{tempLeftTabs}================')
+            print(f'f=========测试面状特征{st.session_state.leftTabsOpt}================')
             print(pages_utils.TempDataSetFacet[2])
 
             # 展示备选特征数据
@@ -305,33 +305,41 @@ with dataPCV:
             tempDataSetFacetReveal = pd.concat([tempDataSetFacetReveal, pd.DataFrame(tempDataSetFacetReveal_list)],
                                                ignore_index=True)
 
-            tt1 = st.tabs(tempLeftTabs)
-            for i in range(len(tempLeftTabs)):
+            tt1 = st.tabs(st.session_state.leftTabsOpt)
+            for i in range(len(st.session_state.leftTabsOpt)):
                 with tt1[i]:
-                    if tempLeftTabs[i] == '备选特征':
+                    if st.session_state.leftTabsOpt[i] == '备选特征':
                         column = ["数据类型", "备选特征", "大小"]
-                    elif tempLeftTabs[i] == '优选特征':
+                        st.data_editor(
+                            tempDataSetFacetReveal,
+                            height=220, width=800,
+                            column_order=column)
+                    elif st.session_state.leftTabsOpt[i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-                    st.data_editor(
-                        tempDataSetFacetReveal,
-                        height=220, width=800,
-                        column_order=column)
+                        st.data_editor(
+                            pages_utils.TempDataSetFieldFacet[3],
+                            height=220, width=800,
+                            column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
-            tempLeftTabs = st.session_state["leftTabs"][2:]
+            tempLeftTabs = st.session_state.leftTabsOpt
             # print(f'f=========测试{tempLeftTabs}================')
             tt = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
                 with tt[i]:
                     if tempLeftTabs[i] == '备选特征':
                         column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+                        st.data_editor(
+                            tempDataSetFacetReveal,
+                            height=220, width=800,
+                            column_order=column)
                     elif tempLeftTabs[i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-                    st.data_editor(
-                        pages_utils.TempDataSetFacet[2],
-                        height=220, width=800,
-                        column_order=column)
+                        st.data_editor(
+                            pages_utils.TempDataSetFacet[3],
+                            height=220, width=800,
+                            column_order=column)
     # ===============显示左下字段或特征及获取===============
     # a = st.selectbox(
     #     '选择数据集',
@@ -430,8 +438,8 @@ with dataPCM:
         # =======================显示右下任务清单表格=======================
         with placeholder.container():
             st.markdown('##### 任务清单')
-            pages_utils.TempDataSetField[3] = st.data_editor(
-                pages_utils.TempDataSetField[3], height=190, width=800,
+            pages_utils.TempDataSetFieldFacet[3] = st.data_editor(
+                pages_utils.TempDataSetFieldFacet[3], height=190, width=800,
                 column_order=["编号", "数据类型", "输入特征", "优选特征", "特征优选方法", '时间', '处理状态'],
                 disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])

@@ -103,6 +103,7 @@ with col2:
         # in_geojson = "https://raw.githubusercontent.com/opengeos/leafmap/master/examples/data/cable_geo.geojson"
         in_geojsonP = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\SpatiotemporalExtractionResult.json'
         in_geojsonP1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test.json'
+        in_geojsonP2 = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test2.json'
         import json
 
         # 打开并读取JSON文件
@@ -111,17 +112,19 @@ with col2:
         # 打开并读取JSON文件
         with open(in_geojsonP1, 'r', encoding='utf-8') as file:
             in_geojson2 = json.load(file)
-
+        with open(in_geojsonP2, 'r', encoding='utf-8') as file:
+            in_geojson3 = json.load(file)
         # 加载json格式的矢量数据
         # m.add_geojson(in_geojson, layer_name="Cable points")
         # m.add_geojson(in_geojson2, layer_name="Cable lines")
+        m.add_geojson(in_geojson3, layer_name="Cable lines")
 
         # 加载栅格数据
-        # DOY = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\DayOfYear-ActiveAccumulatedTemperature.tif'
+        DOY = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\DayOfYear-ActiveAccumulatedTemperature.tif'
         SET = r'E:\a_python\program\testPlatform\demo\demo111-112\T51RTP_20240303T023611_TCI_10m_NDVI.tif'
         resample = r'E:\a_python\program\testPlatform\demo\demo136\output_resample.tif'
         resampleGRA_Average = r'E:\a_python\program\testPlatform\demo\demo136\outputResampleGRA_Average.tif'
-        # m.add_raster(DOY, colormap="RdYlGn_r", layer_name="DOY", nodata=0)
+        m.add_raster(DOY, colormap="RdYlGn_r", layer_name="DOY", nodata=0)
         # m.add_raster(SET, colormap="RdYlGn_r", layer_name="NDVI", nodata=0)
         # m.add_raster(resample, colormap="RdYlGn_r", layer_name="resample", nodata=0)
         # m.add_raster(resampleGRA_Average, colormap="RdYlGn_r", layer_name="resampleGRA_Average", nodata=0)
@@ -145,7 +148,7 @@ with col2:
             "orientation": "horizontal",
             "transparent": True,
         }
-        m.add_colormap(position=(75, 5), **params)
+        # m.add_colormap(position=(75, 5), **params)
 
         # 或通过图片添加色带
         image = "https://i.imgur.com/SpmE7Cs.png"
