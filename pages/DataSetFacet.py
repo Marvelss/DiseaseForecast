@@ -136,20 +136,17 @@ def updateLeftBars(raw_data_facet):
 
 empty1 = st.empty()
 # ==============================文件上传显示==============================
-dataSCM, dataSCMap, dataSCR = st.columns([0.2, 0.7, 0.4])
+dataSCM, dataSCMap, dataSCR = st.columns([0.2, 0.4, 0.6])
+# dataSCM, dataSCMap = st.columns([0.2, 0.7])
 with dataSCM:
+    st.markdown("##### 数据与特征")
     # with empty1.container():
     temp = tree_select(st.session_state.leftBars)
     # st.markdown(temp)
-with dataSCMap:
-    pass
-    # # 初始化地图
-    # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-    #
-    # m.to_streamlit()
+
 
 # ==============================右侧文件上传状态显示==============================
-with dataSCR:
+with dataSCMap:
     st.markdown("##### 上传数据集")
 
     selectedTemplate = pills("选择数据集", ['气象数据', '植保数据(未开放)', '农学数据(未开放)'], ["🌨️️", "🌾", "☣️"])
@@ -166,40 +163,8 @@ with dataSCR:
     #     <style>''',
     #             unsafe_allow_html=True)
 
-    st.markdown('---')
-    # ==============================右侧数据模板下载及注意事项==============================
-    st.markdown("##### 数据模板下载及注意事项")
-    placeholder1 = st.empty()
-    if selectedTemplate == '气象数据':
-        # with placeholder1.container():
-        st.warning('warningMInfo', icon="⚠️")
-    #     with open(path1, "rb") as file:
-    #         st.download_button(
-    #             label="下载气象数据模板",
-    #             data=file,
-    #             file_name="气象数据-模板.xlsx",
-    #             mime="application/octet-stream"
-    #         )
-    if selectedTemplate == '植保数据':
-        # with placeholder1.container():
-        st.warning('warningPInfo', icon="⚠️")
-    #     with open(path2, "rb") as file:
-    #         st.download_button(
-    #             label="下载植保数据模板",
-    #             data=file,
-    #             file_name="植保数据-模板.xlsx",
-    #             mime="application/octet-stream"
-    #         )
-    if selectedTemplate == '农学数据':
-        with placeholder1.container():
-            st.warning('warningAInfo', icon="⚠️")
-            # with open(path3, "rb") as file:
-            #     st.download_button(
-            #         label="下载农学数据模板",
-            #         data=file,
-            #         file_name="农学数据-模板.xlsx",
-            #         mime="application/octet-stream"
-            #     )
+    # st.markdown('---')
+
     # ==============================控制文件上传逻辑==============================
     if uploaded_files:
         # 获取已有文件名的集合
@@ -241,3 +206,41 @@ with dataSCR:
         print('======================原始数据集======================')
         # st.markdown(pages_utils.TempDataSetFieldFacet[0])
         # st.markdown(len(pages_utils.TempDataSetFieldFacet[0]['文件名称']))
+with dataSCR:
+    # ==============================右侧数据模板下载及注意事项==============================
+    st.markdown("##### 数据模板下载及注意事项")
+    placeholder1 = st.empty()
+    if selectedTemplate == '气象数据':
+        # with placeholder1.container():
+        st.warning('warningMInfo', icon="⚠️")
+    #     with open(path1, "rb") as file:
+    #         st.download_button(
+    #             label="下载气象数据模板",
+    #             data=file,
+    #             file_name="气象数据-模板.xlsx",
+    #             mime="application/octet-stream"
+    #         )
+    if selectedTemplate == '植保数据':
+        # with placeholder1.container():
+        st.warning('warningPInfo', icon="⚠️")
+    #     with open(path2, "rb") as file:
+    #         st.download_button(
+    #             label="下载植保数据模板",
+    #             data=file,
+    #             file_name="植保数据-模板.xlsx",
+    #             mime="application/octet-stream"
+    #         )
+    if selectedTemplate == '农学数据':
+        with placeholder1.container():
+            st.warning('warningAInfo', icon="⚠️")
+            # with open(path3, "rb") as file:
+            #     st.download_button(
+            #         label="下载农学数据模板",
+            #         data=file,
+            #         file_name="农学数据-模板.xlsx",
+            #         mime="application/octet-stream"
+            #     )
+    # # 初始化地图
+    # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+    #
+    # m.to_streamlit()
