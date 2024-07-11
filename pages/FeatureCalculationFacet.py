@@ -6,6 +6,7 @@
 """
 import datetime
 
+import pandas as pd
 import streamlit as st
 from st_pages import hide_pages
 from streamlit_tree_select import tree_select
@@ -206,9 +207,9 @@ with colFCF3:
         elif tempMethod == '空间点提取':
             # 根据参数内容存入表
             # 待提取字段名称、年、DayOfYear、基准文件
-
             pages_utils.TempDataSetFacet[
-                2] = r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型构建\2024-05-06T01-24_export.xlsx'
+                2] = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型构建\2024-05-06T01-24_export.xlsx')
+            st.toast("空间点提取执行完毕", icon="ℹ️️")
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["featureMethodFacetName"].items():
             pass

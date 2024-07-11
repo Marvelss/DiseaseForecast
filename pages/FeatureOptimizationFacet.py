@@ -57,42 +57,6 @@ def mergeArray(list1, list2, list3):
     return list(set().union(*[list1, list2, list3]))
 
 
-def simulate_temperature_data1():
-    # 模拟生成数据
-    np.random.seed(42)  # 设置随机种子以确保可重复性
-
-    # 创建一个包含随机数据的数据框
-    data = {
-        'Feature1': np.random.normal(0, 1, 100),
-        'Feature2': np.random.normal(0, 1, 100),
-        'Feature3': np.random.normal(0, 1, 100),
-        'Target': np.random.choice([0, 1], size=100)
-    }
-    dfT = pd.DataFrame(data)
-    return dfT
-
-
-def simulate_temperature_data():
-    # 模拟生成温度数据
-    np.random.seed(15)
-    N = 15
-
-    temperature1 = np.random.normal(loc=20, scale=2, size=(N,))
-    temperature2 = np.random.normal(loc=25, scale=4, size=(N,))
-    temperature3 = np.random.normal(loc=18, scale=1.5, size=(N,))
-    temperature4 = np.random.normal(loc=22, scale=3, size=(N,))
-
-    # 创建DataFrame
-    dfT = pd.DataFrame({
-        'Temperature1': temperature1,
-        'Temperature2': temperature2,
-        'Temperature3': temperature3,
-        'Temperature4': temperature4,
-        'Target': np.random.choice([0, 1], size=N)  # 二分类目标
-    })
-    return dfT
-
-
 # 取消所有选项按钮
 def clear_all():
     for h in range(checkBoxNum):
@@ -311,20 +275,45 @@ with dataPCV:
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
-            tempLeftTabs = pages_utils.TempDataSetFacet[2]
+            # tempLeftTabs = pages_utils.TempDataSetFacet[2]
             # if tempLeftTabs.empty:
-            tempLeftTabs = ['待进行空间点提取']
-            column = ['空']
-            # print(f'f=========测试{tempLeftTabs}================')
+            tempLeftTabs = ['备选特征']
+            # column = ['空']
+            print(f'f=========测试面状特征{tempLeftTabs}================')
+            print(pages_utils.TempDataSetFacet[2])
+
+            # 展示备选特征数据
+            temp_df = pages_utils.TempDataSetFacet[2]
+            # 排除指定列，获取其他列的名称
+            exclude_columns = ['上级单位', '测报站点', '经度', '纬度', '年', 'DayOfYear']
+            remaining_columns = [col for col in temp_df.columns if col not in exclude_columns]
+
+            # 创建空的 DataFrame
+            tempDataSetFacetReveal = pd.DataFrame(columns=["数据类型", "备选特征", "大小"])
+
+            # 计算每个剩余列的数据量大小并填充到新的 DataFrame 中
+            tempDataSetFacetReveal_list = []
+            for col in remaining_columns:
+                data_size = temp_df[col].memory_usage(index=False)
+                tempDataSetFacetReveal_list.append({
+                    "数据类型": "气象数据",
+                    "备选特征": col,
+                    "大小": data_size
+                })
+
+            # 使用 pd.concat 方法创建 DataFrame
+            tempDataSetFacetReveal = pd.concat([tempDataSetFacetReveal, pd.DataFrame(tempDataSetFacetReveal_list)],
+                                               ignore_index=True)
+
             tt1 = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
                 with tt1[i]:
                     if tempLeftTabs[i] == '备选特征':
-                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+                        column = ["数据类型", "备选特征", "大小"]
                     elif tempLeftTabs[i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     st.data_editor(
-                        pages_utils.TempDataSetField[i + 2],
+                        tempDataSetFacetReveal,
                         height=220, width=800,
                         column_order=column)
 
@@ -340,7 +329,7 @@ with dataPCV:
                     elif tempLeftTabs[i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     st.data_editor(
-                        pages_utils.TempDataSetField[i + 2],
+                        pages_utils.TempDataSetFacet[2],
                         height=220, width=800,
                         column_order=column)
     # ===============显示左下字段或特征及获取===============
@@ -349,12 +338,12 @@ with dataPCV:
     #     ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
     # 预处理后数据集表信息
     # weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled()
-    weatherNameT, plantNameT, agricultureNameT = pages_utils.TempDataSet[2].columns.tolist(), ['无1'], ['无2']
+    # weatherNameT, plantNameT, agricultureNameT = pages_utils.TempDataSet[2].columns.tolist(), ['无1'], ['无2']
     # 数组元素去重
-    weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
-        set(agricultureNameT))
+    # weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
+    #     set(agricultureNameT))
     result1 = pages_utils.multiselect_all(
-        st, '全选-特征', weatherName,
+        st, '全选-特征', pages_utils.TempDataSetFacet[2].columns.tolist(),
         'temp', 'collapsed')
     st.checkbox('全选-植保数据', disabled=True)
     st.checkbox('全选-农学数据', disabled=True)
