@@ -97,17 +97,22 @@ def clear_all():
     return
 
 
-colFCF1, colFCF2, colFCF3 = st.columns([0.2, 0.9, 0.3])
+colFCF1, colFCF21, colFCF22, colFCF3 = st.columns([0.2, 0.7, 0.7, 0.3])
 with colFCF1:
     st.markdown("##### 数据与特征")
     temp = tree_select(st.session_state.leftBars)
-with colFCF2:
+with colFCF21:
+    st.columns(3)[1].markdown("##### 预处理后数据集")
     # 初始化地图
     pe = st.empty()
     with pe:
         m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         m.to_streamlit()
+with colFCF22:
+    st.columns(5)[2].markdown("##### 特征集")
 
+    m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+    m1.to_streamlit()
 with colFCF3:
     st.markdown("##### 特征计算方法")
     col1, col2 = st.columns(2)
@@ -208,7 +213,8 @@ with colFCF3:
             # 根据参数内容存入表
             # 待提取字段名称、年、DayOfYear、基准文件
             pages_utils.TempDataSetFacet[
-                2] = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型构建\2024-05-06T01-24_export.xlsx')
+                2] = pd.read_excel(
+                r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型构建\2024-05-06T01-24_export.xlsx')
             st.toast("空间点提取执行完毕", icon="ℹ️️")
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["featureMethodFacetName"].items():

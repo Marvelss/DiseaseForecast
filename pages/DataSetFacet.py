@@ -136,7 +136,7 @@ def updateLeftBars(raw_data_facet):
 
 empty1 = st.empty()
 # ==============================文件上传显示==============================
-dataSCM, dataSCMap, dataSCR = st.columns([0.2, 0.4, 0.6])
+dataSCM, dataSCMap, dataSCR = st.columns([0.2, 0.9, 0.3])
 # dataSCM, dataSCMap = st.columns([0.2, 0.7])
 with dataSCM:
     st.markdown("##### 数据与特征")
@@ -147,6 +147,11 @@ with dataSCM:
 
 # ==============================右侧文件上传状态显示==============================
 with dataSCMap:
+    # 初始化地图
+    m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+
+    m.to_streamlit()
+with dataSCR:
     st.markdown("##### 上传数据集")
 
     selectedTemplate = pills("选择数据集", ['气象数据', '植保数据(未开放)', '农学数据(未开放)'], ["🌨️️", "🌾", "☣️"])
@@ -206,7 +211,7 @@ with dataSCMap:
         print('======================原始数据集======================')
         # st.markdown(pages_utils.TempDataSetFieldFacet[0])
         # st.markdown(len(pages_utils.TempDataSetFieldFacet[0]['文件名称']))
-with dataSCR:
+
     # ==============================右侧数据模板下载及注意事项==============================
     st.markdown("##### 数据模板下载及注意事项")
     placeholder1 = st.empty()
@@ -240,7 +245,3 @@ with dataSCR:
             #         file_name="农学数据-模板.xlsx",
             #         mime="application/octet-stream"
             #     )
-    # # 初始化地图
-    # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-    #
-    # m.to_streamlit()

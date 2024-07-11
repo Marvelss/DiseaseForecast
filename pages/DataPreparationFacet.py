@@ -90,11 +90,12 @@ if "preMethodFacetName" not in st.session_state:
 if "nowPFacetMethodName" not in st.session_state:
     st.session_state.nowPFacetMethodName = ''
 
-col1, col2, col3 = st.columns([0.2, 0.9, 0.3])
-with col1:
+colDPF1, colDPF21, colDPF22, colDPF3 = st.columns([0.2, 0.7, 0.7, 0.3])
+with colDPF1:
     st.markdown("##### 数据与特征")
     temp = tree_select(st.session_state.leftBars)
-with col2:
+with colDPF21:
+    st.markdown("##### 原始数据集")
     # 初始化地图
     placeHolderDPF = st.empty()
     with placeHolderDPF:
@@ -154,8 +155,16 @@ with col2:
         image = "https://i.imgur.com/SpmE7Cs.png"
         # m.add_image(image, position="bottomright")
         m.to_streamlit()
-
-with col3:
+with colDPF22:
+    st.markdown("##### 预处理后数据")
+    m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+    # colors = ["blue", "lime", "red"]
+    # vmin = 0
+    # vmax = 10000
+    # m1.add_colorbar(colors=colors, vmin=vmin, vmax=vmax)
+    # m1.add_title("World Population Heat Map", font_size="20px", align="center")
+    m1.to_streamlit()
+with colDPF3:
     st.markdown("##### 预处理方法")
     col12, col22 = st.columns(2)
     with col12:
