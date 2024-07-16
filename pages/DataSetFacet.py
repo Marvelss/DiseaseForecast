@@ -144,13 +144,14 @@ with dataSCM:
     temp = tree_select(st.session_state.leftBars)
     # st.markdown(temp)
 
-
 # ==============================右侧文件上传状态显示==============================
 with dataSCMap:
-    # 初始化地图
-    m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+    placeHolderDSF = st.empty()
+    with placeHolderDSF:
+        # 初始化地图
+        m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
 
-    m.to_streamlit()
+        m.to_streamlit()
 with dataSCR:
     st.markdown("##### 上传数据集")
 
@@ -201,13 +202,39 @@ with dataSCR:
                 # 添加到TempDataSetFieldFacet[0]
                 for key in pages_utils.TempDataSetFieldFacet[0].keys():
                     pages_utils.TempDataSetFieldFacet[0][key].append(new_entry[key])
-
+                # print('============更新原始数据============')
+                # print(pages_utils.TempDataSetFieldFacet[0])
                 # 更新左侧目标显示
                 st.session_state.leftBars = updateLeftBars(pages_utils.RawDataSetFieldFacet)
             # 上传出错提示
             except BaseException as e:
                 st.toast('上传错误,请检测文件内容及格式无误后重新上传', icon="⚠️")
                 raise e
+
+    with placeHolderDSF:
+        # 初始化地图
+        m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+
+        # 后续删除,为结果可视化而用
+        # # 点
+        # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
+        # # 插值后
+        # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file2.tif',layer_name='interpolation')
+        # # 掩膜模板
+        # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo138\reveal\zjsshp.shp',layer_name='coverTemplate')
+        # # 裁剪后
+        # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file_cropped.tif',layer_name='cropped')
+        for rasterName, suffix in zip(pages_utils.TempDataSetFieldFacet[0]["文件名称"],
+                                      pages_utils.TempDataSetFieldFacet[0]["数据格式"]):
+            print(rasterName)
+            print(suffix)
+            path = os.path.join(
+                os.getcwd(),
+                'resource',
+                'uploadFileDir', rasterName + '.' + suffix)
+            # m.add_shp(path, layer_name=rasterName)
+            # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
+        m.to_streamlit()
         print('======================原始数据集======================')
         # st.markdown(pages_utils.TempDataSetFieldFacet[0])
         # st.markdown(len(pages_utils.TempDataSetFieldFacet[0]['文件名称']))
