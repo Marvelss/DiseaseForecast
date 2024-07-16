@@ -72,6 +72,7 @@ if 'leftBars' not in st.session_state:
             ],
         },
     ]
+
 # 隐藏页面
 hide_pages(
     [
@@ -84,15 +85,7 @@ hide_pages(
 )
 
 
-# st.navigation([
-#     st.Page("App.py", title='主页'),
-#     st.Page("DataSetFacet.py", title='原始'),
-#     st.Page("FeatureOptimizationFacet.py", title='特征优选'),
-#     st.Page("DataPreparationFacet.py"),
-# ])
-
 # 保存文件到本地
-
 def savedFile(uploadedFile):
     filePath = os.path.join(
         os.getcwd(),

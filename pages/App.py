@@ -14,7 +14,8 @@ import ui
 # Adjust the width of the Streamlit page
 st.set_page_config(
     page_title="病虫害预测系统",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # Establish communication between pygwalker and streamlit
@@ -28,15 +29,15 @@ show_pages(
         Page("pages/DataPreparation.py", "数据预处理"),
         Page("pages/FeatureCalculation.py", "特征计算"),
         Page("pages/FeatureOptimization.py", "特征优选"),
+        Page("pages/DataSetFacet.py", "原始数据-面状"),
+        Page("pages/DataPreparationFacet.py", "数据预处理-面状"),
+        Page("pages/FeatureCalculationFacet.py", "特征计算-面状"),
+        Page("pages/FeatureOptimizationFacet.py", "特征优选-面状"),
         Page("pages/ModelBuilding.py", "模型构建"),
         Page("pages/WeatherGenerator.py", '基于天气情景生成器的模型评价'),
         Page("pages/Visualization.py", '可视化及数据下载'),
         Page("pages/ModelApplication.py", '模型应用'),
         Page("pages/ModelEvaluation.py", "测试界面"),
-        Page("pages/DataSetFacet.py", "原始数据-面状"),
-        Page("pages/DataPreparationFacet.py", "数据预处理-面状"),
-        Page("pages/FeatureCalculationFacet.py", "特征计算-面状"),
-        Page("pages/FeatureOptimizationFacet.py", "特征优选-面状"),
     ]
 )
 
@@ -59,9 +60,37 @@ if 'page12' not in st.session_state:
 # 左侧内容标题
 if "leftTabs" not in st.session_state:
     st.session_state["leftTabs"] = ['原始数据']
-
+# 控制模型构建等后续步骤点/面界面显示
+if "isPlanarInterface" not in st.session_state:
+    st.session_state.isPlanarInterface = False
 # 设置网页标题
 st.title('多场景病虫害预测系统')
+
+category_colors_cycle = itertools.cycle(
+    [
+        # ui.color("red-70"),
+        ui.color("orange-70"),
+        ui.color("light-blue-70"),
+        ui.color("blue-green-70"),
+        ui.color("blue-70"),
+        ui.color("violet-70"),
+        ui.color("red-70"),
+        ui.color("green-70"),
+    ]
+)
+
+
+def category(name, description=None):
+    # if current_category_index != 0:
+    # st.write("---")
+    # st.write("")
+    # pass
+    # ui.colored_header(name, "rgba(38, 39, 48, 0.6)")
+    ui.colored_header(name, next(category_colors_cycle), description)
+    # st.header(name)
+    st.write("")
+
+    # current_category_index += 1
 
 
 # 清空各环节初始化按钮
@@ -119,6 +148,10 @@ def emptyValue():
     # st.session_state.page12 = 0
 
 
+category("🌈 初始化建模数据")
+if st.button('初始化数据', on_click=emptyValue):
+    st.toast("初始化完毕", icon="ℹ️️")
+
 # st.markdown("""
 # <style>
 # button {
@@ -129,6 +162,17 @@ def emptyValue():
 # }
 # </style>
 # """, unsafe_allow_html=True)
+category("🗣️ 点/面数据建模入口")
+colAppBtn1, colAppBtn2, = st.columns([0.4, 0.6])
+
+with colAppBtn2:
+    if st.button('点状数据建模'):
+        st.session_state.isPlanarInterface = False
+        switch_page("DataSet.py")
+
+    if st.button('面状数据建模'):
+        st.session_state.isPlanarInterface = True
+        switch_page("DataSetFacet.py")
 
 
 def navbar():
@@ -272,32 +316,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-category_colors_cycle = itertools.cycle(
-    [
-        # ui.color("red-70"),
-        ui.color("orange-70"),
-        ui.color("light-blue-70"),
-        ui.color("blue-green-70"),
-        ui.color("blue-70"),
-        ui.color("violet-70"),
-        ui.color("red-70"),
-        ui.color("green-70"),
-    ]
-)
-
-
-def category(name, description=None):
-    # if current_category_index != 0:
-    # st.write("---")
-    # st.write("")
-    # pass
-    # ui.colored_header(name, "rgba(38, 39, 48, 0.6)")
-    ui.colored_header(name, next(category_colors_cycle), description)
-    # st.header(name)
-    st.write("")
-
-    # current_category_index += 1
-
 
 @st.experimental_dialog("有效值提取", width='large')
 def vote():
@@ -334,21 +352,6 @@ def app(image, link, name, description, developer, repo_link):
     st.write("")
 
 
-# ===================界面===================
-category("🌈 初始化项目数据")
-
-if st.button('初始化数据', on_click=emptyValue):
-    st.toast("初始化完毕", icon="ℹ️️")
-
-category("🗣️ 点/面数据建模入口")
-colAppBtn1, colAppBtn2, = st.columns([0.4, 0.6])
-
-with colAppBtn2:
-    if st.button('点状数据建模'):
-        switch_page("DataSet.py")
-
-    if st.button('面状数据建模'):
-        switch_page("DataSetFacet.py")
 category("📊️ 各项特征计算方法API")
 col1, col2, col3 = st.columns(3)
 with col1:

@@ -22,15 +22,26 @@ if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
 # 隐藏页面
-hide_pages(
-    [
-        "测试界面",
-        "原始数据-面状",
-        "数据预处理-面状",
-        "特征计算-面状",
-        "特征优选-面状",
-    ]
-)
+if st.session_state.isPlanarInterface:
+    hide_pages(
+        [
+            "测试界面",
+            "原始数据",
+            "数据预处理",
+            "特征计算",
+            "特征优选",
+        ]
+    )
+else:
+    hide_pages(
+        [
+            "测试界面",
+            "原始数据-面状",
+            "数据预处理-面状",
+            "特征计算-面状",
+            "特征优选-面状",
+        ]
+    )
 # 处理方法内容记录(任务清单各项值)
 if "modelName" not in st.session_state:
     st.session_state["modelName"] = {

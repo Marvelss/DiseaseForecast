@@ -11,6 +11,7 @@ import pandas as pd
 import streamlit as st
 from matplotlib import pyplot as plt
 import seaborn as sns
+from st_pages import hide_pages
 from streamlit_pills import pills
 
 import pages_utils
@@ -19,7 +20,26 @@ st.set_page_config(
     layout="wide"
 )
 
-
+if st.session_state.isPlanarInterface:
+    hide_pages(
+        [
+            "测试界面",
+            "原始数据",
+            "数据预处理",
+            "特征计算",
+            "特征优选",
+        ]
+    )
+else:
+    hide_pages(
+        [
+            "测试界面",
+            "原始数据-面状",
+            "数据预处理-面状",
+            "特征计算-面状",
+            "特征优选-面状",
+        ]
+    )
 @st.cache_data
 def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun

@@ -15,6 +15,7 @@ import pandas as pd
 import matlab.engine
 from PIL import Image
 from sklearn.preprocessing import StandardScaler
+from st_pages import hide_pages
 from streamlit_pills import pills
 from modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 from modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
@@ -24,6 +25,26 @@ import pages_utils
 st.set_page_config(
     layout="wide"
 )
+if st.session_state.isPlanarInterface:
+    hide_pages(
+        [
+            "测试界面",
+            "原始数据",
+            "数据预处理",
+            "特征计算",
+            "特征优选",
+        ]
+    )
+else:
+    hide_pages(
+        [
+            "测试界面",
+            "原始数据-面状",
+            "数据预处理-面状",
+            "特征计算-面状",
+            "特征优选-面状",
+        ]
+    )
 if 'page16' not in st.session_state:
     st.session_state.page16 = 0
 
