@@ -119,9 +119,6 @@ def emptyValue():
     # st.session_state.page12 = 0
 
 
-if st.button('初始化数据', on_click=emptyValue):
-    st.toast("初始化完毕", icon="ℹ️️")
-
 # st.markdown("""
 # <style>
 # button {
@@ -132,14 +129,6 @@ if st.button('初始化数据', on_click=emptyValue):
 # }
 # </style>
 # """, unsafe_allow_html=True)
-colAppBtn1, colAppBtn2, = st.columns([0.4, 0.6])
-
-with colAppBtn2:
-    if st.button('点状数据建模'):
-        switch_page("DataSet.py")
-
-    if st.button('面状数据建模'):
-        switch_page("DataSetFacet.py")
 
 
 def navbar():
@@ -345,7 +334,22 @@ def app(image, link, name, description, developer, repo_link):
     st.write("")
 
 
-category("🗣️ 各项特征计算方法API")
+# ===================界面===================
+category("🌈 初始化项目数据")
+
+if st.button('初始化数据', on_click=emptyValue):
+    st.toast("初始化完毕", icon="ℹ️️")
+
+category("🗣️ 点/面数据建模入口")
+colAppBtn1, colAppBtn2, = st.columns([0.4, 0.6])
+
+with colAppBtn2:
+    if st.button('点状数据建模'):
+        switch_page("DataSet.py")
+
+    if st.button('面状数据建模'):
+        switch_page("DataSetFacet.py")
+category("📊️ 各项特征计算方法API")
 col1, col2, col3 = st.columns(3)
 with col1:
     app("pages/images/GPTLab.png",
