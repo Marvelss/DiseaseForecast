@@ -137,16 +137,16 @@ def updateLeftBars(raw_data_facet):
     return left_bars
 
 
-st.markdown('测试左侧数据不显示问题')
-st.markdown(st.session_state.leftBars)
+st.markdown(f'测试左侧数据不显示问题:{st.session_state.leftBars}')
 # ==============================文件上传显示==============================
 dataSCM, dataSCMap, dataSCR = st.columns([0.2, 0.9, 0.3])
 # dataSCM, dataSCMap = st.columns([0.2, 0.7])
 with dataSCM:
     st.markdown("##### 数据与特征")
-    # with empty1.container():
-    temp = tree_select(nodes=st.session_state.leftBars, checked=pages_utils.RawDataSetFieldFacet['文件名称'])
-    # st.markdown(temp)
+    checkedNameList = [f"{name}.{format1}" for name, format1 in zip(
+        pages_utils.RawDataSetFieldFacet['文件名称'],
+        pages_utils.RawDataSetFieldFacet['数据格式'])]
+    temp = tree_select(nodes=st.session_state.leftBars, checked=checkedNameList)
 
 # ==============================右侧文件上传状态显示==============================
 with dataSCMap:
