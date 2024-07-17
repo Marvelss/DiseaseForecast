@@ -26,6 +26,16 @@ if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 if 'count' not in st.session_state:
     st.session_state.count = 0
+# 地图
+if 'dSFmap' not in st.session_state:
+    st.session_state.dSFmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+
+
+@st.cache_resource
+def get_database_session():
+    # Create a database session object that points to the URL.
+    return st.session_state.dSFmap
+
 
 # json1 = [
 #         {"label": "原始数据集", "value": "原始数据集"},
@@ -68,7 +78,7 @@ if 'leftBars' not in st.session_state:
             "label": "原始数据集",
             "value": "原始数据集",
             "children": [
-                {"label": "test", "value": "test"}
+                {"label": "气象数据", "value": "气象数据"}
             ],
         },
     ]
@@ -127,24 +137,47 @@ def updateLeftBars(raw_data_facet):
     return left_bars
 
 
-empty1 = st.empty()
+st.markdown('测试左侧数据不显示问题')
+st.markdown(st.session_state.leftBars)
 # ==============================文件上传显示==============================
 dataSCM, dataSCMap, dataSCR = st.columns([0.2, 0.9, 0.3])
 # dataSCM, dataSCMap = st.columns([0.2, 0.7])
 with dataSCM:
     st.markdown("##### 数据与特征")
     # with empty1.container():
-    temp = tree_select(st.session_state.leftBars)
+    temp = tree_select(nodes=st.session_state.leftBars, checked=pages_utils.RawDataSetFieldFacet['文件名称'])
     # st.markdown(temp)
 
 # ==============================右侧文件上传状态显示==============================
 with dataSCMap:
     placeHolderDSF = st.empty()
     with placeHolderDSF:
-        # 初始化地图
-        m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        map1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
 
-        m.to_streamlit()
+        # 初始化地图
+        # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+
+        # 后续删除,为结果可视化而用
+        # # 点
+        # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
+        # # 插值后
+        # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file2.tif',layer_name='interpolation')
+        # # 掩膜模板
+        # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo138\reveal\zjsshp.shp',layer_name='coverTemplate')
+        # # 裁剪后
+        # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file_cropped.tif',layer_name='cropped')
+        with st.status('加载数据中...'):
+            for name in temp['checked']:
+                if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
+                    path = os.path.join(
+                        os.getcwd(),
+                        'resource',
+                        'uploadFileDir', name)
+                    print('=============')
+                    print(path)
+                    map1.add_raster(path, layer_name=name.split('.')[0])
+                    st.header(f'{name}加载完成')
+        map1.to_streamlit()
 with dataSCR:
     st.markdown("##### 上传数据集")
 
@@ -197,40 +230,13 @@ with dataSCR:
                     pages_utils.TempDataSetFieldFacet[0][key].append(new_entry[key])
                 # print('============更新原始数据============')
                 # print(pages_utils.TempDataSetFieldFacet[0])
-                # 更新左侧目标显示
-                st.session_state.leftBars = updateLeftBars(pages_utils.RawDataSetFieldFacet)
+
             # 上传出错提示
             except BaseException as e:
                 st.toast('上传错误,请检测文件内容及格式无误后重新上传', icon="⚠️")
                 raise e
-
-    with placeHolderDSF:
-        # 初始化地图
-        m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-
-        # 后续删除,为结果可视化而用
-        # # 点
-        # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
-        # # 插值后
-        # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file2.tif',layer_name='interpolation')
-        # # 掩膜模板
-        # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo138\reveal\zjsshp.shp',layer_name='coverTemplate')
-        # # 裁剪后
-        # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file_cropped.tif',layer_name='cropped')
-        for rasterName, suffix in zip(pages_utils.TempDataSetFieldFacet[0]["文件名称"],
-                                      pages_utils.TempDataSetFieldFacet[0]["数据格式"]):
-            print(rasterName)
-            print(suffix)
-            path = os.path.join(
-                os.getcwd(),
-                'resource',
-                'uploadFileDir', rasterName + '.' + suffix)
-            # m.add_shp(path, layer_name=rasterName)
-            # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
-        m.to_streamlit()
-        print('======================原始数据集======================')
-        # st.markdown(pages_utils.TempDataSetFieldFacet[0])
-        # st.markdown(len(pages_utils.TempDataSetFieldFacet[0]['文件名称']))
+        # 更新左侧目标显示
+        st.session_state.leftBars = updateLeftBars(pages_utils.RawDataSetFieldFacet)
 
     # ==============================右侧数据模板下载及注意事项==============================
     st.markdown("##### 数据模板下载及注意事项")
