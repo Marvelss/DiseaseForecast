@@ -5,6 +5,7 @@
 @Description : 面状数特征计算界面
 """
 import datetime
+import os
 
 import pandas as pd
 import streamlit as st
@@ -97,7 +98,7 @@ def clear_all():
     return
 
 
-colFCF1, colFCF2,  colFCF3 = st.columns([0.2,  0.7, 0.3])
+colFCF1, colFCF2, colFCF3 = st.columns([0.2, 0.7, 0.3])
 with colFCF1:
     st.markdown("##### 数据与特征")
     temp = tree_select(st.session_state.leftBars)
@@ -106,6 +107,17 @@ with colFCF2:
     pe = st.empty()
     with pe:
         m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        with st.status('加载数据中...'):
+            for name in temp['checked']:
+                if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[2]['文件名称']:
+                    path = os.path.join(
+                        os.getcwd(),
+                        'resource',
+                        'uploadFileDir', name)
+                    print('=============')
+                    print(path)
+                    m.add_raster(path, layer_name=name.split('.')[0])
+                    st.header(f'{name}加载完成')
         m.to_streamlit()
 with colFCF3:
     st.markdown("##### 特征计算方法")
@@ -182,14 +194,18 @@ with colFCF3:
                 resultFilePathList = FTool.spatiotemporalExtraction(
                     methodParam)
                 print(resultFilePathList)
-            with pe:
-                m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        elif tempMethod == '空间点提取':
+            # 根据参数内容存入表
+            # 待提取字段名称、年、DayOfYear、基准文件
+            pages_utils.TempDataSetFacet[
+                2] = pd.read_excel(
+                r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型构建\2024-05-06T01-24_export.xlsx')
+            st.toast("空间点提取执行完毕", icon="ℹ️️")
 
+        with pe:
+            with st.status('加载数据中...'):
                 m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
                 m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
-
-                m.add_layer_control()
-
                 params = {
                     "width": 2,
                     "height": 0.3,
@@ -203,13 +219,7 @@ with colFCF3:
                 m.add_colormap(position=(75, 5), **params)
 
                 m.to_streamlit()
-        elif tempMethod == '空间点提取':
-            # 根据参数内容存入表
-            # 待提取字段名称、年、DayOfYear、基准文件
-            pages_utils.TempDataSetFacet[
-                2] = pd.read_excel(
-                r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型构建\2024-05-06T01-24_export.xlsx')
-            st.toast("空间点提取执行完毕", icon="ℹ️️")
+
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["featureMethodFacetName"].items():
             pass

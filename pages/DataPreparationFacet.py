@@ -7,11 +7,9 @@
 import datetime
 import os
 
-import folium
 import numpy as np
 import streamlit as st
 from st_pages import hide_pages
-from streamlit_folium import st_folium
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 
@@ -109,100 +107,30 @@ with colDPF1:
     temp = tree_select(st.session_state.leftBars)
 with colDPF21:
     st.markdown("##### 原始数据集")
-    # st.markdown(temp)
-    # st.markdown(temp['checked'])
-
     # 初始化地图
     placeHolderDPF = st.empty()
     with placeHolderDPF:
-        m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-        for name in temp['checked']:
-            # print(name.split('.')[0])
-            # print(pages_utils.TempDataSetFieldFacet[0]['文件名称'])
-            # if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
-            #     path = os.path.join(
-            #         os.getcwd(),
-            #         'resource',
-            #         'uploadFileDir', name)
-            m.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
-
-            # m.add_shp(path, layer_name=name.split('.')[0])
-        # # in_geojson = "https://raw.githubusercontent.com/opengeos/leafmap/master/examples/data/cable_geo.geojson"
-        # in_geojsonP = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\SpatiotemporalExtractionResult.json'
-        # in_geojsonP1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test.json'
-        # in_geojsonP2 = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test2.json'
-        # import json
-        #
-        # # 打开并读取JSON文件
-        # with open(in_geojsonP, 'r', encoding='utf-8') as file:
-        #     in_geojson = json.load(file)
-        # # 打开并读取JSON文件
-        # with open(in_geojsonP1, 'r', encoding='utf-8') as file:
-        #     in_geojson2 = json.load(file)
-        # with open(in_geojsonP2, 'r', encoding='utf-8') as file:
-        #     in_geojson3 = json.load(file)
-        # # 加载json格式的矢量数据
-        # # m.add_geojson(in_geojson, layer_name="Cable points")
-        # # m.add_geojson(in_geojson2, layer_name="Cable lines")
-        # m.add_geojson(in_geojson3, layer_name="Cable lines")
-        #
-        # # 加载栅格数据
-        # DOY = r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\DayOfYear-ActiveAccumulatedTemperature.tif'
-        # SET = r'E:\a_python\program\testPlatform\demo\demo111-112\T51RTP_20240303T023611_TCI_10m_NDVI.tif'
-        # resample = r'E:\a_python\program\testPlatform\demo\demo136\output_resample.tif'
-        # resampleGRA_Average = r'E:\a_python\program\testPlatform\demo\demo136\outputResampleGRA_Average.tif'
-        # m.add_raster(DOY, colormap="RdYlGn_r", layer_name="DOY", nodata=0)
-        # # m.add_raster(SET, colormap="RdYlGn_r", layer_name="NDVI", nodata=0)
-        # # m.add_raster(resample, colormap="RdYlGn_r", layer_name="resample", nodata=0)
-        # # m.add_raster(resampleGRA_Average, colormap="RdYlGn_r", layer_name="resampleGRA_Average", nodata=0)
-        # # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
-        # m.add_layer_control()
-        #
-        # # 图例
-        # # 定义图例标签和颜色（从最大值到最小值）
-        # # labels = ["10", "8", "6", "4", "2", "0"]
-        # # colors = ["#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#4DAF4A"]
-        # #
-        # # m.add_legend(title="Legend", labels=labels, colors=colors)
-        #
-        # params = {
-        #     "width": 2,
-        #     "height": 0.3,
-        #     "vmin": 0,
-        #     "vmax": 100,
-        #     "cmap": "terrain",
-        #     "label": "Elevation (m)",
-        #     "orientation": "horizontal",
-        #     "transparent": True,
-        # }
-        # # m.add_colormap(position=(75, 5), **params)
-        #
-        # # 或通过图片添加色带
-        # image = "https://i.imgur.com/SpmE7Cs.png"
-        # # m.add_image(image, position="bottomright")
-        m.to_streamlit()
+        m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        with st.status('加载数据中...'):
+            for name in temp['checked']:
+                if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[1]['文件名称']:
+                    path = os.path.join(
+                        os.getcwd(),
+                        'resource',
+                        'uploadFileDir', name)
+                    print('=============')
+                    print(path)
+                    m1.add_raster(path, layer_name=name.split('.')[0])
+                    st.header(f'{name}加载完成')
+        m1.to_streamlit()
 with colDPF22:
     st.markdown("##### 预处理后数据")
     # 初始化地图
     placeHolderDPF2 = st.empty()
     with placeHolderDPF2:
-        m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        m2 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         for name in temp['checked']:
-            pass
-            # if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[1]['文件名称']:
-            #     path = os.path.join(
-            #         os.getcwd(),
-            #         'resource',
-            #         'uploadFileDir', name)
-            #     m.add_raster(path, layer_name=name.split('.')[0])
-            # m1.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\02_05.tif', layer_name=name.split('.')[0])
-
-        # colors = ["blue", "lime", "red"]
-        # vmin = 0
-        # vmax = 10000
-        # m1.add_colorbar(colors=colors, vmin=vmin, vmax=vmax)
-        # m1.add_title("World Population Heat Map", font_size="20px", align="center")
-        m1.to_streamlit()
+            m2.to_streamlit()
 with colDPF3:
     st.markdown("##### 预处理方法")
     col12, col22 = st.columns(2)
@@ -281,30 +209,29 @@ with colDPF3:
                     methodParam)
                 print(resultFilePathList)
         with placeHolderDPF2:
-            m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+            with st.status('加载数据中...'):
+                m1.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\02_05.tif', layer_name='a.tif')
 
-            m1.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\02_05.tif', layer_name=name.split('.')[0])
+                # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                #
+                # m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
+                # m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
+                #
+                # m.add_layer_control()
+                #
+                # params = {
+                #     "width": 2,
+                #     "height": 0.3,
+                #     "vmin": 0,
+                #     "vmax": 100,
+                #     "cmap": "terrain",
+                #     "label": "Elevation (m)",
+                #     "orientation": "horizontal",
+                #     "transparent": True,
+                # }
+                # m.add_colormap(position=(75, 5), **params)
 
-            # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-            #
-            # m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
-            # m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
-            #
-            # m.add_layer_control()
-            #
-            # params = {
-            #     "width": 2,
-            #     "height": 0.3,
-            #     "vmin": 0,
-            #     "vmax": 100,
-            #     "cmap": "terrain",
-            #     "label": "Elevation (m)",
-            #     "orientation": "horizontal",
-            #     "transparent": True,
-            # }
-            # m.add_colormap(position=(75, 5), **params)
-
-            m1.to_streamlit()
+                m1.to_streamlit()
 
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["preMethodFacetName"].items():
