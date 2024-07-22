@@ -32,6 +32,8 @@ hide_pages(
         "特征优选",
     ]
 )
+if 'dPmap' not in st.session_state:
+    st.session_state.dPmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
 
 
 # 更新左侧目标显示(可添加至pages_utils)
@@ -104,7 +106,7 @@ if "preMethodFacetName" not in st.session_state:
 if "nowPFacetMethodName" not in st.session_state:
     st.session_state.nowPFacetMethodName = ''
 
-emp1 = st.empty()
+emptyHead = st.empty()
 colDPF1, colDPF21, colDPF22, colDPF3 = st.columns([0.2, 0.7, 0.7, 0.3])
 with colDPF1:
     st.markdown("##### 数据与特征")
@@ -133,9 +135,21 @@ with colDPF22:
     # 初始化地图
     placeHolderDPF2 = st.empty()
     with placeHolderDPF2:
-        m2 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-        # for name in temp['checked']:
-        m2.to_streamlit()
+        # st.session_state.dPmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        # with st.status('加载数据中...'):
+        #     for name in temp['checked']:
+        #         if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[1]['文件名称']:
+        #             path = os.path.join(
+        #                 os.getcwd(),
+        #                 'resource',
+        #                 'uploadFileDir', name)
+        #             print('=============')
+        #             print(path)
+        #             # m1.add_raster(path, layer_name=name.split('.')[0])
+        #             m2.add_shp(path, layer_name=name.split('.')[0])
+        #             st.header(f'{name}加载完成')
+        st.session_state.dPmap.to_streamlit()
+        print(st.session_state.dPmap)
 with colDPF3:
     st.markdown("##### 预处理方法")
     col12, col22 = st.columns(2)
@@ -192,7 +206,7 @@ with colDPF3:
     if agree12:
         option = st.selectbox(
             '点数据',
-            options=('02_06', '自定义'))
+            options=('02_05', '自定义'))
         textAN = st.text_input(
             label='点属性字段名称',
             placeholder='value',
@@ -206,7 +220,7 @@ with colDPF3:
             help='经纬度按左边 底部 右边 顶部顺序且空格分隔填入')
         textSN = st.text_input(
             label='保存输出文件名称',
-            value='02_06_预处理')
+            value='02_05_预处理.tif')
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([1.5, 1])
@@ -218,42 +232,50 @@ with colDPF3:
         tempMethod = getCheckboxName(st.session_state.nowPFacetMethodName)
         methodParam = [value for key, value in st.session_state["preMethodFacetName"].items() if
                        key != 'checkBox']
-        print('=============测试方法名称=============')
-        print(tempMethod)
         if tempMethod == 'a':
             with st.spinner('正在计算时空抽取,预计耗时1分半'):
                 resultFilePathList = FTool.spatiotemporalExtraction(
                     methodParam)
                 print(resultFilePathList)
         elif tempMethod == '空间插值':
-            with emp1:
-                for _ in stqdm(range(5), desc="This is a slow task", mininterval=1):
-                    time.sleep(0.5)
+            with emptyHead:
+                # for _ in stqdm(range(5), desc="This is a slow task", mininterval=1):
+                #     time.sleep(0.5)
+                with st.spinner('数据处理中...'):
+                    time.sleep(5)
+                    methodParam = [
+                        '02_05.shp',
+                        'atemp',
+                        '反距离权重法',
+                        '118.053330 31.086861 121.953330 27.286861',
+                        '02_05_预处理.tif']
+                    FTool.spatialInterpolation(methodParam)
                 st.toast("空间插值完毕", icon="ℹ️️")
-        with placeHolderDPF2:
-            with st.status('加载数据中...'):
-                m1.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\02_05.tif', layer_name='a.tif')
+            with placeHolderDPF2:
+                with st.status('加载数据中...'):
+                    m3 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                    m3.add_raster(
+                        r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\02_05_预处理.tif',
+                        layer_name='interpolation')
 
-                # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-                #
-                # m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
-                # m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
-                #
-                # m.add_layer_control()
-                #
-                # params = {
-                #     "width": 2,
-                #     "height": 0.3,
-                #     "vmin": 0,
-                #     "vmax": 100,
-                #     "cmap": "terrain",
-                #     "label": "Elevation (m)",
-                #     "orientation": "horizontal",
-                #     "transparent": True,
-                # }
-                # m.add_colormap(position=(75, 5), **params)
+                    # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                    #
+                    # m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
+                    # m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
+                    #
+                    # params = {
+                    #     "width": 2,
+                    #     "height": 0.3,
+                    #     "vmin": 0,
+                    #     "vmax": 100,
+                    #     "cmap": "terrain",
+                    #     "label": "Elevation (m)",
+                    #     "orientation": "horizontal",
+                    #     "transparent": True,
+                    # }
+                    # m.add_colormap(position=(75, 5), **params)
 
-                m1.to_streamlit()
+                m3.to_streamlit()
 
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["preMethodFacetName"].items():
