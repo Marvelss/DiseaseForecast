@@ -6,10 +6,12 @@
 """
 import datetime
 import os
+import time
 
 import numpy as np
 import streamlit as st
 from st_pages import hide_pages
+from stqdm import stqdm
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 
@@ -75,6 +77,7 @@ def getCheckboxName(checkbox):
 
 # 取消其他选项按钮
 def clear_other(key):
+    st.session_state.nowPFacetMethodName = f'checkbox{key}'
     for h in range(checkBoxNum):
         if h != key:
             st.session_state[f'checkbox{h}'] = False
@@ -101,6 +104,7 @@ if "preMethodFacetName" not in st.session_state:
 if "nowPFacetMethodName" not in st.session_state:
     st.session_state.nowPFacetMethodName = ''
 
+emp1 = st.empty()
 colDPF1, colDPF21, colDPF22, colDPF3 = st.columns([0.2, 0.7, 0.7, 0.3])
 with colDPF1:
     st.markdown("##### 数据与特征")
@@ -113,14 +117,15 @@ with colDPF21:
         m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
             for name in temp['checked']:
-                if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[1]['文件名称']:
+                if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
                     path = os.path.join(
                         os.getcwd(),
                         'resource',
                         'uploadFileDir', name)
                     print('=============')
                     print(path)
-                    m1.add_raster(path, layer_name=name.split('.')[0])
+                    # m1.add_raster(path, layer_name=name.split('.')[0])
+                    m1.add_shp(path, layer_name=name.split('.')[0])
                     st.header(f'{name}加载完成')
         m1.to_streamlit()
 with colDPF22:
@@ -129,8 +134,8 @@ with colDPF22:
     placeHolderDPF2 = st.empty()
     with placeHolderDPF2:
         m2 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-        for name in temp['checked']:
-            m2.to_streamlit()
+        # for name in temp['checked']:
+        m2.to_streamlit()
 with colDPF3:
     st.markdown("##### 预处理方法")
     col12, col22 = st.columns(2)
@@ -185,13 +190,23 @@ with colDPF3:
                     latext, icon="ℹ️")
         # st.markdown('---')
     if agree12:
-        coll11, coll22 = st.columns([0.3, 0.6])
-        with coll11:
-            number2 = st.text_input("剔除大于", value=0.1)
-            number3 = st.text_input("剔除小于", value=0.1)
-        with coll22:
-            st.info('剔除方法介绍\n'
-                    '* 描述:剔除最大值和最小值区域外的异常值\n', icon="ℹ️")
+        option = st.selectbox(
+            '点数据',
+            options=('02_06', '自定义'))
+        textAN = st.text_input(
+            label='点属性字段名称',
+            placeholder='value',
+            help='可在arcgis中查看属性表获取')
+        optionIM = st.selectbox(
+            '插值方法',
+            options=('反距离权重法', '克里金插值'))
+        textLL = st.text_input(
+            label='经纬度范围',
+            placeholder='118.053 31.086 121.953 27.286',  # 可在原始数据时规定范围,在这默认输入
+            help='经纬度按左边 底部 右边 顶部顺序且空格分隔填入')
+        textSN = st.text_input(
+            label='保存输出文件名称',
+            value='02_06_预处理')
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([1.5, 1])
@@ -203,11 +218,18 @@ with colDPF3:
         tempMethod = getCheckboxName(st.session_state.nowPFacetMethodName)
         methodParam = [value for key, value in st.session_state["preMethodFacetName"].items() if
                        key != 'checkBox']
+        print('=============测试方法名称=============')
+        print(tempMethod)
         if tempMethod == 'a':
             with st.spinner('正在计算时空抽取,预计耗时1分半'):
                 resultFilePathList = FTool.spatiotemporalExtraction(
                     methodParam)
                 print(resultFilePathList)
+        elif tempMethod == '空间插值':
+            with emp1:
+                for _ in stqdm(range(5), desc="This is a slow task", mininterval=1):
+                    time.sleep(0.5)
+                st.toast("空间插值完毕", icon="ℹ️️")
         with placeHolderDPF2:
             with st.status('加载数据中...'):
                 m1.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\02_05.tif', layer_name='a.tif')
