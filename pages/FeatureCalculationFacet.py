@@ -6,6 +6,7 @@
 """
 import datetime
 import os
+import random
 
 import pandas as pd
 import streamlit as st
@@ -98,6 +99,35 @@ def clear_all():
     return
 
 
+# dataframe转为json
+def df_to_geojson(df, properties_columns, lon_column='经度', lat_column='纬度'):
+    # 初始化GeoJSON字典
+    geojson = {
+        "type": "FeatureCollection",
+        "crs": {
+            "type": "name",
+            "properties": {
+                "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+            }
+        },
+        "features": []
+    }
+
+    # 遍历DataFrame的每一行
+    for _, row in df.iterrows():
+        feature = {
+            "type": "Feature",
+            "properties": {col: row[col] for col in properties_columns},
+            "geometry": {
+                "type": "Point",
+                "coordinates": [row[lon_column], row[lat_column], 0]
+            }
+        }
+        geojson["features"].append(feature)
+
+    return geojson
+
+
 colFCF1, colFCF2, colFCF3 = st.columns([0.2, 0.7, 0.3])
 with colFCF1:
     st.markdown("##### 数据与特征")
@@ -145,6 +175,18 @@ with colFCF3:
         standardFile = st.selectbox(
             '基准文件',
             ('野外调查数据', '专业植保站调查数据'))
+        if standardFile:
+            # 读取含经纬度excel表格
+            df = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\SEIR-测试模型构建\植保数据.xlsx')
+            unique_locations = df[['上级单位', '测报站点', '经度', '纬度']].drop_duplicates()
+            print(f'读取含经纬度excel表格数据:\n{unique_locations}')
+            with pe:
+                m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                properties_columns = ['上级单位', '测报站点']
+                geojson = df_to_geojson(df, properties_columns)
+                m.add_geojson(geojson, layer_name="基准文件")
+                # m.add_geojson(r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test2.json', layer_name="Cable lines")
+                m.to_streamlit()
         extractMethod = st.selectbox(
             '提取方法',
             ('最近邻插值法', '双线性插值法', '三次样条插值法'))
