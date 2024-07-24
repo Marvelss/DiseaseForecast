@@ -110,7 +110,8 @@ emptyHead = st.empty()
 colDPF1, colDPF21, colDPF22, colDPF3 = st.columns([0.2, 0.7, 0.7, 0.3])
 with colDPF1:
     st.markdown("##### 数据与特征")
-    temp = tree_select(st.session_state.leftBars)
+    with st.container(height=750, border=False):
+        temp = tree_select(st.session_state.leftBars)
 with colDPF21:
     st.markdown("##### 原始数据集")
     # 初始化地图

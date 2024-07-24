@@ -131,7 +131,8 @@ def df_to_geojson(df, properties_columns, lon_column='经度', lat_column='纬�
 colFCF1, colFCF2, colFCF3 = st.columns([0.2, 0.7, 0.3])
 with colFCF1:
     st.markdown("##### 数据与特征")
-    temp = tree_select(st.session_state.leftBars)
+    with st.container(height=750, border=False):
+        temp = tree_select(st.session_state.leftBars)
 with colFCF2:
     # 初始化地图
     pe = st.empty()
@@ -163,6 +164,11 @@ with colFCF3:
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
     if option22:
+        with pe:
+            with st.status('加载数据中...'):
+                m11 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                m11.add_raster(r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\02_05_预处理.tif',
+                               layer_name="面状数据")
         extractFileList = pages_utils.multiselect_all(
             st, '全选-待提取文件',
             ['遥感数据', '气象数据'],
@@ -177,16 +183,25 @@ with colFCF3:
             ('野外调查数据', '专业植保站调查数据'))
         if standardFile:
             # 读取含经纬度excel表格
-            df = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\SEIR-测试模型构建\植保数据.xlsx')
+            df = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\空间点提取测试文件-浙江省3点.xlsx')
             unique_locations = df[['上级单位', '测报站点', '经度', '纬度']].drop_duplicates()
+            # dataframe转为csv再转为shp
+            # data = {
+            #     'longitude': [120.3023, 118.6227, 120.5465],
+            #     'latitude': [30.1172, 28.7382, 30.6373],
+            #     '上级单位': ['浙江省', '浙江省', '浙江省'],
+            #     '测报站点': ['萧山区', '衢州市', '桐乡市']
+            # }
+            # df11 = pd.DataFrame(data)
+            # df11.to_csv('test.csv')
+            # leafmap.csv_to_shp('test.csv', 'test.shp')
             print(f'读取含经纬度excel表格数据:\n{unique_locations}')
             with pe:
-                m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
                 properties_columns = ['上级单位', '测报站点']
                 geojson = df_to_geojson(df, properties_columns)
-                m.add_geojson(geojson, layer_name="基准文件")
+                m11.add_geojson(geojson, layer_name="基准文件")
                 # m.add_geojson(r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test2.json', layer_name="Cable lines")
-                m.to_streamlit()
+                m11.to_streamlit()
         extractMethod = st.selectbox(
             '提取方法',
             ('最近邻插值法', '双线性插值法', '三次样条插值法'))
@@ -239,28 +254,27 @@ with colFCF3:
         elif tempMethod == '空间点提取':
             # 根据参数内容存入表
             # 待提取字段名称、年、DayOfYear、基准文件
-            pages_utils.TempDataSetFacet[
-                2] = pd.read_excel(
+            pages_utils.TempDataSetFacet[2] = pd.read_excel(
                 r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型构建\2024-05-06T01-24_export.xlsx')
             st.toast("空间点提取执行完毕", icon="ℹ️️")
 
-        with pe:
-            with st.status('加载数据中...'):
-                m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
-                m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
-                params = {
-                    "width": 2,
-                    "height": 0.3,
-                    "vmin": 0,
-                    "vmax": 100,
-                    "cmap": "terrain",
-                    "label": "Elevation (m)",
-                    "orientation": "horizontal",
-                    "transparent": True,
-                }
-                m.add_colormap(position=(75, 5), **params)
-
-                m.to_streamlit()
+        # with pe:
+        #     with st.status('加载数据中...'):
+        #         m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
+        #         m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
+        #         params = {
+        #             "width": 2,
+        #             "height": 0.3,
+        #             "vmin": 0,
+        #             "vmax": 100,
+        #             "cmap": "terrain",
+        #             "label": "Elevation (m)",
+        #             "orientation": "horizontal",
+        #             "transparent": True,
+        #         }
+        #         m.add_colormap(position=(75, 5), **params)
+        #
+        #         m.to_streamlit()
 
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["featureMethodFacetName"].items():

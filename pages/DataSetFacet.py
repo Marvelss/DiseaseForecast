@@ -5,12 +5,12 @@
 @Description : 原始数据界面-面状
 """
 import os
+import time
 from datetime import datetime
 
-import pandas as pd
 import streamlit as st
 from st_pages import hide_pages, show_pages
-from streamlit import Page
+from stqdm import stqdm
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 
@@ -137,7 +137,7 @@ def updateLeftBars(raw_data_facet):
     return left_bars
 
 
-st.markdown(f'测试左侧数据不显示问题:{st.session_state.leftBars}')
+# st.markdown(f'测试左侧数据不显示问题:{st.session_state.leftBars}')
 # ==============================文件上传显示==============================
 dataSCM, dataSCMap, dataSCR = st.columns([0.2, 0.9, 0.3])
 # dataSCM, dataSCMap = st.columns([0.2, 0.7])
@@ -146,7 +146,8 @@ with dataSCM:
     checkedNameList = [f"{name}.{format1}" for name, format1 in zip(
         pages_utils.RawDataSetFieldFacet['文件名称'],
         pages_utils.RawDataSetFieldFacet['数据格式'])]
-    temp = tree_select(nodes=st.session_state.leftBars, checked=checkedNameList)
+    with st.container(height=750, border=False):
+        temp = tree_select(nodes=st.session_state.leftBars, checked=checkedNameList)
 
 # ==============================右侧文件上传状态显示==============================
 with dataSCMap:
@@ -175,14 +176,16 @@ with dataSCMap:
                         'uploadFileDir', name)
                     print('=============')
                     print(path)
-                    map1.add_raster(path, layer_name=name.split('.')[0])
+                    # map1.add_raster(path, layer_name=name.split('.')[0])
+                    # map1.add_shp(path, layer_name=name.split('.')[0])
+                    # map1.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
                     st.header(f'{name}加载完成')
         map1.to_streamlit()
 with dataSCR:
     st.markdown("##### 上传数据集")
 
-    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据(未开放)', '农学数据(未开放)'], ["🌨️️", "🌾", "☣️"])
-    suuDirName = st.text_input(label='子文件夹名称', value='文件夹名称')
+    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据(未开放)', '遥感数据(未开放)'], ["🌨️️", "🌾", "🚁"])
+    suuDirName = st.text_input(label='子文件夹名称', value='气象数据')
     uploaded_files = st.file_uploader(
         "上传数据集",
         accept_multiple_files=True,
