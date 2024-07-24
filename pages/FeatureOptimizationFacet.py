@@ -79,6 +79,9 @@ def clear_other(key):
 def firstPage(): st.session_state.page14 = 0
 
 
+plt.rc("font", family='Microsoft YaHei')
+
+
 @st.experimental_dialog("预览", width='large')
 # 预览运行结果
 def onPreviewResults():
