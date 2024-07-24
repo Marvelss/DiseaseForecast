@@ -128,6 +128,7 @@ def df_to_geojson(df, properties_columns, lon_column='经度', lat_column='纬�
     return geojson
 
 
+emptyHead = st.empty()
 colFCF1, colFCF2, colFCF3 = st.columns([0.2, 0.7, 0.3])
 with colFCF1:
     st.markdown("##### 数据与特征")
@@ -164,14 +165,9 @@ with colFCF3:
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
     if option22:
-        with pe:
-            with st.status('加载数据中...'):
-                m11 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-                m11.add_raster(r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\02_05_预处理.tif',
-                               layer_name="面状数据")
         extractFileList = pages_utils.multiselect_all(
-            st, '全选-待提取文件',
-            ['遥感数据', '气象数据'],
+            st, '全选-待提取特征文件',
+            ['LAI', 'FPAR'],
             'tempModels', 'collapsed')
         extractValue = st.selectbox(
             '待提取字段名称',
@@ -181,9 +177,23 @@ with colFCF3:
         standardFile = st.selectbox(
             '基准文件',
             ('野外调查数据', '专业植保站调查数据'))
-        if standardFile:
+        print(extractFileList)
+        if 'LAI' in extractFileList:
+            with pe:
+                with st.status('加载数据中...'):
+                    m11 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                    m11.add_raster(
+                        r'E:\a_python\program\diseaseForecastStreamlit\resource\surfaceProcessData\resultData\EVI_2015_SEResult.tif',
+                        layer_name="EVI_2015_SEResult")
+                    m11.add_raster(
+                        r'E:\a_python\program\diseaseForecastStreamlit\resource\surfaceProcessData\resultData\FPAR_2015_SEResult.tif',
+                        layer_name="FPAR_2015_SEResult")
+                m11.to_streamlit()
+
+        if standardFile == '专业植保站调查数据':
             # 读取含经纬度excel表格
-            df = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\空间点提取测试文件-浙江省3点.xlsx')
+            df = pd.read_excel(
+                r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\空间点提取测试文件-浙江省3点.xlsx')
             unique_locations = df[['上级单位', '测报站点', '经度', '纬度']].drop_duplicates()
             # dataframe转为csv再转为shp
             # data = {
@@ -197,25 +207,39 @@ with colFCF3:
             # leafmap.csv_to_shp('test.csv', 'test.shp')
             print(f'读取含经纬度excel表格数据:\n{unique_locations}')
             with pe:
-                properties_columns = ['上级单位', '测报站点']
-                geojson = df_to_geojson(df, properties_columns)
-                m11.add_geojson(geojson, layer_name="基准文件")
-                # m.add_geojson(r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test2.json', layer_name="Cable lines")
-                m11.to_streamlit()
+                with st.status('加载数据中...'):
+                    m12 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                    name = r'E:\a_python\program\diseaseForecastStreamlit\resource\茶树炭疽病发生程度-测试模型构建\病害分布清洗后问卷-总\清洗后All.shp'
+                    m12.add_raster(
+                        r'E:\a_python\program\diseaseForecastStreamlit\resource\surfaceProcessData\resultData\EVI_2015_SEResult.tif',
+                        layer_name="EVI_2015_SEResult")
+                    m12.add_raster(
+                        r'E:\a_python\program\diseaseForecastStreamlit\resource\surfaceProcessData\resultData\FPAR_2015_SEResult.tif',
+                        layer_name="FPAR_2015_SEResult")
+                    m12.add_shp(name, layer_name="基准文件")
+                    st.header(f'{name}加载完成')
+                    # properties_columns = ['上级单位', '测报站点']
+                    # geojson = df_to_geojson(df, properties_columns)
+                    # m11.add_geojson(geojson, layer_name="基准文件")
+                    # m.add_geojson(r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test2.json', layer_name="Cable lines")
+                m12.to_streamlit()
         extractMethod = st.selectbox(
             '提取方法',
             ('最近邻插值法', '双线性插值法', '三次样条插值法'))
     if option18:
         # 注意:温度文件名称按照实际day of year顺序排序从小到大即可
         weatherDataDir = st.selectbox(
-            '选择含温度文件夹',
-            ('气象数据', '植保数据', '农学数据'))
-        extractDataFile = st.selectbox(
+            '选择温度文件',
+            ('温度', 'LAI'),
+            help='以特征名称筛选选中所以文件')
+        extractDataFile = st.multiselect(
             '待抽取特征文件',
-            ('待抽取特征文件.tif', 'b.tif', 'c.tif'))
+            ('LAI', 'FPAR', 'EVI'),
+            help='以特征名称筛选选中所以文件')
         templateFile = st.selectbox(
             '模板文件',
-            ('模板文件.tif', 'e.tif'))
+            ('模板文件.tif', 'e.tif'),
+            help='默认取各特征第一个时间文件作为模板用于输出结果')
         accumulatedTemperatureThreshold = st.number_input(
             "积温阈值温度(50-300℃)", value=50, step=50,
             min_value=50, max_value=300)
@@ -226,7 +250,8 @@ with colFCF3:
             ('平均值', '累计值'))
         savedFile = st.text_input(
             label='保存文件名称',
-            value='spatiotemporalExtraction.tif')
+            help='每个特征计算结果文件名称格式为:特征+年份',
+            placeholder='LAI_2016_SEResult.tif')
 
         st.session_state["featureMethodFacetName"]['param1'] = str(weatherDataDir)
         st.session_state["featureMethodFacetName"]['param2'] = str(extractDataFile)
@@ -243,19 +268,32 @@ with colFCF3:
     FTool = FeatureCalculationMethodFacet()
 
     if btn:
+        # print(f'=====测试跳过处理=====\n{pages_utils.TempDataSetFieldFacet[1]}')
         tempMethod = getCheckboxName(st.session_state.nowFFacetMethodName)
         methodParam = [value for key, value in st.session_state["featureMethodFacetName"].items() if
                        key != 'checkBox']
         if tempMethod == '时空抽取':
-            with st.spinner('正在计算时空抽取,预计耗时1分半'):
-                resultFilePathList = FTool.spatiotemporalExtraction(
-                    methodParam)
-                print(resultFilePathList)
+            with emptyHead:
+                with st.spinner('正在计算时空抽取,预计耗时1分半'):
+                    paramT = [value for key, value in st.session_state["featureMethodFacetName"].items() if
+                              key != 'checkBox']
+                    print(f'========测试参数======={paramT}')
+                    inputFileList = temp['checked']
+                    print(inputFileList)
+                    resultFilePathList = FeatureCalculationMethodFacet().spatiotemporalExtraction(inputFileList, paramT)
+            with pe:
+                m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                with st.status('加载数据中...'):
+                    for name in resultFilePathList:
+                        m1.add_raster(name, layer_name=os.path.basename(name))
+                        st.header(f'{name}加载完成')
+                m1.to_streamlit()
         elif tempMethod == '空间点提取':
+
             # 根据参数内容存入表
             # 待提取字段名称、年、DayOfYear、基准文件
             pages_utils.TempDataSetFacet[2] = pd.read_excel(
-                r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型构建\2024-05-06T01-24_export.xlsx')
+                r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\C5_特征因子_150℃_3分类 - v2.xlsx')
             st.toast("空间点提取执行完毕", icon="ℹ️️")
 
         # with pe:
