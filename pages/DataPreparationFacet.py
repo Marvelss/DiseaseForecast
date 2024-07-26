@@ -127,8 +127,8 @@ with colDPF21:
                         os.getcwd(),
                         'resource',
                         'uploadFileDir', name)
-                    print('=============')
-                    print(path)
+                    # print('=============')
+                    # print(path)
                     # m1.add_raster(path, layer_name=name.split('.')[0])
                     m1.add_shp(path, layer_name=name.split('.')[0])
                     st.header(f'{name}加载完成')
@@ -152,7 +152,6 @@ with colDPF22:
         #             m2.add_shp(path, layer_name=name.split('.')[0])
         #             st.header(f'{name}加载完成')
         st.session_state.dPmap.to_streamlit()
-        print(st.session_state.dPmap)
 with colDPF3:
     st.markdown("##### 预处理方法")
     col12, col22 = st.columns(2)
@@ -183,28 +182,28 @@ with colDPF3:
             if missing_values:
                 info += f"* {column}:{missing_values} {missing_percentage:.2f}%\n"
                 flag = True
-        if not flag:
-            info = '无缺失字段\n'
-            st.info(f"{info}\n", icon="ℹ️️")
-        else:
-            st.warning(f"{info}\n", icon="⚠️")
-        coll11, coll22 = st.columns([0.3, 0.6])
-        with coll11:
-            option = st.selectbox(
-                '插补方法',
-                options=('线性插值', '自定义'))
-            if option == '自定义':
-                num = st.text_input('缺失值', value=np.nan)
-                num1 = st.text_input('插补值')
-        with coll22:
-            latext = '* 公式:' + r'''
-            $$
-            y = y_0 + (y_1 - y_0) \frac{(x - x_0)}{(x_1 - x_0)}
-            $$
-            '''
-            st.info('插补方法介绍\n'
-                    '* 描述:使用缺失值前后最近的两个非缺失值填充\n' +
-                    latext, icon="ℹ️")
+        # if not flag:
+        #     info = '无缺失字段\n'
+        #     st.info(f"{info}\n", icon="ℹ️️")
+        # else:
+        #     st.warning(f"{info}\n", icon="⚠️")
+        # coll11, coll22 = st.columns([0.3, 0.6])
+        # with coll11:
+        #     option = st.selectbox(
+        #         '插补方法',
+        #         options=('线性插值', '自定义'))
+        #     if option == '自定义':
+        #         num = st.text_input('缺失值', value=np.nan)
+        #         num1 = st.text_input('插补值')
+        # with coll22:
+        #     latext = '* 公式:' + r'''
+        #     $$
+        #     y = y_0 + (y_1 - y_0) \frac{(x - x_0)}{(x_1 - x_0)}
+        #     $$
+        #     '''
+        #     st.info('插补方法介绍\n'
+        #             '* 描述:使用缺失值前后最近的两个非缺失值填充\n' +
+        #             latext, icon="ℹ️")
         # st.markdown('---')
     if agree12:
         option = st.selectbox(
@@ -233,6 +232,7 @@ with colDPF3:
 
     if btn:
         tempMethod = getCheckboxName(st.session_state.nowPFacetMethodName)
+        # print(f'========测试方法名========{tempMethod}')
         # # 暂时默认传递
         # pages_utils.PreprocessedDataSetFieldFacet = pages_utils.RawDataSetFieldFacet
         # print(f'=====预处理界面-测试跳过处理=====\n{pages_utils.PreprocessedDataSetFieldFacet}')
@@ -243,6 +243,7 @@ with colDPF3:
         else:
             methodParam = [value for key, value in st.session_state["preMethodFacetName"].items() if
                            key != 'checkBox']
+            handledFile = None
             if tempMethod == '空间插值':
                 with emptyHead:
                     # for _ in stqdm(range(5), desc="This is a slow task", mininterval=1):
@@ -255,7 +256,7 @@ with colDPF3:
                             '反距离权重法',
                             '118.053330 31.086861 121.953330 27.286861',
                             '02_05_预处理.tif']
-                        FTool.spatialInterpolation(methodParam)
+                        handledFile = FTool.spatialInterpolation(methodParam)
                     st.toast("空间插值完毕", icon="ℹ️️")
                 with placeHolderDPF2:
                     with st.status('加载数据中...'):
@@ -263,58 +264,24 @@ with colDPF3:
                         m3.add_raster(
                             r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\02_05_预处理.tif',
                             layer_name='interpolation')
-
-                        # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-                        #
-                        # m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
-                        # m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
-                        #
-                        # params = {
-                        #     "width": 2,
-                        #     "height": 0.3,
-                        #     "vmin": 0,
-                        #     "vmax": 100,
-                        #     "cmap": "terrain",
-                        #     "label": "Elevation (m)",
-                        #     "orientation": "horizontal",
-                        #     "transparent": True,
-                        # }
-                        # m.add_colormap(position=(75, 5), **params)
-
                     m3.to_streamlit()
-
-            # 测试特征方法名称正确性
-            for key11, value11 in st.session_state["preMethodFacetName"].items():
-                pass
-                # print('============测试方法参数正确性============')
-                # print(f"Key: {key11}, Value: {value11}")
+            elif tempMethod == '重采样':
+                handledFile = '源文件名-重采样_2010_11.tif'
             new_entry = {
                 "编号": pages_utils.generateID(),
                 "数据类型": '气象数据',
                 "根节点": '预处理后数据集',
                 "子节点": '气象数据',
-                "文件名称": pages_utils.generateID()[:5],
-                "数据格式": 'testFormat',
-                "预处理后字段": None,
-                "大小": 'testSize',
-                "输入字段": None,
-                "预处理方法": getCheckboxName(st.session_state["preMethodFacetName"]['checkBox']),
+                "文件名称": handledFile.split('.')[0],
+                "数据格式": handledFile.split('.')[1],
+                "输入文件": None,
+                "预处理方法": tempMethod,
                 "方法参数": [value for key, value in st.session_state["preMethodFacetName"].items() if
                              key != 'checkBox'],
                 "时间": datetime.datetime.now().time(),
-                "处理状态": False}
+                "处理状态": True}
             print('======================预处理方法-添加任务清单记录======================')
             print(new_entry)
             # 添加到TempDataSetFieldFacet[1]
             for key in pages_utils.TempDataSetFieldFacet[1].keys():
                 pages_utils.TempDataSetFieldFacet[1][key].append(new_entry[key])
-
-            # 合并原始和预处理数据集记录
-            # preprocessed_data_structure = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
-            # row_data_structure = updateLeftBars(pages_utils.RawDataSetFieldFacet)
-            # row_data_structure.extend(preprocessed_data_structure)
-            # st.session_state.leftBars = row_data_structure
-            # st.markdown(st.session_state.leftBars)
-            # st.session_state.leftBars = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
-            # 更新左侧目标显示
-            # st.markdown(st.session_state.leftBars)

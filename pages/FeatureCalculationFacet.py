@@ -275,6 +275,7 @@ with colFCF3:
         tempMethod = getCheckboxName(st.session_state.nowFFacetMethodName)
         methodParam = [value for key, value in st.session_state["featureMethodFacetName"].items() if
                        key != 'checkBox']
+        handledFile = None
         if tempMethod == '时空抽取':
             with emptyHead:
                 with st.spinner('正在计算时空抽取,预计耗时1分半'):
@@ -284,6 +285,7 @@ with colFCF3:
                     inputFileList = leftBarsPreData['checked']
                     print(inputFileList)
                     resultFilePathList = FeatureCalculationMethodFacet().spatiotemporalExtraction(inputFileList, paramT)
+                    handledFile = ' '.join(resultFilePathList)
             with pe:
                 m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
                 with st.status('加载数据中...'):
@@ -292,47 +294,22 @@ with colFCF3:
                         st.header(f'{name}加载完成')
                 m1.to_streamlit()
         elif tempMethod == '空间点提取':
-
+            handledFile = 'excel.xlsx'
             # 根据参数内容存入表
             # 待提取字段名称、年、DayOfYear、基准文件
             pages_utils.TempDataSetFacet[2] = pd.read_excel(
                 r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\C5_特征因子_150℃_3分类 - v2.xlsx')
             st.toast("空间点提取执行完毕", icon="ℹ️️")
 
-        # with pe:
-        #     with st.status('加载数据中...'):
-        #         m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
-        #         m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
-        #         params = {
-        #             "width": 2,
-        #             "height": 0.3,
-        #             "vmin": 0,
-        #             "vmax": 100,
-        #             "cmap": "terrain",
-        #             "label": "Elevation (m)",
-        #             "orientation": "horizontal",
-        #             "transparent": True,
-        #         }
-        #         m.add_colormap(position=(75, 5), **params)
-        #
-        #         m.to_streamlit()
-
-        # 测试特征方法名称正确性
-        for key11, value11 in st.session_state["featureMethodFacetName"].items():
-            pass
-            # print('============测试方法参数正确性============')
-            # print(f"Key: {key11}, Value: {value11}")
         new_entry = {
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
             "根节点": '备选特征集',
             "子节点": '气象数据',
-            "文件名称": pages_utils.generateID()[:5],
-            "数据格式": 'testFormat1',
-            "备选特征": None,
-            "大小": 'testSize1',
-            "输入特征": None,
-            "特征计算方法": getCheckboxName(st.session_state["featureMethodFacetName"]['checkBox']),
+            "文件名称": handledFile.split('.')[0],
+            "数据格式": handledFile.split('.')[1],
+            "输入文件": None,
+            "特征计算方法": tempMethod,
             "方法参数": [value for key, value in st.session_state["featureMethodFacetName"].items() if
                          key != 'checkBox'],
             "时间": datetime.datetime.now().time(),
