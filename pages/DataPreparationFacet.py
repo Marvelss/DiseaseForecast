@@ -111,7 +111,9 @@ colDPF1, colDPF21, colDPF22, colDPF3 = st.columns([0.2, 0.7, 0.7, 0.3])
 with colDPF1:
     st.markdown("##### 数据与特征")
     with st.container(height=750, border=False):
-        temp = tree_select(st.session_state.leftBars)
+        leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet))
+        leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
+
 with colDPF21:
     st.markdown("##### 原始数据集")
     # 初始化地图
@@ -119,7 +121,7 @@ with colDPF21:
     with placeHolderDPF:
         m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
-            for name in temp['checked']:
+            for name in leftBarsRawData['checked']:
                 if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
                     path = os.path.join(
                         os.getcwd(),
@@ -225,91 +227,94 @@ with colDPF3:
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([1.5, 1])
-    btn = interval_col2.button('添加处理')
+    btn = interval_col2.button('添加或跳过处理')
 
     FTool = PretreatmentMethodFacet()
 
     if btn:
         tempMethod = getCheckboxName(st.session_state.nowPFacetMethodName)
-        methodParam = [value for key, value in st.session_state["preMethodFacetName"].items() if
-                       key != 'checkBox']
-        if tempMethod == 'a':
-            with st.spinner('正在计算时空抽取,预计耗时1分半'):
-                resultFilePathList = FTool.spatiotemporalExtraction(
-                    methodParam)
-                print(resultFilePathList)
-        elif tempMethod == '空间插值':
-            with emptyHead:
-                # for _ in stqdm(range(5), desc="This is a slow task", mininterval=1):
-                #     time.sleep(0.5)
-                with st.spinner('数据处理中...'):
-                    time.sleep(5)
-                    methodParam = [
-                        '02_05.shp',
-                        'atemp',
-                        '反距离权重法',
-                        '118.053330 31.086861 121.953330 27.286861',
-                        '02_05_预处理.tif']
-                    FTool.spatialInterpolation(methodParam)
-                st.toast("空间插值完毕", icon="ℹ️️")
-            with placeHolderDPF2:
-                with st.status('加载数据中...'):
-                    m3 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-                    m3.add_raster(
-                        r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\02_05_预处理.tif',
-                        layer_name='interpolation')
+        # # 暂时默认传递
+        # pages_utils.PreprocessedDataSetFieldFacet = pages_utils.RawDataSetFieldFacet
+        # print(f'=====预处理界面-测试跳过处理=====\n{pages_utils.PreprocessedDataSetFieldFacet}')
 
-                    # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-                    #
-                    # m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
-                    # m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
-                    #
-                    # params = {
-                    #     "width": 2,
-                    #     "height": 0.3,
-                    #     "vmin": 0,
-                    #     "vmax": 100,
-                    #     "cmap": "terrain",
-                    #     "label": "Elevation (m)",
-                    #     "orientation": "horizontal",
-                    #     "transparent": True,
-                    # }
-                    # m.add_colormap(position=(75, 5), **params)
-
-                m3.to_streamlit()
-
-        # 测试特征方法名称正确性
-        for key11, value11 in st.session_state["preMethodFacetName"].items():
+        # 若为空则跳过该步骤
+        if tempMethod is None:
             pass
-            # print('============测试方法参数正确性============')
-            # print(f"Key: {key11}, Value: {value11}")
-        new_entry = {
-            "编号": pages_utils.generateID(),
-            "数据类型": '气象数据',
-            "根节点": '预处理后数据集',
-            "子节点": 'test',
-            "文件名称": 'testName',
-            "数据格式": 'testFormat',
-            "预处理后字段": None,
-            "大小": 'testSize',
-            "输入字段": None,
-            "预处理方法": getCheckboxName(st.session_state["preMethodFacetName"]['checkBox']),
-            "方法参数": [value for key, value in st.session_state["preMethodFacetName"].items() if
-                         key != 'checkBox'],
-            "时间": datetime.datetime.now().time(),
-            "处理状态": False}
-        print('======================预处理方法-添加任务清单记录======================')
-        print(new_entry)
-        # 添加到TempDataSetFieldFacet[1]
-        for key in pages_utils.TempDataSetFieldFacet[1].keys():
-            pages_utils.TempDataSetFieldFacet[1][key].append(new_entry[key])
+        else:
+            methodParam = [value for key, value in st.session_state["preMethodFacetName"].items() if
+                           key != 'checkBox']
+            if tempMethod == '空间插值':
+                with emptyHead:
+                    # for _ in stqdm(range(5), desc="This is a slow task", mininterval=1):
+                    #     time.sleep(0.5)
+                    with st.spinner('数据处理中...'):
+                        time.sleep(5)
+                        methodParam = [
+                            '02_05.shp',
+                            'atemp',
+                            '反距离权重法',
+                            '118.053330 31.086861 121.953330 27.286861',
+                            '02_05_预处理.tif']
+                        FTool.spatialInterpolation(methodParam)
+                    st.toast("空间插值完毕", icon="ℹ️️")
+                with placeHolderDPF2:
+                    with st.status('加载数据中...'):
+                        m3 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                        m3.add_raster(
+                            r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\02_05_预处理.tif',
+                            layer_name='interpolation')
 
-        # 合并原始和预处理数据集记录
-        preprocessed_data_structure = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
-        row_data_structure = updateLeftBars(pages_utils.RawDataSetFieldFacet)
-        row_data_structure.extend(preprocessed_data_structure)
-        st.session_state.leftBars = row_data_structure
-        st.markdown(st.session_state.leftBars)
-        # st.session_state.leftBars = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
-        # 更新左侧目标显示
-        # st.markdown(st.session_state.leftBars)
+                        # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                        #
+                        # m.add_raster(resultFilePathList[1], colormap="RdYlGn_r", layer_name="DOY", nodata=0)
+                        # m.add_raster(resultFilePathList[0], colormap="RdYlGn_r", layer_name="SET", nodata=0)
+                        #
+                        # params = {
+                        #     "width": 2,
+                        #     "height": 0.3,
+                        #     "vmin": 0,
+                        #     "vmax": 100,
+                        #     "cmap": "terrain",
+                        #     "label": "Elevation (m)",
+                        #     "orientation": "horizontal",
+                        #     "transparent": True,
+                        # }
+                        # m.add_colormap(position=(75, 5), **params)
+
+                    m3.to_streamlit()
+
+            # 测试特征方法名称正确性
+            for key11, value11 in st.session_state["preMethodFacetName"].items():
+                pass
+                # print('============测试方法参数正确性============')
+                # print(f"Key: {key11}, Value: {value11}")
+            new_entry = {
+                "编号": pages_utils.generateID(),
+                "数据类型": '气象数据',
+                "根节点": '预处理后数据集',
+                "子节点": '气象数据',
+                "文件名称": pages_utils.generateID()[:5],
+                "数据格式": 'testFormat',
+                "预处理后字段": None,
+                "大小": 'testSize',
+                "输入字段": None,
+                "预处理方法": getCheckboxName(st.session_state["preMethodFacetName"]['checkBox']),
+                "方法参数": [value for key, value in st.session_state["preMethodFacetName"].items() if
+                             key != 'checkBox'],
+                "时间": datetime.datetime.now().time(),
+                "处理状态": False}
+            print('======================预处理方法-添加任务清单记录======================')
+            print(new_entry)
+            # 添加到TempDataSetFieldFacet[1]
+            for key in pages_utils.TempDataSetFieldFacet[1].keys():
+                pages_utils.TempDataSetFieldFacet[1][key].append(new_entry[key])
+
+            # 合并原始和预处理数据集记录
+            # preprocessed_data_structure = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
+            # row_data_structure = updateLeftBars(pages_utils.RawDataSetFieldFacet)
+            # row_data_structure.extend(preprocessed_data_structure)
+            # st.session_state.leftBars = row_data_structure
+            # st.markdown(st.session_state.leftBars)
+            # st.session_state.leftBars = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
+            # 更新左侧目标显示
+            # st.markdown(st.session_state.leftBars)

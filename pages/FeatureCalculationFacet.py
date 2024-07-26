@@ -133,14 +133,17 @@ colFCF1, colFCF2, colFCF3 = st.columns([0.2, 0.7, 0.3])
 with colFCF1:
     st.markdown("##### 数据与特征")
     with st.container(height=750, border=False):
-        temp = tree_select(st.session_state.leftBars)
+        leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet))
+        leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
+        leftBarsFCalData = tree_select(nodes=updateLeftBars(pages_utils.FeatureDataSetFieldFacet))
+
 with colFCF2:
     # 初始化地图
     pe = st.empty()
     with pe:
         m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
-            for name in temp['checked']:
+            for name in leftBarsPreData['checked']:
                 if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[2]['文件名称']:
                     path = os.path.join(
                         os.getcwd(),
@@ -278,7 +281,7 @@ with colFCF3:
                     paramT = [value for key, value in st.session_state["featureMethodFacetName"].items() if
                               key != 'checkBox']
                     print(f'========测试参数======={paramT}')
-                    inputFileList = temp['checked']
+                    inputFileList = leftBarsPreData['checked']
                     print(inputFileList)
                     resultFilePathList = FeatureCalculationMethodFacet().spatiotemporalExtraction(inputFileList, paramT)
             with pe:
@@ -323,8 +326,8 @@ with colFCF3:
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
             "根节点": '备选特征集',
-            "子节点": 'test1',
-            "文件名称": 'testName1' + pages_utils.generateID()[-4:],
+            "子节点": '气象数据',
+            "文件名称": pages_utils.generateID()[:5],
             "数据格式": 'testFormat1',
             "备选特征": None,
             "大小": 'testSize1',
@@ -342,11 +345,11 @@ with colFCF3:
 
         # 合并原始和预处理数据集记录
 
-        featureCalculation_data_structure = updateLeftBars(pages_utils.FeatureDataSetFieldFacet)
-        preprocessed_data_structure = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
-        preprocessed_data_structure.extend(featureCalculation_data_structure)
-
-        st.session_state.leftBars = preprocessed_data_structure
+        # featureCalculation_data_structure = updateLeftBars(pages_utils.FeatureDataSetFieldFacet)
+        # preprocessed_data_structure = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
+        # preprocessed_data_structure.extend(featureCalculation_data_structure)
+        #
+        # st.session_state.leftBars = preprocessed_data_structure
         # st.session_state.leftBars = updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet)
         # 更新左侧目标显示
         # st.markdown(st.session_state.leftBars)

@@ -5,7 +5,6 @@
 @Description : 原始数据界面-面状
 """
 import os
-import time
 from datetime import datetime
 
 import streamlit as st
@@ -37,41 +36,6 @@ def get_database_session():
     return st.session_state.dSFmap
 
 
-# json1 = [
-#         {"label": "原始数据集", "value": "原始数据集"},
-#         {
-#             "label": "预处理数据集",
-#             "value": "预处理数据集",
-#             "children": [
-#                 {"label": "temperature_1", "value": "temperature_1_2024"},
-#                 {"label": "temperature_2", "value": "temperature_2_2024"},
-#                 {"label": "temperature_3", "value": "temperature_3_2024"},
-#             ],
-#         },
-#         {
-#             "label": "特征计算数据集",
-#             "value": "特征计算数据集",
-#             "children": [
-#                 {"label": "晚稻移栽期", "value": "sub_d"},
-#                 {
-#                     "label": "预测峰值",
-#                     "value": "sub_e",
-#                     "children": [
-#                         {"label": "测报站点", "value": "sub_sub4"},
-#                         {"label": "生化指标", "value": "sub_s5"},
-#                     ],
-#                 },
-#                 {"label": "生化指标", "value": "sub_f"},
-#             ],
-#         },
-#         {"label": "特征优选数据集",
-#          "value": "特征优选数据集",
-#          "children": [
-#              {"label": "模板文件", "value": "模板文件"},
-#              {"label": "待提取特征文件", "value": "待提取特征文件"},
-#          ],
-#          },
-#     ]
 if 'leftBars' not in st.session_state:
     st.session_state.leftBars = [
         {
@@ -147,11 +111,13 @@ with dataSCM:
         pages_utils.RawDataSetFieldFacet['文件名称'],
         pages_utils.RawDataSetFieldFacet['数据格式'])]
     with st.container(height=750, border=False):
-        temp = tree_select(nodes=st.session_state.leftBars, checked=checkedNameList)
+        leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet), checked=checkedNameList)
 
 # ==============================右侧文件上传状态显示==============================
 with dataSCMap:
     placeHolderDSF = st.empty()
+    # st.markdown(temp['checked'])
+
     with placeHolderDSF:
         map1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
 
@@ -168,7 +134,7 @@ with dataSCMap:
         # # 裁剪后
         # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file_cropped.tif',layer_name='cropped')
         with st.status('加载数据中...'):
-            for name in temp['checked']:
+            for name in leftBarsRawData['checked']:
                 if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
                     path = os.path.join(
                         os.getcwd(),
@@ -239,7 +205,7 @@ with dataSCR:
                 st.toast('上传错误,请检测文件内容及格式无误后重新上传', icon="⚠️")
                 raise e
         # 更新左侧目标显示
-        st.session_state.leftBars = updateLeftBars(pages_utils.RawDataSetFieldFacet)
+        # st.session_state.leftBars = updateLeftBars(pages_utils.RawDataSetFieldFacet)
 
     # ==============================右侧数据模板下载及注意事项==============================
     st.markdown("##### 数据模板下载及注意事项")
