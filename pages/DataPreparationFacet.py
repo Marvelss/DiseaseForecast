@@ -6,19 +6,14 @@
 """
 import datetime
 import os
-import time
 from collections import deque
-
-import numpy as np
 import streamlit as st
 from st_pages import hide_pages
-from stqdm import stqdm
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 
 import pages_utils
 from modelmethodfacet.PretreatmentMethodFacet import PretreatmentMethodFacet
-from modelmethodfacet.FeatureCalculationMethodFacet import FeatureCalculationMethodFacet
 
 st.set_page_config(
     layout="wide"
@@ -37,8 +32,11 @@ if 'dPmap' not in st.session_state:
     st.session_state.dPmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
 
 # 显示地图图层,创建一个最大长度为5的队列
-if 'dPMapLayer' not in st.session_state:
-    st.session_state.dPMapLayer = deque(maxlen=5)
+if 'dPLeftMapLayer' not in st.session_state:
+    st.session_state.dPLeftMapLayer = deque(maxlen=5)
+# 显示右侧预处理地图图层,创建一个最大长度为5的队列
+if 'dPRightMapLayer' not in st.session_state:
+    st.session_state.dPRightMapLayer = deque(maxlen=5)
 
 
 # 添加图层
@@ -142,9 +140,9 @@ with colDPF21:
         with st.status('加载数据中...'):
             for name in leftBarsRawData['checked']:
                 if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
-                    st.session_state.dPMapLayer.append(name)
-            print(st.session_state.dPMapLayer)
-            for layer in st.session_state.dPMapLayer:
+                    st.session_state.dPLeftMapLayer.append(name)
+            print(st.session_state.dPLeftMapLayer)
+            for layer in st.session_state.dPLeftMapLayer:
                 path = os.path.join(
                     os.getcwd(),
                     'resource',
@@ -268,7 +266,7 @@ with colDPF3:
                     # for _ in stqdm(range(5), desc="This is a slow task", mininterval=1):
                     #     time.sleep(0.5)
                     with st.spinner('数据处理中...'):
-                        time.sleep(5)
+                        # time.sleep(5)
                         methodParam = [
                             '02_05.shp',
                             'atemp',
@@ -276,16 +274,25 @@ with colDPF3:
                             '118.053330 31.086861 121.953330 27.286861',
                             '02_05_预处理.tif']
                         handledFile = FTool.spatialInterpolation(methodParam)
+                        st.session_state.dPRightMapLayer.append(handledFile)
                     st.toast("空间插值完毕", icon="ℹ️️")
-                with placeHolderDPF2:
-                    with st.status('加载数据中...'):
-                        m3 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-                        m3.add_raster(
-                            r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\02_05_预处理.tif',
-                            layer_name='interpolation')
-                    m3.to_streamlit()
             elif tempMethod == '重采样':
-                handledFile = '源文件名-重采样_2010_11.tif'
+                handledFile = '源文件名-重采样_2010_' + pages_utils.generateID()[:3] + '.tif'
+                methodParam = [
+                    '02_05.shp',
+                    'atemp',
+                    '反距离权重法',
+                    '118.053330 31.086861 121.953330 27.286861',
+                    '02_05_预处理.tif']
+                # handledFile = FTool.spatialInterpolation(methodParam)
+                st.session_state.dPRightMapLayer.append(handledFile)
+            with placeHolderDPF2:
+                with st.status('加载数据中...'):
+                    afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                    for layerPath in st.session_state.dPRightMapLayer:
+                        addLayer(afterPreMap, layerPath)
+                        st.header(f'{layerPath}加载完成')
+                afterPreMap.to_streamlit()
             new_entry = {
                 "编号": pages_utils.generateID(),
                 "数据类型": '气象数据',

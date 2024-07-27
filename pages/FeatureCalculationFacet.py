@@ -6,7 +6,6 @@
 """
 import datetime
 import os
-import random
 from collections import deque
 
 import pandas as pd
@@ -123,7 +122,7 @@ def clear_all():
 
 
 # dataframe转为json
-def df_to_geojson(df, properties_columns, lon_column='经度', lat_column='纬度'):
+def df_to_geojson(dfT, properties_columns, lon_column='经度', lat_column='纬度'):
     # 初始化GeoJSON字典
     geojson = {
         "type": "FeatureCollection",
@@ -137,7 +136,7 @@ def df_to_geojson(df, properties_columns, lon_column='经度', lat_column='纬�
     }
 
     # 遍历DataFrame的每一行
-    for _, row in df.iterrows():
+    for _, row in dfT.iterrows():
         feature = {
             "type": "Feature",
             "properties": {col: row[col] for col in properties_columns},
@@ -309,21 +308,25 @@ with colFCF3:
                     print(inputFileList)
                     resultFilePathList = FeatureCalculationMethodFacet().spatiotemporalExtraction(inputFileList, paramT)
                     handledFile = ' '.join(resultFilePathList)
-            with pe:
-                m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-                with st.status('加载数据中...'):
-                    for name in resultFilePathList:
-                        m1.add_raster(name, layer_name=os.path.basename(name))
-                        st.header(f'{name}加载完成')
-                m1.to_streamlit()
+                    st.session_state.fCMapLayer.append(handledFile)
+
         elif tempMethod == '空间点提取':
             handledFile = 'excel.xlsx'
             # 根据参数内容存入表
             # 待提取字段名称、年、DayOfYear、基准文件
+            st.session_state.fCMapLayer.append(handledFile)
+
             pages_utils.TempDataSetFacet[2] = pd.read_excel(
                 r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\C5_特征因子_150℃_3分类 - v2.xlsx')
             st.toast("空间点提取执行完毕", icon="ℹ️️")
 
+        with pe:
+            with st.status('加载数据中...'):
+                afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                for layerPath in st.session_state.fCMapLayer:
+                    addLayer(afterPreMap, layerPath)
+                    st.header(f'{layerPath}加载完成')
+            afterPreMap.to_streamlit()
         new_entry = {
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
