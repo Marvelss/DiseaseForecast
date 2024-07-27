@@ -7,6 +7,7 @@
 import datetime
 import os
 import random
+from collections import deque
 
 import pandas as pd
 import streamlit as st
@@ -65,6 +66,28 @@ if "featureMethodFacetName" not in st.session_state:
 # 获取当前选中的方法名称
 if "nowFFacetMethodName" not in st.session_state:
     st.session_state.nowFFacetMethodName = ''
+
+# 显示地图图层,创建一个最大长度为5的队列
+if 'fCMapLayer' not in st.session_state:
+    st.session_state.fCMapLayer = deque(maxlen=5)
+
+
+# 添加图层
+def addLayer(mapTemp, filePath):
+    fileName = os.path.basename(filePath)
+    print('============')
+    print(filePath)
+    print(fileName)
+    if 'tif' in fileName:
+        mapTemp.add_raster(filePath,
+                           layer_name=fileName.split('.')[0])
+    elif 'shp' in fileName:
+        mapTemp.add_raster(filePath,
+                           layer_name=fileName.split('.')[0])
+    elif 'json' in fileName:
+        mapTemp.add_json(filePath,
+                         layer_name=fileName.split('.')[0])
+
 
 checkBoxNum = 4
 
@@ -143,16 +166,16 @@ with colFCF2:
     with pe:
         m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
-            for name in leftBarsPreData['checked']:
-                if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[2]['文件名称']:
-                    path = os.path.join(
-                        os.getcwd(),
-                        'resource',
-                        'uploadFileDir', name)
-                    print('=============')
-                    print(path)
-                    m.add_raster(path, layer_name=name.split('.')[0])
-                    st.header(f'{name}加载完成')
+            for name in leftBarsRawData['checked']:
+                if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
+                    st.session_state.fCMapLayer.append(name)
+            for layer in st.session_state.fCMapLayer:
+                path = os.path.join(
+                    os.getcwd(),
+                    'resource',
+                    'uploadFileDir', layer)
+                addLayer(m, path)
+                st.header(f'{layer}加载完成')
         m.to_streamlit()
 with colFCF3:
     st.markdown("##### 特征计算方法")

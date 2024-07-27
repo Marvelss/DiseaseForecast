@@ -7,6 +7,7 @@
 import datetime
 import os
 import time
+from collections import deque
 
 import numpy as np
 import streamlit as st
@@ -34,6 +35,24 @@ hide_pages(
 )
 if 'dPmap' not in st.session_state:
     st.session_state.dPmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+
+# 显示地图图层,创建一个最大长度为5的队列
+if 'dPMapLayer' not in st.session_state:
+    st.session_state.dPMapLayer = deque(maxlen=5)
+
+
+# 添加图层
+def addLayer(mapTemp, filePath):
+    fileName = os.path.basename(filePath)
+    if 'tif' in fileName:
+        mapTemp.add_raster(filePath,
+                           layer_name=fileName.split('.')[0])
+    elif 'shp' in fileName:
+        mapTemp.add_raster(filePath,
+                           layer_name=fileName.split('.')[0])
+    elif 'json' in fileName:
+        mapTemp.add_json(filePath,
+                         layer_name=fileName.split('.')[0])
 
 
 # 更新左侧目标显示(可添加至pages_utils)
@@ -123,15 +142,15 @@ with colDPF21:
         with st.status('加载数据中...'):
             for name in leftBarsRawData['checked']:
                 if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
-                    path = os.path.join(
-                        os.getcwd(),
-                        'resource',
-                        'uploadFileDir', name)
-                    # print('=============')
-                    # print(path)
-                    # m1.add_raster(path, layer_name=name.split('.')[0])
-                    m1.add_shp(path, layer_name=name.split('.')[0])
-                    st.header(f'{name}加载完成')
+                    st.session_state.dPMapLayer.append(name)
+            print(st.session_state.dPMapLayer)
+            for layer in st.session_state.dPMapLayer:
+                path = os.path.join(
+                    os.getcwd(),
+                    'resource',
+                    'uploadFileDir', layer)
+                addLayer(m1, path)
+                st.header(f'{layer}加载完成')
         m1.to_streamlit()
 with colDPF22:
     st.markdown("##### 预处理后数据")
