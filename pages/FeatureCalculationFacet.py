@@ -81,8 +81,8 @@ def addLayer(mapTemp, filePath):
         mapTemp.add_raster(filePath,
                            layer_name=fileName.split('.')[0])
     elif 'shp' in fileName:
-        mapTemp.add_raster(filePath,
-                           layer_name=fileName.split('.')[0])
+        mapTemp.add_shp(filePath,
+                        layer_name=fileName.split('.')[0])
     elif 'json' in fileName:
         mapTemp.add_json(filePath,
                          layer_name=fileName.split('.')[0])
