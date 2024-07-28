@@ -47,7 +47,7 @@ def addLayer(mapTemp, filePath):
                            layer_name=fileName.split('.')[0])
     elif 'shp' in fileName:
         mapTemp.add_shp(filePath,
-                    layer_name=fileName.split('.')[0])
+                        layer_name=fileName.split('.')[0])
     elif 'json' in fileName:
         mapTemp.add_json(filePath,
                          layer_name=fileName.split('.')[0])
@@ -183,45 +183,27 @@ with colDPF3:
 
     # ===============显示和处理右中各个处理方法设置参数===============
     if agree11:
-        # 显示缺失值信息
-        info = '缺失字段个数及占比:\n'
-        flag = False
-        # 统计缺失值信息
-        for column in pages_utils.TempDataSet[0].columns:
-            # 获取每个字段的非缺失值数量
-            non_missing_values = pages_utils.TempDataSet[0][column].count()
-            total_rows = len(pages_utils.TempDataSet[0])
-            # 计算缺失值数量
-            missing_values = total_rows - non_missing_values
-            # 计算缺失值占比
-            missing_percentage = (missing_values / total_rows) * 100
-            # 将每个字段的缺失值占比保存到信息中
-            if missing_values:
-                info += f"* {column}:{missing_values} {missing_percentage:.2f}%\n"
-                flag = True
-        # if not flag:
-        #     info = '无缺失字段\n'
-        #     st.info(f"{info}\n", icon="ℹ️️")
-        # else:
-        #     st.warning(f"{info}\n", icon="⚠️")
-        # coll11, coll22 = st.columns([0.3, 0.6])
-        # with coll11:
-        #     option = st.selectbox(
-        #         '插补方法',
-        #         options=('线性插值', '自定义'))
-        #     if option == '自定义':
-        #         num = st.text_input('缺失值', value=np.nan)
-        #         num1 = st.text_input('插补值')
-        # with coll22:
-        #     latext = '* 公式:' + r'''
-        #     $$
-        #     y = y_0 + (y_1 - y_0) \frac{(x - x_0)}{(x_1 - x_0)}
-        #     $$
-        #     '''
-        #     st.info('插补方法介绍\n'
-        #             '* 描述:使用缺失值前后最近的两个非缺失值填充\n' +
-        #             latext, icon="ℹ️")
-        # st.markdown('---')
+        optionResample = st.selectbox(
+            '待重采样文件',
+            options=leftBarsRawData['checked'])
+        optionInterpolationMethod = st.selectbox(
+            '重采样方法',
+            options=('最近邻插值', '双线性插值', '立方卷积逼近',
+                     '三次样条线逼近', '均值', '众数'))
+        optionTemplateFile = st.selectbox(
+            '模板文件',
+            options=(leftBarsRawData['checked']),
+            help='参考坐标系及投影数等')
+        optionOutputFile = st.text_input(
+            label='输出文件名称',
+            value=optionResample)
+        tempRP = os.path.join(os.getcwd(),
+                              'resource', 'uploadFileDir')
+        st.session_state["preMethodFacetName"]['param1'] = os.path.join(tempRP, optionResample)
+        st.session_state["preMethodFacetName"]['param2'] = optionInterpolationMethod
+        st.session_state["preMethodFacetName"]['param3'] = os.path.join(tempRP, optionTemplateFile)
+        st.session_state["preMethodFacetName"]['param4'] = os.path.join(tempRP, optionOutputFile)
+
     if agree12:
         option = st.selectbox(
             '点数据',
@@ -260,6 +242,7 @@ with colDPF3:
         else:
             methodParam = [value for key, value in st.session_state["preMethodFacetName"].items() if
                            key != 'checkBox']
+            print(f'=====测试===={methodParam}')
             handledFile = None
             if tempMethod == '空间插值':
                 with emptyHead:
@@ -277,15 +260,9 @@ with colDPF3:
                         st.session_state.dPRightMapLayer.append(handledFile)
                     st.toast("空间插值完毕", icon="ℹ️️")
             elif tempMethod == '重采样':
-                handledFile = '源文件名-重采样_2010_' + pages_utils.generateID()[:3] + '.tif'
-                methodParam = [
-                    '02_05.shp',
-                    'atemp',
-                    '反距离权重法',
-                    '118.053330 31.086861 121.953330 27.286861',
-                    '02_05_预处理.tif']
-                # handledFile = FTool.spatialInterpolation(methodParam)
+                handledFile = PretreatmentMethodFacet().onResample(methodParam)
                 st.session_state.dPRightMapLayer.append(handledFile)
+                print(handledFile)
             with placeHolderDPF2:
                 with st.status('加载数据中...'):
                     afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
