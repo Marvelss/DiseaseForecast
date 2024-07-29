@@ -12,7 +12,7 @@ from st_pages import hide_pages, show_pages
 from stqdm import stqdm
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
-
+from collections import deque
 import pages_utils
 from streamlit_pills import pills
 from warnings import simplefilter
@@ -111,7 +111,11 @@ with dataSCM:
         pages_utils.RawDataSetFieldFacet['文件名称'],
         pages_utils.RawDataSetFieldFacet['数据格式'])]
     with st.container(height=750, border=False):
-        leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet), checked=checkedNameList)
+        if len(pages_utils.RawDataSetFieldFacet['编号']) == 0:
+            tree_select([{"label": "原始数据集", "value": "原始数据集"}])
+        else:
+            leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet),
+                                          checked=checkedNameList)
 
 # ==============================右侧文件上传状态显示==============================
 with dataSCMap:
@@ -134,18 +138,21 @@ with dataSCMap:
         # # 裁剪后
         # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file_cropped.tif',layer_name='cropped')
         with st.status('加载数据中...'):
-            for name in leftBarsRawData['checked']:
-                if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
-                    path = os.path.join(
-                        os.getcwd(),
-                        'resource',
-                        'uploadFileDir', name)
-                    print('=============')
-                    print(path)
-                    # map1.add_raster(path, layer_name=name.split('.')[0])
-                    # map1.add_shp(path, layer_name=name.split('.')[0])
-                    # map1.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
-                    st.header(f'{name}加载完成')
+            # 排除初次加载时
+            # st.markdown(leftBarsRawData)
+            if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
+                for name in leftBarsRawData['checked']:
+                    if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
+                        path = os.path.join(
+                            os.getcwd(),
+                            'resource',
+                            'uploadFileDir', name)
+                        print('=============')
+                        print(path)
+                        # map1.add_raster(path, layer_name=name.split('.')[0])
+                        # map1.add_shp(path, layer_name=name.split('.')[0])
+                        # map1.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
+                        st.header(f'{name}加载完成')
         map1.to_streamlit()
 with dataSCR:
     st.markdown("##### 上传数据集")
@@ -167,6 +174,7 @@ with dataSCR:
     # st.markdown('---')
 
     # ==============================控制文件上传逻辑==============================
+    count = 0
     if uploaded_files:
         # 获取已有文件名的集合
         existing_file_names = set(pages_utils.TempDataSetFieldFacet[0]['文件名称'])
@@ -197,6 +205,7 @@ with dataSCR:
                 # 添加到TempDataSetFieldFacet[0]
                 for key in pages_utils.TempDataSetFieldFacet[0].keys():
                     pages_utils.TempDataSetFieldFacet[0][key].append(new_entry[key])
+
                 # print('============更新原始数据============')
                 # print(pages_utils.TempDataSetFieldFacet[0])
 

@@ -128,7 +128,10 @@ colDPF1, colDPF21, colDPF22, colDPF3 = st.columns([0.2, 0.7, 0.7, 0.3])
 with colDPF1:
     st.markdown("##### 数据与特征")
     with st.container(height=750, border=False):
-        leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet))
+        if len(pages_utils.RawDataSetFieldFacet['编号']) == 0:
+            leftBarsRawData = [{"label": "原始数据集", "value": "原始数据集"}]
+        else:
+            leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet))
         leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
 
 with colDPF21:
@@ -138,17 +141,18 @@ with colDPF21:
     with placeHolderDPF:
         m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
-            for name in leftBarsRawData['checked']:
-                if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
-                    st.session_state.dPLeftMapLayer.append(name)
-            print(st.session_state.dPLeftMapLayer)
-            for layer in st.session_state.dPLeftMapLayer:
-                path = os.path.join(
-                    os.getcwd(),
-                    'resource',
-                    'uploadFileDir', layer)
-                addLayer(m1, path)
-                st.header(f'{layer}加载完成')
+            if len(pages_utils.PreprocessedDataSetFieldFacet['编号']) != 0:
+                for name in leftBarsRawData['checked']:
+                    if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
+                        st.session_state.dPLeftMapLayer.append(name)
+                print(st.session_state.dPLeftMapLayer)
+                for layer in st.session_state.dPLeftMapLayer:
+                    path = os.path.join(
+                        os.getcwd(),
+                        'resource',
+                        'uploadFileDir', layer)
+                    addLayer(m1, path)
+                    st.header(f'{layer}加载完成')
         m1.to_streamlit()
 with colDPF22:
     st.markdown("##### 预处理后数据")
@@ -250,12 +254,12 @@ with colDPF3:
                     #     time.sleep(0.5)
                     with st.spinner('数据处理中...'):
                         # time.sleep(5)
-                        methodParam = [
-                            '02_05.shp',
-                            'atemp',
-                            '反距离权重法',
-                            '118.053330 31.086861 121.953330 27.286861',
-                            '02_05_预处理.tif']
+                        # methodParam = [
+                        #     '02_05.shp',
+                        #     'atemp',
+                        #     '反距离权重法',
+                        #     '118.053330 31.086861 121.953330 27.286861',
+                        #     '02_05_预处理.tif']
                         handledFile = FTool.spatialInterpolation(methodParam)
                         st.session_state.dPRightMapLayer.append(handledFile)
                     st.toast("空间插值完毕", icon="ℹ️️")

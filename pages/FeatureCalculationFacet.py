@@ -155,10 +155,15 @@ colFCF1, colFCF2, colFCF3 = st.columns([0.2, 0.7, 0.3])
 with colFCF1:
     st.markdown("##### 数据与特征")
     with st.container(height=750, border=False):
-        leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet))
-        leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
+        if len(pages_utils.RawDataSetFieldFacet['编号']) == 0:
+            leftBarsRawData = [{"label": "原始数据集", "value": "原始数据集"}]
+        else:
+            leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet))
+        if len(pages_utils.PreprocessedDataSetFieldFacet['编号']) == 0:
+            leftBarsPreData = {"label": "预处理后数据", "value": "预处理后数据"}
+        else:
+            leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
         leftBarsFCalData = tree_select(nodes=updateLeftBars(pages_utils.FeatureDataSetFieldFacet))
-
 with colFCF2:
     # 初始化地图
     pe = st.empty()
@@ -189,6 +194,25 @@ with colFCF3:
 
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
+    if option21:
+        optionVegetationIndex = st.selectbox(
+            '植被指数',
+            ('NDVI', 'EVI'))
+        optionInputFile = st.selectbox(
+            '输入文件',
+            (leftBarsPreData['checked']))
+        optionRed = st.number_input(label='红波段对应的波段数', value=3)
+        optionNir = st.number_input(label='近红波段对应的波段数', value=2)
+        optionOutput = st.text_input(
+            '输出文件名称',
+            (leftBarsPreData['checked']))
+
+        st.session_state["featureMethodFacetName"]['param1'] = str(optionVegetationIndex)
+        st.session_state["featureMethodFacetName"]['param2'] = str(optionInputFile)
+        st.session_state["featureMethodFacetName"]['param3'] = str(optionRed)
+        st.session_state["featureMethodFacetName"]['param4'] = str(optionNir)
+        st.session_state["featureMethodFacetName"]['param5'] = str(optionOutput)
+
     if option22:
         extractFileList = pages_utils.multiselect_all(
             st, '全选-待提取特征文件',
@@ -298,6 +322,7 @@ with colFCF3:
         methodParam = [value for key, value in st.session_state["featureMethodFacetName"].items() if
                        key != 'checkBox']
         handledFile = None
+        fcTool = FeatureCalculationMethodFacet()
         if tempMethod == '时空抽取':
             with emptyHead:
                 with st.spinner('正在计算时空抽取,预计耗时1分半'):
@@ -310,6 +335,16 @@ with colFCF3:
                     handledFile = ' '.join(resultFilePathList)
                     st.session_state.fCMapLayer.append(handledFile)
 
+        elif tempMethod == '植被指数计算':
+            resultFilePathList = fcTool.onNDVI(methodParam)
+            handledFile = ' '.join(resultFilePathList)
+            st.session_state.fCMapLayer.append(handledFile)
+
+        elif tempMethod == '景观指数计算':
+            resultFilePathList = fcTool.onLandscapeIndex(methodParam)
+            handledFile = ' '.join(resultFilePathList)
+            st.session_state.fCMapLayer.append(handledFile)
+
         elif tempMethod == '空间点提取':
             handledFile = 'excel.xlsx'
             # 根据参数内容存入表
@@ -321,8 +356,13 @@ with colFCF3:
             st.toast("空间点提取执行完毕", icon="ℹ️️")
 
         with pe:
+            afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
             with st.status('加载数据中...'):
-                afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
+                    for name in leftBarsRawData['checked']:
+                        if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
+                            st.session_state.dPLeftMapLayer.append(name)
+                    print(st.session_state.dPLeftMapLayer)
                 for layerPath in st.session_state.fCMapLayer:
                     addLayer(afterPreMap, layerPath)
                     st.header(f'{layerPath}加载完成')

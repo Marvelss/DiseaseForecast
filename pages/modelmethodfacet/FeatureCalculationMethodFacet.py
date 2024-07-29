@@ -8,11 +8,14 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import glob
 import os
 
+from osgeo import gdal
 from tqdm import trange
 import rasterio
+import rpy2.robjects as robjects
+from rpy2.robjects import pandas2ri
+from rpy2.robjects.packages import importr
 
 
 class FeatureCalculationMethodFacet:
@@ -184,6 +187,7 @@ class FeatureCalculationMethodFacet:
         threshold = int(param[3])
         duration = int(param[4])
         mode = param[5]
+
         # saved_path1 = param[6]
 
         # 起点温度暂时不保存
@@ -346,3 +350,68 @@ class FeatureCalculationMethodFacet:
         self.dataFrame = self.dataFrame.drop(['日期'], axis=1)
 
         return self.dataFrame, growthPeriod
+
+    # NDVI植被指数计算
+    def onNDVI(self, methodParam):
+        input_path, red, nir, output_path = (methodParam[0],
+                                             methodParam[1],
+                                             methodParam[2],
+                                             methodParam[3])
+        """
+        :param input_path: 输入的栅格数据路径
+        :param output_path: 输出的文件路径
+        :param red: 红波段对应的波段数
+        :param nir: 近红波段对应的波段数
+        :return: 输出tif格式的NDVI计算结果图
+        """
+        ds = gdal.Open(input_path)  # 打开数据集dataset
+        ds_width = ds.RasterXSize  # 获取数据宽度
+        ds_height = ds.RasterYSize  # 获取数据高度
+        ds_geo = ds.GetGeoTransform()  # 获取仿射地理变换参数
+        ds_prj = ds.GetProjection()  # 获取投影信息
+        # red是红波段对应的波段数
+        array_red = ds.GetRasterBand(red).ReadAsArray(0, 0, ds_width, ds_height).astype(np.float64)
+        # nir是近红波段对应的波段数
+        array_nir = ds.GetRasterBand(nir).ReadAsArray(0, 0, ds_width, ds_height).astype(np.float64)
+        # print("======归一化植被指数NDVI计算======")
+        # 以数组的形式读取红波段和近红外波段
+        b1 = array_nir - array_red
+        b2 = array_nir + array_red
+        # 计算NDVI
+        NDVI_data = np.divide(b1, b2, out=np.zeros_like(b1), where=b2 != 0)
+        # print("======生成输出文件======")
+        driver = gdal.GetDriverByName('GTiff')  # 载入数据驱动，用于存储内存中的数组
+        # 创建一个数组，宽高为原始尺寸
+        ds_result = driver.Create(output_path, ds_width, ds_height, bands=1, eType=gdal.GDT_Float64)
+        ds_result.SetGeoTransform(ds_geo)  # 导入仿射地理变换参数
+        ds_result.SetProjection(ds_prj)  # 导入投影信息
+        ds_result.GetRasterBand(1).SetNoDataValue(-9999)  # 将无效值设为9999
+        ds_result.GetRasterBand(1).WriteArray(NDVI_data)  # 将NDVI的计算结果写入数组
+        del ds_result  # 删除内存中的结果，否则结果不会写入图像中
+        print("计算完成")
+
+    # 景观指数计算
+    def onLandscapeIndex(self, methodParam):
+        a = methodParam[0]
+        # 加载R的landscapemetrics包
+        importr('landscapemetrics')
+        # 读取本地数据
+        # 相对路径
+        path = 'fengtai2010.tif'
+        # 绝对路径
+        # path = r'E:\a_python\program\testPlatform\demo\demo140\fengtai2010.tif'
+        # path = path.replace("\\", "/")  # 确保路径格式正确
+        script = f'landscape <- terra::rast("{path}")'
+        # 运行脚本
+        robjects.r(script)
+        # 运行R代码并获取结果
+        robjects.r('enn_results4 <- lsm_c_lpi(landscape)')
+        enn_results4 = robjects.r('enn_results4')
+
+        # 启用pandas与rpy2之间的转换
+        pandas2ri.activate()
+        # 转换成pandas格式
+        enn_results4_df = pandas2ri.rpy2py(enn_results4)
+        # 打印结果数据框
+        print(enn_results4_df)
+        # 生成根据列名tif图
