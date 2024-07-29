@@ -165,21 +165,23 @@ with colFCF1:
             leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
         leftBarsFCalData = tree_select(nodes=updateLeftBars(pages_utils.FeatureDataSetFieldFacet))
 with colFCF2:
+    onFC = st.toggle(label="选中文件时自动显示对应图层", help='图层加载时间较长', value=True)
     # 初始化地图
     pe = st.empty()
     with pe:
         m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
-            for name in leftBarsRawData['checked']:
-                if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
-                    st.session_state.fCMapLayer.append(name)
-            for layer in st.session_state.fCMapLayer:
-                path = os.path.join(
-                    os.getcwd(),
-                    'resource',
-                    'uploadFileDir', layer)
-                addLayer(m, path)
-                st.header(f'{layer}加载完成')
+            if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
+                for name in leftBarsRawData['checked']:
+                    if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
+                        st.session_state.fCMapLayer.append(name)
+                for layer in st.session_state.fCMapLayer:
+                    path = os.path.join(
+                        os.getcwd(),
+                        'resource',
+                        'uploadFileDir', layer)
+                    addLayer(m, path)
+                    st.header(f'{layer}加载完成')
         m.to_streamlit()
 with colFCF3:
     st.markdown("##### 特征计算方法")

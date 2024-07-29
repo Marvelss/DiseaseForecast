@@ -37,6 +37,9 @@ if 'dPLeftMapLayer' not in st.session_state:
 # 显示右侧预处理地图图层,创建一个最大长度为5的队列
 if 'dPRightMapLayer' not in st.session_state:
     st.session_state.dPRightMapLayer = deque(maxlen=5)
+# 资源路径
+tempRP = os.path.join(os.getcwd(),
+                      'resource', 'uploadFileDir')
 
 
 # 添加图层
@@ -135,17 +138,24 @@ with colDPF1:
         leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
 
 with colDPF21:
-    st.markdown("##### 原始数据集")
+    colDPF21col1, colDPF21col2 = st.columns([3, 1])
+    with colDPF21col1:
+        st.markdown("##### 原始数据集")
+    with colDPF21col2:
+        onDP1 = st.toggle(label="选中文件时自动显示对应图层-左侧", help='图层加载时间较长', value=True)
+
     # 初始化地图
     placeHolderDPF = st.empty()
     with placeHolderDPF:
         m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
-            if len(pages_utils.PreprocessedDataSetFieldFacet['编号']) != 0:
+            if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
                 for name in leftBarsRawData['checked']:
                     if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
                         st.session_state.dPLeftMapLayer.append(name)
                 print(st.session_state.dPLeftMapLayer)
+                if onDP1:
+                    st.session_state.dPLeftMapLayer.clear()
                 for layer in st.session_state.dPLeftMapLayer:
                     path = os.path.join(
                         os.getcwd(),
@@ -155,7 +165,11 @@ with colDPF21:
                     st.header(f'{layer}加载完成')
         m1.to_streamlit()
 with colDPF22:
-    st.markdown("##### 预处理后数据")
+    colDPF21col3, colDPF21col4 = st.columns([1, 9])
+    with colDPF21col3:
+        st.markdown("##### 原始数据集")
+    with colDPF21col4:
+        onDP2 = st.toggle(label="选中文件时自动显示对应图层-右侧", help='图层加载时间较长', value=True)
     # 初始化地图
     placeHolderDPF2 = st.empty()
     with placeHolderDPF2:
@@ -178,9 +192,9 @@ with colDPF3:
     col12, col22 = st.columns(2)
     with col12:
         # agree = st.checkbox('剔除异常值', key='checkbox0', args=[0])
-        agree11 = st.checkbox("重采样(待发布)", key='checkbox0', on_change=clear_other, args=[0])
+        agree11 = st.checkbox("重采样", key='checkbox0', on_change=clear_other, args=[0])
     with col22:
-        agree12 = st.checkbox("空间插值(待发布)", key='checkbox1', on_change=clear_other, args=[1])
+        agree12 = st.checkbox("空间插值", key='checkbox1', on_change=clear_other, args=[1])
         # agree10 = st.checkbox("缺失值插补", key='checkbox1', args=[1])
         # agree13 = st.checkbox("点面数据关联(待发布)", key='checkbox4', args=[4], disabled=True)
     st.markdown('---')
@@ -201,15 +215,14 @@ with colDPF3:
         optionOutputFile = st.text_input(
             label='输出文件名称',
             value=optionResample)
-        tempRP = os.path.join(os.getcwd(),
-                              'resource', 'uploadFileDir')
+
         st.session_state["preMethodFacetName"]['param1'] = os.path.join(tempRP, optionResample)
         st.session_state["preMethodFacetName"]['param2'] = optionInterpolationMethod
         st.session_state["preMethodFacetName"]['param3'] = os.path.join(tempRP, optionTemplateFile)
         st.session_state["preMethodFacetName"]['param4'] = os.path.join(tempRP, optionOutputFile)
 
     if agree12:
-        option = st.selectbox(
+        optionPoint = st.selectbox(
             '点数据',
             options=('02_05', '自定义'))
         textAN = st.text_input(
@@ -226,6 +239,12 @@ with colDPF3:
         textSN = st.text_input(
             label='保存输出文件名称',
             value='02_05_预处理.tif')
+        if textSN:
+            st.session_state["preMethodFacetName"]['param1'] = os.path.join(tempRP, optionPoint)
+            st.session_state["preMethodFacetName"]['param2'] = textAN
+            st.session_state["preMethodFacetName"]['param3'] = optionIM
+            st.session_state["preMethodFacetName"]['param4'] = textLL
+            st.session_state["preMethodFacetName"]['param5'] = os.path.join(tempRP, textSN)
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([1.5, 1])
@@ -261,15 +280,22 @@ with colDPF3:
                         #     '118.053330 31.086861 121.953330 27.286861',
                         #     '02_05_预处理.tif']
                         handledFile = FTool.spatialInterpolation(methodParam)
+                        os.path.join(tempRP, handledFile)
                         st.session_state.dPRightMapLayer.append(handledFile)
                     st.toast("空间插值完毕", icon="ℹ️️")
             elif tempMethod == '重采样':
                 handledFile = PretreatmentMethodFacet().onResample(methodParam)
+                os.path.join(tempRP, handledFile)
+                print(methodParam)
+                print(handledFile)
+
                 st.session_state.dPRightMapLayer.append(handledFile)
                 print(handledFile)
             with placeHolderDPF2:
                 with st.status('加载数据中...'):
                     afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                    if onDP2:
+                        st.session_state.dPRightMapLayer.clear()
                     for layerPath in st.session_state.dPRightMapLayer:
                         addLayer(afterPreMap, layerPath)
                         st.header(f'{layerPath}加载完成')

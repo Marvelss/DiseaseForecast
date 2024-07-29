@@ -38,6 +38,7 @@ class PretreatmentMethodFacet:
         :return:
         """
         # output_file, point_station_file, attrName
+        print(f'========测试参数========{methodParam}')
         point_station_file = os.path.join(
             os.getcwd(),
             'resource',

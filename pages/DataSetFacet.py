@@ -29,6 +29,24 @@ if 'count' not in st.session_state:
 if 'dSFmap' not in st.session_state:
     st.session_state.dSFmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
 
+# 显示地图图层,创建一个最大长度为5的队列
+if 'dSMapLayer' not in st.session_state:
+    st.session_state.dSMapLayer = deque(maxlen=5)
+
+
+# 添加图层
+def addLayer(mapTemp, filePath):
+    fileNameT = os.path.basename(filePath)
+    if 'tif' in fileNameT:
+        mapTemp.add_raster(filePath,
+                           layer_name=fileNameT.split('.')[0])
+    elif 'shp' in fileNameT:
+        mapTemp.add_shp(filePath,
+                        layer_name=fileNameT.split('.')[0])
+    elif 'json' in fileNameT:
+        mapTemp.add_json(filePath,
+                         layer_name=fileNameT.split('.')[0])
+
 
 @st.cache_resource
 def get_database_session():
@@ -119,6 +137,8 @@ with dataSCM:
 
 # ==============================右侧文件上传状态显示==============================
 with dataSCMap:
+    onDS = st.toggle(label="选中文件时自动显示对应图层", help='图层加载时间较长', value=True)
+
     placeHolderDSF = st.empty()
     # st.markdown(temp['checked'])
 
@@ -139,7 +159,6 @@ with dataSCMap:
         # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file_cropped.tif',layer_name='cropped')
         with st.status('加载数据中...'):
             # 排除初次加载时
-            # st.markdown(leftBarsRawData)
             if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
                 for name in leftBarsRawData['checked']:
                     if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
@@ -149,10 +168,17 @@ with dataSCMap:
                             'uploadFileDir', name)
                         print('=============')
                         print(path)
-                        # map1.add_raster(path, layer_name=name.split('.')[0])
-                        # map1.add_shp(path, layer_name=name.split('.')[0])
-                        # map1.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
-                        st.header(f'{name}加载完成')
+                        st.session_state.dSMapLayer.append(path)
+
+                if onDS:
+                    st.session_state.dSMapLayer.clear()
+                for layer in st.session_state.dSMapLayer:
+                    path = os.path.join(
+                        os.getcwd(),
+                        'resource',
+                        'uploadFileDir', layer)
+                    addLayer(map1, path)
+                    st.header(f'{layer}加载完成')
         map1.to_streamlit()
 with dataSCR:
     st.markdown("##### 上传数据集")
