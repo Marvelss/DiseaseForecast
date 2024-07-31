@@ -191,7 +191,7 @@ with dataSCR:
         "上传数据集",
         accept_multiple_files=True,
         label_visibility='collapsed',
-        type=['tif', 'shp', 'txt'],
+        type=['tif', 'shp', 'txt', 'cpg', 'dbf', 'prj', 'xml', 'shx'],
         help='help')
     # st.markdown('''
     #     <style>
