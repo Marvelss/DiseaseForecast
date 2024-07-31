@@ -233,67 +233,52 @@ with colFCF3:
     if option22:
         extractFileList = pages_utils.multiselect_all(
             st, '全选-待提取特征文件',
-            ['LAI', 'FPAR'],
+            leftBarsRawData['checked'],
             'tempModels', 'collapsed')
         extractValue = st.selectbox(
             '待提取字段名称',
-            ('value', 'value1'))
+            ('value', 'value1'),
+            help='可以不按照顺序填写,系统自动根据这些值搜索')
         # 获取年和day of year
-        numDate = st.date_input(label='日期')
+        # numDate = st.date_input(label='日期')
         standardFile = st.selectbox(
             '基准文件',
-            ('野外调查数据', '专业植保站调查数据'))
+            options=leftBarsRawData['checked']
+        )
         extractMethod = st.selectbox(
             '提取方法',
             ('最近邻插值法', '双线性插值法', '三次样条插值法'))
         # 联合特征计算表格放入methodParam
-        methodParam[4]
+        # methodParam[4]
         print(extractFileList)
-        if 'LAI' in extractFileList:
-            with pe:
-                with st.status('加载数据中...'):
-                    m11 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-                    m11.add_raster(
-                        r'E:\a_python\program\diseaseForecastStreamlit\resource\surfaceProcessData\resultData\EVI_2015_SEResult.tif',
-                        layer_name="EVI_2015_SEResult")
-                    m11.add_raster(
-                        r'E:\a_python\program\diseaseForecastStreamlit\resource\surfaceProcessData\resultData\FPAR_2015_SEResult.tif',
-                        layer_name="FPAR_2015_SEResult")
-                m11.to_streamlit()
+        if extractFileList:
+            for temp in extractFileList:
+                tempPath = os.path.join(
+                    os.getcwd(),
+                    'resource',
+                    'uploadFileDir', temp)
+                st.session_state.fCMapLayer.append(tempPath)
+        with pe:
+            mapTemp1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+            with st.status('加载数据中...'):
+                for layerTemp in st.session_state.fCMapLayer:
+                    addLayer(mapTemp1, layerTemp)
+            mapTemp1.to_streamlit()
 
-        if standardFile == '专业植保站调查数据':
+        if standardFile:
+            tempPath = os.path.join(
+                os.getcwd(),
+                'resource',
+                'uploadFileDir', standardFile)
+            st.session_state.fCMapLayer.append(tempPath)
+            # 可读取数据格式: excel, csv, shp, geojson
             # 读取含经纬度excel表格
-            df = pd.read_excel(
-                r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\空间点提取测试文件-浙江省3点.xlsx')
-            unique_locations = df[['上级单位', '测报站点', '经度', '纬度']].drop_duplicates()
-            # dataframe转为csv再转为shp
-            # data = {
-            #     'longitude': [120.3023, 118.6227, 120.5465],
-            #     'latitude': [30.1172, 28.7382, 30.6373],
-            #     '上级单位': ['浙江省', '浙江省', '浙江省'],
-            #     '测报站点': ['萧山区', '衢州市', '桐乡市']
-            # }
-            # df11 = pd.DataFrame(data)
-            # df11.to_csv('test.csv')
-            # leafmap.csv_to_shp('test.csv', 'test.shp')
-            print(f'读取含经纬度excel表格数据:\n{unique_locations}')
             with pe:
+                mapTemp2 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
                 with st.status('加载数据中...'):
-                    m12 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-                    name = r'E:\a_python\program\diseaseForecastStreamlit\resource\茶树炭疽病发生程度-测试模型构建\病害分布清洗后问卷-总\清洗后All.shp'
-                    m12.add_raster(
-                        r'E:\a_python\program\diseaseForecastStreamlit\resource\surfaceProcessData\resultData\EVI_2015_SEResult.tif',
-                        layer_name="EVI_2015_SEResult")
-                    m12.add_raster(
-                        r'E:\a_python\program\diseaseForecastStreamlit\resource\surfaceProcessData\resultData\FPAR_2015_SEResult.tif',
-                        layer_name="FPAR_2015_SEResult")
-                    m12.add_shp(name, layer_name="基准文件")
-                    st.header(f'{name}加载完成')
-                    # properties_columns = ['上级单位', '测报站点']
-                    # geojson = df_to_geojson(df, properties_columns)
-                    # m11.add_geojson(geojson, layer_name="基准文件")
-                    # m.add_geojson(r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test2.json', layer_name="Cable lines")
-                m12.to_streamlit()
+                    for layerTemp in st.session_state.fCMapLayer:
+                        addLayer(mapTemp2,layerTemp)
+                mapTemp2.to_streamlit()
 
     if option18:
         # 注意:温度文件名称按照实际day of year顺序排序从小到大即可
