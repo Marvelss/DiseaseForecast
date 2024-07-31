@@ -138,11 +138,11 @@ with colDPF1:
         leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
 
 with colDPF21:
-    colDPF21col1, colDPF21col2 = st.columns([3, 1])
+    colDPF21col1, colDPF21col2 = st.columns([3, 10])
     with colDPF21col1:
-        st.markdown("##### 原始数据集")
+        st.markdown("##### 原始数据")
     with colDPF21col2:
-        onDP1 = st.toggle(label="选中文件时自动显示对应图层-左侧", help='图层加载时间较长', value=True)
+        onDP1 = st.toggle(label="选中文件时自动显示对应图层-左侧", help='图层加载时间较长')
 
     # 初始化地图
     placeHolderDPF = st.empty()
@@ -154,7 +154,7 @@ with colDPF21:
                     if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
                         st.session_state.dPLeftMapLayer.append(name)
                 print(st.session_state.dPLeftMapLayer)
-                if onDP1:
+                if not onDP1:
                     st.session_state.dPLeftMapLayer.clear()
                 for layer in st.session_state.dPLeftMapLayer:
                     path = os.path.join(
@@ -165,11 +165,11 @@ with colDPF21:
                     st.header(f'{layer}加载完成')
         m1.to_streamlit()
 with colDPF22:
-    colDPF21col3, colDPF21col4 = st.columns([1, 9])
+    colDPF21col3, colDPF21col4 = st.columns([4, 10])
     with colDPF21col3:
-        st.markdown("##### 原始数据集")
+        st.markdown("##### 预处理后数据")
     with colDPF21col4:
-        onDP2 = st.toggle(label="选中文件时自动显示对应图层-右侧", help='图层加载时间较长', value=True)
+        onDP2 = st.toggle(label="自动显示对应图层-右侧", help='图层加载时间较长', value=True)
     # 初始化地图
     placeHolderDPF2 = st.empty()
     with placeHolderDPF2:
@@ -193,6 +193,7 @@ with colDPF3:
     with col12:
         # agree = st.checkbox('剔除异常值', key='checkbox0', args=[0])
         agree11 = st.checkbox("重采样", key='checkbox0', on_change=clear_other, args=[0])
+        agree13 = st.checkbox("裁剪(待发布)", key='checkbox2', on_change=clear_other, args=[2])
     with col22:
         agree12 = st.checkbox("空间插值", key='checkbox1', on_change=clear_other, args=[1])
         # agree10 = st.checkbox("缺失值插补", key='checkbox1', args=[1])

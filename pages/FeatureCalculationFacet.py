@@ -165,7 +165,7 @@ with colFCF1:
             leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
         leftBarsFCalData = tree_select(nodes=updateLeftBars(pages_utils.FeatureDataSetFieldFacet))
 with colFCF2:
-    onFC = st.toggle(label="选中文件时自动显示对应图层", help='图层加载时间较长', value=True)
+    onFC = st.toggle(label="选中文件时自动显示对应图层", help='图层加载时间较长')
     # 初始化地图
     pe = st.empty()
     with pe:
@@ -175,6 +175,8 @@ with colFCF2:
                 for name in leftBarsRawData['checked']:
                     if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
                         st.session_state.fCMapLayer.append(name)
+                if not onFC:
+                    st.session_state.fCMapLayer.clear()
                 for layer in st.session_state.fCMapLayer:
                     path = os.path.join(
                         os.getcwd(),
@@ -187,15 +189,28 @@ with colFCF3:
     st.markdown("##### 特征计算方法")
     col1, col2 = st.columns(2)
     with col1:
-        option21 = st.checkbox('植被指数计算(待发布)', key='checkbox1', on_change=clear_other, args=[1])
-        option20 = st.checkbox('景观指数计算(待发布)', key='checkbox2', on_change=clear_other, args=[2])
+        option21 = st.checkbox('植被指数计算', key='checkbox1', on_change=clear_other, args=[1])
+        option20 = st.checkbox('景观指数计算', key='checkbox2', on_change=clear_other, args=[2])
 
     with col2:
-        option18 = st.checkbox('时空抽取(待发布)', key='checkbox0', on_change=clear_other, args=[0])
+        option18 = st.checkbox('时空抽取', key='checkbox0', on_change=clear_other, args=[0])
         option22 = st.checkbox('空间点提取', key='checkbox3', on_change=clear_other, args=[3])
 
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
+    if option20:
+        optionInputFile = st.selectbox(
+            '输入文件',
+            (leftBarsFCalData['checked']))
+        landscapemetricsPattern = st.selectbox(
+            '景观水平类型',
+            ('景观水平', '斑块类别水平', '斑块水平'))
+        landscapemetricsFunction = st.selectbox(
+            '景观水平类型',
+            ('PSSD', 'ESD'))
+        optionOutput1 = st.text_input(
+            '输出文件名称',
+            (leftBarsFCalData['checked']))
     if option21:
         optionVegetationIndex = st.selectbox(
             '植被指数',
@@ -228,6 +243,11 @@ with colFCF3:
         standardFile = st.selectbox(
             '基准文件',
             ('野外调查数据', '专业植保站调查数据'))
+        extractMethod = st.selectbox(
+            '提取方法',
+            ('最近邻插值法', '双线性插值法', '三次样条插值法'))
+        # 联合特征计算表格放入methodParam
+        methodParam[4]
         print(extractFileList)
         if 'LAI' in extractFileList:
             with pe:
@@ -274,9 +294,7 @@ with colFCF3:
                     # m11.add_geojson(geojson, layer_name="基准文件")
                     # m.add_geojson(r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\test2.json', layer_name="Cable lines")
                 m12.to_streamlit()
-        extractMethod = st.selectbox(
-            '提取方法',
-            ('最近邻插值法', '双线性插值法', '三次样条插值法'))
+
     if option18:
         # 注意:温度文件名称按照实际day of year顺序排序从小到大即可
         weatherDataDir = st.selectbox(

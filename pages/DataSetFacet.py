@@ -137,7 +137,9 @@ with dataSCM:
 
 # ==============================右侧文件上传状态显示==============================
 with dataSCMap:
-    onDS = st.toggle(label="选中文件时自动显示对应图层", help='图层加载时间较长', value=True)
+    onDS = st.toggle(label="选中文件时自动显示对应图层",
+                     help='图层加载时间较长',
+                     value=True)
 
     placeHolderDSF = st.empty()
     # st.markdown(temp['checked'])
@@ -170,7 +172,7 @@ with dataSCMap:
                         print(path)
                         st.session_state.dSMapLayer.append(path)
 
-                if onDS:
+                if not onDS:
                     st.session_state.dSMapLayer.clear()
                 for layer in st.session_state.dSMapLayer:
                     path = os.path.join(

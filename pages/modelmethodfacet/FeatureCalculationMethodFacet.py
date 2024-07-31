@@ -16,6 +16,7 @@ import rasterio
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr
+from geopy.distance import geodesic
 
 
 class FeatureCalculationMethodFacet:
@@ -392,21 +393,28 @@ class FeatureCalculationMethodFacet:
 
     # 景观指数计算
     def onLandscapeIndex(self, methodParam):
-        a = methodParam[0]
+        # 输入文件名称
+        # 景观水平类型
+        # 函数名称
+        # 输出文件名称
+        inputFileName = methodParam[0]
+        landscapemetricsPattern = methodParam[1]
+        landscapemetricsFunction = methodParam[2]
+        outputFileName = methodParam[3]
+        outputDataFrame = methodParam[4]
         # 加载R的landscapemetrics包
         importr('landscapemetrics')
         # 读取本地数据
-        # 相对路径
-        path = 'fengtai2010.tif'
         # 绝对路径
-        # path = r'E:\a_python\program\testPlatform\demo\demo140\fengtai2010.tif'
-        # path = path.replace("\\", "/")  # 确保路径格式正确
+        path = r'E:\a_python\program\testPlatform\demo\demo140\fengtai2010.tif'
+        path = path.replace("\\", "/")  # 确保路径格式正确
         script = f'landscape <- terra::rast("{path}")'
         # 运行脚本
         robjects.r(script)
         # 运行R代码并获取结果
-        robjects.r('enn_results4 <- lsm_c_lpi(landscape)')
-        enn_results4 = robjects.r('enn_results4')
+
+        robjects.r('enn_results <- lsm_c_lpi(landscape)')
+        enn_results4 = robjects.r('enn_results')
 
         # 启用pandas与rpy2之间的转换
         pandas2ri.activate()
@@ -415,3 +423,91 @@ class FeatureCalculationMethodFacet:
         # 打印结果数据框
         print(enn_results4_df)
         # 生成根据列名tif图
+
+    # 空间点提取
+    def spatialPointExtract(self, methodParma):
+        # 注册所有的gdal驱动
+        gdal.AllRegister()
+
+        # 打开tif文件
+        filePath = 'resource/DayOfYear-ActiveAccumulatedTemperature.tif'
+        dataset = gdal.Open(filePath)
+
+        # 获取地理变换参数
+        adfGeoTransform = dataset.GetGeoTransform()
+
+        # 定义两个点的经纬度坐标
+        coords_1 = (30.73828, 118.6229)  # 例如，纽约帝国大厦
+        coords_2 = (30.7382, 118.6227)  # 例如，洛杉矶
+
+        # 计算距离
+        distance = geodesic(coords_1, coords_2).kilometers
+        print(f"Distance: {distance:.2f} kilometers")
+
+        # 打印左上角地理坐标
+        print(adfGeoTransform[0])  # 左上角X坐标
+        print(adfGeoTransform[3])  # 左上角Y坐标
+
+        # 获取栅格的列数和行数
+        nXSize = dataset.RasterXSize  # 列数
+        nYSize = dataset.RasterYSize  # 行数
+
+        # 获取第一个波段
+        band = dataset.GetRasterBand(1)
+        data = band.ReadAsArray()
+
+        # 用于存储每个像素的经纬度和对应的值
+        arrSlope = []
+
+        for i in range(nYSize):
+            for j in range(nXSize):
+                px = adfGeoTransform[0] + j * adfGeoTransform[1] + i * adfGeoTransform[2]
+                py = adfGeoTransform[3] + j * adfGeoTransform[4] + i * adfGeoTransform[5]
+                value = data[i, j]
+                arrSlope.append([px, py, value])
+
+        # 将结果转换为DataFrame
+        df = pd.DataFrame(arrSlope, columns=['待提取经度', '待提取纬度', 'Value'])
+
+        df1 = pd.read_excel('浙江省.xlsx')
+
+        from scipy.spatial import cKDTree
+
+        # 构建 cKDTree
+        coords = df[['待提取经度', '待提取纬度']].values
+        tree = cKDTree(coords)
+
+        # 找到 df1 中每个点的最近的4个点
+        def find_nearest_neighbors(lon, lat, k=5):
+            distance, indices = tree.query([lon, lat], k=k)
+            neighbors = df.iloc[indices].copy()
+            neighbors.loc[:, '经度'] = lon
+            neighbors.loc[:, '纬度'] = lat
+
+            return neighbors
+
+        # 保存结果
+        results = []
+
+        for index, row in df1.iterrows():
+            lon, lat = row['经度'], row['纬度']
+            neighbors = find_nearest_neighbors(lon, lat)
+
+            # 取邻近经纬度对应值的平均值
+            avg_value = neighbors['Value'].mean()
+            print('**获取到的邻近值**')
+            print(neighbors)
+
+            # 创建一个包含平均值的新记录
+            new_record = row.copy()
+            new_record['平均值'] = avg_value
+            results.append(new_record)
+            print('-------------------')
+
+        # 将结果拼接成一个 DataFrame
+        result_df = pd.DataFrame(results)
+
+        # result_df = result_df[['经度1', '纬度1', '待提取经度', '待提取纬度', 'Value']]
+
+        # 保存到 Excel
+        result_df.to_excel('最近点结果3.xlsx', index=False)
