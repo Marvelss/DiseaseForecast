@@ -17,11 +17,28 @@ import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr
 from geopy.distance import geodesic
+import geopandas as gpd
+from scipy.spatial import cKDTree
 
 
 class FeatureCalculationMethodFacet:
     def __init__(self):
         pass
+
+    @staticmethod
+    def shpToExcel(shpFile):
+        # 读取面状shp文件
+        gdf = gpd.read_file(shpFile)
+        # 将面状shp文件转换为点数据（获取几何中心点）
+        gdf['geometry'] = gdf['geometry'].centroid
+
+        # 提取点的坐标
+        gdf['经度'] = gdf['geometry'].x
+        gdf['纬度'] = gdf['geometry'].y
+
+        # 将数据框转换为DataFrame
+        df = pd.DataFrame(gdf.drop(columns='geometry'))
+        return df
 
     @staticmethod
     def generate_tif(result_array, template_tif_path, saved_path):
@@ -425,28 +442,30 @@ class FeatureCalculationMethodFacet:
         # 生成根据列名tif图
 
     # 空间点提取
-    def spatialPointExtract(self, methodParma):
+    def onSpatialPointExtract(self, methodParma):
+
+        inputFile = eval(methodParma[0])
+        field = methodParma[1]
+        standardFile = methodParma[2]
+        name = methodParma[3]
         # 注册所有的gdal驱动
         gdal.AllRegister()
 
         # 打开tif文件
-        filePath = 'resource/DayOfYear-ActiveAccumulatedTemperature.tif'
-        dataset = gdal.Open(filePath)
-
+        dataset = gdal.Open(inputFile[0])
         # 获取地理变换参数
         adfGeoTransform = dataset.GetGeoTransform()
-
-        # 定义两个点的经纬度坐标
-        coords_1 = (30.73828, 118.6229)  # 例如，纽约帝国大厦
-        coords_2 = (30.7382, 118.6227)  # 例如，洛杉矶
-
-        # 计算距离
-        distance = geodesic(coords_1, coords_2).kilometers
-        print(f"Distance: {distance:.2f} kilometers")
-
-        # 打印左上角地理坐标
-        print(adfGeoTransform[0])  # 左上角X坐标
-        print(adfGeoTransform[3])  # 左上角Y坐标
+        # # 定义两个点的经纬度坐标
+        # coords_1 = (30.73828, 118.6229)  # 例如，纽约帝国大厦
+        # coords_2 = (30.7382, 118.6227)  # 例如，洛杉矶
+        #
+        # # 计算距离
+        # distance = geodesic(coords_1, coords_2).kilometers
+        # print(f"Distance: {distance:.2f} kilometers")
+        #
+        # # 打印左上角地理坐标
+        # print(adfGeoTransform[0])  # 左上角X坐标
+        # print(adfGeoTransform[3])  # 左上角Y坐标
 
         # 获取栅格的列数和行数
         nXSize = dataset.RasterXSize  # 列数
@@ -469,16 +488,14 @@ class FeatureCalculationMethodFacet:
         # 将结果转换为DataFrame
         df = pd.DataFrame(arrSlope, columns=['待提取经度', '待提取纬度', 'Value'])
 
-        df1 = pd.read_excel('浙江省.xlsx')
-
-        from scipy.spatial import cKDTree
+        df1 = FeatureCalculationMethodFacet.shpToExcel(standardFile)
 
         # 构建 cKDTree
         coords = df[['待提取经度', '待提取纬度']].values
         tree = cKDTree(coords)
 
         # 找到 df1 中每个点的最近的4个点
-        def find_nearest_neighbors(lon, lat, k=5):
+        def find_nearest_neighbors(lon, lat, k=4):
             distance, indices = tree.query([lon, lat], k=k)
             neighbors = df.iloc[indices].copy()
             neighbors.loc[:, '经度'] = lon
@@ -495,19 +512,21 @@ class FeatureCalculationMethodFacet:
 
             # 取邻近经纬度对应值的平均值
             avg_value = neighbors['Value'].mean()
-            print('**获取到的邻近值**')
-            print(neighbors)
+            # print('**获取到的邻近值**')
+            # print(neighbors)
 
             # 创建一个包含平均值的新记录
             new_record = row.copy()
-            new_record['平均值'] = avg_value
+            new_record['特征值'] = avg_value
             results.append(new_record)
-            print('-------------------')
+            # print('-------------------')
 
         # 将结果拼接成一个 DataFrame
         result_df = pd.DataFrame(results)
 
         # result_df = result_df[['经度1', '纬度1', '待提取经度', '待提取纬度', 'Value']]
 
+        outputFile = 'result.xlsx'
         # 保存到 Excel
-        result_df.to_excel('最近点结果3.xlsx', index=False)
+        result_df.to_excel(outputFile, index=False)
+        return outputFile
