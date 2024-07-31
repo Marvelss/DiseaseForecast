@@ -235,10 +235,6 @@ with colFCF3:
             st, '全选-待提取特征文件',
             leftBarsRawData['checked'],
             'tempModels', 'collapsed')
-        extractValue = st.selectbox(
-            '待提取字段名称',
-            ('value', 'value1'),
-            help='可以不按照顺序填写,系统自动根据这些值搜索')
         # 获取年和day of year
         # numDate = st.date_input(label='日期')
         standardFile = st.selectbox(
@@ -247,7 +243,7 @@ with colFCF3:
         )
         extractMethod = st.selectbox(
             '提取方法',
-            ('最近邻插值法', '双线性插值法', '三次样条插值法'))
+            ('最近邻插值法', '双线性插值法'))
         # 联合特征计算表格放入methodParam
         # methodParam[4]
         print(extractFileList)
@@ -277,9 +273,12 @@ with colFCF3:
                 mapTemp2 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
                 with st.status('加载数据中...'):
                     for layerTemp in st.session_state.fCMapLayer:
-                        addLayer(mapTemp2,layerTemp)
+                        addLayer(mapTemp2, layerTemp)
                 mapTemp2.to_streamlit()
-
+            st.session_state["featureMethodFacetName"]['param1'] = str(extractFileList)
+            st.session_state["featureMethodFacetName"]['param2'] = str(standardFile)
+            st.session_state["featureMethodFacetName"]['param3'] = str(extractMethod)
+            st.session_state["featureMethodFacetName"]['param4'] = 'spatialPointFile.xlsx'
     if option18:
         # 注意:温度文件名称按照实际day of year顺序排序从小到大即可
         weatherDataDir = st.selectbox(
@@ -351,13 +350,15 @@ with colFCF3:
             st.session_state.fCMapLayer.append(handledFile)
 
         elif tempMethod == '空间点提取':
-            handledFile = 'excel.xlsx'
+            handledFile = FeatureCalculationMethodFacet().onSpatialPointExtract(
+                methodParam)
             # 根据参数内容存入表
             # 待提取字段名称、年、DayOfYear、基准文件
-            st.session_state.fCMapLayer.append(handledFile)
+            # st.session_state.fCMapLayer.append(handledFile)
 
-            pages_utils.TempDataSetFacet[2] = pd.read_excel(
-                r'E:\a_python\program\diseaseForecastStreamlit\resource\a_test_resource\C5_特征因子_150℃_3分类 - v2.xlsx')
+            pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
+            print('----------------特征优选数据集----------------')
+            print(pages_utils.TempDataSetFacet[2])
             st.toast("空间点提取执行完毕", icon="ℹ️️")
 
         with pe:

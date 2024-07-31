@@ -445,88 +445,77 @@ class FeatureCalculationMethodFacet:
     def onSpatialPointExtract(self, methodParma):
 
         inputFile = eval(methodParma[0])
-        field = methodParma[1]
-        standardFile = methodParma[2]
-        name = methodParma[3]
+        standardFile = methodParma[1]
+        methodName = methodParma[2]
+        outputFile = methodParma[3]
         # 注册所有的gdal驱动
         gdal.AllRegister()
+        df1 = FeatureCalculationMethodFacet.shpToExcel(
+            os.path.join(os.getcwd(),
+                         'resource',
+                         'uploadFileDir', standardFile)
+        )
+        for tempFile in inputFile:
+            filePath = os.path.join(
+                os.getcwd(), 'resource',
+                'uploadFileDir', tempFile
+            )
+            featureFiledName = tempFile.split('.')[0].split('_')[0]
+            # 打开tif文件
+            dataset = gdal.Open(filePath)
+            # 获取地理变换参数
+            adfGeoTransform = dataset.GetGeoTransform()
 
-        # 打开tif文件
-        dataset = gdal.Open(inputFile[0])
-        # 获取地理变换参数
-        adfGeoTransform = dataset.GetGeoTransform()
-        # # 定义两个点的经纬度坐标
-        # coords_1 = (30.73828, 118.6229)  # 例如，纽约帝国大厦
-        # coords_2 = (30.7382, 118.6227)  # 例如，洛杉矶
-        #
-        # # 计算距离
-        # distance = geodesic(coords_1, coords_2).kilometers
-        # print(f"Distance: {distance:.2f} kilometers")
-        #
-        # # 打印左上角地理坐标
-        # print(adfGeoTransform[0])  # 左上角X坐标
-        # print(adfGeoTransform[3])  # 左上角Y坐标
+            # 获取栅格的列数和行数
+            nXSize = dataset.RasterXSize  # 列数
+            nYSize = dataset.RasterYSize  # 行数
 
-        # 获取栅格的列数和行数
-        nXSize = dataset.RasterXSize  # 列数
-        nYSize = dataset.RasterYSize  # 行数
+            # 获取第一个波段
+            band = dataset.GetRasterBand(1)
+            data = band.ReadAsArray()
 
-        # 获取第一个波段
-        band = dataset.GetRasterBand(1)
-        data = band.ReadAsArray()
+            # 用于存储每个像素的经纬度和对应的值
+            arrSlope = []
 
-        # 用于存储每个像素的经纬度和对应的值
-        arrSlope = []
+            for i in range(nYSize):
+                for j in range(nXSize):
+                    px = adfGeoTransform[0] + j * adfGeoTransform[1] + i * adfGeoTransform[2]
+                    py = adfGeoTransform[3] + j * adfGeoTransform[4] + i * adfGeoTransform[5]
+                    value = data[i, j]
+                    arrSlope.append([px, py, value])
 
-        for i in range(nYSize):
-            for j in range(nXSize):
-                px = adfGeoTransform[0] + j * adfGeoTransform[1] + i * adfGeoTransform[2]
-                py = adfGeoTransform[3] + j * adfGeoTransform[4] + i * adfGeoTransform[5]
-                value = data[i, j]
-                arrSlope.append([px, py, value])
+            # 将结果转换为DataFrame
+            df = pd.DataFrame(arrSlope, columns=['待提取经度', '待提取纬度', featureFiledName + 'temp'])
 
-        # 将结果转换为DataFrame
-        df = pd.DataFrame(arrSlope, columns=['待提取经度', '待提取纬度', 'Value'])
+            # 构建 cKDTree
+            coords = df[['待提取经度', '待提取纬度']].values
+            tree = cKDTree(coords)
 
-        df1 = FeatureCalculationMethodFacet.shpToExcel(standardFile)
+            # 找到 df1 中每个点的最近的4个点
+            def find_nearest_neighbors(lon, lat, k=4):
+                distance, indices = tree.query([lon, lat], k=k)
+                neighbors = df.iloc[indices].copy()
+                neighbors.loc[:, '经度'] = lon
+                neighbors.loc[:, '纬度'] = lat
 
-        # 构建 cKDTree
-        coords = df[['待提取经度', '待提取纬度']].values
-        tree = cKDTree(coords)
+                return neighbors
 
-        # 找到 df1 中每个点的最近的4个点
-        def find_nearest_neighbors(lon, lat, k=4):
-            distance, indices = tree.query([lon, lat], k=k)
-            neighbors = df.iloc[indices].copy()
-            neighbors.loc[:, '经度'] = lon
-            neighbors.loc[:, '纬度'] = lat
+            # 保存结果
+            results = []
 
-            return neighbors
+            for index, row in df1.iterrows():
+                lon, lat = row['经度'], row['纬度']
+                neighbors = find_nearest_neighbors(lon, lat)
+                # 取邻近经纬度对应值的平均值
+                avg_value = neighbors[featureFiledName + 'temp'].mean()
+                results.append(avg_value)
 
-        # 保存结果
-        results = []
-
-        for index, row in df1.iterrows():
-            lon, lat = row['经度'], row['纬度']
-            neighbors = find_nearest_neighbors(lon, lat)
-
-            # 取邻近经纬度对应值的平均值
-            avg_value = neighbors['Value'].mean()
-            # print('**获取到的邻近值**')
-            # print(neighbors)
-
-            # 创建一个包含平均值的新记录
-            new_record = row.copy()
-            new_record['特征值'] = avg_value
-            results.append(new_record)
-            # print('-------------------')
-
-        # 将结果拼接成一个 DataFrame
-        result_df = pd.DataFrame(results)
-
-        # result_df = result_df[['经度1', '纬度1', '待提取经度', '待提取纬度', 'Value']]
-
-        outputFile = 'result.xlsx'
+            # 添加新列到df1
+            df1[featureFiledName] = results
+        outputFileT = os.path.join(os.getcwd(),
+                                   'resource',
+                                   'uploadFileDir',
+                                   outputFile)
         # 保存到 Excel
-        result_df.to_excel(outputFile, index=False)
-        return outputFile
+        df1.to_excel(outputFileT, index=False)
+        return outputFileT
