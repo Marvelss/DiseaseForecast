@@ -213,10 +213,10 @@ FeatureDataSetFieldFacet = {
 OptimalFeatureDataSetFieldFacet = pd.DataFrame(
     columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间", "处理状态"])
 
-ModelSetFacet = {
-    "编号": [], "模型": [], "模型参数": [], "特征": [], "标签": [], "评价指标": [],
-    "数据集划分比例": [], "模型结构": [], "模型训练结果": [], "时间": [], "处理状态": []
-}
+ModelSetFacet = pd.DataFrame(
+    columns=["编号", "模型", "模型参数", "特征", "标签", "评价指标", "数据集划分比例", "模型结构", "模型训练结果",
+             "时间",
+             "处理状态"])
 
 # 存储字典列表
 TempDataSetFieldFacet = [

@@ -29,11 +29,12 @@ show_pages(
         Page("pages/DataPreparation.py", "数据预处理"),
         Page("pages/FeatureCalculation.py", "特征计算"),
         Page("pages/FeatureOptimization.py", "特征优选"),
+        Page("pages/ModelBuilding.py", "模型构建"),
         Page("pages/DataSetFacet.py", "原始数据-面状"),
         Page("pages/DataPreparationFacet.py", "数据预处理-面状"),
         Page("pages/FeatureCalculationFacet.py", "特征计算-面状"),
         Page("pages/FeatureOptimizationFacet.py", "特征优选-面状"),
-        Page("pages/ModelBuilding.py", "模型构建"),
+        Page("pages/ModelBuildingFacet.py", "模型构建-面状"),
         Page("pages/WeatherGenerator.py", '基于天气情景生成器的模型评价'),
         Page("pages/Visualization.py", '可视化及数据下载'),
         Page("pages/ModelApplication.py", '模型应用'),
@@ -51,6 +52,7 @@ hide_pages(
      "数据预处理-面状",
      "特征计算-面状",
      "特征优选-面状",
+     "模型构建-面状",
      ]
 )
 

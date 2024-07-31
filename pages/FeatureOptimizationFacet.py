@@ -27,6 +27,7 @@ hide_pages(
         "数据预处理",
         "特征计算",
         "特征优选",
+        "模型构建",
     ]
 )
 checkBoxNum = 3
@@ -188,8 +189,8 @@ def onPreviewResults():
 
 
 def onRun():
-    if '优选特征' not in st.session_state.leftTabsOpt:
-        st.session_state.leftTabsOpt.append('优选特征')
+    if '优选特征' not in st.session_state["leftTabs"]:
+        st.session_state["leftTabs"].append('优选特征')
     st.session_state.page14 += 1
 
     # ===============获取任务清单内容===============
@@ -279,10 +280,7 @@ with dataPCV:
     if st.session_state.page12 == 0:
         with placeholder1.container():
             # tempLeftTabs = pages_utils.TempDataSetFacet[2]
-            # if tempLeftTabs.empty:
-            st.session_state.leftTabsOpt = ['备选特征']
-            # column = ['空']
-            print(f'f=========测试面状特征{st.session_state.leftTabsOpt}================')
+            print(f'f=========测试面状特征{st.session_state["leftTabs"]}================')
             print(pages_utils.TempDataSetFacet[2])
 
             # 展示备选特征数据
@@ -308,39 +306,27 @@ with dataPCV:
             tempDataSetFacetReveal = pd.concat([tempDataSetFacetReveal, pd.DataFrame(tempDataSetFacetReveal_list)],
                                                ignore_index=True)
 
-            tt1 = st.tabs(st.session_state.leftTabsOpt)
-            for i in range(len(st.session_state.leftTabsOpt)):
+            tt1 = st.tabs(st.session_state["leftTabs"])
+            for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
-                    if st.session_state.leftTabsOpt[i] == '备选特征':
-                        column = ["数据类型", "备选特征", "大小"]
-                        st.data_editor(
-                            tempDataSetFacetReveal,
-                            height=220, width=800,
-                            column_order=column)
-                    elif st.session_state.leftTabsOpt[i] == '优选特征':
+                    if st.session_state["leftTabs"][i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                         st.data_editor(
-                            pages_utils.TempDataSetFieldFacet[3],
+                            pages_utils.TempDataSetFacet[2],
                             height=220, width=800,
                             column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
-            tempLeftTabs = st.session_state.leftTabsOpt
+            tempLeftTabs = st.session_state["leftTabs"]
             # print(f'f=========测试{tempLeftTabs}================')
             tt = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
                 with tt[i]:
-                    if tempLeftTabs[i] == '备选特征':
-                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
-                        st.data_editor(
-                            tempDataSetFacetReveal,
-                            height=220, width=800,
-                            column_order=column)
-                    elif tempLeftTabs[i] == '优选特征':
+                    if tempLeftTabs[i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                         st.data_editor(
-                            pages_utils.TempDataSetFacet[3],
+                            pages_utils.TempDataSetFacet[2],
                             height=220, width=800,
                             column_order=column)
     # ===============显示左下字段或特征及获取===============

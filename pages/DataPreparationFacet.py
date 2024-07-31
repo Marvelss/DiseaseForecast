@@ -26,6 +26,7 @@ hide_pages(
         "数据预处理",
         "特征计算",
         "特征优选",
+        "模型构建",
     ]
 )
 if 'dPmap' not in st.session_state:
