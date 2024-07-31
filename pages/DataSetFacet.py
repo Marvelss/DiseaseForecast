@@ -193,6 +193,7 @@ with dataSCR:
         label_visibility='collapsed',
         type=['tif', 'shp', 'txt', 'cpg', 'dbf', 'prj', 'xml', 'shx'],
         help='help')
+
     # st.markdown('''
     #     <style>
     #         .uploadedFile {display: none}
