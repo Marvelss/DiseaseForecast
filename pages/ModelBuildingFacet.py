@@ -398,11 +398,14 @@ with modelACV:
     columnArrayT = pages_utils.TempDataSetFacet[3].columns
 
     # 去除元素不包含特定子字符串的元素，例如 "_优选"
-    columnArray = [col for col in columnArrayT if "_优选" in col]
+    # columnArray = [col for col in columnArrayT if "_优选" in col]
     # 数组元素去重
-    featureList = list(set(columnArray))  # 特征变量
+    featureList = list(set(columnArrayT))  # 特征变量
     # 过滤特定元素
-    filtered_columns = [col for col in featureList if col not in ["上级单位", "测报站点", "年", "DayOfYear"]]
+    filtered_columns = [col for col in featureList if col not in ["上级单位",
+                                                                  "测报站点",
+                                                                  "经度", "纬度",
+                                                                  "年", "DayOfYear"]]
 
     # 将过滤后的元素放入集合中
     targetList = set(filtered_columns)  # 目标变量
@@ -619,7 +622,7 @@ with modelACM:
                     predicted_values = predictLabelDF.iloc[:, 0]
 
                     # 回归模型
-                    if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or 'SEIR机理模型':
+                    if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[i] == 'SEIR机理模型':
                         # 绘制散点图
                         fig, ax = plt.subplots()
 
