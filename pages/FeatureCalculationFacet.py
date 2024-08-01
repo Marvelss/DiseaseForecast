@@ -261,14 +261,14 @@ with colFCF3:
         st.session_state["featureMethodFacetName"]['param5'] = str(optionOutput)
 
     if option22:
+        shp_files = [item for item in leftBarsRawData['checked'] if item.endswith('.shp')]
         extractFileList = pages_utils.multiselect_all(
             st, '全选-待提取特征文件',
-            unique_first_elements_list,
+            shp_files + leftBarsFCalData['checked'],
             'tempModels', 'collapsed')
         # 获取年和day of year
         # numDate = st.date_input(label='日期')
         # 过滤以 .shp 结尾的元素
-        shp_files = [item for item in leftBarsRawData['checked'] if item.endswith('.shp')]
         standardFile = st.selectbox(
             '基准文件',
             options=shp_files
@@ -278,7 +278,7 @@ with colFCF3:
             ('最近邻插值法', '双线性插值法'))
         # 联合特征计算表格放入methodParam
         # methodParam[4]
-        print(extractFileList)
+        # print(extractFileList)
         if extractFileList:
             for temp in extractFileList:
                 tempPath = os.path.join(
@@ -307,7 +307,7 @@ with colFCF3:
                     for layerTemp in st.session_state.fCMapLayer:
                         addLayer(mapTemp2, layerTemp)
                 mapTemp2.to_streamlit()
-            st.session_state["featureMethodFacetName"]['param1'] = str(findFeatureFile(extractFileList, tempList))
+            st.session_state["featureMethodFacetName"]['param1'] = str(extractFileList)
             st.session_state["featureMethodFacetName"]['param2'] = str(standardFile)
             st.session_state["featureMethodFacetName"]['param3'] = str(extractMethod)
             st.session_state["featureMethodFacetName"]['param4'] = 'spatialPointFile.xlsx'
@@ -364,10 +364,13 @@ with colFCF3:
                 with st.spinner('正在计算时空抽取,预计耗时1分半'):
                     paramT = [value for key, value in st.session_state["featureMethodFacetName"].items() if
                               key != 'checkBox']
-                    print(f'========测试参数======={paramT}')
+                    # print(f'========测试参数======={paramT}')
                     resultFilePathList = FeatureCalculationMethodFacet().spatiotemporalExtraction(tempList, paramT)
-                    handledFile = ' '.join(resultFilePathList)
-                    st.session_state.fCMapLayer.append(handledFile)
+                    handledFile = resultFilePathList
+                    # 添加记录时该处需要修改
+                    # handledFile = ' '.join()
+                    for tempH in resultFilePathList:
+                        st.session_state.fCMapLayer.append(tempH)
 
         elif tempMethod == '植被指数计算':
             resultFilePathList = fcTool.onNDVI(methodParam)
@@ -400,29 +403,55 @@ with colFCF3:
                     for name in leftBarsFCalData['checked']:
                         if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
                             st.session_state.dPLeftMapLayer.append(name)
-                    print(st.session_state.dPLeftMapLayer)
+                    # print(st.session_state.fCMapLayer)
                 for layerPath in st.session_state.fCMapLayer:
                     addLayer(afterPreMap, layerPath)
                     st.header(f'{layerPath}加载完成')
             afterPreMap.to_streamlit()
-        new_entry = {
-            "编号": pages_utils.generateID(),
-            "数据类型": '气象数据',
-            "根节点": '备选特征集',
-            "子节点": '气象数据',
-            "文件名称": handledFile.split('.')[0],
-            "数据格式": handledFile.split('.')[1],
-            "输入文件": None,
-            "特征计算方法": tempMethod,
-            "方法参数": [value for key, value in st.session_state["featureMethodFacetName"].items() if
-                         key != 'checkBox'],
-            "时间": datetime.datetime.now().time(),
-            "处理状态": False}
-        print('======================特征计算-添加任务清单记录======================')
-        print(new_entry)
 
-        for key in pages_utils.TempDataSetFieldFacet[2].keys():
-            pages_utils.TempDataSetFieldFacet[2][key].append(new_entry[key])
+        # 若返回值为数组
+        if isinstance(handledFile, list):
+            for tempEntry in handledFile:
+                tempEntryT = os.path.basename(tempEntry)
+                new_entry = {
+                    "编号": pages_utils.generateID(),
+                    "数据类型": '气象数据',
+                    "根节点": '备选特征集',
+                    "子节点": '气象数据',
+                    "文件名称": tempEntryT.split('.')[0],
+                    "数据格式": tempEntryT.split('.')[1],
+                    "输入文件": None,
+                    "特征计算方法": tempMethod,
+                    "方法参数": [value for key, value in st.session_state["featureMethodFacetName"].items() if
+                                 key != 'checkBox'],
+                    "时间": datetime.datetime.now().time(),
+                    "处理状态": False}
+                print('======================特征计算-添加任务清单记录======================')
+                print(new_entry)
+
+                for key in pages_utils.TempDataSetFieldFacet[2].keys():
+                    pages_utils.TempDataSetFieldFacet[2][key].append(new_entry[key])
+
+        else:
+            tempEntryT = os.path.basename(handledFile)
+            new_entry = {
+                "编号": pages_utils.generateID(),
+                "数据类型": '气象数据',
+                "根节点": '备选特征集',
+                "子节点": '气象数据',
+                "文件名称": tempEntryT.split('.')[0],
+                "数据格式": tempEntryT.split('.')[1],
+                "输入文件": None,
+                "特征计算方法": tempMethod,
+                "方法参数": [value for key, value in st.session_state["featureMethodFacetName"].items() if
+                             key != 'checkBox'],
+                "时间": datetime.datetime.now().time(),
+                "处理状态": False}
+            print('======================特征计算-添加任务清单记录======================')
+            print(new_entry)
+
+            for key in pages_utils.TempDataSetFieldFacet[2].keys():
+                pages_utils.TempDataSetFieldFacet[2][key].append(new_entry[key])
 
         # 合并原始和预处理数据集记录
 
