@@ -72,6 +72,22 @@ if 'fCMapLayer' not in st.session_state:
     st.session_state.fCMapLayer = deque(maxlen=5)
 
 
+# 根据特征名称查找所有对应文件
+def findFeatureFile(featureList, fileList):
+    # 创建一个字典来存储特征名称及其对应的文件
+    feature_files = {}
+
+    # 遍历每个特征名称
+    for feature in featureList:
+        # 找出所有文件名中包含特征名称的文件
+        matched_files = [file for file in fileList if feature in file]
+
+        # 将结果存储在字典中
+        feature_files[feature] = matched_files
+    matched_files = [file for files in feature_files.values() for file in files]
+    return matched_files
+
+
 # 添加图层
 def addLayer(mapTemp, filePath):
     fileName = os.path.basename(filePath)
@@ -161,7 +177,7 @@ with colFCF1:
         else:
             leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet))
         if len(pages_utils.PreprocessedDataSetFieldFacet['编号']) == 0:
-            leftBarsPreData = {"label": "预处理后数据", "value": "预处理后数据"}
+            leftBarsPreData = [{"label": "预处理后数据", "value": "预处理后数据"}]
         else:
             leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
         leftBarsFCalData = tree_select(nodes=updateLeftBars(pages_utils.FeatureDataSetFieldFacet))
@@ -173,7 +189,9 @@ with colFCF2:
         m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
             if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
-                for name in leftBarsRawData['checked']:
+                tempList = leftBarsRawData['checked'] + leftBarsPreData['checked'] if len(leftBarsPreData) != 1 else \
+                    leftBarsRawData['checked']
+                for name in tempList:
                     if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
                         st.session_state.fCMapLayer.append(name)
                 if not onFC:
@@ -199,10 +217,21 @@ with colFCF3:
 
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
+    # 处理输入文件
+    unique_first_elements = set()
+    tempList = leftBarsRawData['checked'] + leftBarsPreData['checked'] if len(leftBarsPreData) != 1 else \
+        leftBarsRawData['checked']
+    for item in tempList:
+        # 分割元素并获取第一个元素
+        first_element = item.split('.')[0].split('_')[0]
+        # 将第一个元素添加到集合中
+        unique_first_elements.add(first_element)
+        # 转换集合为列表
+    unique_first_elements_list = list(unique_first_elements)
     if option20:
         optionInputFile = st.selectbox(
             '输入文件',
-            (leftBarsFCalData['checked']))
+            unique_first_elements_list)
         landscapemetricsPattern = st.selectbox(
             '景观水平类型',
             ('景观水平', '斑块类别水平', '斑块水平'))
@@ -210,23 +239,23 @@ with colFCF3:
             '景观水平类型',
             ('PSSD', 'ESD'))
         optionOutput1 = st.text_input(
-            '输出文件名称',
-            (leftBarsFCalData['checked']))
+            label='输出文件名称',
+            value='默认')
     if option21:
         optionVegetationIndex = st.selectbox(
             '植被指数',
             ('NDVI', 'EVI'))
         optionInputFile = st.selectbox(
             '输入文件',
-            (leftBarsPreData['checked']))
+            unique_first_elements_list)
         optionRed = st.number_input(label='红波段对应的波段数', value=3)
         optionNir = st.number_input(label='近红波段对应的波段数', value=2)
         optionOutput = st.text_input(
-            '输出文件名称',
-            (leftBarsPreData['checked']))
+            label='输出文件名称',
+            value='默认')
 
         st.session_state["featureMethodFacetName"]['param1'] = str(optionVegetationIndex)
-        st.session_state["featureMethodFacetName"]['param2'] = str(optionInputFile)
+        st.session_state["featureMethodFacetName"]['param2'] = str(findFeatureFile(optionInputFile, tempList))
         st.session_state["featureMethodFacetName"]['param3'] = str(optionRed)
         st.session_state["featureMethodFacetName"]['param4'] = str(optionNir)
         st.session_state["featureMethodFacetName"]['param5'] = str(optionOutput)
@@ -234,13 +263,15 @@ with colFCF3:
     if option22:
         extractFileList = pages_utils.multiselect_all(
             st, '全选-待提取特征文件',
-            leftBarsRawData['checked'],
+            unique_first_elements_list,
             'tempModels', 'collapsed')
         # 获取年和day of year
         # numDate = st.date_input(label='日期')
+        # 过滤以 .shp 结尾的元素
+        shp_files = [item for item in leftBarsRawData['checked'] if item.endswith('.shp')]
         standardFile = st.selectbox(
             '基准文件',
-            options=leftBarsRawData['checked']
+            options=shp_files
         )
         extractMethod = st.selectbox(
             '提取方法',
@@ -276,7 +307,7 @@ with colFCF3:
                     for layerTemp in st.session_state.fCMapLayer:
                         addLayer(mapTemp2, layerTemp)
                 mapTemp2.to_streamlit()
-            st.session_state["featureMethodFacetName"]['param1'] = str(extractFileList)
+            st.session_state["featureMethodFacetName"]['param1'] = str(findFeatureFile(extractFileList, tempList))
             st.session_state["featureMethodFacetName"]['param2'] = str(standardFile)
             st.session_state["featureMethodFacetName"]['param3'] = str(extractMethod)
             st.session_state["featureMethodFacetName"]['param4'] = 'spatialPointFile.xlsx'
@@ -284,11 +315,11 @@ with colFCF3:
         # 注意:温度文件名称按照实际day of year顺序排序从小到大即可
         weatherDataDir = st.selectbox(
             '选择温度文件',
-            ('温度', 'LAI'),
+            unique_first_elements_list,
             help='以特征名称筛选选中所以文件')
         extractDataFile = st.multiselect(
             '待抽取特征文件',
-            ('LAI', 'FPAR', 'EVI'),
+            unique_first_elements_list,
             help='以特征名称筛选选中所以文件')
         templateFile = st.selectbox(
             '模板文件',
@@ -334,9 +365,7 @@ with colFCF3:
                     paramT = [value for key, value in st.session_state["featureMethodFacetName"].items() if
                               key != 'checkBox']
                     print(f'========测试参数======={paramT}')
-                    inputFileList = leftBarsPreData['checked']
-                    print(inputFileList)
-                    resultFilePathList = FeatureCalculationMethodFacet().spatiotemporalExtraction(inputFileList, paramT)
+                    resultFilePathList = FeatureCalculationMethodFacet().spatiotemporalExtraction(tempList, paramT)
                     handledFile = ' '.join(resultFilePathList)
                     st.session_state.fCMapLayer.append(handledFile)
 
@@ -351,22 +380,24 @@ with colFCF3:
             st.session_state.fCMapLayer.append(handledFile)
 
         elif tempMethod == '空间点提取':
-            handledFile = FeatureCalculationMethodFacet().onSpatialPointExtract(
-                methodParam)
-            # 根据参数内容存入表
-            # 待提取字段名称、年、DayOfYear、基准文件
-            # st.session_state.fCMapLayer.append(handledFile)
+            with emptyHead:
+                with st.spinner('正在进行空间点提取'):
+                    handledFile = FeatureCalculationMethodFacet().onSpatialPointExtract(
+                        methodParam)
+                    # 根据参数内容存入表
+                    # 待提取字段名称、年、DayOfYear、基准文件
+                    # st.session_state.fCMapLayer.append(handledFile)
 
-            pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
-            print('----------------特征优选数据集----------------')
-            print(pages_utils.TempDataSetFacet[2])
+                    pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
+                    print('----------------特征优选数据集----------------')
+                    print(pages_utils.TempDataSetFacet[2])
             st.toast("空间点提取执行完毕", icon="ℹ️️")
 
         with pe:
             afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
             with st.status('加载数据中...'):
                 if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
-                    for name in leftBarsRawData['checked']:
+                    for name in leftBarsFCalData['checked']:
                         if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
                             st.session_state.dPLeftMapLayer.append(name)
                     print(st.session_state.dPLeftMapLayer)
