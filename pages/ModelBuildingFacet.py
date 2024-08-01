@@ -142,8 +142,8 @@ def clearOtherOption(key1):
 
 # 模型训练
 def onTrain(temporaResolution):
-    if '模型' not in st.session_state["leftTabs"]:
-        st.session_state["leftTabs"].append('模型')
+    if '模型' not in st.session_state["leftTabsFacet"]:
+        st.session_state["leftTabsFacet"].append('模型')
     st.session_state.page = 0
     st.session_state.page15 += 1
 
@@ -360,49 +360,50 @@ with modelACV:
     st.markdown("##### 特征与模型")
 
     # =======================显示左侧特征与模型=======================
+    tempLeftTabs = st.session_state["leftTabsFacet"][1:]
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
-            tt1 = st.tabs(st.session_state["leftTabs"])
-            for i in range(len(st.session_state["leftTabs"])):
+            tt1 = st.tabs(tempLeftTabs)
+            for i in range(len(tempLeftTabs)):
                 with tt1[i]:
-                    if st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+                    if tempLeftTabs[i] == '优选特征':
+                        # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                         st.data_editor(
                             pages_utils.TempDataSetFieldFacet[3],
-                            height=220, width=800,
-                            column_order=column)
-                    elif st.session_state["leftTabs"][i] == '模型':
-                        column = ["编号", "模型", "评价指标", "数据集划分比例", "时间"]
+                            height=220, width=800)
+                    elif tempLeftTabs[i] == '模型':
+                        # column = ["编号", "模型", "评价指标", "数据集划分比例", "时间"]
                         st.data_editor(
                             pages_utils.TempDataSetFieldFacet[4],
-                            height=220, width=800,
-                            column_order=column)
+                            height=220, width=800)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
-            tt = st.tabs(st.session_state["leftTabs"])
-            for i in range(len(st.session_state["leftTabs"])):
+            tt = st.tabs(tempLeftTabs)
+            for i in range(len(tempLeftTabs)):
                 with tt[i]:
-                    if st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+                    if tempLeftTabs[i] == '优选特征':
+                        # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                         st.data_editor(
                             pages_utils.TempDataSetFieldFacet[3],
-                            height=220, width=800,
-                            column_order=column)
-                    elif st.session_state["leftTabs"][i] == '模型':
-                        column = ["编号", "模型", "评价指标", "数据集划分比例", "时间"]
+                            height=220, width=800)
+                    elif tempLeftTabs[i] == '模型':
+                        # column = ["编号", "模型", "评价指标", "数据集划分比例", "时间"]
                         st.data_editor(
                             pages_utils.TempDataSetFieldFacet[4],
-                            height=220, width=800,
-                            column_order=column)
+                            height=220, width=800)
     # ===============显示左下字段或特征及获取===============
     # 获取所有column
-    columnArray = pages_utils.TempDataSetFacet[3].columns
+    columnArrayT = pages_utils.TempDataSetFacet[3].columns
+
+    # 去除元素不包含特定子字符串的元素，例如 "_优选"
+    columnArray = [col for col in columnArrayT if "_优选" in col]
     # 数组元素去重
     featureList = list(set(columnArray))  # 特征变量
     # 过滤特定元素
     filtered_columns = [col for col in featureList if col not in ["上级单位", "测报站点", "年", "DayOfYear"]]
+
     # 将过滤后的元素放入集合中
     targetList = set(filtered_columns)  # 目标变量
     result1 = pages_utils.multiselect_all(
@@ -500,14 +501,6 @@ with modelACM:
         # =======================添加评价指标=======================
         with ph.container():
             st.markdown("##### 评价指标")
-            st.markdown('###### 回归指标')
-            tempCol1, tempCol2, tempCol3 = st.columns(3)
-            with tempCol1:
-                agree10 = st.checkbox('RMSE', key='checkBoxPrecision4')
-            with tempCol2:
-                agree9 = st.checkbox('R方', key='checkBoxPrecision3')
-            with tempCol3:
-                agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
 
             st.markdown('###### 分类指标')
             tempCol21, tempCol22, tempCol23 = st.columns(3)
@@ -517,6 +510,15 @@ with modelACM:
                 agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
             with tempCol23:
                 pass
+            st.markdown('###### 回归指标')
+            tempCol1, tempCol2, tempCol3 = st.columns(3)
+            with tempCol1:
+                agree10 = st.checkbox('RMSE', key='checkBoxPrecision4')
+            with tempCol2:
+                agree9 = st.checkbox('R方', key='checkBoxPrecision3')
+            with tempCol3:
+                agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
+
             interval_col1, interval_col2 = st.columns([5, 1])
             # 传入指标
             # tempArgs =

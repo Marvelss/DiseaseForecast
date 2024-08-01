@@ -62,6 +62,8 @@ if 'page12' not in st.session_state:
 # 左侧内容标题
 if "leftTabs" not in st.session_state:
     st.session_state["leftTabs"] = ['原始数据']
+if "leftTabsFacet" not in st.session_state:
+    st.session_state["leftTabsFacet"] = ['备选特征']
 # 控制模型构建等后续步骤点/面界面显示
 if "isPlanarInterface" not in st.session_state:
     st.session_state.isPlanarInterface = False

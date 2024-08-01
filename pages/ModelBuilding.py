@@ -504,6 +504,14 @@ with modelACM:
         # =======================添加评价指标=======================
         with ph.container():
             st.markdown("##### 评价指标")
+            st.markdown('###### 分类指标')
+            tempCol21, tempCol22, tempCol23 = st.columns(3)
+            with tempCol21:
+                agree6 = st.checkbox('OA', key='checkBoxPrecision0')
+            with tempCol22:
+                agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
+            with tempCol23:
+                pass
             st.markdown('###### 回归指标')
             tempCol1, tempCol2, tempCol3 = st.columns(3)
             with tempCol1:
@@ -513,14 +521,6 @@ with modelACM:
             with tempCol3:
                 agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
 
-            st.markdown('###### 分类指标')
-            tempCol21, tempCol22, tempCol23 = st.columns(3)
-            with tempCol21:
-                agree6 = st.checkbox('OA', key='checkBoxPrecision0')
-            with tempCol22:
-                agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
-            with tempCol23:
-                pass
             interval_col1, interval_col2 = st.columns([5, 1])
             # 传入指标
             # tempArgs =
