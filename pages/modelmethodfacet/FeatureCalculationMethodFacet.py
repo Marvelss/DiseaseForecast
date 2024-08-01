@@ -268,9 +268,12 @@ class FeatureCalculationMethodFacet:
             result1 = space_time_extract(sorted_temperature_listT,
                                          sorted_temperature_listT, extractFeaturePathList[i],
                                          threshold, duration)
+            # saved_path = os.path.join(
+            #     project_root, 'resource', 'surfaceProcessData',
+            #     'resultData',
+            #     f'{extractFeatureList[i]}_2015_SEResult.tif')
             saved_path = os.path.join(
-                project_root, 'resource', 'surfaceProcessData',
-                'resultData',
+                project_root, 'resource', 'uploadFileDir',
                 f'{extractFeatureList[i]}_2015_SEResult.tif')
             FeatureCalculationMethodFacet.generate_tif(result1, extractFeaturePathList[i][0], saved_path)
             resultPathList.append(saved_path)
