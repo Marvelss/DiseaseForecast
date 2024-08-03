@@ -413,6 +413,28 @@ class FeatureCalculationMethodFacet:
 
     # 景观指数计算
     def onLandscapeIndex(self, methodParam):
+        # 创建一个对照表字典
+        lookup_table = {
+            "c_lpi": "lsm_c_lpi",
+            "c_pd": "lsm_c_pd",
+            "c_ed": "lsm_c_ed",
+            "c_pssd": "lsm_c_pssd",
+            "l_lpi": "lsm_l_lpi",
+            "l_pd": "lsm_l_pd",
+            "l_ed": "lsm_l_ed",
+            "l_pssd": "lsm_l_pssd",
+        }
+
+        def get_lookup_value(input_str):
+
+            # 检查输入字符串是否在对照表中
+            if input_str in lookup_table:
+                return lookup_table[input_str]
+            else:
+                return "No matching entry found."
+
+        # 函数对应表
+
         # 输入文件名称
         # 景观水平类型
         # 函数名称
@@ -433,7 +455,8 @@ class FeatureCalculationMethodFacet:
         robjects.r(script)
         # 运行R代码并获取结果
 
-        robjects.r('enn_results <- lsm_c_lpi(landscape)')
+        funcName = get_lookup_value('l_lpi')
+        robjects.r(f'enn_results <- {funcName}(landscape)')
         enn_results4 = robjects.r('enn_results')
 
         # 启用pandas与rpy2之间的转换
