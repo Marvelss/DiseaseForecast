@@ -231,16 +231,21 @@ with colFCF3:
     if option20:
         optionInputFile = st.selectbox(
             '输入文件',
-            unique_first_elements_list)
+            tempList)
         landscapemetricsPattern = st.selectbox(
             '景观水平类型',
             ('景观水平', '斑块类别水平', '斑块水平'))
-        landscapemetricsFunction = st.selectbox(
+        landscapemetricsFunction = st.multiselect(
             '景观水平类型',
-            ('PSSD', 'ESD'))
+            ('lpi', 'pd'))
         optionOutput1 = st.text_input(
             label='输出文件名称',
             value='默认')
+        st.session_state["featureMethodFacetName"]['param1'] = optionInputFile
+        st.session_state["featureMethodFacetName"]['param2'] = landscapemetricsPattern
+        st.session_state["featureMethodFacetName"]['param3'] = str(landscapemetricsFunction)
+        st.session_state["featureMethodFacetName"]['param4'] = optionOutput1
+
     if option21:
         optionVegetationIndex = st.selectbox(
             '植被指数',
@@ -379,8 +384,9 @@ with colFCF3:
 
         elif tempMethod == '景观指数计算':
             resultFilePathList = fcTool.onLandscapeIndex(methodParam)
-            handledFile = ' '.join(resultFilePathList)
-            st.session_state.fCMapLayer.append(handledFile)
+            handledFile = resultFilePathList
+            for tempH in resultFilePathList:
+                st.session_state.fCMapLayer.append(tempH)
 
         elif tempMethod == '空间点提取':
             with emptyHead:

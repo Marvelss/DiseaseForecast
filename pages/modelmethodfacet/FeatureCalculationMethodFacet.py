@@ -441,31 +441,44 @@ class FeatureCalculationMethodFacet:
         # 输出文件名称
         inputFileName = methodParam[0]
         landscapemetricsPattern = methodParam[1]
-        landscapemetricsFunction = methodParam[2]
-        outputFileName = methodParam[3]
-        outputDataFrame = methodParam[4]
-        # 加载R的landscapemetrics包
-        importr('landscapemetrics')
-        # 读取本地数据
-        # 绝对路径
-        path = r'E:\a_python\program\testPlatform\demo\demo140\fengtai2010.tif'
-        path = path.replace("\\", "/")  # 确保路径格式正确
-        script = f'landscape <- terra::rast("{path}")'
-        # 运行脚本
-        robjects.r(script)
-        # 运行R代码并获取结果
-
-        funcName = get_lookup_value('l_lpi')
-        robjects.r(f'enn_results <- {funcName}(landscape)')
-        enn_results4 = robjects.r('enn_results')
-
-        # 启用pandas与rpy2之间的转换
-        pandas2ri.activate()
-        # 转换成pandas格式
-        enn_results4_df = pandas2ri.rpy2py(enn_results4)
-        # 打印结果数据框
-        print(enn_results4_df)
-        # 生成根据列名tif图
+        landscapemetricsFunction = eval(methodParam[2])
+        # outputFileName = methodParam[3]
+        outputFileName = []
+        # outputDataFrame = methodParam[4]
+        from rpy2.robjects import conversion, default_converter
+        with conversion.localconverter(default_converter):
+            # 加载R的landscapemetrics包
+            importr('landscapemetrics')
+            # 读取本地数据
+            # 绝对路径
+            path = os.path.join(r'E:/a_python/program/diseaseForecastStreamlit', 'resource',
+                                'uploadFileDir', inputFileName)
+            path = path.replace("\\", "/")  # 确保路径格式正确
+            script = f'landscape <- terra::rast("{path}")'
+            # 运行脚本
+            robjects.r(script)
+            # 运行R代码并获取结果
+            for func in landscapemetricsFunction:
+                tempPattern = 'l'
+                if landscapemetricsPattern == '斑块类别水平':
+                    tempPattern = 'c'
+                elif landscapemetricsPattern == '斑块水平':
+                    tempPattern = 'p'
+                funcName = get_lookup_value(f'{tempPattern}_{func}')
+                print(f'{tempPattern}_{func}')
+                print(funcName)
+                robjects.r(f'enn_results <- {funcName}(landscape)')
+                enn_results4 = robjects.r('enn_results')
+                # 启用pandas与rpy2之间的转换
+                pandas2ri.activate()
+                # 转换成pandas格式
+                enn_results4_df = pandas2ri.rpy2py(enn_results4)
+                pandas2ri.deactivate()
+                # 打印结果数据框
+                print(enn_results4_df)
+                # 生成根据列名tif图
+            outputFileName.append(funcName + '_2010_1.tif')
+        return outputFileName
 
     # 空间点提取
     def onSpatialPointExtract(self, methodParma):
