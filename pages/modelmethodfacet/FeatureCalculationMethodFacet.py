@@ -475,9 +475,26 @@ class FeatureCalculationMethodFacet:
                 enn_results4_df = pandas2ri.rpy2py(enn_results4)
                 pandas2ri.deactivate()
                 # 打印结果数据框
-                print(enn_results4_df)
+                # print(enn_results4_df)
                 # 生成根据列名tif图
-            outputFileName.append(funcName + '_2010_1.tif')
+                # Read the original raster using Rasterio
+                with rasterio.open(path) as src:
+                    raster_data = src.read(1)  # Read the first band
+                    profile = src.profile
+                # Create a copy of the raster data for modifications
+                raster_data = raster_data.astype(np.int64)
+                # Replace the class values with corresponding values from the DataFrame
+                for _, row in enn_results4_df.iterrows():
+                    class_value = row['class']
+                    replacement_value = row['value']
+                    raster_data[raster_data == class_value] = replacement_value
+                # Define the path for the output file
+                output_path = funcName + '_2010_1.tif'
+
+                # Write the modified raster data to a new TIFF file
+                with rasterio.open(output_path, 'w', **profile) as dst:
+                    dst.write(raster_data, 1)
+                outputFileName.append(output_path)
         return outputFileName
 
     # 空间点提取
