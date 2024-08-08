@@ -38,25 +38,19 @@ class PretreatmentMethodFacet:
         :return:
         """
         # output_file, point_station_file, attrName
-        print(f'========测试参数========{methodParam}')
-        point_station_file = os.path.join(
-            os.getcwd(),
-            'resource',
-            'uploadFileDir', methodParam[0])
+        # print(f'========测试参数========{methodParam}')
+        point_station_file = methodParam[0]
         attrName = methodParam[1]
         interpolationMethod = methodParam[2]
         outputBoundsTemp = methodParam[3].split(' ')
         outputFileTemp = methodParam[4]
-        outputFile = os.path.join(
-            os.getcwd(),
-            'resource',
-            'uploadFileDir', outputFileTemp)
-        print('============测试输入参数============')
-        print(point_station_file)
-        print(attrName)
-        print(interpolationMethod)
-        print(outputBoundsTemp)
-        print(outputFile)
+        outputFile = outputFileTemp
+        # print('============测试输入参数============')
+        # print(point_station_file)
+        # print(attrName)
+        # print(interpolationMethod)
+        # print(outputBoundsTemp)
+        # print(outputFile)
         if interpolationMethod != '克里金插值':
             # 默认为反距离权重法
             algorithmTemp = 'invdist:power=3.6:smoothing=0.2:radius1=0.0:radius2=0.0:angle=0.0:max_points=0:min_points=0:nodata=-9999'
@@ -67,7 +61,6 @@ class PretreatmentMethodFacet:
                 algorithmTemp = 'nearest:radius1=0.0:radius2=1.0:nodata=-9999'
             elif interpolationMethod == '移动平均法':
                 algorithmTemp = 'average:radius1=0.0:radius2=0.0:nodata=-9999'
-            print(f'============测试=========={algorithmTemp}')
             opts = gdal.GridOptions(
                 algorithm=algorithmTemp,
                 format="GTiff", outputType=gdal.GDT_Float32, zfield=attrName,
@@ -75,6 +68,7 @@ class PretreatmentMethodFacet:
             gdal.Grid(destName=outputFile, srcDS=point_station_file, options=opts)
 
         elif interpolationMethod == '克里金插值':
+            print()
             onKriging()
         return outputFileTemp
 

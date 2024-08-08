@@ -226,7 +226,7 @@ with colDPF3:
     if agree12:
         optionPoint = st.selectbox(
             '点数据',
-            options=('02_05', '自定义'))
+            options=(leftBarsRawData['checked']))
         textAN = st.text_input(
             label='点属性字段名称',
             placeholder='value',
