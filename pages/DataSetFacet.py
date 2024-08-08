@@ -251,7 +251,7 @@ with dataSCR:
     placeholder1 = st.empty()
     if selectedTemplate == '气象数据':
         # with placeholder1.container():
-        st.warning('warningMInfo', icon="⚠️")
+        st.warning('shp文件名称不能以shp结尾', icon="⚠️")
     #     with open(path1, "rb") as file:
     #         st.download_button(
     #             label="下载气象数据模板",
