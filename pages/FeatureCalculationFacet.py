@@ -28,6 +28,9 @@ hide_pages(
     ]
 )
 
+tempRP = os.path.join(os.getcwd(),
+                      'resource', 'uploadFileDir')
+
 
 # 更新左侧目标显示(可添加至pages_utils)
 def updateLeftBars(raw_data_facet):
@@ -252,18 +255,18 @@ with colFCF3:
             ('NDVI', 'EVI'))
         optionInputFile = st.selectbox(
             '输入文件',
-            unique_first_elements_list)
+            tempList)
         optionRed = st.number_input(label='红波段对应的波段数', value=3)
         optionNir = st.number_input(label='近红波段对应的波段数', value=2)
         optionOutput = st.text_input(
             label='输出文件名称',
-            value='默认')
+            value=optionInputFile)
 
-        st.session_state["featureMethodFacetName"]['param1'] = str(optionVegetationIndex)
-        st.session_state["featureMethodFacetName"]['param2'] = str(findFeatureFile(optionInputFile, tempList))
-        st.session_state["featureMethodFacetName"]['param3'] = str(optionRed)
-        st.session_state["featureMethodFacetName"]['param4'] = str(optionNir)
-        st.session_state["featureMethodFacetName"]['param5'] = str(optionOutput)
+        st.session_state["featureMethodFacetName"]['param1'] = optionVegetationIndex
+        st.session_state["featureMethodFacetName"]['param2'] = os.path.join(tempRP, optionInputFile)
+        st.session_state["featureMethodFacetName"]['param3'] = optionRed
+        st.session_state["featureMethodFacetName"]['param4'] = optionNir
+        st.session_state["featureMethodFacetName"]['param5'] = os.path.join(tempRP, optionOutput)
 
     if option22:
         shp_files = [item for item in leftBarsRawData['checked'] if item.endswith('.shp')]
@@ -379,7 +382,7 @@ with colFCF3:
 
         elif tempMethod == '植被指数计算':
             resultFilePathList = fcTool.onNDVI(methodParam)
-            handledFile = ' '.join(resultFilePathList)
+            handledFile = resultFilePathList
             st.session_state.fCMapLayer.append(handledFile)
 
         elif tempMethod == '景观指数计算':
