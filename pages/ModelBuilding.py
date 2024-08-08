@@ -647,7 +647,7 @@ with modelACM:
                         plt.title('回归模型精度评价-散点图')
                         # 精度结果直接显示在图中
                         metrics_text = "\n".join(
-                            [f"{key}: {round(value, 3)}" for key, value in evaluationIndex[i].items()])
+                            [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
                         plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
                                  verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
                         st.pyplot(fig)
