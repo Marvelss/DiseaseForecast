@@ -234,6 +234,10 @@ with colDPF3:
         optionIM = st.selectbox(
             '插值方法',
             options=('反距离权重法', '克里金插值'))
+        if optionIM == '克里金插值':
+            templateFile = st.selectbox(
+                '模板文件(.tif)',
+                options=(leftBarsRawData['checked']))
         textLL = st.text_input(
             label='经纬度范围',
             placeholder='118.053 31.086 121.953 27.286',  # 可在原始数据时规定范围,在这默认输入
@@ -247,7 +251,7 @@ with colDPF3:
             st.session_state["preMethodFacetName"]['param3'] = optionIM
             st.session_state["preMethodFacetName"]['param4'] = textLL
             st.session_state["preMethodFacetName"]['param5'] = os.path.join(tempRP, textSN)
-
+            st.session_state["preMethodFacetName"]['param6'] = os.path.join(tempRP, templateFile)
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([1.5, 1])
     btn = interval_col2.button('添加或跳过处理')

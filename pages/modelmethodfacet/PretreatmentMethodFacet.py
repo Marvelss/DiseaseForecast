@@ -68,8 +68,47 @@ class PretreatmentMethodFacet:
             gdal.Grid(destName=outputFile, srcDS=point_station_file, options=opts)
 
         elif interpolationMethod == '克里金插值':
-            print()
-            onKriging()
+            # 1. 读取shp文件
+            gdf = gpd.read_file(point_station_file)
+
+            # 假设shp文件有名为'geometry'的列和需要插值的'values'列
+            coordinates = np.array([(geom.x, geom.y) for geom in gdf.geometry])
+            values = gdf[attrName].values
+
+            # 2. 读取模板TIFF文件
+            template_tif = methodParam[5]
+            with rasterio.open(template_tif) as src:
+                template_transform = src.transform
+                template_crs = src.crs
+                template_bounds = src.bounds
+                template_shape = src.shape
+
+            # 定义目标栅格的分辨率
+            gridx = np.linspace(template_bounds.left, template_bounds.right, template_shape[1])
+            gridy = np.linspace(template_bounds.bottom, template_bounds.top, template_shape[0])
+
+            # 3. 执行克里金插值
+            ok = OrdinaryKriging(
+                coordinates[:, 0],
+                coordinates[:, 1],
+                values,
+                variogram_model='linear',
+                verbose=False,
+                enable_plotting=False
+            )
+            z, ss = ok.execute('grid', gridx, gridy)
+
+            # 5. 保存插值结果为TIFF文件
+            output_tif = outputFileTemp
+
+            with rasterio.open(
+                    output_tif, 'w', driver='GTiff',
+                    height=template_shape[0], width=template_shape[1],
+                    count=1, dtype=z.dtype,
+                    crs=template_crs,
+                    transform=template_transform,
+            ) as dst:
+                dst.write(z, 1)
         return outputFileTemp
 
     def onResample(self, methodParam):  # 影像重采样
@@ -122,51 +161,6 @@ class PretreatmentMethodFacet:
             band_data[band_data == nodata_value] = nodata_value
             band.WriteArray(band_data)
         return out_path_resample
-
-
-def onKriging(shp_file, attrName, template_tif):
-    # 1. 读取shp文件
-    gdf = gpd.read_file(shp_file)
-
-    # 假设shp文件有名为'geometry'的列和需要插值的'values'列
-    coordinates = np.array([(geom.x, geom.y) for geom in gdf.geometry])
-    values = gdf[attrName].values
-
-    # 2. 读取模板TIFF文件
-    template_tif = '02_05.tif'
-    with rasterio.open(template_tif) as src:
-        template_transform = src.transform
-        template_crs = src.crs
-        template_bounds = src.bounds
-        template_shape = src.shape
-
-    # 定义目标栅格的分辨率
-    gridx = np.linspace(template_bounds.left, template_bounds.right, template_shape[1])
-    gridy = np.linspace(template_bounds.bottom, template_bounds.top, template_shape[0])
-
-    # 3. 执行克里金插值
-    ok = OrdinaryKriging(
-        coordinates[:, 0],
-        coordinates[:, 1],
-        values,
-        variogram_model='linear',
-        verbose=False,
-        enable_plotting=False
-    )
-    z, ss = ok.execute('grid', gridx, gridy)
-
-    # 5. 保存插值结果为TIFF文件
-    output_tif = 'output_file2.tif'
-
-    with rasterio.open(
-            output_tif, 'w', driver='GTiff',
-            height=template_shape[0], width=template_shape[1],
-            count=1, dtype=z.dtype,
-            crs=template_crs,
-            transform=template_transform,
-    ) as dst:
-        dst.write(z, 1)
-    return output_tif
 
 
 # 剔除异常值
