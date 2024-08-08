@@ -645,6 +645,11 @@ with modelACM:
                         ax.set_ylabel('预测峰值(%)')
                         # plt.figure(figsize=(10, 6))
                         plt.title('回归模型精度评价-散点图')
+                        # 精度结果直接显示在图中
+                        metrics_text = "\n".join(
+                            [f"{key}: {round(value, 3)}" for key, value in evaluationIndex[i].items()])
+                        plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
+                                 verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
                         st.pyplot(fig)
 
                     # 分类模型
@@ -657,7 +662,8 @@ with modelACM:
                         ax.set_ylabel('预测病害发生程度')
                         plt.title('分类模型精度评价-混淆矩阵')
                         st.pyplot(fig)
-                        # Populate the array with key-value pairs
+
+                    # Populate the array with key-value pairs
                     metrics = []
                     for key, value in evaluationIndex[i].items():
                         metrics.append((key, round(value, 3)))
