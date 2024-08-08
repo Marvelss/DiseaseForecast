@@ -4,12 +4,12 @@
 @File : PretreatmentMethodFacet.py
 @Description : 面状数据预处理方法
 """
-import os.path
 import geopandas as gpd
 import rasterio
 import numpy as np
 from osgeo import gdal, ogr
 from pykrige.ok import OrdinaryKriging
+from rasterio.mask import mask
 
 
 class PretreatmentMethodFacet:
@@ -161,6 +161,45 @@ class PretreatmentMethodFacet:
             band_data[band_data == nodata_value] = nodata_value
             band.WriteArray(band_data)
         return out_path_resample
+
+    def onClipRaster(self, methodParam):  # 影像重采样
+        beClipFile = methodParam[0]
+        templateShapeFile = methodParam[1]
+        outputFile = self.getHandledField(methodParam[2])
+
+        # 1. 读取行政区边界shapefile
+        shapefile = templateShapeFile
+
+        input_tif = beClipFile
+        gdf = gpd.read_file(shapefile)
+
+        # 2. 确保行政区边界的CRS与TIFF文件一致
+        template_tif = input_tif
+        with rasterio.open(template_tif) as src:
+            tiff_crs = src.crs
+
+        if gdf.crs != tiff_crs:
+            gdf = gdf.to_crs(tiff_crs)
+        # 4. 使用行政区边界进行裁剪
+        # 如果shapefile包含多个几何体，可以选择一个或合并
+        geometry = [gdf.geometry.union_all()]
+
+        # 裁剪
+        with rasterio.open(input_tif, nodata=-99) as src:
+            out_image, out_transform = mask(src, geometry, crop=True)
+            out_meta = src.meta
+
+        # 更新裁剪后的元数据
+        out_meta.update({
+            "driver": "GTiff",
+            "height": out_image.shape[1],
+            "width": out_image.shape[2],
+            "transform": out_transform
+        })
+
+        # 4. 保存裁剪后的TIFF文件
+        with rasterio.open(outputFile, 'w', **out_meta) as dst:
+            dst.write(out_image)
 
 
 # 剔除异常值

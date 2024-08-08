@@ -87,7 +87,7 @@ def updateLeftBars(raw_data_facet):
     return left_bars
 
 
-checkBoxNum = 2
+checkBoxNum = 3
 
 
 # 获取选项值对应名称
@@ -96,6 +96,8 @@ def getCheckboxName(checkbox):
         return '重采样'
     elif checkbox == 'checkbox1':
         return '空间插值'
+    elif checkbox == 'checkbox2':
+        return '裁剪'
 
 
 # 取消其他选项按钮
@@ -192,13 +194,10 @@ with colDPF3:
     st.markdown("##### 预处理方法")
     col12, col22 = st.columns(2)
     with col12:
-        # agree = st.checkbox('剔除异常值', key='checkbox0', args=[0])
         agree11 = st.checkbox("重采样", key='checkbox0', on_change=clear_other, args=[0])
-        agree13 = st.checkbox("裁剪(待发布)", key='checkbox2', on_change=clear_other, args=[2])
+        agree13 = st.checkbox("裁剪", key='checkbox2', on_change=clear_other, args=[2])
     with col22:
         agree12 = st.checkbox("空间插值", key='checkbox1', on_change=clear_other, args=[1])
-        # agree10 = st.checkbox("缺失值插补", key='checkbox1', args=[1])
-        # agree13 = st.checkbox("点面数据关联(待发布)", key='checkbox4', args=[4], disabled=True)
     st.markdown('---')
 
     # ===============显示和处理右中各个处理方法设置参数===============
@@ -252,6 +251,22 @@ with colDPF3:
             st.session_state["preMethodFacetName"]['param4'] = textLL
             st.session_state["preMethodFacetName"]['param5'] = os.path.join(tempRP, textSN)
             st.session_state["preMethodFacetName"]['param6'] = os.path.join(tempRP, templateFile)
+    if agree13:
+        optionClip = st.selectbox(
+            '待裁剪文件',
+            options=leftBarsRawData['checked'])
+        optionTemplateFileClip = st.selectbox(
+            '模板文件',
+            options=(leftBarsRawData['checked']),
+            help='参考坐标系及投影数等')
+        optionOutputFileClip = st.text_input(
+            label='输出文件名称',
+            value=optionClip)
+
+        st.session_state["preMethodFacetName"]['param1'] = os.path.join(tempRP, optionClip)
+        st.session_state["preMethodFacetName"]['param2'] = os.path.join(tempRP, optionTemplateFileClip)
+        st.session_state["preMethodFacetName"]['param3'] = os.path.join(tempRP, optionOutputFileClip)
+
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([1.5, 1])
     btn = interval_col2.button('添加或跳过处理')
@@ -286,17 +301,20 @@ with colDPF3:
                         #     '118.053330 31.086861 121.953330 27.286861',
                         #     '02_05_预处理.tif']
                         handledFile = FTool.spatialInterpolation(methodParam)
-                        os.path.join(tempRP, handledFile)
+                        # os.path.join(tempRP, handledFile)
                         st.session_state.dPRightMapLayer.append(handledFile)
                     st.toast("空间插值完毕", icon="ℹ️️")
             elif tempMethod == '重采样':
                 handledFile = PretreatmentMethodFacet().onResample(methodParam)
-                os.path.join(tempRP, handledFile)
-                print(methodParam)
+                # os.path.join(tempRP, handledFile)
                 print(handledFile)
-
                 st.session_state.dPRightMapLayer.append(handledFile)
+            elif tempMethod == '裁剪':
+                handledFile = PretreatmentMethodFacet().onClipRaster(methodParam)
+                # os.path.join(tempRP, handledFile)
                 print(handledFile)
+                st.session_state.dPRightMapLayer.append(handledFile)
+
             with placeHolderDPF2:
                 with st.status('加载数据中...'):
                     afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
