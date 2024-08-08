@@ -43,6 +43,7 @@ else:
             "数据预处理-面状",
             "特征计算-面状",
             "特征优选-面状",
+            "模型构建-面状",
         ]
     )
 if 'page16' not in st.session_state:
