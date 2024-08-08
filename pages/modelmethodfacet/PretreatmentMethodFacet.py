@@ -200,7 +200,7 @@ class PretreatmentMethodFacet:
         # 4. 保存裁剪后的TIFF文件
         with rasterio.open(outputFile, 'w', **out_meta) as dst:
             dst.write(out_image)
-
+        return outputFile
 
 # 剔除异常值
 def outlierEliminator(self, methodParam):
