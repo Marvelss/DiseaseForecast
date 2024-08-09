@@ -310,8 +310,8 @@ with dataPCM:
     if agree:
         coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:
-            number2 = st.text_input("剔除大于", value=0.1)
-            number3 = st.text_input("剔除小于", value=0.1)
+            number2 = st.text_input("剔除大于以下数值外的值", value=0.1)
+            number3 = st.text_input("剔除小于以下数值外的值", value=0.1)
             st.session_state["preMethodName"]['param1'] = number2
             st.session_state["preMethodName"]['param2'] = number3
         with coll22:

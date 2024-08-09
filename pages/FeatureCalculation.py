@@ -271,7 +271,7 @@ with (featureCCM):
                            value=datetime.date(1990, 7, 6),
                            format='MM/DD/YYYY',
                            )
-        d2 = st.date_input("结束时间", value=None)
+        d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 8, 9))
         option = st.selectbox(
             '计算阈值方式',
             ('单日降水量', '总降水量'))

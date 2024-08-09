@@ -534,8 +534,7 @@ with modelACM:
     elif st.session_state.page == 2:
         # =======================添加验证与训练数据集划分=======================
         with ph.container():
-            st.markdown("###### 有效特征集提取")
-
+            # st.markdown("###### 有效特征集提取")
             # 检查是否有缺失值
             for p in range(len(pages_utils.TempDataSet))[::-1]:
                 df11 = pages_utils.TempDataSet[p]
@@ -544,23 +543,23 @@ with modelACM:
             beforeDF = df11
             pages_utils.TempDataSet[4] = beforeDF
             missing_values = pages_utils.TempDataSet[4].isnull().sum()
-            if missing_values.any():
-                st.toast('优选特征中含有缺失值,请选中下方选项以提取有效值', icon="⚠️")
+            if missing_values.any() and 'SEIR机理模型' not in pages_utils.TempDataSetField[4]["模型"].tolist():
+                # st.toast('优选特征中含有缺失值,请选中下方选项以提取有效值', icon="⚠️")
 
-            isExtract = st.checkbox('提取有效值')
-            # 分组并提取每个分组的第一个非空值
-            result = beforeDF.groupby(['上级单位', '测报站点', '年']).first().reset_index()
-            # ******删除包含缺失值的行******
-            df_cleaned = result.dropna()
+                # isExtract = st.checkbox('提取有效值')
+                # 分组并提取每个分组的第一个非空值
+                result = beforeDF.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+                # ******删除包含缺失值的行******
+                df_cleaned = result.dropna()
 
-            if isExtract:
+                # if isExtract:
                 pages_utils.TempDataSet[4] = df_cleaned
-                st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
-            else:
-                st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
-                pages_utils.TempDataSet[4] = beforeDF
+                # st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
+                # else:
+                #     st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
+                #     pages_utils.TempDataSet[4] = beforeDF
 
-            st.markdown('---')
+            # st.markdown('---')
             st.markdown("###### 训练与验证数据集划分")
             colOP1, colOP2 = st.columns(2)
             with colOP1:

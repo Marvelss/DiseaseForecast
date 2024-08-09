@@ -245,15 +245,15 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
             # print(rawData.columns)
             # print(type(rawData.columns))
             tool2 = FeatureOptimizationMethod(rawData, rawData.columns.tolist())
-            # 初始化特征优选方法
-            for indexT, tempMethod in enumerate(featureOptimalList):
-                if tempMethod == 'Pearson相关性分析':
-                    # print('=============Pearson相关性分析检测============')
-                    # print(modelParam2[indexT].split(','))
-                    rawData, _ = tool2.Pearson(modelParam2[indexT])
-                elif tempMethod == 'Relief-F互相关分析':
-                    rawData, _ = tool2.ReliefF(
-                        modelParam2[indexT])
+            # # 初始化特征优选方法
+            # for indexT, tempMethod in enumerate(featureOptimalList):
+            #     if tempMethod == 'Pearson相关性分析':
+            #         # print('=============Pearson相关性分析检测============')
+            #         # print(modelParam2[indexT].split(','))
+            #         rawData, _ = tool2.Pearson(modelParam2[indexT])
+            #     elif tempMethod == 'Relief-F互相关分析':
+            #         rawData, _ = tool2.ReliefF(
+            #             modelParam2[indexT])
 
             print(f'=============特征字段优选完成=============')
             # rawData.to_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\featureOptimized.xlsx')

@@ -182,10 +182,18 @@ class FeatureOptimizationMethod:
         # 遍历输入变量进行pearson分析
         tempResultP = {}
         # 选择需要计算相关性的列
-        data = newDataFrame[fieldList]
-
+        result = newDataFrame.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+        # ******删除包含缺失值的行******
+        df_cleaned = result.dropna()
+        data = df_cleaned[fieldList]
+        # print(data)
+        # result = data.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+        # # ******删除包含缺失值的行******
+        # df_cleaned = result.dropna()
         # 计算相关性矩阵
         correlation_matrix = data.corr()
+        # print(df_cleaned)
+        # print(correlation_matrix)
 
         for i in range(len(fieldList)):
             for j in range(i + 1, len(fieldList)):

@@ -5,18 +5,159 @@ import pandas as pd
 import numpy as np
 from pygwalker.api.streamlit import StreamlitRenderer
 from st_pages import add_page_title
+from stqdm import stqdm
 from streamlit import switch_page
 from streamlit_tree_select import tree_select
 import extra_streamlit_components as stx
 
 # add_page_title()
-st.header('模型评估')
-st.markdown('---')
+# st.header('模型评估')
+# st.markdown('---')
 
-import streamlit as st
 import webbrowser
 import itertools
 import ui
+import pages_utils
+nodes1 = [
+        {"label": "气象数据", "value": "气象数据"},
+        {
+            "label": "植保数据",
+            "value": "植保数据",
+            "children": [
+                {"label": "feature1", "value": "sub_a"},
+                {"label": "feature2", "value": "sub_b"},
+                {"label": "feature3", "value": "sub_c"},
+            ],
+        },
+        {
+            "label": "农学数据",
+            "value": "folder_c",
+            "children": [
+                {"label": "晚稻移栽期", "value": "sub_d"},
+                {
+                    "label": "预测峰值",
+                    "value": "sub_e",
+                    "children": [
+                        {"label": "测报站点", "value": "sub_sub4"},
+                        {"label": "生化指标", "value": "sub_s5"},
+                    ],
+                },
+                {"label": "生化指标", "value": "sub_f"},
+            ],
+        },
+    ]
+# import folium
+
+# from streamlit_folium import st_folium
+#
+# col1, col2, col3 = st.columns([0.2, 0.9, 0.3])
+# with col1:
+#     st.markdown("##### 数据")
+#     nodes1 = [
+#         {"label": "气象数据", "value": "气象数据"},
+#         {
+#             "label": "植保数据",
+#             "value": "植保数据",
+#             "children": [
+#                 {"label": "feature1", "value": "sub_a"},
+#                 {"label": "feature2", "value": "sub_b"},
+#                 {"label": "feature3", "value": "sub_c"},
+#             ],
+#         },
+#         {
+#             "label": "农学数据",
+#             "value": "folder_c",
+#             "children": [
+#                 {"label": "晚稻移栽期", "value": "sub_d"},
+#                 {
+#                     "label": "预测峰值",
+#                     "value": "sub_e",
+#                     "children": [
+#                         {"label": "测报站点", "value": "sub_sub4"},
+#                         {"label": "生化指标", "value": "sub_s5"},
+#                     ],
+#                 },
+#                 {"label": "生化指标", "value": "sub_f"},
+#             ],
+#         },
+#     ]
+#     temp = tree_select(nodes1)
+# with col2:
+#     m = folium.Map(location=[30.314207, 120.343200], zoom_start=16)
+#     folium.Marker(
+#         [30.314207, 120.343200], popup="Liberty Bell", tooltip="Liberty Bell"
+#     ).add_to(m)
+#
+#     # call to render Folium map in Streamlit
+#     st_data = st_folium(m, width=950, height=600)
+# with col3:
+#     st.markdown("##### 预处理方法")
+#     col12, col22 = st.columns(2)
+#     with col12:
+#         agree = st.checkbox('剔除异常值', key='checkbox0', args=[0])
+#         agree11 = st.checkbox("空间数据重采样(待发布)", key='checkbox2', args=[2], disabled=True)
+#         agree12 = st.checkbox("点面数据转化(待发布)", key='checkbox3', args=[3], disabled=True)
+#     with col22:
+#         agree10 = st.checkbox("缺失值插补", key='checkbox1', args=[1])
+#         agree13 = st.checkbox("点面数据关联(待发布)", key='checkbox4', args=[4], disabled=True)
+#     st.markdown('---')
+#
+#     # ===============显示和处理右中各个处理方法设置参数===============
+#     if agree10:
+#         # 显示缺失值信息
+#         info = '缺失字段个数及占比:\n'
+#         flag = False
+#         # 统计缺失值信息
+#         for column in pages_utils.TempDataSet[0].columns:
+#             # 获取每个字段的非缺失值数量
+#             non_missing_values = pages_utils.TempDataSet[0][column].count()
+#             total_rows = len(pages_utils.TempDataSet[0])
+#             # 计算缺失值数量
+#             missing_values = total_rows - non_missing_values
+#             # 计算缺失值占比
+#             missing_percentage = (missing_values / total_rows) * 100
+#             # 将每个字段的缺失值占比保存到信息中
+#             if missing_values:
+#                 info += f"* {column}:{missing_values} {missing_percentage:.2f}%\n"
+#                 flag = True
+#         if not flag:
+#             info = '无缺失字段\n'
+#             st.info(f"{info}\n", icon="ℹ️️")
+#         else:
+#             st.warning(f"{info}\n", icon="⚠️")
+#         coll11, coll22 = st.columns([0.3, 0.6])
+#         with coll11:
+#             option = st.selectbox(
+#                 '插补方法',
+#                 options=('线性插值', '自定义'))
+#             if option == '自定义':
+#                 num = st.text_input('缺失值', value=np.nan)
+#                 num1 = st.text_input('插补值')
+#         with coll22:
+#             latext = '* 公式:' + r'''
+#             $$
+#             y = y_0 + (y_1 - y_0) \frac{(x - x_0)}{(x_1 - x_0)}
+#             $$
+#             '''
+#             st.info('插补方法介绍\n'
+#                     '* 描述:使用缺失值前后最近的两个非缺失值填充\n' +
+#                     latext, icon="ℹ️")
+#         # st.markdown('---')
+#     if agree:
+#         coll11, coll22 = st.columns([0.3, 0.6])
+#         with coll11:
+#             number2 = st.text_input("剔除大于", value=0.1)
+#             number3 = st.text_input("剔除小于", value=0.1)
+#         with coll22:
+#             st.info('剔除方法介绍\n'
+#                     '* 描述:剔除最大值和最小值区域外的异常值\n', icon="ℹ️")
+#
+#     # =======================添加处理至任务清单=======================
+#     interval_col1, interval_col2 = st.columns([1.5, 1])
+#     btn = interval_col2.button('添加处理')
+
+
+# center on Liberty Bell, add marker
 
 
 def navbar():
@@ -124,8 +265,8 @@ def navbar():
     )
 
 
-st.image("https://streamlit.io/images/brand/streamlit-mark-color.png", width=100)
-st.title("Snowflake Summit Demo Apps")
+# st.image("https://streamlit.io/images/brand/streamlit-mark-color.png", width=100)
+# st.title("Snowflake Summit Demo Apps")
 
 st.markdown(
     """
@@ -222,13 +363,13 @@ def app(image, link, name, description, developer, repo_link):
     st.write("")
 
 
-category("🗣️ Large Language Models")
+category("🗣️ 各项特征计算方法API")
 col1, col2, col3 = st.columns(3)
 with col1:
     app("pages/images/GPTLab.png",
         '#',
         "降雨日数计算",
-        "根据某个时间段内降雨量特定阈值以及连续时长计算有效降雨日数",
+        "基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数",
         "Vagrant",
         "https://github.com/Marvelss",
         )
@@ -236,20 +377,45 @@ with col1:
 with col2:
     app("pages/images/AskMyPDF.png",
         '#',
-        "降雨日数计算1",
-        "根据某个时间段内效降雨日数",
-        "Vagrant1",
+        "降水累积量计算",
+        "累加某个时间段内降雨量以计算降水累积量",
+        "Vagrant",
         "https://github.com/Marvelss",
         )
 with col3:
     app("pages/images/HugChat.png",
         '#',
-        "降雨日数计算2",
-        "根据某个时间段内降雨量",
+        "基于活动积温的生育期计算",
+        "基于每日累积温度达到特定积温阈值的时间即为相应生育期",
         "孙轨迹",
         "https://github.com/Marvelss",
         )
+col21, col22, col23 = st.columns(3)
+with col21:
+    app("pages/images/KnowledgeGPT.png",
+        '#',
+        "时空抽取",
+        "基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数",
+        "Vagrant",
+        "https://github.com/Marvelss",
+        )
 
+with col22:
+    app("pages/images/NYC.png",
+        '#',
+        "植被指数计算",
+        "累加某个时间段内降雨量以计算降水累积量",
+        "Vagrant",
+        "https://github.com/Marvelss",
+        )
+with col23:
+    app("pages/images/Roadmap.png",
+        '#',
+        "景观指数计算",
+        "基于每日累积温度达到特定积温阈值的时间即为相应生育期",
+        "Landscapemetrics",
+        "https://github.com/r-spatialecology/landscapemetrics",
+        )
 
 # col1, col2, col3 = st.columns(3)
 # with col1:
@@ -625,34 +791,7 @@ df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
 #              fontsize=16)
 # st.pyplot(fig)
 # # temperature_data = simulate_temperature_data()
-nodes1 = [
-    {"label": "气象数据", "value": "气象数据"},
-    {
-        "label": "植保数据",
-        "value": "植保数据",
-        "children": [
-            {"label": "feature1", "value": "sub_a"},
-            {"label": "feature2", "value": "sub_b"},
-            {"label": "feature3", "value": "sub_c"},
-        ],
-    },
-    {
-        "label": "农学数据",
-        "value": "folder_c",
-        "children": [
-            {"label": "晚稻移栽期", "value": "sub_d"},
-            {
-                "label": "预测峰值",
-                "value": "sub_e",
-                "children": [
-                    {"label": "测报站点", "value": "sub_sub4"},
-                    {"label": "生化指标", "value": "sub_s5"},
-                ],
-            },
-            {"label": "生化指标", "value": "sub_f"},
-        ],
-    },
-]
+
 nodes2 = [
     {"label": "气象数据", "value": "气象数据"},
     {
