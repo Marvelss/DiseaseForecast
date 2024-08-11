@@ -53,7 +53,7 @@ dataSCM, dataSCR = st.columns([0.7, 0.4])
 with dataSCM:
     st.markdown("##### 上传数据集")
 
-    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据(未开放)', '农学数据(未开放)'], ["🌨️️", "🌾", "☣️"])
+    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '农学数据'], ["🌨️️", "🌾", "☣️"])
 
     uploaded_files = st.file_uploader(
         "上传数据集",
@@ -133,12 +133,13 @@ with dataSCM:
         # 上传出错提示
         except BaseException as e:
             st.toast('上传错误,请检测文件内容及格式无误后重新上传', icon="⚠️")
-            new_data = {
-                "编号": pages_utils.generateID(),
-                "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "上传出错",
-                "上传时间": datetime.now().strftime("%H:%M:%S"),
-                "字段": '未识别'}
-            pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
+            # new_data = {
+            #     "编号": pages_utils.generateID(),
+            #     "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "上传出错",
+            #     "上传时间": datetime.now().strftime("%H:%M:%S"),
+            #     "字段": '未识别'}
+            # pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
+        st.markdown(pages_utils.TempDataSetField[0])
         print('======================原始数据集======================')
         print(pages_utils.TempDataSet[0])
 # ==============================右侧文件上传状态显示==============================

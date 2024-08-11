@@ -209,10 +209,18 @@ with dataPCV:
                         column_order=column)
 
     # ===============显示左下字段或特征及获取===============
-    weatherNameT, plantNameT, agricultureNameT = pages_utils.TempDataSet[0].columns.tolist(), ['无1'], ['无2']
-    # 数组元素去重
-    weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
-        set(agricultureNameT))
+    weatherNameT, plantNameT, agricultureNameT = ['无1'], ['无2'], ['无3']
+    print('===========预处理===========')
+    if not pages_utils.TempDataSetField[0].empty:
+        weatherNameT1, plantNameT1, agricultureNameT1 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
+        weatherNameList = weatherNameT1
+        plantNameList = plantNameT1
+        agricultureNameList = agricultureNameT1
+    if not pages_utils.TempDataSetField[1].empty:
+        weatherNameT2, plantNameT2, agricultureNameT2 = pages_utils.getDataFiled(1, pages_utils.TempDataSetField[1])
+        weatherNameList = weatherNameT1 + weatherNameT2
+        plantNameList = plantNameT1 + plantNameT2
+        agricultureNameList = agricultureNameT1 + agricultureNameT2
     # 添加字段名称选项
     # weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
     # if tempDF[tempDF['数据类型'] == '气象数据']['字段'].any():
@@ -228,26 +236,14 @@ with dataPCV:
     #     '选择数据集',
     #     ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
     result1 = pages_utils.multiselect_all(
-        st, '全选-字段', weatherName,
-        'temp', 'collapsed')
-    # st.checkbox('全选-植保数据', disabled=True)
-    # st.checkbox('全选-农学数据', disabled=True)
-    # selection = st.dataframe(
-    #     pages_utils.TempDataSet[0], height=190, width=800, on_select="rerun", selection_mode="multi-row")
-    # # st.markdown(selection['上级单位'])
-    # people = selection.selection.rows
-    # # filtered_df = df.iloc[people]
-    # st.markdown(people)
-
-    result2 = []
-    result3 = []
-    # result2 = pages_utils.multiselect_all(
-    #     st, '全选-植保数据', plantName,
-    #     'temp', 'collapsed')
-
-    # result3 = pages_utils.multiselect_all(
-    #     st, '全选-农学数据', agricultureName,
-    #     'temp', 'collapsed')
+        st, '全选-气象数据', weatherNameList,
+        'tempTemperature', 'collapsed')
+    result2 = pages_utils.multiselect_all(
+        st, '全选-植保数据', plantNameList,
+        'tempPlant', 'collapsed')
+    result3 = pages_utils.multiselect_all(
+        st, '全选-农学数据', agricultureNameList,
+        'tempAgriculture', 'collapsed')
 
 # ===============显示右上预处理方法选项===============
 with dataPCM:
@@ -327,9 +323,15 @@ with dataPCM:
         # update dataframe state
         # print('=======获取预处理方法=====')
         # print(getCheckboxName(st.session_state["preMethodName"]['checkBox']))
+        if result1:
+            dataType = '气象数据'
+        elif result2:
+            dataType = '植保数据'
+        elif result3:
+            dataType = '农学数据'
         new_data = {
             "编号": pages_utils.generateID(),
-            "数据类型": '原始数据集',
+            "数据类型": dataType,
             "输入字段": mergeArray(result1, result2, result3),
             "预处理后字段": None,
             "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),

@@ -55,55 +55,39 @@ def generateID():
 
 
 # 获取各类数据集字段
-def getDataFiled():
-    weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
-    for i in range(len(TempDataSetField)):
-        tempDF = TempDataSetField[i]
-        if i == 0:
-            if tempDF[tempDF['数据类型'] == '气象数据']['字段'].any():
-                weatherName.clear()
-                temp = tempDF[tempDF['数据类型'] == '气象数据']['字段'].tolist()[0]
-                weatherName = np.concatenate((temp, weatherName))
-            if tempDF[tempDF['数据类型'] == '植保数据']['字段'].any():
-                plantName.clear()
-                temp = tempDF[tempDF['数据类型'] == '植保数据']['字段'].tolist()[0]
-                plantName = np.concatenate((temp, plantName))
-            if tempDF[tempDF['数据类型'] == '农学数据']['字段'].any():
-                agricultureName.clear()
-                temp = tempDF[tempDF['数据类型'] == '农学数据']['字段'].tolist()[0]
-                agricultureName = np.concatenate((temp, agricultureName))
-        elif i == 1:
-            if tempDF[tempDF['数据类型'] == '气象数据']['预处理后字段'].any():
-                temp = tempDF[tempDF['数据类型'] == '气象数据']['预处理后字段'].tolist()[0]
-                weatherName = np.concatenate((temp, weatherName))
-            if tempDF[tempDF['数据类型'] == '植保数据']['预处理后字段'].any():
-                temp = tempDF[tempDF['数据类型'] == '植保数据']['预处理后字段'].tolist()[0]
-                plantName = np.concatenate((temp, plantName))
-            if tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].any():
-                temp = tempDF[tempDF['数据类型'] == '农学数据']['预处理后字段'].tolist()[0]
-                agricultureName = np.concatenate((temp, agricultureName))
-        elif i == 2:
-            if tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '气象数据']['备选特征'].tolist()[0]
-                weatherName = np.concatenate(([temp], weatherName))
-            if tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '植保数据']['备选特征'].tolist()[0]
-                plantName = np.concatenate((temp, plantName))
-            if tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '农学数据']['备选特征'].tolist()[0]
-                agricultureName = np.concatenate((temp, agricultureName))
-        elif i == 3:
-            if tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '气象数据']['优选特征'].tolist()[0]
-                weatherName = np.concatenate(([temp], weatherName))
-            if tempDF[tempDF['数据类型'] == '植保数据']['优选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '植保数据']['优选特征'].tolist()[0]
-                plantName = np.concatenate((temp, plantName))
-            if tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].any():
-                temp = tempDF[tempDF['数据类型'] == '农学数据']['优选特征'].tolist()[0]
-                agricultureName = np.concatenate((temp, agricultureName))
-    # print(weatherName, plantName, agricultureName)
-
+def getDataFiled(dataNum, tempDataSetField):
+    tempDF = tempDataSetField
+    weatherName, plantName, agricultureName = [], [], []
+    fieldName = '字段'
+    if dataNum == 0:
+        fieldName = '字段'
+    elif dataNum == 1:
+        fieldName = '预处理后字段'
+    elif dataNum == 2:
+        fieldName = '备选特征'
+    elif dataNum == 3:
+        fieldName = '优选特征'
+    if tempDF[tempDF['数据类型'] == '气象数据'][fieldName].any():
+        array_2d = tempDF[tempDF['数据类型'] == '气象数据'][fieldName].tolist()
+        # 原始数据传入的是个数组, 而其他环节只传入上传后的单个字符串, 所以array_2d[0]
+        if not isinstance(array_2d[0], list):
+            array_2d = [array_2d]
+        # 合并二维数组为一维数组并去重
+        weatherName = list(set([item for sublist in array_2d for item in sublist]))
+    if tempDF[tempDF['数据类型'] == '植保数据'][fieldName].any():
+        array_2dP = tempDF[tempDF['数据类型'] == '植保数据'][fieldName].tolist()
+        # 原始数据传入的是个数组, 而其他环节只传入上传后的单个字符串, 所以array_2d[0]
+        if not isinstance(array_2dP[0], list):
+            array_2dP = [array_2dP]
+        # 合并二维数组为一维数组并去重
+        plantName = list(set([item for sublist in array_2dP for item in sublist]))
+    if tempDF[tempDF['数据类型'] == '农学数据'][fieldName].any():
+        array_2dA = tempDF[tempDF['数据类型'] == '农学数据'][fieldName].tolist()
+        # 原始数据传入的是个数组, 而其他环节只传入上传后的单个字符串, 所以array_2d[0]
+        if not isinstance(array_2dA[0], list):
+            array_2dA = [array_2dA]
+        # 合并二维数组为一维数组并去重
+        agricultureName = list(set([item for sublist in array_2dA for item in sublist]))
     return weatherName, plantName, agricultureName
 
 
