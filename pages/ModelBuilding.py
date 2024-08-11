@@ -400,23 +400,27 @@ with modelACV:
                         height=220, width=800,
                         column_order=column)
     # ===============显示左下字段或特征及获取===============
-    # 获取所有column
-    columnArray = []
-    for p in range(len(pages_utils.TempDataSet) - 1):
-        columnArray.extend(pages_utils.TempDataSet[p].columns)
-    # 数组元素去重
-    featureList = list(set(columnArray))  # 特征变量
-    # 过滤特定元素
-    filtered_columns = [col for col in featureList if col not in ["上级单位", "测报站点", "年", "DayOfYear"]]
-    # 将过滤后的元素放入集合中
-    targetList = set(filtered_columns)  # 目标变量
+    weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
+    if not pages_utils.TempDataSetField[3].empty:
+        weatherNameT0, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
+        weatherNameT1, plantNameT1, agricultureNameT1 = pages_utils.getDataFiled(1, pages_utils.TempDataSetField[1])
+        weatherNameT2, plantNameT2, agricultureNameT2 = pages_utils.getDataFiled(2, pages_utils.TempDataSetField[2])
+        weatherNameT3, plantNameT3, agricultureNameT3 = pages_utils.getDataFiled(3, pages_utils.TempDataSetField[3])
+
+        weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0 + weatherNameT3
+        plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0 + plantNameT3
+        agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT3
+
+    # 按照数据类型显示左侧字段或特征
     result1 = pages_utils.multiselect_all(
-        st, '全选-特征变量',
-        featureList,
-        'temp', 'collapsed')
+        st, '全选-气象特征', weatherNameList,
+        'tempTemperature', 'collapsed')
     result2 = pages_utils.multiselect_all(
-        st, '全选-目标变量', targetList,
-        'temp', 'collapsed')
+        st, '全选-植保特征', plantNameList,
+        'tempPlant', 'collapsed')
+    result3 = pages_utils.multiselect_all(
+        st, '全选-农学特征', agricultureNameList,
+        'tempAgriculture', 'collapsed')
 
 # ===============显示右上模型选项===============
 with modelACM:

@@ -345,28 +345,29 @@ with dataPCV:
                         height=220, width=800,
                         column_order=column)
     # ===============显示左下字段或特征及获取===============
-    # a = st.selectbox(
-    #     '选择数据集',
-    #     ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
-    # 预处理后数据集表信息
-    # weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled()
-    weatherNameT, plantNameT, agricultureNameT = pages_utils.TempDataSet[2].columns.tolist(), ['无1'], ['无2']
-    # 数组元素去重
-    weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
-        set(agricultureNameT))
+    weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
+    if not pages_utils.TempDataSetField[2].empty:
+        weatherNameT0, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
+        weatherNameT1, plantNameT1, agricultureNameT1 = pages_utils.getDataFiled(1, pages_utils.TempDataSetField[1])
+        weatherNameT2, plantNameT2, agricultureNameT2 = pages_utils.getDataFiled(2, pages_utils.TempDataSetField[2])
+        weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0
+        plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0
+        agricultureNameList = agricultureNameT1 + agricultureNameT0
+    if not pages_utils.TempDataSetField[3].empty:
+        weatherNameT3, plantNameT3, agricultureNameT3 = pages_utils.getDataFiled(3, pages_utils.TempDataSetField[3])
+        weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0 + weatherNameT3
+        plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0 + plantNameT3
+        agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT3
+    # 按照数据类型显示左侧字段或特征
     result1 = pages_utils.multiselect_all(
-        st, '全选-特征', weatherName,
-        'temp', 'collapsed')
-    st.checkbox('全选-植保数据', disabled=True)
-    st.checkbox('全选-农学数据', disabled=True)
-    result2 = []
-    result3 = []
-    # result2 = pages_utils.multiselect_all(
-    #     st, '全选-植保数据', plantName,
-    #     'temp', 'collapsed')
-    # result3 = pages_utils.multiselect_all(
-    #     st, '全选-农学数据', agricultureName,
-    #     'temp', 'collapsed')
+        st, '全选-气象特征', weatherNameList,
+        'tempTemperature', 'collapsed')
+    result2 = pages_utils.multiselect_all(
+        st, '全选-植保特征', plantNameList,
+        'tempPlant', 'collapsed')
+    result3 = pages_utils.multiselect_all(
+        st, '全选-农学特征', agricultureNameList,
+        'tempAgriculture', 'collapsed')
 # ===============显示右上处理方法选项===============
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])

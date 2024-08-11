@@ -209,8 +209,7 @@ with dataPCV:
                         column_order=column)
 
     # ===============显示左下字段或特征及获取===============
-    weatherNameT, plantNameT, agricultureNameT = ['无1'], ['无2'], ['无3']
-    print('===========预处理===========')
+    weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
     if not pages_utils.TempDataSetField[0].empty:
         weatherNameT1, plantNameT1, agricultureNameT1 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
         weatherNameList = weatherNameT1
@@ -221,20 +220,7 @@ with dataPCV:
         weatherNameList = weatherNameT1 + weatherNameT2
         plantNameList = plantNameT1 + plantNameT2
         agricultureNameList = agricultureNameT1 + agricultureNameT2
-    # 添加字段名称选项
-    # weatherName, plantName, agricultureName = ['无1'], ['无2'], ['无3']
-    # if tempDF[tempDF['数据类型'] == '气象数据']['字段'].any():
-    #     weatherName.clear()
-    #     weatherName = tempDF[tempDF['数据类型'] == '气象数据']['字段'].tolist()[0]
-    # if tempDF[tempDF['数据类型'] == '植保数据']['字段'].any():
-    #     plantName.clear()
-    #     plantName = tempDF[tempDF['数据类型'] == '植保数据']['字段'].tolist()[0]
-    # if tempDF[tempDF['数据类型'] == '农学数据']['字段'].any():
-    #     agricultureName.clear()
-    #     agricultureName = tempDF[tempDF['数据类型'] == '农学数据']['字段'].tolist()[0]
-    # a = st.selectbox(
-    #     '选择数据集',
-    #     ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
+    # 按照数据类型显示左侧字段或特征
     result1 = pages_utils.multiselect_all(
         st, '全选-气象数据', weatherNameList,
         'tempTemperature', 'collapsed')
