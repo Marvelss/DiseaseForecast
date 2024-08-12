@@ -148,6 +148,17 @@ def colored_header(label, color=None, description=None):
         st.caption(description)
 
 
+def colored_subHeader(label, color=None, description=None):
+    """Shows a header with a colored underline and an optional description."""
+    st.subheader(label)
+    st.write(
+        f'<hr style="background-color: {color}; margin-top: 0; margin-bottom: 0; height: 3px; border: none; border-radius: 3px;">',
+        unsafe_allow_html=True,
+    )
+    if description:
+        st.caption(description)
+
+
 # From: https://discuss.streamlit.io/t/href-on-image/9693/3
 @st.cache_data()
 def get_base64_of_bin_file(bin_file):
