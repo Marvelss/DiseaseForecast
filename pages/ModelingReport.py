@@ -77,7 +77,8 @@ def category(name, description=None):
 
 
 # st.header('建模报告')
-st.markdown('# 建模报告')
+st.title('建模报告')
+# st.markdown('# 建模报告')
 category("📊️ 原始数据")
 
 st.markdown(
@@ -145,7 +146,7 @@ category("🌎 特征优选")
 colFO1, colFO2 = st.columns(2)
 with colFO1:
     img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '特征优选-Pearson.png'))
-    st.image(img, width=700)
+    st.image(img, width=670)
     colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
     colFCPart1.metric('输入特征', '降水、温度')
     colFCPart2.metric('特征优选方法', 'Pearson相关性分析')
@@ -163,12 +164,45 @@ with colFO2:
     colFCPart4.metric('筛选条件', 'TOP80(%)')
 category("🌏 模型构建")
 
-st.markdown('#### 5.:'
-            '模型,模型参数,评价指标,分配比例,特征信息(个数和条数)')
+colMB1, colMB2 = st.columns(2)
+img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '模型构建-回归模型1.png'))
+img1 = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '模型构建-预测结果图.png'))
+with colMB1:
+    st.image(img1, width=750)
+    st.metric('特征集', '降水、温度、降水累积量、降雨日数')
+    colMBPart1, colMBPart2 = st.columns(2)
+    colMBPart1.metric('标签', '病害峰值')
+    colMBPart2.metric('特征大小', '5*90')
+with colMB2:
+    st.image(img, width=720)
+    st.metric('模型', 'Random Forest')
+    colMBPart3, colMBPart4 = st.columns(2)
+    colMBPart3.metric('评价指标', 'MSE、R方')
+    colMBPart4.metric('数据集分配比例', '5:6')
 
-st.markdown('#### 6.天气情景生成器:'
-            '地区,模型,年限长度,场景,异常程度,'
-            '模拟气象数据生成图 ,模型预测结果 ,偏差指标结果')
+category("🌐 天气情景生成器")
+colWG1, colWG2 = st.columns(2)
+with colWG1:
+    st.metric('地区', '湖南省湘阴县')
+    st.metric('模型', 'RF、SVM')
+with colWG2:
+    st.metric('天气情景', '高温少雨、低温多雨')
+    st.metric('年限长度', '3年')
+colWG3, colWG4 = st.columns(2)
+img2 = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'Figure_1.png'))
+img3 = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'Figure_2.png'))
+colWG3.image(img2)
+colWG4.image(img3)
 
-st.markdown('#### 7.模型预测结果:'
-            '模型构建中测试集和模拟气象数据的预测结果(地图中展示)')
+
+st.markdown('#### 基于天气情景生成器的模拟气象数据与训练数据的模型预测结果对比')
+img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '高温多雨情景下和实际病害发生程度对比图.png'))
+st.image(img)
+st.markdown('#### 基于天气情景生成器的模型预测与实际数据结果对比')
+img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'weatherGeneratorEvaluateResult2.jpg'))
+st.image(img)
+co3, co4 = st.columns(2)
+with co3:
+    st.metric("Dev_S", "0.0799")
+with co4:
+    st.metric("Dev_S", "0.0899")
