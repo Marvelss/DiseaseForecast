@@ -194,7 +194,6 @@ img3 = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'Figure_2.png')
 colWG3.image(img2)
 colWG4.image(img3)
 
-
 st.markdown('#### 基于天气情景生成器的模拟气象数据与训练数据的模型预测结果对比')
 img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '高温多雨情景下和实际病害发生程度对比图.png'))
 st.image(img)
@@ -206,3 +205,9 @@ with co3:
     st.metric("Dev_S", "0.0799")
 with co4:
     st.metric("Dev_S", "0.0899")
+category("🌑 模型稳定性评估结果")
+st.markdown('###### 在高温多雨的条件下，RF模型极易受到温度的影响，可能导致决策树中的特征选择不稳定。'
+            '原因可能在于树模型对高维度数据的分裂规则过于敏感，高温可能使某些特征权重过高或过低。'
+            '这种情况下，模型的输出可能波动较大，预测结果不稳定。\n'
+            '###### RF模型在高温多雨的极端气象情景下,极易遭受温度的影响,模型极不稳定\n'
+            '###### KNN模型在低温多雨的极端气象情景下,不易遭受温度的影响,模型十分稳定')
