@@ -136,6 +136,8 @@ def clearOtherOption(key1):
     for h in range(checkBoxModelNum):
         if h != key1:
             st.session_state[f'checkBoxModel{h}'] = False
+    # 若已经在可视化展示状态,则默认返回任务清单
+    st.session_state.page15 = 0
     return
 
 

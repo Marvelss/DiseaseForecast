@@ -100,6 +100,7 @@ def clear_all():
         if st.session_state[f'checkbox{h}']:
             st.session_state["OptimizationMethodName"]['checkBox'] = f'checkbox{h}'
         st.session_state[f'checkbox{h}'] = False
+    st.session_state.page14 = 0
     return
 
 

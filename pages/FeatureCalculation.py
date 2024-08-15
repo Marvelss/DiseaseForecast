@@ -65,6 +65,8 @@ def clear_all():
         if st.session_state[f'checkbox{h}']:
             st.session_state["featureMethodName"]['checkBox'] = f'checkbox{h}'
         st.session_state[f'checkbox{h}'] = False
+    # 若已经在可视化展示状,则默认返回任务清单
+    st.session_state.page13 = 0
     return
 
 
