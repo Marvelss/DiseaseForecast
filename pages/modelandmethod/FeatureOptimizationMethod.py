@@ -4,11 +4,9 @@
 @File : FeatureOptimizationMethod.py
 @Description : 特征优化方法
 """
-import pandas as pd
 from scipy.stats import stats
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from skrebate import ReliefF
 
 
@@ -17,15 +15,13 @@ class FeatureOptimizationMethod:
         self.dataFrame = dataFrame.copy()
         self.reservedField = reservedField
 
-    # 加工字段名称
-    def getHandledField(self, fieldName):
+    def getHandledFieldPoint(self, fieldName):
         # 若字段为原始数据
-        if '_优' not in fieldName:
-            return f"{fieldName}_优选特征"
+        if fieldName[-1].isdigit() and fieldName[-2] != '后':
+            return fieldName[:-1] + str(int(fieldName[-1]) + 1)
         # 若字段已处理,则末尾数字+1
-        if '_优' in fieldName:
-            return (fieldName.split('征')[0] + '征' +
-                    str(int(fieldName.split('征')[1]) + 1))
+        else:
+            return f"{fieldName}-优选特征0"
 
     # t检验
     def tTest(self, methodParam):
@@ -54,7 +50,7 @@ class FeatureOptimizationMethod:
         optimalFeatureList = list(filtered_data.keys())
         newColumnsList = []
         for feature in optimalFeatureList:
-            new_column_name = self.getHandledField(feature)
+            new_column_name = self.getHandledFieldPoint(feature)
             self.dataFrame[new_column_name] = self.dataFrame[feature]
             newColumnsList.append(new_column_name)
         return self.dataFrame, tempResult, newColumnsList
@@ -157,7 +153,7 @@ class FeatureOptimizationMethod:
         selected_features = X.columns[selected_features_indices]
         newColumnsList = []
         for feature in selected_features:
-            new_column_name = self.getHandledField(feature)
+            new_column_name = self.getHandledFieldPoint(feature)
             self.dataFrame[new_column_name] = self.dataFrame[feature]
             newColumnsList.append(new_column_name)
         return self.dataFrame, sorted_feature_importance_dict, newColumnsList
@@ -167,11 +163,6 @@ class FeatureOptimizationMethod:
         # param:['年 DayOfYear 上级单位 测报站点', '0.9']
         # param1:所有变量
         # param2:提取条件
-
-        # 保存字段名称对应系数值,用于返回热力图显示
-        tempDict = {}
-        # 筛选后的字段
-        newColumns = []
         print('============测试============')
         print(methodParam)
         fieldList = methodParam[0].split(' ')
@@ -222,7 +213,7 @@ class FeatureOptimizationMethod:
         newColumnsList = []
         selected_features_list = list(selected_features)
         for feature in selected_features_list:
-            new_column_name = self.getHandledField(feature)
+            new_column_name = self.getHandledFieldPoint(feature)
             self.dataFrame[new_column_name] = self.dataFrame[feature]
             newColumnsList.append(new_column_name)
         return self.dataFrame, correlation_matrix, newColumnsList

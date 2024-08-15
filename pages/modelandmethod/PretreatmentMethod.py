@@ -14,14 +14,13 @@ class PretreatmentMethod:
         self.reservedField = reservedField
 
     # 加工字段名称
-    def getHandledField(self, fieldName):
+    def getHandledFieldPoint(self, fieldName):
         # 若字段为原始数据
-        if '_预' not in fieldName:
-            return f"{fieldName}_预处理后"
+        if fieldName[-1].isdigit():
+            return fieldName[:-1] + str(int(fieldName[-1]) + 1)
         # 若字段已处理,则末尾数字+1
-        if '_预' in fieldName:
-            return (fieldName.split('后')[0] + '后' +
-                    str(int(fieldName.split('后')[1]) + 1))
+        else:
+            return f"{fieldName}-预处理后0"
 
     # 缺失值插补
     def linearInterpolation(self, methodParam):
@@ -32,7 +31,7 @@ class PretreatmentMethod:
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
         # 复制原处理字段,并在名称后添加_预处理后
-        newDataColumn = self.getHandledField(self.fieldName)
+        newDataColumn = self.getHandledFieldPoint(self.fieldName)
         print(f'线性插补:{self.fieldName}-{newDataColumn}')
         # 线性插值
         if methodParam[0] == '线性插值':
@@ -66,7 +65,8 @@ class PretreatmentMethod:
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
 
-        newDataColumn = self.getHandledField(self.fieldName)
+        newDataColumn = self.getHandledFieldPoint(self.fieldName)
+
         print(f'剔除异常值:{self.fieldName}-{newDataColumn}')
         newDataFrame[newDataColumn] = newDataFrame[self.fieldName]
 

@@ -208,7 +208,10 @@ def onPreviewResults():
     if st.button("添加处理", on_click=clear_all):
         new_data = {
             "编号": pages_utils.generateID(),
-            "数据类型": '气象数据',
+            "数据类型":
+                ["气象数据"] * len(result1) +
+                ["植保数据"] * len(result2) +
+                ["农学数据"] * len(result3),
             "输入特征": mergeArray(result1, result2, result3),
             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
             "方法参数":
@@ -281,6 +284,7 @@ def onRun():
             afterHandleData, pages_utils.TempDataSet[3],
             on=intersection_cols, how="left")
 
+        # print(newColumns)
         # ===============更新左侧显示内容===============
         update_values = {
             # "数据类型": "气象数据", "输入特征": fields[0],
@@ -289,10 +293,6 @@ def onRun():
             # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
             "时间": datetime.datetime.now().time(),
             "处理状态": True}
-        print(update_values)
-        print(type(newColumns))
-        print(len(idNumber))
-        print(len(pages_utils.TempDataSetField[3]))
         # 查找要更新的数据记录
         for index, row in pages_utils.TempDataSetField[3].iterrows():
             if row["编号"] == idNumber[indexT]:
@@ -359,6 +359,15 @@ with dataPCV:
     weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0 + weatherNameT3
     plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0 + plantNameT3
     agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT3
+    print(weatherNameT1 + weatherNameT2 + weatherNameT0)
+    print(weatherNameT3)
+    if weatherNameT3:
+        for a, b in zip(weatherNameT1 + weatherNameT2 + weatherNameT0, weatherNameT3):
+            if '-'.join(b.split('-')[:-1]) in a:
+                weatherNameList.append(b)
+            else:
+                weatherNameList.append(a)
+
     # 按照数据类型显示左侧字段或特征
     result1 = pages_utils.multiselect_all(
         st, '全选-气象特征', list(set(weatherNameList)),

@@ -1,7 +1,7 @@
+import ast
 import random
 import shutil
 
-import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix, roc_curve, precision_recall_curve
 import zipfile
@@ -88,6 +88,20 @@ def getDataFiled(dataNum, tempDataSetField):
             array_2dA = [array_2dA]
         # 合并二维数组为一维数组并去重
         agricultureName = list(set([item for sublist in array_2dA for item in sublist]))
+
+    # 特征优选界面做单独处理,因为单条记录含多个输出特征
+    if dataNum == 3 and not tempDF['优选特征'].empty:
+        flagT = True
+        for i, row in tempDF.iterrows():
+            if isinstance(tempDF['优选特征'][i], float):
+                # 只要含有nan就不取
+                flagT = False
+        expanded_rows = []
+        if flagT:
+            for i, row in tempDF.iterrows():
+                print(row['优选特征'])
+                expanded_rows = expanded_rows + row['优选特征'].split(',')
+            weatherName, plantName, agricultureName = expanded_rows, expanded_rows, expanded_rows
     return weatherName, plantName, agricultureName
 
 
@@ -174,8 +188,6 @@ TempDataSet = [RawDataSet, PreprocessedDataSet,
                FeatureDataSet, OptimalFeatureDataSet, OptimalFeatureDataSet]
 
 # 面状内容
-
-
 # 创建字典
 RawDataSetFieldFacet = {
     "编号": [], "文件名称": [], "数据类型": [], "数据格式": [], "根节点": [], "子节点": [],
