@@ -209,26 +209,26 @@ with dataPCV:
                         column_order=column)
 
     # ===============显示左下字段或特征及获取===============
-    weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
-    if not pages_utils.TempDataSetField[0].empty:
-        weatherNameT1, plantNameT1, agricultureNameT1 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
-        weatherNameList = weatherNameT1
-        plantNameList = plantNameT1
-        agricultureNameList = agricultureNameT1
-    if not pages_utils.TempDataSetField[1].empty:
-        weatherNameT2, plantNameT2, agricultureNameT2 = pages_utils.getDataFiled(1, pages_utils.TempDataSetField[1])
-        weatherNameList = weatherNameT1 + weatherNameT2
-        plantNameList = plantNameT1 + plantNameT2
-        agricultureNameList = agricultureNameT1 + agricultureNameT2
+    # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
+    # if not pages_utils.TempDataSetField[0].empty:
+    weatherNameT1, plantNameT1, agricultureNameT1 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
+    # weatherNameList = weatherNameT1
+    # plantNameList = plantNameT1
+    # agricultureNameList = agricultureNameT1
+    # if not pages_utils.TempDataSetField[1].empty:
+    weatherNameT2, plantNameT2, agricultureNameT2 = pages_utils.getDataFiled(1, pages_utils.TempDataSetField[1])
+    weatherNameList = weatherNameT1 + weatherNameT2
+    plantNameList = plantNameT1 + plantNameT2
+    agricultureNameList = agricultureNameT1 + agricultureNameT2
     # 按照数据类型显示左侧字段或特征
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', weatherNameList,
+        st, '全选-气象数据', list(set(weatherNameList)),
         'tempTemperature', 'collapsed')
     result2 = pages_utils.multiselect_all(
-        st, '全选-植保数据', plantNameList,
+        st, '全选-植保数据', list(set(plantNameList)),
         'tempPlant', 'collapsed')
     result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', agricultureNameList,
+        st, '全选-农学数据', list(set(agricultureNameList)),
         'tempAgriculture', 'collapsed')
 
 # ===============显示右上预处理方法选项===============

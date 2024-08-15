@@ -139,7 +139,6 @@ with dataSCM:
             #     "上传时间": datetime.now().strftime("%H:%M:%S"),
             #     "字段": '未识别'}
             # pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
-        st.markdown(pages_utils.TempDataSetField[0])
         print('======================原始数据集======================')
         print(pages_utils.TempDataSet[0])
 # ==============================右侧文件上传状态显示==============================
