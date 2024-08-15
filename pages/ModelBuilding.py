@@ -410,17 +410,28 @@ with modelACV:
         weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0 + weatherNameT3
         plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0 + plantNameT3
         agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT3
+    modelACVCol1, modelACVCol2 = st.columns(2)
+    with modelACVCol1:
 
-    # 按照数据类型显示左侧字段或特征
-    result1 = pages_utils.multiselect_all(
-        st, '全选-气象特征', weatherNameList,
-        'tempTemperature', 'collapsed')
-    result2 = pages_utils.multiselect_all(
-        st, '全选-植保特征', plantNameList,
-        'tempPlant', 'collapsed')
-    result3 = pages_utils.multiselect_all(
-        st, '全选-农学特征', agricultureNameList,
-        'tempAgriculture', 'collapsed')
+        # 按照数据类型显示左侧字段或特征
+        result1 = pages_utils.multiselect_all(
+            st, '全选-气象特征', weatherNameList,
+            'tempTemperature', 'collapsed')
+        result2 = pages_utils.multiselect_all(
+            st, '全选-植保特征', plantNameList,
+            'tempPlant', 'collapsed')
+        result3 = pages_utils.multiselect_all(
+            st, '全选-农学特征', agricultureNameList,
+            'tempAgriculture', 'collapsed')
+    with modelACVCol2:
+        st.markdown("###### 标签\n")
+        resultLabel = st.selectbox(
+            'predictLabel',
+            weatherNameList + plantNameList + agricultureNameList,
+            label_visibility='collapsed')
+
+
+
 
 # ===============显示右上模型选项===============
 with modelACM:
@@ -496,8 +507,8 @@ with modelACM:
                         "编号": pages_utils.generateID(),
                         "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
                         "模型参数": st.session_state["modelParamName"],
-                        "特征": result1,
-                        "标签": result2,
+                        "特征": result1 + result3 + result2,
+                        "标签": resultLabel,
                         "时间": datetime.datetime.now().time(),
                         "处理状态": False}
                     print('======================模型构建-添加模型======================')
@@ -562,7 +573,8 @@ with modelACM:
                 # else:
                 #     st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
                 #     pages_utils.TempDataSet[4] = beforeDF
-
+            st.markdown('###### 最终输入模型特征')
+            st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
             # st.markdown('---')
             st.markdown("###### 训练与验证数据集划分")
             colOP1, colOP2 = st.columns(2)
