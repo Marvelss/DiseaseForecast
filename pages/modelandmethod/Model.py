@@ -160,9 +160,15 @@ class Model:
         parameters_dict = {}
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
-        # print(parameters_dict)
-        # 使用SVM回归模型进行拟合
-        model1 = KNeighborsClassifier(n_neighbors=3)
+        # # 转换参数格式
+        if 'n_neighbors' in parameters_dict:
+            parameters_dict['n_neighbors'] = int(parameters_dict['n_neighbors'])
+        if 'leaf_size' in parameters_dict:
+            parameters_dict['max_iter'] = int(parameters_dict['max_iter'])
+        if 'n_jobs' in parameters_dict:
+            parameters_dict['max_iter'] = int(parameters_dict['max_iter'])
+        # 使用KNN回归模型进行拟合
+        model1 = KNeighborsClassifier(**parameters_dict)
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
@@ -246,10 +252,12 @@ class Model:
         parameters_dict = {}
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
-
-        # print(parameters_dict)
+        # # 转换参数格式
+        if 'store_covariance' in parameters_dict:
+            parameters_dict['store_covariance'] = bool(parameters_dict['store_covariance'])
+        # 使用KNN回归模型进行拟合
         # 使用FLDA回归模型进行拟合
-        model1 = LinearDiscriminantAnalysis()
+        model1 = LinearDiscriminantAnalysis(**parameters_dict)
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
@@ -335,8 +343,13 @@ class Model:
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
         # print(parameters_dict)
+        # # 转换参数格式
+        if 'n_estimators' in parameters_dict:
+            parameters_dict['n_estimators'] = int(parameters_dict['n_estimators'])
+        if 'min_samples_split' in parameters_dict:
+            parameters_dict['min_samples_split'] = int(parameters_dict['min_samples_split'])
         # 使用RF回归模型进行拟合
-        model1 = RandomForestClassifier(n_estimators=100, random_state=42)
+        model1 = RandomForestClassifier(**parameters_dict)
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
@@ -633,17 +646,21 @@ class Model:
         # print('======================模型构建-开始训练======================')
         # 合并参数名称和值
         params = self.modelParam
-        # print(params['参数名'].keys())
+        param_names = params['参数名']
+        param_values = params['参数值']
         parameters_dict = {}
-        for key in params['参数名']:
-            # Get the parameter name and value using the key
-            param_name = str(params['参数名'][key])
-            param_value = str(params['参数值'][key])
-            # Store them in the new dictionary
-            parameters_dict[param_name] = param_value
-        print(parameters_dict)
+        for i in range(len(param_names)):
+            parameters_dict[param_names[i]] = param_values[i]
+        # # 转换参数格式
+        if 'n_components' in parameters_dict:
+            parameters_dict['n_components'] = int(parameters_dict['n_components'])
+        if 'max_iter' in parameters_dict:
+            parameters_dict['max_iter'] = int(parameters_dict['max_iter'])
+        if 'scale' in parameters_dict:
+            parameters_dict['scale'] = bool(parameters_dict['scale'])
+        # print(parameters_dict)
         # 使用PLSR回归模型进行拟合
-        model1 = PLSRegression(n_components=2)
+        model1 = PLSRegression(**parameters_dict)
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
@@ -726,8 +743,12 @@ class Model:
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
         # print(parameters_dict)
+        if 'fit_intercept' in parameters_dict:
+            parameters_dict['fit_intercept'] = bool(parameters_dict['fit_intercept'])
+        if 'alpha' in parameters_dict:
+            parameters_dict['alpha'] = float(parameters_dict['alpha'])
         # 使用LR回归模型进行拟合
-        model1 = LinearRegression()
+        model1 = LinearRegression(**parameters_dict)
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
@@ -816,8 +837,13 @@ class Model:
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
         # print(parameters_dict)
+
+        if 'epsilon' in parameters_dict:
+            parameters_dict['epsilon'] = float(parameters_dict['epsilon'])
+        if 'C' in parameters_dict:
+            parameters_dict['C'] = float(parameters_dict['C'])
         # 使用SVM回归模型进行拟合
-        model1 = SVR(kernel='linear')
+        model1 = SVR(**parameters_dict)
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
