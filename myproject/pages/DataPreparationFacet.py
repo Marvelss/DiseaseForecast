@@ -12,8 +12,8 @@ from st_pages import hide_pages
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 
-import pages_utils
-from modelmethodfacet.PretreatmentMethodFacet import PretreatmentMethodFacet
+from pages import pages_utils
+from pages.modelmethodfacet.PretreatmentMethodFacet import PretreatmentMethodFacet
 
 st.set_page_config(
     layout="wide"

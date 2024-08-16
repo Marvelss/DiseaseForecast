@@ -17,10 +17,12 @@ from PIL import Image
 from sklearn.preprocessing import StandardScaler
 from st_pages import hide_pages
 from streamlit_pills import pills
-from modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
-from modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
 
-import pages_utils
+from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_PROCESS_PATH, RESOURCE_IMAGES_PATH
+from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
+from pages.modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
+
+from pages import pages_utils
 
 st.set_page_config(
     layout="wide"
@@ -120,7 +122,7 @@ def getSimulateWeather(weatherSituation, province, station, startYear):
 
 # 获取模型
 def getModel(modelName):
-    modelPathRoot = os.path.join(r'E:\a_python\program\diseaseForecastStreamlit',
+    modelPathRoot = os.path.join(r'/',
                                  'resource',
                                  'modelsResults',
                                  'modelsStructure')
@@ -390,7 +392,7 @@ with col223:
         st.warning(warningMInfo, icon="⚠️")
     with col2332:
         path2 = os.path.join(
-            os.getcwd(), 'resource', '上传历史数据集模板-测试.xlsx')
+            RESOURCE_TEMPLATE_PATH, '上传历史数据集模板-测试.xlsx')
         with open(path2, "rb") as file:
             st.download_button(
                 label="下载历史站点气象数据模板",
@@ -425,7 +427,7 @@ with col22332:
     with col233232:
         # 根据模型构建最终数据集制作实际标签模板
         path2 = os.path.join(
-            os.getcwd(), 'resource', 'uploadFileDir', '上传实际标签数据.xlsx')
+            RESOURCE_PROCESS_PATH, '上传实际标签数据.xlsx')
 
         dataTemplate = pages_utils.TempDataSet[4]
 
@@ -532,7 +534,7 @@ btn = st.button('运行程序', on_click=onRun,
 st.markdown('---')
 st.markdown("##### 模型评价指标结果及可视化")
 with st.popover("效果图预览"):
-    img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'weatherGeneratorEvaluateResult2.jpg'))
+    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'weatherGeneratorEvaluateResult2.jpg'))
     st.image(img)
     co3, co4 = st.columns(2)
     with co3:
@@ -557,7 +559,7 @@ if btn:
 colRes1, colRes2 = st.columns(2)
 st.markdown('###### 静态偏差指标')
 
-img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'figure22.png'))
+img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'figure22.png'))
 st.image(img)
 with st.container(height=700):
     items = list(st.session_state.modelSituationIndexResult.items())

@@ -3,14 +3,13 @@ import datetime
 import streamlit as st
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
 from st_pages import hide_pages
-from streamlit import switch_page
-import pages_utils
+
+from pages import pages_utils
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
+from pages.modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
 
 st.set_page_config(
     layout="wide"
@@ -19,15 +18,16 @@ if 'page14' not in st.session_state:
     st.session_state.page14 = 0
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
+
 # 隐藏页面
 hide_pages(
     [
         "测试界面",
-        "原始数据-面状",
-        "数据预处理-面状",
-        "特征计算-面状",
-        "特征优选-面状",
-        "模型构建-面状",
+        "原始数据",
+        "数据预处理",
+        "特征计算",
+        "特征优选",
+        "模型构建",
     ]
 )
 checkBoxNum = 3
@@ -58,49 +58,12 @@ def mergeArray(list1, list2, list3):
     return list(set().union(*[list1, list2, list3]))
 
 
-def simulate_temperature_data1():
-    # 模拟生成数据
-    np.random.seed(42)  # 设置随机种子以确保可重复性
-
-    # 创建一个包含随机数据的数据框
-    data = {
-        'Feature1': np.random.normal(0, 1, 100),
-        'Feature2': np.random.normal(0, 1, 100),
-        'Feature3': np.random.normal(0, 1, 100),
-        'Target': np.random.choice([0, 1], size=100)
-    }
-    dfT = pd.DataFrame(data)
-    return dfT
-
-
-def simulate_temperature_data():
-    # 模拟生成温度数据
-    np.random.seed(15)
-    N = 15
-
-    temperature1 = np.random.normal(loc=20, scale=2, size=(N,))
-    temperature2 = np.random.normal(loc=25, scale=4, size=(N,))
-    temperature3 = np.random.normal(loc=18, scale=1.5, size=(N,))
-    temperature4 = np.random.normal(loc=22, scale=3, size=(N,))
-
-    # 创建DataFrame
-    dfT = pd.DataFrame({
-        'Temperature1': temperature1,
-        'Temperature2': temperature2,
-        'Temperature3': temperature3,
-        'Temperature4': temperature4,
-        'Target': np.random.choice([0, 1], size=N)  # 二分类目标
-    })
-    return dfT
-
-
 # 取消所有选项按钮
 def clear_all():
     for h in range(checkBoxNum):
         if st.session_state[f'checkbox{h}']:
             st.session_state["OptimizationMethodName"]['checkBox'] = f'checkbox{h}'
         st.session_state[f'checkbox{h}'] = False
-    st.session_state.page14 = 0
     return
 
 
@@ -117,6 +80,9 @@ def clear_other(key):
 def firstPage(): st.session_state.page14 = 0
 
 
+plt.rc("font", family='Microsoft YaHei')
+
+
 @st.experimental_dialog("预览", width='large')
 # 预览运行结果
 def onPreviewResults():
@@ -126,10 +92,10 @@ def onPreviewResults():
                    key != 'checkBox']
 
     # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
-    if pages_utils.TempDataSet[3].shape[0] == 0:
-        dataFrameTemp = pages_utils.TempDataSet[2]
+    if pages_utils.TempDataSetFacet[3].shape[0] == 0:
+        dataFrameTemp = pages_utils.TempDataSetFacet[2]
     else:
-        dataFrameTemp = pages_utils.TempDataSet[3]
+        dataFrameTemp = pages_utils.TempDataSetFacet[3]
     if tempMethod == 't检验':
         afterHandleData, tempResult, optimalFeatureListT = FeatureOptimizationMethod(
             dataFrameTemp.copy(), None).tTest(
@@ -162,7 +128,7 @@ def onPreviewResults():
         # 使用Seaborn绘制热图
         plt.figure(figsize=(10, 8))
         sns.heatmap(tempResultP, annot=True, cmap='coolwarm', center=0)
-        plt.title('互相关分析矩阵')
+        plt.title('Pearson互相关性分析矩阵')
         st.pyplot(plt)
         st.multiselect('预期保留特征:',
                        options=optimalFeatureList,
@@ -208,10 +174,7 @@ def onPreviewResults():
     if st.button("添加处理", on_click=clear_all):
         new_data = {
             "编号": pages_utils.generateID(),
-            "数据类型":
-                ["气象数据"] * len(result1) +
-                ["植保数据"] * len(result2) +
-                ["农学数据"] * len(result3),
+            "数据类型": '气象数据',
             "输入特征": mergeArray(result1, result2, result3),
             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
             "方法参数":
@@ -221,25 +184,25 @@ def onPreviewResults():
             "处理状态": False}
         print('======================特征优选-添加任务清单记录======================')
         print(new_data)
-        pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
+        pages_utils.TempDataSetFieldFacet[3].loc[len(pages_utils.TempDataSetFieldFacet[3])] = new_data
         st.rerun()
 
 
 def onRun():
-    if '优选特征' not in st.session_state["leftTabs"]:
-        st.session_state["leftTabs"].append('优选特征')
+    if '优选特征' not in st.session_state["leftTabsFacet"]:
+        st.session_state["leftTabsFacet"].append('优选特征')
     st.session_state.page14 += 1
 
     # ===============获取任务清单内容===============
-    idNumber = pages_utils.TempDataSetField[3]["编号"].tolist()
-    fields = pages_utils.TempDataSetField[3]["输入特征"].tolist()
-    methodParam = pages_utils.TempDataSetField[3]["方法参数"].tolist()
-    methodList = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()
-    isHandledFlags = pages_utils.TempDataSetField[3]["处理状态"].tolist()
+    idNumber = pages_utils.TempDataSetFieldFacet[3]["编号"].tolist()
+    fields = pages_utils.TempDataSetFieldFacet[3]["输入特征"].tolist()
+    methodParam = pages_utils.TempDataSetFieldFacet[3]["方法参数"].tolist()
+    methodList = pages_utils.TempDataSetFieldFacet[3]["特征优选方法"].tolist()
+    isHandledFlags = pages_utils.TempDataSetFieldFacet[3]["处理状态"].tolist()
 
     # 若为空则跳过该步骤
     if not idNumber:
-        pages_utils.TempDataSet[3] = pages_utils.TempDataSet[2]
+        pages_utils.TempDataSetFacet[3] = pages_utils.TempDataSetFacet[2]
 
     newColumns = '错误'
     # ===============根据名称匹配调用并执行各个处理方法===============
@@ -249,11 +212,11 @@ def onRun():
         if isHandled:
             continue
         # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
-        if pages_utils.TempDataSet[3].shape[0] == 0:
-            dataFrameTemp = pages_utils.TempDataSet[2]
+        if pages_utils.TempDataSetFacet[3].shape[0] == 0:
+            dataFrameTemp = pages_utils.TempDataSetFacet[2]
         else:
-            dataFrameTemp = pages_utils.TempDataSet[3]
-        reservedField = pages_utils.TempDataSet[2].columns.tolist()
+            dataFrameTemp = pages_utils.TempDataSetFacet[3]
+        reservedField = pages_utils.TempDataSetFacet[2].columns.tolist()
         afterHandleData = None
         # print(tempMethod)
         if tempMethod == 't检验':
@@ -278,13 +241,12 @@ def onRun():
         row_size = len(afterHandleData)
         # print('-------优选特征-------')
         intersection_cols = pages_utils.getIntersectionCols(
-            pages_utils.TempDataSet[3], afterHandleData
+            pages_utils.TempDataSetFacet[3], afterHandleData
         )
-        pages_utils.TempDataSet[3] = pd.merge(
-            afterHandleData, pages_utils.TempDataSet[3],
+        pages_utils.TempDataSetFacet[3] = pd.merge(
+            afterHandleData, pages_utils.TempDataSetFacet[3],
             on=intersection_cols, how="left")
 
-        # print(newColumns)
         # ===============更新左侧显示内容===============
         update_values = {
             # "数据类型": "气象数据", "输入特征": fields[0],
@@ -293,14 +255,18 @@ def onRun():
             # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
             "时间": datetime.datetime.now().time(),
             "处理状态": True}
+        print(update_values)
+        print(type(newColumns))
+        print(len(idNumber))
+        print(len(pages_utils.TempDataSetFieldFacet[3]))
         # 查找要更新的数据记录
-        for index, row in pages_utils.TempDataSetField[3].iterrows():
+        for index, row in pages_utils.TempDataSetFieldFacet[3].iterrows():
             if row["编号"] == idNumber[indexT]:
                 for key, value in update_values.items():
-                    pages_utils.TempDataSetField[3].loc[index, key] = value
+                    pages_utils.TempDataSetFieldFacet[3].loc[index, key] = value
 
     print('======================优选特征集======================')
-    print(pages_utils.TempDataSet[3])
+    print(pages_utils.TempDataSetFacet[3])
 
 
 # ==============================界面==============================
@@ -313,71 +279,85 @@ with dataPCV:
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
-            tempLeftTabs = st.session_state["leftTabs"][2:]
-            if not tempLeftTabs:
-                tempLeftTabs = ['待进行特征计算']
-                column = ['空']
-            # print(f'f=========测试{tempLeftTabs}================')
-            tt1 = st.tabs(tempLeftTabs)
-            for i in range(len(tempLeftTabs)):
+            # tempLeftTabs = pages_utils.TempDataSetFacet[2]
+            print(f'f=========测试面状特征{st.session_state["leftTabsFacet"]}================')
+            print(pages_utils.TempDataSetFacet[2])
+
+            # 展示备选特征数据
+            temp_df = pages_utils.TempDataSetFacet[2]
+            # 排除指定列，获取其他列的名称
+            exclude_columns = ['上级单位', '测报站点', '经度', '纬度', '年', 'DayOfYear']
+            remaining_columns = [col for col in temp_df.columns if col not in exclude_columns]
+
+            # 创建空的 DataFrame
+            tempDataSetFacetReveal = pd.DataFrame(columns=["数据类型", "备选特征", "大小"])
+
+            # 计算每个剩余列的数据量大小并填充到新的 DataFrame 中
+            tempDataSetFacetReveal_list = []
+            for col in remaining_columns:
+                data_size = temp_df[col].memory_usage(index=False)
+                tempDataSetFacetReveal_list.append({
+                    "数据类型": "气象数据",
+                    "备选特征": col,
+                    "大小": data_size
+                })
+
+            # 使用 pd.concat 方法创建 DataFrame
+            tempDataSetFacetReveal = pd.concat([tempDataSetFacetReveal, pd.DataFrame(tempDataSetFacetReveal_list)],
+                                               ignore_index=True)
+            print(f'{tempDataSetFacetReveal}-----tempDataSetFacetReveal')
+            tt1 = st.tabs(st.session_state["leftTabsFacet"])
+            for i in range(len(st.session_state["leftTabsFacet"])):
                 with tt1[i]:
-                    if tempLeftTabs[i] == '备选特征':
-                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
-                    elif tempLeftTabs[i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-                    st.data_editor(
-                        pages_utils.TempDataSetField[i + 2],
-                        height=220, width=800,
-                        column_order=column)
+                    if st.session_state["leftTabsFacet"][i] == '备选特征':
+                        st.data_editor(
+                            tempDataSetFacetReveal,
+                            height=220, width=800)
+                    elif st.session_state["leftTabsFacet"][i] == '优选特征':
+                        # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+                        st.data_editor(
+                            pages_utils.TempDataSetFieldFacet[3],
+                            height=220, width=800)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
-            tempLeftTabs = st.session_state["leftTabs"][2:]
+            tempLeftTabs = st.session_state["leftTabsFacet"]
             # print(f'f=========测试{tempLeftTabs}================')
             tt = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
                 with tt[i]:
-                    if tempLeftTabs[i] == '备选特征':
-                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+                    if st.session_state["leftTabsFacet"][i] == '备选特征':
+                        st.data_editor(
+                            tempDataSetFacetReveal,
+                            height=220, width=800)
                     elif tempLeftTabs[i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-                    st.data_editor(
-                        pages_utils.TempDataSetField[i + 2],
-                        height=220, width=800,
-                        column_order=column)
+                        # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+                        st.data_editor(
+                            pages_utils.TempDataSetFieldFacet[3],
+                            height=220, width=800)
     # ===============显示左下字段或特征及获取===============
-    # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
-    # if not pages_utils.TempDataSetField[2].empty:
-    weatherNameT0, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
-    weatherNameT1, plantNameT1, agricultureNameT1 = pages_utils.getDataFiled(1, pages_utils.TempDataSetField[1])
-    weatherNameT2, plantNameT2, agricultureNameT2 = pages_utils.getDataFiled(2, pages_utils.TempDataSetField[2])
-    # weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0
-    # plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0
-    # agricultureNameList = agricultureNameT1 + agricultureNameT0
-    # if not pages_utils.TempDataSetField[3].empty:
-    weatherNameT3, plantNameT3, agricultureNameT3 = pages_utils.getDataFiled(3, pages_utils.TempDataSetField[3])
-    weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0 + weatherNameT3
-    plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0 + plantNameT3
-    agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT3
-    print(weatherNameT1 + weatherNameT2 + weatherNameT0)
-    print(weatherNameT3)
-    if weatherNameT3:
-        for a, b in zip(weatherNameT1 + weatherNameT2 + weatherNameT0, weatherNameT3):
-            if '-'.join(b.split('-')[:-1]) in a:
-                weatherNameList.append(b)
-            else:
-                weatherNameList.append(a)
-
-    # 按照数据类型显示左侧字段或特征
+    # a = st.selectbox(
+    #     '选择数据集',
+    #     ('原始数据集', '预处理后数据集', '备选特征', '优选特征'))
+    # 预处理后数据集表信息
+    # weatherNameT, plantNameT, agricultureNameT = pages_utils.getDataFiled()
+    # weatherNameT, plantNameT, agricultureNameT = pages_utils.TempDataSet[2].columns.tolist(), ['无1'], ['无2']
+    # 数组元素去重
+    # weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
+    #     set(agricultureNameT))
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象特征', list(set(weatherNameList)),
-        'tempTemperature', 'collapsed')
-    result2 = pages_utils.multiselect_all(
-        st, '全选-植保特征', list(set(plantNameList)),
-        'tempPlant', 'collapsed')
-    result3 = pages_utils.multiselect_all(
-        st, '全选-农学特征', list(set(agricultureNameList)),
-        'tempAgriculture', 'collapsed')
+        st, '全选-特征', pages_utils.TempDataSetFacet[2].columns.tolist(),
+        'temp', 'collapsed')
+    st.checkbox('全选-植保数据', disabled=True)
+    st.checkbox('全选-农学数据', disabled=True)
+    result2 = []
+    result3 = []
+    # result2 = pages_utils.multiselect_all(
+    #     st, '全选-植保数据', plantName,
+    #     'temp', 'collapsed')
+    # result3 = pages_utils.multiselect_all(
+    #     st, '全选-农学数据', agricultureName,
+    #     'temp', 'collapsed')
 # ===============显示右上处理方法选项===============
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
@@ -453,8 +433,8 @@ with dataPCM:
         # =======================显示右下任务清单表格=======================
         with placeholder.container():
             st.markdown('##### 任务清单')
-            pages_utils.TempDataSetField[3] = st.data_editor(
-                pages_utils.TempDataSetField[3], height=190, width=800,
+            pages_utils.TempDataSetFieldFacet[3] = st.data_editor(
+                pages_utils.TempDataSetFieldFacet[3], height=190, width=800,
                 column_order=["编号", "数据类型", "输入特征", "优选特征", "特征优选方法", '时间', '处理状态'],
                 disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])

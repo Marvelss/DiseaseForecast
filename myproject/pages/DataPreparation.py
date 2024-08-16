@@ -9,8 +9,9 @@ import streamlit as st
 from PIL import Image
 from st_pages import hide_pages
 
-import pages_utils
-from modelandmethod.PretreatmentMethod import PretreatmentMethod
+from lib.share import RESOURCE_IMAGES_PATH
+from pages import pages_utils
+from pages.modelandmethod.PretreatmentMethod import PretreatmentMethod
 
 st.set_page_config(
     layout="wide"
@@ -288,7 +289,7 @@ with dataPCM:
             st.info('插补方法介绍\n'
                     '* 描述:使用缺失值前后最近的两个非缺失值填充\n' +
                     latext, icon="ℹ️")
-            img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', 'Figure_5.png'))
+            img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'Figure_5.png'))
             st.image(img)
         # st.markdown('---')
     if agree:
@@ -301,7 +302,7 @@ with dataPCM:
         with coll22:
             st.info('剔除方法介绍\n'
                     '* 描述:剔除最大值和最小值区域外的异常值\n', icon="ℹ️")
-            img = Image.open(os.path.join(os.getcwd(), 'resource', 'image', '3.png'))
+            img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '3.png'))
             st.image(img)
 
     # =======================添加处理至任务清单=======================

@@ -1,12 +1,11 @@
 import datetime
 
-import numpy as np
 import pandas as pd
 import streamlit as st
 from st_pages import hide_pages
 
-import pages_utils
-from modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
+from pages import pages_utils
+from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -17,7 +16,7 @@ if 'page13' not in st.session_state:
     st.session_state.page13 = 0
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
-    st.switch_page("App.py")
+    st.switch_page("app.py")
 # 隐藏页面
 hide_pages(
     [

@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 from st_pages import hide_pages
 
-import pages_utils
+from pages import pages_utils
 from streamlit_pills import pills
 from warnings import simplefilter
 
@@ -28,9 +28,9 @@ hide_pages(
     ]
 )
 # 模板路径及注释信息
-path1 = r'E:\a_python\program\diseaseForecastStreamlit\resource\气象数据-模板.xlsx'
-path2 = r'E:\a_python\program\diseaseForecastStreamlit\resource\植保数据-模板.xlsx'
-path3 = r'E:\a_python\program\diseaseForecastStreamlit\resource\农学数据-模板.xlsx'
+path1 = r'E:\a_python\program\diseaseForecastStreamlit\myproject\resource\气象数据-模板.xlsx'
+path2 = r'E:\a_python\program\diseaseForecastStreamlit\myproject\resource\植保数据-模板.xlsx'
+path3 = r'E:\a_python\program\diseaseForecastStreamlit\myproject\resource\农学数据-模板.xlsx'
 
 warningMInfo = '''
 注意事项
@@ -132,7 +132,7 @@ with dataSCM:
                     on=intersection_cols, how="outer")
         # 上传出错提示
         except BaseException as e:
-            st.toast('上传错误,请检测文件内容及格式无误后重新上传', icon="⚠️")
+            st.toast('上传错误  \n请检查文件内容及格式无误后重新上传', icon="⚠️")
             # new_data = {
             #     "编号": pages_utils.generateID(),
             #     "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "上传出错",

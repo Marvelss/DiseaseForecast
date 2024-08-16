@@ -8,8 +8,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from st_pages import hide_pages
 
-import pages_utils
-from modelandmethod.Model import Model
+from pages import pages_utils
+from pages.modelandmethod.Model import Model
 
 st.set_page_config(
     layout="wide"
@@ -64,7 +64,7 @@ model_params = [
     {"模型名称": "SVM",
      "模型参数": {
          'C': '1.0', 'kernel': 'rbf', 'gamma': 'scale'},
-     "备注": ['test1', 'test2', 'test3']},
+     "备注": ['test_pre_p', 'test_fc_p', 'test_fo_p']},
     {"模型名称": "KNN",
      "模型参数": {"n_neighbors": "5", "leaf_size": "30", "n_jobs": "1"},
      "备注": ['testA1', 'testA2', 'testA3']},

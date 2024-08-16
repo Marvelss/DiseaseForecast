@@ -9,9 +9,9 @@ from matplotlib import pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from streamlit_pills import pills
 
-import pages_utils
-from modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
-from modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
+from pages import pages_utils
+from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
+from pages.modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
 
 # 原始数据
 if "dataSet" not in st.session_state:
@@ -33,7 +33,7 @@ st.set_page_config(
 
 # 获取模型
 def getModel(modelName):
-    modelPathRoot = os.path.join(r'E:\a_python\program\diseaseForecastStreamlit',
+    modelPathRoot = os.path.join(r'/',
                                  'resource',
                                  'modelsResults',
                                  'modelsStructure')

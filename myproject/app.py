@@ -1,12 +1,15 @@
+import os
+
 import pandas as pd
 import streamlit as st
 
 from st_pages import Page, show_pages, hide_pages
 from streamlit import switch_page
 
-import pages_utils
 import itertools
-import ui
+
+from lib.share import PROJECT_PATH, RESOURCE_PATH, PAGES_PATH, RESOURCE_IMAGES_PATH
+from pages import ui, pages_utils
 
 # add_page_title()
 
@@ -21,25 +24,36 @@ st.set_page_config(
 # Establish communication between pygwalker and streamlit
 # init_streamlit_comm()
 
+HORIZONTAL_BLUE = os.path.join(RESOURCE_IMAGES_PATH, 'icon.png')
+ICON_BLUE = os.path.join(RESOURCE_IMAGES_PATH, 'HDU_Logo.png')
+
+sidebar_logo = ICON_BLUE
+main_body_logo = HORIZONTAL_BLUE
+
+st.logo(sidebar_logo, icon_image=main_body_logo)
+
 # 控制界面显示
 show_pages(
     [
-        Page("pages/App.py", "主页"),
-        Page("pages/DataSet.py", "原始数据"),
-        Page("pages/DataPreparation.py", "数据预处理"),
-        Page("pages/FeatureCalculation.py", "特征计算"),
-        Page("pages/FeatureOptimization.py", "特征优选"),
-        Page("pages/ModelBuilding.py", "模型构建"),
-        Page("pages/DataSetFacet.py", "原始数据-面状"),
-        Page("pages/DataPreparationFacet.py", "数据预处理-面状"),
-        Page("pages/FeatureCalculationFacet.py", "特征计算-面状"),
-        Page("pages/FeatureOptimizationFacet.py", "特征优选-面状"),
-        Page("pages/ModelBuildingFacet.py", "模型构建-面状"),
-        Page("pages/WeatherGenerator.py", '基于天气情景生成器的模型评价'),
-        Page("pages/ModelingReport.py", '建模报告'),
-        Page("pages/Visualization.py", '数据下载中心'),
-        Page("pages/ModelApplication.py", '模型应用'),
-        Page("pages/ModelEvaluation.py", "测试界面"),
+        Page(os.path.join(PROJECT_PATH, 'app.py'), "主页"),
+        Page(os.path.join(PAGES_PATH, 'DataSet.py'), "原始数据"),
+        Page(os.path.join(PAGES_PATH, 'DataPreparation.py'), "数据预处理"),
+        Page(os.path.join(PAGES_PATH, 'FeatureCalculation.py'), "特征计算"),
+        Page(os.path.join(PAGES_PATH, 'FeatureOptimization.py'), "特征优选"),
+        Page(os.path.join(PAGES_PATH, 'ModelBuilding.py'), "模型构建"),
+
+        Page(os.path.join(PAGES_PATH, 'DataSetFacet.py'), "原始数据-面状"),
+        Page(os.path.join(PAGES_PATH, 'DataPreparationFacet.py'), "数据预处理-面状"),
+        Page(os.path.join(PAGES_PATH, 'FeatureCalculationFacet.py'), "特征计算-面状"),
+        Page(os.path.join(PAGES_PATH, 'FeatureOptimizationFacet.py'), "特征优选-面状"),
+        Page(os.path.join(PAGES_PATH, 'ModelBuildingFacet.py'), "模型构建-面状"),
+
+        Page(os.path.join(PAGES_PATH, 'WeatherGenerator.py'), "基于天气情景生成器的模型评价"),
+        Page(os.path.join(PAGES_PATH, 'ModelingReport.py'), "建模报告"),
+        Page(os.path.join(PAGES_PATH, 'Visualization.py'), "数据下载中心"),
+        Page(os.path.join(PAGES_PATH, 'ModelApplication.py'), "模型应用"),
+        Page(os.path.join(PAGES_PATH, 'ModelEvaluation.py'), "测试界面"),
+
     ]
 )
 
@@ -173,11 +187,11 @@ colAppBtn1, colAppBtn2, = st.columns([0.4, 0.6])
 with colAppBtn2:
     if st.button('点状数据建模'):
         st.session_state.isPlanarInterface = False
-        switch_page("DataSet.py")
+        switch_page(os.path.join(PAGES_PATH, 'DataSet.py'))
 
     if st.button('面状数据建模'):
         st.session_state.isPlanarInterface = True
-        switch_page("DataSetFacet.py")
+        switch_page(os.path.join(PAGES_PATH, 'DataSetFacet.py'))
 
 
 def navbar():
@@ -285,7 +299,7 @@ def navbar():
     )
 
 
-# st.image("https://streamlit.io/images/brand/streamlit-mark-color.png", width=100)
+# st.images("https://streamlit.io/images/brand/streamlit-mark-color.png", width=100)
 # st.title("Snowflake Summit Demo Apps")
 
 st.markdown(
@@ -360,7 +374,8 @@ def app(image, link, name, description, developer, repo_link):
 category("📊️ 各项特征计算方法API")
 col1, col2, col3 = st.columns(3)
 with col1:
-    app("pages/images/GPTLab.png",
+    print()
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'GPTLab.png'),
         '#',
         "降雨日数计算",
         "基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数",
@@ -369,7 +384,7 @@ with col1:
         )
 
 with col2:
-    app("pages/images/AskMyPDF.png",
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'AskMyPDF.png'),
         '#',
         "降水累积量计算",
         "累加某个时间段内降雨量以计算降水累积量",
@@ -377,7 +392,7 @@ with col2:
         "https://github.com/Marvelss",
         )
 with col3:
-    app("pages/images/HugChat.png",
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'HugChat.png'),
         '#',
         "基于活动积温的生育期计算",
         "基于每日累积温度达到特定积温阈值的时间即为相应生育期",
@@ -386,7 +401,7 @@ with col3:
         )
 col21, col22, col23 = st.columns(3)
 with col21:
-    app("pages/images/KnowledgeGPT.png",
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'KnowledgeGPT.png'),
         '#',
         "时空抽取",
         "待补充",
@@ -395,7 +410,7 @@ with col21:
         )
 
 with col22:
-    app("pages/images/NYC.png",
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'NYC.png'),
         '#',
         "植被指数计算",
         "待补充",
@@ -403,7 +418,7 @@ with col22:
         "https://github.com/Marvelss",
         )
 with col23:
-    app("pages/images/Roadmap.png",
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'Roadmap.png'),
         '#',
         "景观指数计算",
         "待补充",

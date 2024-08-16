@@ -13,8 +13,8 @@ import streamlit as st
 from st_pages import hide_pages
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
-import pages_utils
-from modelmethodfacet.FeatureCalculationMethodFacet import FeatureCalculationMethodFacet
+from pages import pages_utils
+from pages.modelmethodfacet.FeatureCalculationMethodFacet import FeatureCalculationMethodFacet
 
 # 隐藏页面
 hide_pages(

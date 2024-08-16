@@ -1,11 +1,6 @@
-import time
-
 import streamlit as st
 import pandas as pd
 import numpy as np
-from pygwalker.api.streamlit import StreamlitRenderer
-from st_pages import add_page_title
-from stqdm import stqdm
 from streamlit import switch_page
 from streamlit_tree_select import tree_select
 import extra_streamlit_components as stx
@@ -14,10 +9,9 @@ import extra_streamlit_components as stx
 # st.header('模型评估')
 # st.markdown('---')
 
-import webbrowser
 import itertools
-import ui
-import pages_utils
+from pages import ui
+
 nodes1 = [
         {"label": "气象数据", "value": "气象数据"},
         {
@@ -265,7 +259,7 @@ def navbar():
     )
 
 
-# st.image("https://streamlit.io/images/brand/streamlit-mark-color.png", width=100)
+# st.images("https://streamlit.io/images/brand/streamlit-mark-color.png", width=100)
 # st.title("Snowflake Summit Demo Apps")
 
 st.markdown(

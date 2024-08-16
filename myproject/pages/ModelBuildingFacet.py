@@ -8,8 +8,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from st_pages import hide_pages
 
-import pages_utils
-from modelandmethod.Model import Model
+from pages import pages_utils
+from pages.modelandmethod.Model import Model
 
 st.set_page_config(
     layout="wide"

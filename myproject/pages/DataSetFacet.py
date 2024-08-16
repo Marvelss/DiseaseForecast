@@ -8,12 +8,11 @@ import os
 from datetime import datetime
 
 import streamlit as st
-from st_pages import hide_pages, show_pages
-from stqdm import stqdm
+from st_pages import hide_pages
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 from collections import deque
-import pages_utils
+from pages import pages_utils
 from streamlit_pills import pills
 from warnings import simplefilter
 
@@ -153,7 +152,7 @@ with dataSCMap:
 
         # 后续删除,为结果可视化而用
         # # 点
-        # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test3\02_05shp.shp', layer_name="point")
+        # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test_fo_p\02_05shp.shp', layer_name="point")
         # # 插值后
         # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file2.tif',layer_name='interpolation')
         # # 掩膜模板

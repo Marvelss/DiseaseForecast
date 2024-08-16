@@ -12,9 +12,8 @@ import streamlit as st
 from matplotlib import pyplot as plt
 import seaborn as sns
 from st_pages import hide_pages
-from streamlit_pills import pills
 
-import pages_utils
+from pages import pages_utils
 
 st.set_page_config(
     layout="wide"
