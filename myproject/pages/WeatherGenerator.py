@@ -18,7 +18,7 @@ from sklearn.preprocessing import StandardScaler
 from st_pages import hide_pages
 from streamlit_pills import pills
 
-from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_PROCESS_PATH, RESOURCE_IMAGES_PATH
+from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_PROCESS_PATH, RESOURCE_IMAGES_PATH, RESOURCE_TEMPDIR_PATH
 from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 from pages.modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
 
@@ -427,7 +427,7 @@ with col22332:
     with col233232:
         # 根据模型构建最终数据集制作实际标签模板
         path2 = os.path.join(
-            RESOURCE_PROCESS_PATH, '上传实际标签数据.xlsx')
+            RESOURCE_TEMPDIR_PATH, '上传实际标签数据.xlsx')
 
         dataTemplate = pages_utils.TempDataSet[4]
 

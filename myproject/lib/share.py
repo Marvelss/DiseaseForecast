@@ -12,7 +12,8 @@ RESOURCE_TEMPLATE_PATH = os.path.join(RESOURCE_PATH, 'template')
 RESOURCE_PROCESS_PATH = os.path.join(RESOURCE_PATH, 'process')
 # 图片或图标文件
 RESOURCE_IMAGES_PATH = os.path.join(RESOURCE_PATH, 'images')
-
+# 临时保存文件
+RESOURCE_TEMPDIR_PATH = os.path.join(RESOURCE_PATH, 'tempdir')
 # 配置文件路径
 # CONFIG_PATH = os.path.join(BASE_DIR, "conf", "db_config.ini")
 # 日志路径

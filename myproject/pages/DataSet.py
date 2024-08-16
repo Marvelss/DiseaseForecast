@@ -1,10 +1,12 @@
 # page2.py
+import os.path
 from datetime import datetime
 
 import pandas as pd
 import streamlit as st
 from st_pages import hide_pages
 
+from lib.share import RESOURCE_TEMPLATE_PATH
 from pages import pages_utils
 from streamlit_pills import pills
 from warnings import simplefilter
@@ -28,9 +30,9 @@ hide_pages(
     ]
 )
 # 模板路径及注释信息
-path1 = r'E:\a_python\program\diseaseForecastStreamlit\myproject\resource\气象数据-模板.xlsx'
-path2 = r'E:\a_python\program\diseaseForecastStreamlit\myproject\resource\植保数据-模板.xlsx'
-path3 = r'E:\a_python\program\diseaseForecastStreamlit\myproject\resource\农学数据-模板.xlsx'
+path1 = os.path.join(RESOURCE_TEMPLATE_PATH, '气象数据-模板.xlsx')
+path2 = os.path.join(RESOURCE_TEMPLATE_PATH, '植保数据-模板.xlsx')
+path3 = os.path.join(RESOURCE_TEMPLATE_PATH, '农学数据-模板.xlsx')
 
 warningMInfo = '''
 注意事项
