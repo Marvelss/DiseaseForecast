@@ -30,7 +30,6 @@ hide_pages(
         "模型构建-面状",
     ]
 )
-
 # 处理方法内容记录(任务清单各项值)
 if "preMethodName" not in st.session_state:
     st.session_state["preMethodName"] = {
@@ -43,6 +42,15 @@ checkBoxNum = 2
 # 设置可视化图表中文
 plt.rcParams['font.sans-serif'] = 'SimHei'
 emptyHeadDPP = st.empty()
+
+
+# 检测用户输入行为
+def detectUserInput():
+    # 1.添加处理
+    # 1.1输入特征（空）
+    # 1.2参数（空）
+    # 1.3方法(空或对应方法无法处理)
+    print()
 
 
 # 获取选项值对应名称
@@ -114,62 +122,74 @@ def onRun():
                     dataFrameTemp = pages_utils.TempDataSet[0]
                 else:
                     dataFrameTemp = pages_utils.TempDataSet[1]
-                # 使用处理后最新的字段内容
-                reservedField = pages_utils.TempDataSet[0].columns.tolist()
-                # print(f'=============测试保留字段-{reservedField}=============')
-                newDataColumn = fields[indexT]
 
-                DPVisualInformationTemp = {'before': dataFrameTemp[newDataColumn[0]]}
-                if tempMethod == '缺失值插补':
-                    (afterHandleData, missingValueBefore, missingValueAfter,
-                     newDataColumn) = PretreatmentMethod(
-                        dataFrameTemp,
-                        fields[indexT], reservedField).linearInterpolation(methodParam[indexT])
-                    # 显示填补信息
-                    st.toast(f'填补缺失值:{str(missingValueBefore - missingValueAfter)}' +
-                             '\n' +
-                             f'剩余缺失值:{missingValueAfter}', icon='✅')
-                elif tempMethod == '剔除异常值':
-                    (afterHandleData, outlierNum, lengthAfter,
-                     newDataColumn) = PretreatmentMethod(
-                        dataFrameTemp,
-                        fields[indexT], reservedField).outlierEliminator(methodParam[indexT])
-                    # 显示填补信息
-                    st.toast(f'剔除异常值个数:{outlierNum}' +
-                             '\n' +
-                             f'剩余条数:{lengthAfter}', icon='✅')
+                try:
+                    # 使用处理后最新的字段内容
+                    reservedField = pages_utils.TempDataSet[0].columns.tolist()
+                    # print(f'=============测试保留字段-{reservedField}=============')
+                    newDataColumn = fields[indexT]
 
-                # ===============合并处理后数据集===============
-                intersection_cols = pages_utils.getIntersectionCols(
-                    pages_utils.TempDataSet[1], afterHandleData
-                )
+                    DPVisualInformationTemp = {'before': dataFrameTemp[newDataColumn[0]]}
 
-                pages_utils.TempDataSet[1] = pd.merge(
-                    afterHandleData, pages_utils.TempDataSet[1],
-                    on=intersection_cols, how="left")
-                # print('======================预处理后数据集======================')
+                    if tempMethod == '缺失值插补':
+                        (afterHandleData, missingValueBefore, missingValueAfter,
+                         newDataColumn) = PretreatmentMethod(
+                            dataFrameTemp,
+                            fields[indexT], reservedField).linearInterpolation(methodParam[indexT])
+                        # 显示填补信息
+                        st.toast(f'填补缺失值:{str(missingValueBefore - missingValueAfter)}' +
+                                 '\n' +
+                                 f'剩余缺失值:{missingValueAfter}', icon='✅')
+                    elif tempMethod == '剔除异常值':
+                        (afterHandleData, outlierNum, lengthAfter,
+                         newDataColumn) = PretreatmentMethod(
+                            dataFrameTemp,
+                            fields[indexT], reservedField).outlierEliminator(methodParam[indexT])
+                        # 显示填补信息
+                        st.toast(f'剔除异常值个数:{outlierNum}' +
+                                 '\n' +
+                                 f'剩余条数:{lengthAfter}', icon='✅')
 
-                # ===============更新左侧显示内容===============
-                # print(f'更新左侧显示内容:{newDataColumn}')
-                DPVisualInformationTemp['name'] = tempMethod
-                DPVisualInformationTemp['after'] = pages_utils.TempDataSet[1][newDataColumn]
-                # 可视化信息添加
-                st.session_state["DPVisualInformation"].append(DPVisualInformationTemp)
-                # print('=====================展示可视化内容======================')
-                # print(st.session_state["DPVisualInformation"])
-                update_values = {
-                    "预处理后字段": newDataColumn,
-                    "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
-                    "时间": datetime.datetime.now().time(),
-                    "处理状态": True
-                }
-                # 查找要更新的数据记录
-                for index, row in pages_utils.TempDataSetField[1].iterrows():
-                    if row["编号"] == idNumber[indexT]:
-                        for key1, value1 in update_values.items():
-                            pages_utils.TempDataSetField[1].loc[index, key1] = value1
-            print('===================预处理数据集===================')
-            print(pages_utils.TempDataSet[1])
+                except BaseException as e:
+                    st.toast(f'{tempMethod}运行失败  \n错误:{e}', icon="⚠️")
+                    # 不自动跳转至可视化
+                    st.session_state.page12 = 0
+                    # 删除最后一条记录
+                    pages_utils.TempDataSetField[1] = pages_utils.TempDataSetField[1].drop(
+                        pages_utils.TempDataSetField[1].index[-1])
+                # 若执行正确则合并数据
+                else:
+                    # ===============合并处理后数据集===============
+                    intersection_cols = pages_utils.getIntersectionCols(
+                        pages_utils.TempDataSet[1], afterHandleData
+                    )
+
+                    pages_utils.TempDataSet[1] = pd.merge(
+                        afterHandleData, pages_utils.TempDataSet[1],
+                        on=intersection_cols, how="left")
+                    # print('======================预处理后数据集======================')
+
+                    # ===============更新左侧显示内容===============
+                    # print(f'更新左侧显示内容:{newDataColumn}')
+                    DPVisualInformationTemp['name'] = tempMethod
+                    DPVisualInformationTemp['after'] = pages_utils.TempDataSet[1][newDataColumn]
+                    # 可视化信息添加
+                    st.session_state["DPVisualInformation"].append(DPVisualInformationTemp)
+                    # print('=====================展示可视化内容======================')
+                    # print(st.session_state["DPVisualInformation"])
+                    update_values = {
+                        "预处理后字段": newDataColumn,
+                        "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
+                        "时间": datetime.datetime.now().time(),
+                        "处理状态": True
+                    }
+                    # 查找要更新的数据记录
+                    for index, row in pages_utils.TempDataSetField[1].iterrows():
+                        if row["编号"] == idNumber[indexT]:
+                            for key1, value1 in update_values.items():
+                                pages_utils.TempDataSetField[1].loc[index, key1] = value1
+                print('===================预处理数据集===================')
+                print(pages_utils.TempDataSet[1])
 
 
 # ==============================界面==============================
@@ -305,30 +325,46 @@ with dataPCM:
             st.image(img)
 
     # =======================添加处理至任务清单=======================
+
     interval_col1, interval_col2 = st.columns([5, 1])
     btn = interval_col2.button('添加处理', on_click=clearOption)
     if btn:
-        # update dataframe state
-        # print('=======获取预处理方法=====')
-        # print(getCheckboxName(st.session_state["preMethodName"]['checkBox']))
-        if result1:
-            dataType = '气象数据'
-        elif result2:
-            dataType = '植保数据'
-        elif result3:
-            dataType = '农学数据'
-        new_data = {
-            "编号": pages_utils.generateID(),
-            "数据类型": dataType,
-            "输入字段": mergeArray(result1, result2, result3),
-            "预处理后字段": None,
-            "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
-            "方法参数": [value for key, value in st.session_state["preMethodName"].items() if key != 'checkBox'],
-            "时间": datetime.datetime.now().time(), "处理状态": False}
-        print('======================预处理-添加任务清单记录======================')
-        print(new_data)
-        pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
-        st.rerun()
+        # 检测用户行为-输入特征为空(预处理方法空判定未添加)
+        if not len(result1 + result2 + result3):
+            st.toast('未选择特征  \n请重新添加处理', icon="⚠️")
+        else:
+            # 检测用户行为-针对具体方法的局限性
+            isException = False
+            if getCheckboxName(st.session_state["preMethodName"]['checkBox']) == '剔除异常值':
+                isException = PretreatmentMethod.detectLinearInterpolation(
+                    [value for key, value in st.session_state["preMethodName"].items() if key != 'checkBox'])
+            elif getCheckboxName(st.session_state["preMethodName"]['checkBox']) == '缺失值插补':
+                pass
+            # 若错误则提示,否则成功添加方法
+            if isException:
+                st.toast('该预处理方法存在错误  \n请检查输入字段和参数后重新添加处理', icon="⚠️")
+            else:
+                # 获取数据类型
+                if result1:
+                    dataType = '气象数据'
+                elif result2:
+                    dataType = '植保数据'
+                elif result3:
+                    dataType = '农学数据'
+                new_data = {
+                    "编号": pages_utils.generateID(),
+                    "数据类型": dataType,
+                    "输入字段": mergeArray(result1, result2, result3),
+                    "预处理后字段": None,
+                    "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
+                    "方法参数": [value for key, value in st.session_state["preMethodName"].items() if
+                                 key != 'checkBox'],
+                    "时间": datetime.datetime.now().time(), "处理状态": False}
+                print('======================预处理-添加任务清单记录======================')
+                print(new_data)
+                pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
+                st.rerun()
+
     st.markdown('---')
 
     # =======================显示右下内容=======================
@@ -364,6 +400,7 @@ with dataPCM:
                 #     residualField,
                 #     'temp1', 'collapsed')
                 btn2 = st.button('运行', on_click=onRun)
+
             # btn2 = interval_col33.button('运行', on_click=onRun)
 
         # =======================显示右下可视化图表=======================

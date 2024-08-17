@@ -13,14 +13,21 @@ class PretreatmentMethod:
         self.fieldName = fieldName
         self.reservedField = reservedField
 
+    @staticmethod
     # 加工字段名称
-    def getHandledFieldPoint(self, fieldName):
+    def getHandledFieldPoint(fieldName):
         # 若字段为原始数据
         if fieldName[-1].isdigit():
             return fieldName[:-1] + str(int(fieldName[-1]) + 1)
         # 若字段已处理,则末尾数字+1
         else:
             return f"{fieldName}-预处理后0"
+
+    # 检测缺失值插补具体可能错误
+    @staticmethod
+    def detectLinearInterpolation(methodParam):
+        if methodParam[0] != '0.1':
+            return False
 
     # 缺失值插补
     def linearInterpolation(self, methodParam):
