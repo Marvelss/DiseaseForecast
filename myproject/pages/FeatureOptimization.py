@@ -37,6 +37,8 @@ if "OptimizationMethodName" not in st.session_state:
 if "nowMethodName" not in st.session_state:
     st.session_state.nowMethodName = ''
 
+emptyHeadFOP = st.empty()
+
 
 # 获取选项值对应名称
 def getCheckboxName(checkbox):
@@ -235,70 +237,72 @@ def onRun():
     methodList = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()
     isHandledFlags = pages_utils.TempDataSetField[3]["处理状态"].tolist()
 
-    # 若为空则跳过该步骤
-    if not idNumber:
-        pages_utils.TempDataSet[3] = pages_utils.TempDataSet[2]
+    with emptyHeadFOP:
+        with st.spinner('处理数据中...'):
+            # 若为空则跳过该步骤
+            if not idNumber:
+                pages_utils.TempDataSet[3] = pages_utils.TempDataSet[2]
 
-    newColumns = '错误'
-    # ===============根据名称匹配调用并执行各个处理方法===============
-    # 初始化特征优选方法
-    for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
-        # 检查方法是否已执行
-        if isHandled:
-            continue
-        # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
-        if pages_utils.TempDataSet[3].shape[0] == 0:
-            dataFrameTemp = pages_utils.TempDataSet[2]
-        else:
-            dataFrameTemp = pages_utils.TempDataSet[3]
-        reservedField = pages_utils.TempDataSet[2].columns.tolist()
-        afterHandleData = None
-        # print(tempMethod)
-        if tempMethod == 't检验':
-            afterHandleData, _, newColumns = FeatureOptimizationMethod(
-                dataFrameTemp, reservedField).tTest(
-                methodParam[indexT])
-        elif tempMethod == 'Pearson相关性分析':
-            # print('-------Pearson相关性分析-测试-------')
-            # print(methodParam[indexT])
-            afterHandleData, _, newColumns = FeatureOptimizationMethod(
-                dataFrameTemp, reservedField).Pearson(
-                methodParam[indexT])
-        elif tempMethod == 'Relief-F互相关分析':
-            # print('-------Pearson相关性分析-测试-------')
-            # print(fields[0])
-            # print(methodParam[indexT])
-            afterHandleData, _, newColumns = FeatureOptimizationMethod(
-                dataFrameTemp, reservedField).ReliefF(methodParam[indexT])
-        # print('=============返回数据=============')
-        # print(afterHandleData)
-        # ===============合并处理后数据集===============
-        row_size = len(afterHandleData)
-        # print('-------优选特征-------')
-        intersection_cols = pages_utils.getIntersectionCols(
-            pages_utils.TempDataSet[3], afterHandleData
-        )
-        pages_utils.TempDataSet[3] = pd.merge(
-            afterHandleData, pages_utils.TempDataSet[3],
-            on=intersection_cols, how="left")
+            newColumns = '错误'
+            # ===============根据名称匹配调用并执行各个处理方法===============
+            # 初始化特征优选方法
+            for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
+                # 检查方法是否已执行
+                if isHandled:
+                    continue
+                # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
+                if pages_utils.TempDataSet[3].shape[0] == 0:
+                    dataFrameTemp = pages_utils.TempDataSet[2]
+                else:
+                    dataFrameTemp = pages_utils.TempDataSet[3]
+                reservedField = pages_utils.TempDataSet[2].columns.tolist()
+                afterHandleData = None
+                # print(tempMethod)
+                if tempMethod == 't检验':
+                    afterHandleData, _, newColumns = FeatureOptimizationMethod(
+                        dataFrameTemp, reservedField).tTest(
+                        methodParam[indexT])
+                elif tempMethod == 'Pearson相关性分析':
+                    # print('-------Pearson相关性分析-测试-------')
+                    # print(methodParam[indexT])
+                    afterHandleData, _, newColumns = FeatureOptimizationMethod(
+                        dataFrameTemp, reservedField).Pearson(
+                        methodParam[indexT])
+                elif tempMethod == 'Relief-F互相关分析':
+                    # print('-------Pearson相关性分析-测试-------')
+                    # print(fields[0])
+                    # print(methodParam[indexT])
+                    afterHandleData, _, newColumns = FeatureOptimizationMethod(
+                        dataFrameTemp, reservedField).ReliefF(methodParam[indexT])
+                # print('=============返回数据=============')
+                # print(afterHandleData)
+                # ===============合并处理后数据集===============
+                row_size = len(afterHandleData)
+                # print('-------优选特征-------')
+                intersection_cols = pages_utils.getIntersectionCols(
+                    pages_utils.TempDataSet[3], afterHandleData
+                )
+                pages_utils.TempDataSet[3] = pd.merge(
+                    afterHandleData, pages_utils.TempDataSet[3],
+                    on=intersection_cols, how="left")
 
-        # print(newColumns)
-        # ===============更新左侧显示内容===============
-        update_values = {
-            # "数据类型": "气象数据", "输入特征": fields[0],
-            "优选特征": ','.join(newColumns),
-            "大小": '1*' + str(row_size),
-            # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
-            "时间": datetime.datetime.now().time(),
-            "处理状态": True}
-        # 查找要更新的数据记录
-        for index, row in pages_utils.TempDataSetField[3].iterrows():
-            if row["编号"] == idNumber[indexT]:
-                for key, value in update_values.items():
-                    pages_utils.TempDataSetField[3].loc[index, key] = value
+                # print(newColumns)
+                # ===============更新左侧显示内容===============
+                update_values = {
+                    # "数据类型": "气象数据", "输入特征": fields[0],
+                    "优选特征": ','.join(newColumns),
+                    "大小": '1*' + str(row_size),
+                    # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
+                    "时间": datetime.datetime.now().time(),
+                    "处理状态": True}
+                # 查找要更新的数据记录
+                for index, row in pages_utils.TempDataSetField[3].iterrows():
+                    if row["编号"] == idNumber[indexT]:
+                        for key, value in update_values.items():
+                            pages_utils.TempDataSetField[3].loc[index, key] = value
 
-    print('======================优选特征集======================')
-    print(pages_utils.TempDataSet[3])
+            print('======================优选特征集======================')
+            print(pages_utils.TempDataSet[3])
 
 
 # ==============================界面==============================

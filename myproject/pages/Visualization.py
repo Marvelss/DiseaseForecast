@@ -13,6 +13,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from st_pages import hide_pages
 
+from lib.share import RESOURCE_MODELRESULT_PATH
 from pages import pages_utils
 
 st.set_page_config(
@@ -40,6 +41,8 @@ else:
             "模型构建-面状",
         ]
     )
+
+
 @st.cache_data
 def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
@@ -92,7 +95,7 @@ with tab1:
             modelResult = pages_utils.TempDataSetField[4]['模型训练结果'].tolist()
 
             zipPath = os.path.join(
-                os.getcwd(), 'resource', 'modelsResults', '模型结构与训练结果.zip')
+                RESOURCE_MODELRESULT_PATH, '模型结构与训练结果.zip')
 
             with zipfile.ZipFile(zipPath, 'w') as zipf:
                 pass  # 不添加任何文件
@@ -107,13 +110,13 @@ with tab1:
                     # print(f"模型结构: {model_structure}")
                     # print(f"模型训练结果: {model_training_result}\n")
 
-                    rootPathTemp = os.path.join(os.getcwd(), 'resource', 'modelsResults')
+                    rootPathTemp = RESOURCE_MODELRESULT_PATH
 
                     modelStructurePath = os.path.join(rootPathTemp,
-                                                      'modelsStructure', model_structure)
+                                                      'structure', model_structure)
                     # 保存预测结果
                     modelResultPath = os.path.join(rootPathTemp,
-                                                   'predictAndTestLabel',
+                                                   'predict',
                                                    model_training_result)
                     # print(modelStructurePath)
                     # print(modelResultPath)

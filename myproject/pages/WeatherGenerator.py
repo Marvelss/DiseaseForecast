@@ -18,7 +18,8 @@ from sklearn.preprocessing import StandardScaler
 from st_pages import hide_pages
 from streamlit_pills import pills
 
-from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_PROCESS_PATH, RESOURCE_IMAGES_PATH, RESOURCE_TEMPDIR_PATH
+from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_PROCESS_PATH, RESOURCE_IMAGES_PATH, RESOURCE_TEMPDIR_PATH, \
+    RESOURCE_MODELRESULT_PATH
 from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 from pages.modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
 
@@ -122,10 +123,7 @@ def getSimulateWeather(weatherSituation, province, station, startYear):
 
 # 获取模型
 def getModel(modelName):
-    modelPathRoot = os.path.join(r'/',
-                                 'resource',
-                                 'modelsResults',
-                                 'modelsStructure')
+    modelPathRoot = os.path.join(RESOURCE_MODELRESULT_PATH, 'structure')
     modelPath = os.path.join(modelPathRoot, modelName + '_structure.pkl')
     # print(modelPath)
     if os.path.exists(modelPath):
@@ -319,9 +317,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                     (data['测报站点'] == weatherGeneratorStationSelected)]
 
                 resultTempPath = os.path.join(
-                    os.getcwd(),
-                    'resource',
-                    'modelsResults',
+                    RESOURCE_MODELRESULT_PATH,
                     'modelsSimulateWeatherIndexResult',
                     str(tempModel) + '_'
                     + weatherScenes +

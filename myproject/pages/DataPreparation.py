@@ -42,6 +42,7 @@ if 'DPVisualInformation' not in st.session_state:
 checkBoxNum = 2
 # 设置可视化图表中文
 plt.rcParams['font.sans-serif'] = 'SimHei'
+emptyHeadDPP = st.empty()
 
 
 # 获取选项值对应名称
@@ -97,80 +98,78 @@ def onRun():
     isHandledFlags = pages_utils.TempDataSetField[1]["处理状态"]
     methodList = pages_utils.TempDataSetField[1]["预处理方法"]
     # ===============根据名称匹配调用并执行各个处理方法===============
-    # print('=========测试输入数据=========')
-    # print(fields)
-    # print(methodParam)
+    with emptyHeadDPP:
+        with st.spinner('处理数据中...'):
+            # 若为空则跳过该步骤
+            if idNumber.empty:
+                pages_utils.TempDataSet[1] = pages_utils.TempDataSet[0]
 
-    # 若为空则跳过该步骤
-    if idNumber.empty:
-        pages_utils.TempDataSet[1] = pages_utils.TempDataSet[0]
+            afterHandleData = None
+            for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
+                # 检查方法是否已执行
+                if isHandled:
+                    continue
+                # 第一次使用原始数据集,而后基于预处理后数据集多次处理
+                if pages_utils.TempDataSet[1].shape[0] == 0:
+                    dataFrameTemp = pages_utils.TempDataSet[0]
+                else:
+                    dataFrameTemp = pages_utils.TempDataSet[1]
+                # 使用处理后最新的字段内容
+                reservedField = pages_utils.TempDataSet[0].columns.tolist()
+                # print(f'=============测试保留字段-{reservedField}=============')
+                newDataColumn = fields[indexT]
 
-    afterHandleData = None
-    for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
-        # 检查方法是否已执行
-        if isHandled:
-            continue
-        # 第一次使用原始数据集,而后基于预处理后数据集多次处理
-        if pages_utils.TempDataSet[1].shape[0] == 0:
-            dataFrameTemp = pages_utils.TempDataSet[0]
-        else:
-            dataFrameTemp = pages_utils.TempDataSet[1]
-        # 使用处理后最新的字段内容
-        reservedField = pages_utils.TempDataSet[0].columns.tolist()
-        # print(f'=============测试保留字段-{reservedField}=============')
-        newDataColumn = fields[indexT]
+                DPVisualInformationTemp = {'before': dataFrameTemp[newDataColumn[0]]}
+                if tempMethod == '缺失值插补':
+                    (afterHandleData, missingValueBefore, missingValueAfter,
+                     newDataColumn) = PretreatmentMethod(
+                        dataFrameTemp,
+                        fields[indexT], reservedField).linearInterpolation(methodParam[indexT])
+                    # 显示填补信息
+                    st.toast(f'填补缺失值:{str(missingValueBefore - missingValueAfter)}' +
+                             '\n' +
+                             f'剩余缺失值:{missingValueAfter}', icon='✅')
+                elif tempMethod == '剔除异常值':
+                    (afterHandleData, outlierNum, lengthAfter,
+                     newDataColumn) = PretreatmentMethod(
+                        dataFrameTemp,
+                        fields[indexT], reservedField).outlierEliminator(methodParam[indexT])
+                    # 显示填补信息
+                    st.toast(f'剔除异常值个数:{outlierNum}' +
+                             '\n' +
+                             f'剩余条数:{lengthAfter}', icon='✅')
 
-        DPVisualInformationTemp = {'before': dataFrameTemp[newDataColumn[0]]}
-        if tempMethod == '缺失值插补':
-            (afterHandleData, missingValueBefore, missingValueAfter,
-             newDataColumn) = PretreatmentMethod(
-                dataFrameTemp,
-                fields[indexT], reservedField).linearInterpolation(methodParam[indexT])
-            # 显示填补信息
-            st.toast(f'填补缺失值:{str(missingValueBefore - missingValueAfter)}' +
-                     '\n' +
-                     f'剩余缺失值:{missingValueAfter}', icon='✅')
-        elif tempMethod == '剔除异常值':
-            (afterHandleData, outlierNum, lengthAfter,
-             newDataColumn) = PretreatmentMethod(
-                dataFrameTemp,
-                fields[indexT], reservedField).outlierEliminator(methodParam[indexT])
-            # 显示填补信息
-            st.toast(f'剔除异常值个数:{outlierNum}' +
-                     '\n' +
-                     f'剩余条数:{lengthAfter}', icon='✅')
+                # ===============合并处理后数据集===============
+                intersection_cols = pages_utils.getIntersectionCols(
+                    pages_utils.TempDataSet[1], afterHandleData
+                )
 
-        # ===============合并处理后数据集===============
-        intersection_cols = pages_utils.getIntersectionCols(
-            pages_utils.TempDataSet[1], afterHandleData
-        )
+                pages_utils.TempDataSet[1] = pd.merge(
+                    afterHandleData, pages_utils.TempDataSet[1],
+                    on=intersection_cols, how="left")
+                # print('======================预处理后数据集======================')
 
-        pages_utils.TempDataSet[1] = pd.merge(
-            afterHandleData, pages_utils.TempDataSet[1],
-            on=intersection_cols, how="left")
-        # print('======================预处理后数据集======================')
-
-        # ===============更新左侧显示内容===============
-        # print(f'更新左侧显示内容:{newDataColumn}')
-        DPVisualInformationTemp['name'] = tempMethod
-        DPVisualInformationTemp['after'] = pages_utils.TempDataSet[1][newDataColumn]
-        # 可视化信息添加
-        st.session_state["DPVisualInformation"].append(DPVisualInformationTemp)
-        # print('=====================展示可视化内容======================')
-        # print(st.session_state["DPVisualInformation"])
-        update_values = {
-            "预处理后字段": newDataColumn,
-            "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
-            "时间": datetime.datetime.now().time(),
-            "处理状态": True
-        }
-        # 查找要更新的数据记录
-        for index, row in pages_utils.TempDataSetField[1].iterrows():
-            if row["编号"] == idNumber[indexT]:
-                for key1, value1 in update_values.items():
-                    pages_utils.TempDataSetField[1].loc[index, key1] = value1
-    print('===================预处理数据集===================')
-    print(pages_utils.TempDataSet[1])
+                # ===============更新左侧显示内容===============
+                # print(f'更新左侧显示内容:{newDataColumn}')
+                DPVisualInformationTemp['name'] = tempMethod
+                DPVisualInformationTemp['after'] = pages_utils.TempDataSet[1][newDataColumn]
+                # 可视化信息添加
+                st.session_state["DPVisualInformation"].append(DPVisualInformationTemp)
+                # print('=====================展示可视化内容======================')
+                # print(st.session_state["DPVisualInformation"])
+                update_values = {
+                    "预处理后字段": newDataColumn,
+                    "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
+                    "时间": datetime.datetime.now().time(),
+                    "处理状态": True
+                }
+                # 查找要更新的数据记录
+                for index, row in pages_utils.TempDataSetField[1].iterrows():
+                    if row["编号"] == idNumber[indexT]:
+                        for key1, value1 in update_values.items():
+                            pages_utils.TempDataSetField[1].loc[index, key1] = value1
+            print('===================预处理数据集===================')
+            print(pages_utils.TempDataSet[1])
 
 
 # ==============================界面==============================

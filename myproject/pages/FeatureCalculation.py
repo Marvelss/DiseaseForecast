@@ -28,6 +28,7 @@ hide_pages(
         "模型构建-面状",
     ]
 )
+emptyHeadFCP = st.empty()
 
 checkBoxNum = 4
 if "featureMethodName" not in st.session_state:
@@ -105,82 +106,80 @@ def onRun():
     methodList = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
     isHandledFlags = pages_utils.TempDataSetField[2]["处理状态"].tolist()
     # print('===============获取任务清单内容===============')
-    # print(methodParam)
-    # print(methodList)
+    with emptyHeadFCP:
+        with st.spinner('处理数据中...'):
+            # 若为空则跳过该步骤
+            if not idNumber:
+                pages_utils.TempDataSet[2] = pages_utils.TempDataSet[1]
+            afterHandleData = None
+            newColumn = '错误'
+            # ===============根据名称匹配调用并执行各个处理方法===============
+            # 初始化特征计算方法
+            # methodTool = FeatureCalculationMethod(
+            #     pages_utils.TempDataSet[1],
+            #     reservedField + outFields)
+            for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
+                # 检查方法是否已执行
+                if isHandled:
+                    continue
+                # 第一次使用预处理数据集,而后基于特征计算数据集多次处理
+                if pages_utils.TempDataSet[2].shape[0] == 0:
+                    dataFrameTemp = pages_utils.TempDataSet[1]
+                else:
+                    dataFrameTemp = pages_utils.TempDataSet[2]
+                # 使用处理后最新的字段内容
+                reservedField = pages_utils.TempDataSet[1].columns.tolist()
+                # print(f'=============测试保留字段-{reservedField}=============')
+                if tempMethod == '时间(温度)分辨率转换':
+                    pass
+                elif tempMethod == '降雨日数计算':
+                    afterHandleData, newColumn = FeatureCalculationMethod(
+                        dataFrameTemp, reservedField).rainfallDaysAccumulation(
+                        fields[indexT], methodParam[indexT])
+                elif tempMethod == '降水累积量计算':
+                    afterHandleData, newColumn = FeatureCalculationMethod(
+                        dataFrameTemp, reservedField).precipitationAccumulation(
+                        fields[indexT], methodParam[indexT])
+                elif tempMethod == '基于活动积温的生育期计算':
+                    afterHandleData, newColumn = FeatureCalculationMethod(
+                        dataFrameTemp, reservedField).growthPeriodCalculation(
+                        fields[indexT], methodParam[indexT])
+                elif tempMethod == '时空抽取':
+                    return '时空抽取'
 
-    # 若为空则跳过该步骤
-    if not idNumber:
-        pages_utils.TempDataSet[2] = pages_utils.TempDataSet[1]
+                # ===============合并处理后数据集===============
+                row_size = len(afterHandleData)
+                intersection_cols = pages_utils.getIntersectionCols(
+                    pages_utils.TempDataSet[2], afterHandleData
+                )
+                pages_utils.TempDataSet[2] = pd.merge(
+                    afterHandleData, pages_utils.TempDataSet[2],
+                    on=intersection_cols, how="left")
 
-    afterHandleData = None
-    newColumn = '错误'
-    # ===============根据名称匹配调用并执行各个处理方法===============
-    # 初始化特征计算方法
-    # methodTool = FeatureCalculationMethod(
-    #     pages_utils.TempDataSet[1],
-    #     reservedField + outFields)
-    for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
-        # 检查方法是否已执行
-        if isHandled:
-            continue
-        # 第一次使用预处理数据集,而后基于特征计算数据集多次处理
-        if pages_utils.TempDataSet[2].shape[0] == 0:
-            dataFrameTemp = pages_utils.TempDataSet[1]
-        else:
-            dataFrameTemp = pages_utils.TempDataSet[2]
-        # 使用处理后最新的字段内容
-        reservedField = pages_utils.TempDataSet[1].columns.tolist()
-        # print(f'=============测试保留字段-{reservedField}=============')
-        if tempMethod == '时间(温度)分辨率转换':
-            pass
-        elif tempMethod == '降雨日数计算':
-            afterHandleData, newColumn = FeatureCalculationMethod(
-                dataFrameTemp, reservedField).rainfallDaysAccumulation(
-                fields[indexT], methodParam[indexT])
-        elif tempMethod == '降水累积量计算':
-            afterHandleData, newColumn = FeatureCalculationMethod(
-                dataFrameTemp, reservedField).precipitationAccumulation(
-                fields[indexT], methodParam[indexT])
-        elif tempMethod == '基于活动积温的生育期计算':
-            afterHandleData, newColumn = FeatureCalculationMethod(
-                dataFrameTemp, reservedField).growthPeriodCalculation(
-                fields[indexT], methodParam[indexT])
-        elif tempMethod == '时空抽取':
-            return '时空抽取'
+                # print('======================备选特征======================')
+                # print(pages_utils.TempDataSet[2])
+                # ===============更新左侧显示内容===============
+                FCVisualInformationTemp = {
+                    'before': None,
+                    'name': tempMethod,
+                    'column': newColumn,
+                    'after': afterHandleData[[newColumn, '上级单位', '测报站点', '年']]}
+                # 可视化信息添加
+                st.session_state["FCVisualInformation"].append(FCVisualInformationTemp)
+                # print(st.session_state["FCVisualInformation"])
+                update_values = {
+                    "大小": '1*' + str(row_size),
+                    "备选特征": newColumn,
+                    "时间": datetime.datetime.now().time(),
+                    "处理状态": True}
+                # 根据字段名和索引来更新字段值
+                for index, row in pages_utils.TempDataSetField[2].iterrows():
+                    if row["编号"] == idNumber[indexT]:
+                        for key, value in update_values.items():
+                            pages_utils.TempDataSetField[2].loc[index, key] = value
 
-        # ===============合并处理后数据集===============
-        row_size = len(afterHandleData)
-        intersection_cols = pages_utils.getIntersectionCols(
-            pages_utils.TempDataSet[2], afterHandleData
-        )
-        pages_utils.TempDataSet[2] = pd.merge(
-            afterHandleData, pages_utils.TempDataSet[2],
-            on=intersection_cols, how="left")
-
-        # print('======================备选特征======================')
-        # print(pages_utils.TempDataSet[2])
-        # ===============更新左侧显示内容===============
-        FCVisualInformationTemp = {
-            'before': None,
-            'name': tempMethod,
-            'column': newColumn,
-            'after': afterHandleData[[newColumn, '上级单位', '测报站点', '年']]}
-        # 可视化信息添加
-        st.session_state["FCVisualInformation"].append(FCVisualInformationTemp)
-        # print(st.session_state["FCVisualInformation"])
-        update_values = {
-            "大小": '1*' + str(row_size),
-            "备选特征": newColumn,
-            "时间": datetime.datetime.now().time(),
-            "处理状态": True}
-        # 根据字段名和索引来更新字段值
-        for index, row in pages_utils.TempDataSetField[2].iterrows():
-            if row["编号"] == idNumber[indexT]:
-                for key, value in update_values.items():
-                    pages_utils.TempDataSetField[2].loc[index, key] = value
-
-    print('===================特征计算数据集===================')
-    print(pages_utils.TempDataSet[2])
+            print('===================特征计算数据集===================')
+            print(pages_utils.TempDataSet[2])
 
 
 # ==============================界面==============================

@@ -50,6 +50,8 @@ warningAInfo = '''
 1. 模版中的表头名称不可更改,表头行不可删除;
 2. 删除示例数据后,添加新数据.
     '''
+
+emptyHeadDSP = st.empty()
 # ==============================文件上传显示==============================
 dataSCM, dataSCR = st.columns([0.7, 0.4])
 with dataSCM:
@@ -105,44 +107,46 @@ with dataSCM:
                     mime="application/octet-stream"
                 )
     # ==============================控制文件上传逻辑==============================
-    if uploaded_files:
-        # print(uploaded_files)
-        try:
-            bytes_data = uploaded_files.read()
-            data33 = pd.read_excel(bytes_data)
+    with emptyHeadDSP:
+        with st.spinner('处理数据中...'):
+            if uploaded_files:
+                # print(uploaded_files)
+                try:
+                    bytes_data = uploaded_files.read()
+                    data33 = pd.read_excel(bytes_data)
 
-            # st.markdown(data33)
-            new_data = {
-                "编号": pages_utils.generateID(),
-                "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "已上传",
-                "上传时间": datetime.now().strftime("%H:%M:%S"),
-                "字段": data33.columns.tolist()}
+                    # st.markdown(data33)
+                    new_data = {
+                        "编号": pages_utils.generateID(),
+                        "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "已上传",
+                        "上传时间": datetime.now().strftime("%H:%M:%S"),
+                        "字段": data33.columns.tolist()}
 
-            # 防止重复添加
-            if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():
-                pass
-            else:
-                # 添加并合并至原始数据集
-                pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
-                # 获取两个DataFrame列名的交集
-                intersection_cols = pages_utils.getIntersectionCols(
-                    data33, pages_utils.TempDataSet[0]
-                )
-                # 合并数据
-                pages_utils.TempDataSet[0] = pd.merge(
-                    data33, pages_utils.TempDataSet[0],
-                    on=intersection_cols, how="outer")
-        # 上传出错提示
-        except BaseException as e:
-            st.toast('上传错误  \n请检查文件内容及格式无误后重新上传', icon="⚠️")
-            # new_data = {
-            #     "编号": pages_utils.generateID(),
-            #     "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "上传出错",
-            #     "上传时间": datetime.now().strftime("%H:%M:%S"),
-            #     "字段": '未识别'}
-            # pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
-        print('======================原始数据集======================')
-        print(pages_utils.TempDataSet[0])
+                    # 防止重复添加
+                    if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():
+                        pass
+                    else:
+                        # 添加并合并至原始数据集
+                        pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
+                        # 获取两个DataFrame列名的交集
+                        intersection_cols = pages_utils.getIntersectionCols(
+                            data33, pages_utils.TempDataSet[0]
+                        )
+                        # 合并数据
+                        pages_utils.TempDataSet[0] = pd.merge(
+                            data33, pages_utils.TempDataSet[0],
+                            on=intersection_cols, how="outer")
+                # 上传出错提示
+                except BaseException as e:
+                    st.toast('上传错误  \n请检查文件内容及格式无误后重新上传', icon="⚠️")
+                    # new_data = {
+                    #     "编号": pages_utils.generateID(),
+                    #     "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "上传出错",
+                    #     "上传时间": datetime.now().strftime("%H:%M:%S"),
+                    #     "字段": '未识别'}
+                    # pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
+                print('======================原始数据集======================')
+                print(pages_utils.TempDataSet[0])
 # ==============================右侧文件上传状态显示==============================
 with dataSCR:
     st.markdown("##### 文件上传状态显示")

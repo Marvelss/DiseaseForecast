@@ -8,6 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from st_pages import hide_pages
 
+from lib.share import RESOURCE_MODELRESULT_PATH
 from pages import pages_utils
 from pages.modelandmethod.Model import Model
 
@@ -56,6 +57,8 @@ if "modelPrecisionName" not in st.session_state:
 if "nextBtnShow" not in st.session_state:
     st.session_state.nextBtnShow = 0
 
+emptyHeadMBP = st.empty()
+
 checkBoxModelNum = 8
 # 显示可视化中文图例
 plt.rcParams['font.sans-serif'] = 'SimHei'
@@ -64,7 +67,7 @@ model_params = [
     {"模型名称": "SVM",
      "模型参数": {
          'C': '1.0', 'kernel': 'rbf', 'gamma': 'scale'},
-     "备注": ['test_pre_p', 'test_fc_p', 'test_fo_p']},
+     "备注": ['test_pretreatment_point', 'test_feature_calculation_point', 'test_feature_ optimization']},
     {"模型名称": "KNN",
      "模型参数": {"n_neighbors": "5", "leaf_size": "30", "n_jobs": "1"},
      "备注": ['testA1', 'testA2', 'testA3']},
@@ -185,160 +188,162 @@ def onTrain(temporaResolution):
     inputDataSet = pages_utils.TempDataSet[4]
     # print(inputDataSet)
 
-    # ===============运行任务清单调用模型准备训练===============
-    for tempIndex, (tempModel, isHandled) in enumerate(zip(models, isHandledFlags)):
-        # 检查方法是否已执行
-        if isHandled:
-            continue
-        evaluationResult = None
-        modelStruct = None
-        actualAndPredictResult = None
-        if tempModel == 'SVM':
-            evaluationResult, actualAndPredictResult, modelStruct = Model(
-                inputDataSet,
-                features[tempIndex], targets[tempIndex],
-                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
-                evaluationIndicator[tempIndex]).onSVM()
-            # print('======测试返回模型评价结果======')
-            # print(evaluationResult)
-            # 显示模型训练结果信息
-            info = ''
-            for key, value in evaluationResult.items():
-                info += f'{key}:{str(round(value, 3))}' + '       '
-            # 显示精度结果
-            st.toast('SVM训练完成 \n' + '       ' + ' \n' + info,
-                     icon='✅')
-        elif tempModel == 'KNN':
-            evaluationResult, actualAndPredictResult, modelStruct = Model(
-                inputDataSet,
-                features[tempIndex], targets[tempIndex],
-                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
-                evaluationIndicator[tempIndex]).onKNN()
+    with emptyHeadMBP:
+        with st.spinner('训练模型中...'):
+            # ===============运行任务清单调用模型准备训练===============
+            for tempIndex, (tempModel, isHandled) in enumerate(zip(models, isHandledFlags)):
+                # 检查方法是否已执行
+                if isHandled:
+                    continue
+                evaluationResult = None
+                modelStruct = None
+                actualAndPredictResult = None
+                if tempModel == 'SVM':
+                    evaluationResult, actualAndPredictResult, modelStruct = Model(
+                        inputDataSet,
+                        features[tempIndex], targets[tempIndex],
+                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        evaluationIndicator[tempIndex]).onSVM()
+                    # print('======测试返回模型评价结果======')
+                    # print(evaluationResult)
+                    # 显示模型训练结果信息
+                    info = ''
+                    for key, value in evaluationResult.items():
+                        info += f'{key}:{str(round(value, 3))}' + '       '
+                    # 显示精度结果
+                    st.toast('SVM训练完成 \n' + '       ' + ' \n' + info,
+                             icon='✅')
+                elif tempModel == 'KNN':
+                    evaluationResult, actualAndPredictResult, modelStruct = Model(
+                        inputDataSet,
+                        features[tempIndex], targets[tempIndex],
+                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        evaluationIndicator[tempIndex]).onKNN()
 
-            # 显示模型训练结果信息
-            info = ''
-            for key, value in evaluationResult.items():
-                info += f'{key}:{str(round(value, 3))}' + '       '
-            # 显示精度结果
-            st.toast('KNN训练完成 \n' + '       ' + ' \n' + info,
-                     icon='✅')
-        elif tempModel == 'FLDA':
-            evaluationResult, actualAndPredictResult, modelStruct = Model(
-                inputDataSet,
-                features[tempIndex], targets[tempIndex],
-                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
-                evaluationIndicator[tempIndex]).onFLDA()
+                    # 显示模型训练结果信息
+                    info = ''
+                    for key, value in evaluationResult.items():
+                        info += f'{key}:{str(round(value, 3))}' + '       '
+                    # 显示精度结果
+                    st.toast('KNN训练完成 \n' + '       ' + ' \n' + info,
+                             icon='✅')
+                elif tempModel == 'FLDA':
+                    evaluationResult, actualAndPredictResult, modelStruct = Model(
+                        inputDataSet,
+                        features[tempIndex], targets[tempIndex],
+                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        evaluationIndicator[tempIndex]).onFLDA()
 
-            # 显示模型训练结果信息
-            info = ''
-            for key, value in evaluationResult.items():
-                info += f'{key}:{str(round(value, 3))}' + '       '
-            # 显示精度结果
-            st.toast('FLDA训练完成 \n' + '       ' + ' \n' + info,
-                     icon='✅')
-        elif tempModel == 'RF':
-            evaluationResult, actualAndPredictResult, modelStruct = Model(
-                inputDataSet,
-                features[tempIndex], targets[tempIndex],
-                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
-                evaluationIndicator[tempIndex]).onRF()
+                    # 显示模型训练结果信息
+                    info = ''
+                    for key, value in evaluationResult.items():
+                        info += f'{key}:{str(round(value, 3))}' + '       '
+                    # 显示精度结果
+                    st.toast('FLDA训练完成 \n' + '       ' + ' \n' + info,
+                             icon='✅')
+                elif tempModel == 'RF':
+                    evaluationResult, actualAndPredictResult, modelStruct = Model(
+                        inputDataSet,
+                        features[tempIndex], targets[tempIndex],
+                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        evaluationIndicator[tempIndex]).onRF()
 
-            # 显示模型训练结果信息
-            info = ''
-            for key, value in evaluationResult.items():
-                info += f'{key}:{str(round(value, 3))}' + '       '
-            # 显示精度结果
-            st.toast('RF训练完成 \n' + '       ' + ' \n' + info,
-                     icon='✅')
-        elif tempModel == 'PLSR':
-            evaluationResult, actualAndPredictResult, modelStruct = Model(
-                inputDataSet,
-                features[tempIndex], targets[tempIndex],
-                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
-                evaluationIndicator[tempIndex]).onPLSR()
-            print('======测试返回模型评价结果======')
-            print(evaluationResult)
-            # 显示模型训练结果信息
-            info = ''
-            for key, value in evaluationResult.items():
-                info += f'{key}:{str(round(value, 3))}' + '       '
-            # 显示精度结果
-            st.toast('PLSR训练完成 \n' + '       ' + ' \n' + info,
-                     icon='✅')
-        elif tempModel == 'LR':
-            # print('======测试输入参数======')
-            # print(modelParam)
-            evaluationResult, actualAndPredictResult, modelStruct = Model(
-                inputDataSet,
-                features[tempIndex], targets[tempIndex],
-                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
-                evaluationIndicator[tempIndex]).onLR()
-            print('======测试返回模型评价结果======')
-            print(evaluationResult)
-            # 显示模型训练结果信息
-            info = ''
-            for key, value in evaluationResult.items():
-                info += f'{key}:{str(round(value, 3))}' + '       '
-            # 显示精度结果
-            st.toast('LR训练完成 \n' + '       ' + ' \n' + info,
-                     icon='✅')
-        elif tempModel == 'SVR':
-            # print('======测试输入参数======')
-            # print(modelParam)
-            evaluationResult, actualAndPredictResult, modelStruct = Model(
-                inputDataSet,
-                features[tempIndex], targets[tempIndex],
-                dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
-                evaluationIndicator[tempIndex]).onSVR()
-            print('======测试返回模型评价结果======')
-            print(evaluationResult)
-            # 显示模型训练结果信息
-            info = ''
-            for key, value in evaluationResult.items():
-                info += f'{key}:{str(round(value, 3))}' + '       '
-            # 显示精度结果
-            st.toast('SVR训练完成 \n' + '       ' + ' \n' + info,
-                     icon='✅')
-        elif tempModel == 'SEIR机理模型':
-            # print('======测试输入参数======')
-            # print(modelParam)
-            with st.status("正在运行SEIR机理模型"):
-                evaluationResult, actualAndPredictResult, modelStruct = Model(
-                    inputDataSet,
-                    features[tempIndex], targets[tempIndex],
-                    dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
-                    evaluationIndicator[tempIndex]).onSEIR()
-            # print('======测试返回SEIR模型评价结果======')
-            # print(f'精度:{evaluationResult}')
-            # print(f'最优参数:{actualAndPredictResult}')
-            # print(f'模型结构:{modelStruct}')
-            # 显示模型训练结果信息
-            info = ''
-            for key, value in evaluationResult.items():
-                info += f'{key}:{str(round(value, 3))}' + '       '
-            # 显示精度结果
-            st.toast('SEIR机理模型训练完成 \n' + '       ' + ' \n' + info,
-                     icon='✅')
-        # print('==============更新前================')
-        # print(pages_utils.TempDataSetField[4])
-        # ===============更新左侧显示内容===============
-        # print(actualAndPredictResult)
-        update_values = {
-            "时间": datetime.datetime.now().time(),
-            "评价指标": evaluationResult,
-            "处理状态": True,
-            "模型训练结果": actualAndPredictResult,
-            "模型结构": modelStruct}
-        print('======更新指标======')
-        print(update_values)
-        # 查找要更新的数据记录
-        for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
-            if row1["编号"] == idNumber[tempIndex]:
-                for key, value in update_values.items():
-                    pages_utils.TempDataSetField[4].at[index1, key] = value
+                    # 显示模型训练结果信息
+                    info = ''
+                    for key, value in evaluationResult.items():
+                        info += f'{key}:{str(round(value, 3))}' + '       '
+                    # 显示精度结果
+                    st.toast('RF训练完成 \n' + '       ' + ' \n' + info,
+                             icon='✅')
+                elif tempModel == 'PLSR':
+                    evaluationResult, actualAndPredictResult, modelStruct = Model(
+                        inputDataSet,
+                        features[tempIndex], targets[tempIndex],
+                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        evaluationIndicator[tempIndex]).onPLSR()
+                    print('======测试返回模型评价结果======')
+                    print(evaluationResult)
+                    # 显示模型训练结果信息
+                    info = ''
+                    for key, value in evaluationResult.items():
+                        info += f'{key}:{str(round(value, 3))}' + '       '
+                    # 显示精度结果
+                    st.toast('PLSR训练完成 \n' + '       ' + ' \n' + info,
+                             icon='✅')
+                elif tempModel == 'LR':
+                    # print('======测试输入参数======')
+                    # print(modelParam)
+                    evaluationResult, actualAndPredictResult, modelStruct = Model(
+                        inputDataSet,
+                        features[tempIndex], targets[tempIndex],
+                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        evaluationIndicator[tempIndex]).onLR()
+                    print('======测试返回模型评价结果======')
+                    print(evaluationResult)
+                    # 显示模型训练结果信息
+                    info = ''
+                    for key, value in evaluationResult.items():
+                        info += f'{key}:{str(round(value, 3))}' + '       '
+                    # 显示精度结果
+                    st.toast('LR训练完成 \n' + '       ' + ' \n' + info,
+                             icon='✅')
+                elif tempModel == 'SVR':
+                    # print('======测试输入参数======')
+                    # print(modelParam)
+                    evaluationResult, actualAndPredictResult, modelStruct = Model(
+                        inputDataSet,
+                        features[tempIndex], targets[tempIndex],
+                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        evaluationIndicator[tempIndex]).onSVR()
+                    print('======测试返回模型评价结果======')
+                    print(evaluationResult)
+                    # 显示模型训练结果信息
+                    info = ''
+                    for key, value in evaluationResult.items():
+                        info += f'{key}:{str(round(value, 3))}' + '       '
+                    # 显示精度结果
+                    st.toast('SVR训练完成 \n' + '       ' + ' \n' + info,
+                             icon='✅')
+                elif tempModel == 'SEIR机理模型':
+                    # print('======测试输入参数======')
+                    # print(modelParam)
+                    with st.status("正在运行SEIR机理模型"):
+                        evaluationResult, actualAndPredictResult, modelStruct = Model(
+                            inputDataSet,
+                            features[tempIndex], targets[tempIndex],
+                            dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                            evaluationIndicator[tempIndex]).onSEIR()
+                    # print('======测试返回SEIR模型评价结果======')
+                    # print(f'精度:{evaluationResult}')
+                    # print(f'最优参数:{actualAndPredictResult}')
+                    # print(f'模型结构:{modelStruct}')
+                    # 显示模型训练结果信息
+                    info = ''
+                    for key, value in evaluationResult.items():
+                        info += f'{key}:{str(round(value, 3))}' + '       '
+                    # 显示精度结果
+                    st.toast('SEIR机理模型训练完成 \n' + '       ' + ' \n' + info,
+                             icon='✅')
+                # print('==============更新前================')
+                # print(pages_utils.TempDataSetField[4])
+                # ===============更新左侧显示内容===============
+                # print(actualAndPredictResult)
+                update_values = {
+                    "时间": datetime.datetime.now().time(),
+                    "评价指标": evaluationResult,
+                    "处理状态": True,
+                    "模型训练结果": actualAndPredictResult,
+                    "模型结构": modelStruct}
+                print('======更新指标======')
+                print(update_values)
+                # 查找要更新的数据记录
+                for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
+                    if row1["编号"] == idNumber[tempIndex]:
+                        for key, value in update_values.items():
+                            pages_utils.TempDataSetField[4].at[index1, key] = value
 
-    # print('==============更新后指标================')
-    # print(pages_utils.TempDataSetField[4])
+            # print('==============更新后指标================')
+            # print(pages_utils.TempDataSetField[4])
 
 
 def onModel():
@@ -604,7 +609,7 @@ with modelACM:
                 # else:
                 #     st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
                 #     pages_utils.TempDataSet[4] = beforeDF
-            st.markdown('###### 最终输入模型特征')
+            st.markdown('###### 最终输入模型特征预览')
             st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
             # st.markdown('---')
             st.markdown("###### 训练与验证数据集划分")
@@ -667,9 +672,7 @@ with modelACM:
                     # y_Predicted = actualAndPredictList[i]['actualLabel']
                     # print(f'=============可视化{y_Actual}{y_Predicted}=============')
                     # 创建模拟的混淆矩阵
-                    rootPath = os.path.join(os.getcwd(), 'resource',
-                                            'modelsResults',
-                                            'predictAndTestLabel')
+                    rootPath = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
                     testLabelDF = pd.read_excel(
                         os.path.join(rootPath,
                                      models[i] + '_testLabel.xlsx'))

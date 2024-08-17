@@ -35,8 +35,8 @@ st.set_page_config(
 def getModel(modelName):
     modelPathRoot = os.path.join(r'/',
                                  'resource',
-                                 'modelsResults',
-                                 'modelsStructure')
+                                 'modelresult',
+                                 'structure')
     modelPathTemp = os.path.join(modelPathRoot, modelName + '_structure.pkl')
     print(modelPathTemp)
     if os.path.exists(modelPathTemp):
@@ -145,7 +145,7 @@ def onModelApplication(rawData, processedDataRecorderList):
         predictions_df.to_excel(
             os.path.join(os.getcwd(),
                          'resource',
-                         'modelsResults',
+                         'modelresult',
                          'modelsApplicationResult',
                          str(tempModel) +
                          '_applicationPredicts' +
@@ -273,13 +273,13 @@ st.markdown('---')
 st.markdown("##### 可视化结果")
 # Create the bar plot
 plt.figure(figsize=(15, 5))
-sns.barplot(data=pd.read_excel(
-    r'E:\a_python\program\diseaseForecastStreamlit\tests\test21\PLSR_applicationPredicts.xlsx'),
-    x="测报站点",
-    y="Predicted_value",
-    hue="年",
-    dodge=True,
-    saturation=1)
+# sns.barplot(data=pd.read_excel(
+#     r'E:\a_python\program\diseaseForecastStreamlit\tests\test21\PLSR_applicationPredicts.xlsx'),
+#     x="测报站点",
+#     y="Predicted_value",
+#     hue="年",
+#     dodge=True,
+#     saturation=1)
 plt.rcParams['font.sans-serif'] = 'SimHei'
 # Set the labels and title
 plt.xlabel("测报站点")

@@ -609,8 +609,8 @@ with modelACM:
                     # print(f'=============可视化{y_Actual}{y_Predicted}=============')
                     # 创建模拟的混淆矩阵
                     rootPath = os.path.join(os.getcwd(), 'resource',
-                                            'modelsResults',
-                                            'predictAndTestLabel')
+                                            'modelresult',
+                                            'predict')
                     testLabelDF = pd.read_excel(
                         os.path.join(rootPath,
                                      models[i] + '_testLabel.xlsx'))
