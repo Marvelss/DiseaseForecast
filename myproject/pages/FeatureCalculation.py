@@ -1,4 +1,5 @@
 import datetime
+import time
 
 import pandas as pd
 import streamlit as st
@@ -345,6 +346,17 @@ with (featureCCM):
     interval_col1, interval_col2 = st.columns([5, 1])
     btn = interval_col2.button('添加处理', on_click=clear_all)
     if btn:
+        # 检测用户行为-数据中含缺失值
+        tempMissingColumn = []
+        for column in pages_utils.TempDataSet[1].columns:
+            # 获取每个字段的非缺失值数量
+            if pages_utils.TempDataSet[1][column].isnull().any():
+                tempMissingColumn.append(column)
+        print(tempMissingColumn)
+        if len(tempMissingColumn):
+            infoMissingColumn = ' '.join(tempMissingColumn)
+            st.toast(f'数据集中以下字段含缺失值,请进行缺失值插补  \n{infoMissingColumn}', icon="⚠️")
+            time.sleep(1)
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["featureMethodName"].items():
             pass
