@@ -1,5 +1,6 @@
 import datetime
 import os.path
+import time
 
 import streamlit as st
 import pandas as pd
@@ -537,20 +538,55 @@ with modelACM:
                 btn = interval_col2.button("添加模型", on_click=onAddModel)
                 # =======================添加模型=======================
                 if btn:
-                    # 隐藏添加模型按钮
-                    st.session_state.nextBtnShow = 0
-                    new_data = {
-                        "编号": pages_utils.generateID(),
-                        "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
-                        "模型参数": st.session_state["modelParamName"],
-                        "特征": result1 + result3 + result2,
-                        "标签": resultLabel,
-                        "时间": datetime.datetime.now().time(),
-                        "处理状态": False}
-                    print('======================模型构建-添加模型======================')
-                    print(new_data)
-                    pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_data
-                    st.rerun()
+                    # 检测目标连续/回归变量对应分类/回归模型
+                    # 根据唯一值数据占比判断
+                    dfT = pages_utils.TempDataSet[3]
+                    dataRation = dfT[resultLabel].nunique() / len(dfT[resultLabel])
+                    addModelFlag = True
+                    # 占比<0.005
+                    if dataRation < (5 * 0.001):
+                        model_mapping1 = {
+                            'agree': 'SVM',
+                            'agree1': 'RF',
+                            'agree2': 'KNN',
+                            'agree3': 'FLDA'
+                        }
+                        # 查找第一个满足条件的 key
+                        for _, message in model_mapping1.items():
+
+                            if message == getModelName(st.session_state["modelName"]['checkBoxModel']):
+                                addModelFlag = False
+                                st.toast(f'{message}不支持回归模型构建', icon="⚠️")
+                                time.sleep(1)
+                    else:
+                        model_mapping2 = {
+                            'agree4': 'SEIR机理模型',
+                            'agree5': 'PLSR',
+                            'agree6': 'LR',
+                            'agree7': 'SVR'
+                        }
+                        # 查找第一个满足条件的 key
+                        for condition, message in model_mapping2.items():
+                            if condition == getModelName(st.session_state["modelName"]['checkBoxModel']):
+                                addModelFlag = False
+                                st.toast(f'{message}不支持分类模型构建', icon="⚠️")
+                                time.sleep(1)
+                    # 若无错误选择模型
+                    if addModelFlag:
+                        # 隐藏添加模型按钮
+                        st.session_state.nextBtnShow = 0
+                        new_data = {
+                            "编号": pages_utils.generateID(),
+                            "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
+                            "模型参数": st.session_state["modelParamName"],
+                            "特征": result1 + result3 + result2,
+                            "标签": resultLabel,
+                            "时间": datetime.datetime.now().time(),
+                            "处理状态": False}
+                        print('======================模型构建-添加模型======================')
+                        print(new_data)
+                        pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_data
+                        st.rerun()
     # Page 1
     elif st.session_state.page == 1:
         # =======================添加评价指标=======================
