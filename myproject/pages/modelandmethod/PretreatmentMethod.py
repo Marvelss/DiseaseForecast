@@ -23,11 +23,40 @@ class PretreatmentMethod:
         else:
             return f"{fieldName}-预处理后0"
 
-    # 检测缺失值插补具体可能错误
+    # 检测缺失值插剔除参数最小值>最大值
     @staticmethod
-    def detectLinearInterpolation(methodParam):
-        if methodParam[0] != '0.1':
+    def detectLinearInterpolationParam(methodParam):
+        # 检测最小值>最大值
+        if methodParam[0] < methodParam[1]:
+            return True
+        else:
             return False
+
+    # 检测温度
+    @staticmethod
+    def detectLinearInterpolationWeather(dfT1):
+        result = ''
+        max_temp = dfT1['温度'].max()
+        min_temp = dfT1['温度'].min()
+        # 最高温度>45 最低温度<-15
+        if max_temp > 45:
+            result += '温度最大值>45 '
+        if min_temp < -15:
+            result += '温度最大值<-15 '
+        return result
+
+    # 检测降水
+    @staticmethod
+    def detectLinearInterpolationRain(dfT1):
+        result = ''
+        max_temp = dfT1['降水'].max()
+        min_temp = dfT1['降水'].min()
+        # 最大降水量>1500 最小降水量<0
+        if max_temp > 1500:
+            result += '降水最大值>1500 '
+        if min_temp < 0:
+            result += '降水最小值<0 '
+        return result
 
     # 缺失值插补
     def linearInterpolation(self, methodParam):

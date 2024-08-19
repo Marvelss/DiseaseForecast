@@ -312,12 +312,36 @@ with dataPCM:
             st.image(img)
         # st.markdown('---')
     if agree:
+        # 异常值检测(温度和降水)
+        # 显示缺失值信息
+        info = '异常字段:\n'
+        # 第一次使用原始数据集,而后基于预处理后数据集多次处理
+        if pages_utils.TempDataSet[1].shape[0] == 0:
+            dataFrameTemp = pages_utils.TempDataSet[0]
+        else:
+            dataFrameTemp = pages_utils.TempDataSet[1]
+
+        infoT1 = PretreatmentMethod.detectLinearInterpolationWeather(dataFrameTemp)
+        infoT2 = PretreatmentMethod.detectLinearInterpolationRain(dataFrameTemp)
+
+        if not len(infoT1) and not len(infoT2):
+            info = '无异常字段\n'
+            st.info(f"{info}\n", icon="ℹ️️")
+        else:
+            st.warning(f"{info}  \n{infoT1}  \n{infoT2}", icon="⚠️")
+
         coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:
             number2 = st.text_input("剔除大于以下数值外的值", value=0.1)
             number3 = st.text_input("剔除小于以下数值外的值", value=0.1)
             st.session_state["preMethodName"]['param1'] = number2
             st.session_state["preMethodName"]['param2'] = number3
+
+            if number3:
+                # 检测剔除参数最小值>最大值
+                if PretreatmentMethod.detectLinearInterpolationParam([number2, number3]):
+                    st.toast('剔除数据的最小值>最大值', icon="⚠️")
+
         with coll22:
             st.info('剔除方法介绍\n'
                     '* 描述:剔除最大值和最小值区域外的异常值\n', icon="ℹ️")
@@ -333,37 +357,26 @@ with dataPCM:
         if not len(result1 + result2 + result3):
             st.toast('未选择特征  \n请重新添加处理', icon="⚠️")
         else:
-            # 检测用户行为-针对具体方法的局限性
-            isException = False
-            if getCheckboxName(st.session_state["preMethodName"]['checkBox']) == '剔除异常值':
-                isException = PretreatmentMethod.detectLinearInterpolation(
-                    [value for key, value in st.session_state["preMethodName"].items() if key != 'checkBox'])
-            elif getCheckboxName(st.session_state["preMethodName"]['checkBox']) == '缺失值插补':
-                pass
-            # 若错误则提示,否则成功添加方法
-            if isException:
-                st.toast('该预处理方法存在错误  \n请检查输入字段和参数后重新添加处理', icon="⚠️")
-            else:
-                # 获取数据类型
-                if result1:
-                    dataType = '气象数据'
-                elif result2:
-                    dataType = '植保数据'
-                elif result3:
-                    dataType = '农学数据'
-                new_data = {
-                    "编号": pages_utils.generateID(),
-                    "数据类型": dataType,
-                    "输入字段": mergeArray(result1, result2, result3),
-                    "预处理后字段": None,
-                    "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
-                    "方法参数": [value for key, value in st.session_state["preMethodName"].items() if
-                                 key != 'checkBox'],
-                    "时间": datetime.datetime.now().time(), "处理状态": False}
-                print('======================预处理-添加任务清单记录======================')
-                print(new_data)
-                pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
-                st.rerun()
+            # 获取数据类型
+            if result1:
+                dataType = '气象数据'
+            elif result2:
+                dataType = '植保数据'
+            elif result3:
+                dataType = '农学数据'
+            new_data = {
+                "编号": pages_utils.generateID(),
+                "数据类型": dataType,
+                "输入字段": mergeArray(result1, result2, result3),
+                "预处理后字段": None,
+                "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
+                "方法参数": [value for key, value in st.session_state["preMethodName"].items() if
+                             key != 'checkBox'],
+                "时间": datetime.datetime.now().time(), "处理状态": False}
+            print('======================预处理-添加任务清单记录======================')
+            print(new_data)
+            pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
+            st.rerun()
 
     st.markdown('---')
 
