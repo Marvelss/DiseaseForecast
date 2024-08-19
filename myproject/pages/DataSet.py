@@ -114,18 +114,34 @@ with dataSCM:
                 try:
                     bytes_data = uploaded_files.read()
                     data33 = pd.read_excel(bytes_data)
+                    isErrorData = False
+                    # 检测非数值型输入
+                    # 取前10行
+                    subset = data33.head(10)
 
-                    # st.markdown(data33)
-                    new_data = {
-                        "编号": pages_utils.generateID(),
-                        "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "已上传",
-                        "上传时间": datetime.now().strftime("%H:%M:%S"),
-                        "字段": data33.columns.tolist()}
+                    # 检测每一列是否包含非数值型数据，并显示对应的列名
+                    non_numeric_columns = []
+
+                    for column in subset.columns:
+                        if not pd.to_numeric(subset[column], errors='coerce').notna().all():
+                            non_numeric_columns.append(column)
+                    # 去除上级单位、测报站点(固定)
+                    tempT1 = [col for col in non_numeric_columns if col not in ['上级单位', '测报站点']]
 
                     # 防止重复添加
                     if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():
                         pass
+                    # 存在非数值型输入
+                    elif len(tempT1):
+                        tempT2 = ' '.join(tempT1)
+                        st.toast(f'以下列存在非数值型数据,请转换为数值后重新上传  \n字段:{tempT2}', icon="⚠️")
+                    # 正确情况
                     else:
+                        new_data = {
+                            "编号": pages_utils.generateID(),
+                            "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "已上传",
+                            "上传时间": datetime.now().strftime("%H:%M:%S"),
+                            "字段": data33.columns.tolist()}
                         # 添加并合并至原始数据集
                         pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
                         # 获取两个DataFrame列名的交集
