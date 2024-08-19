@@ -446,7 +446,17 @@ with dataPCM:
     interval_col1, interval_col2 = st.columns([4, 1])
     with interval_col2:
         if st.button("结果预览"):
-            onPreviewResults()
+            # 检测Relief-F不接受回归
+            if pages_utils.TempDataSet[3].shape[0] == 0:
+                dataFrameTemp = pages_utils.TempDataSet[2]
+            else:
+                dataFrameTemp = pages_utils.TempDataSet[3]
+            isContinueModel = FeatureOptimizationMethod.detectReliefFContinueColumn(
+                dataFrameTemp, option111)
+            if isContinueModel:
+                st.toast('Relief-F不支持回归模型,请重新选择', icon="⚠️")
+            else:
+                onPreviewResults()
     st.markdown('---')
 
     # =======================显示右下内容=======================

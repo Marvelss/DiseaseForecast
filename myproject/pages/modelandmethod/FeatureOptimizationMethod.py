@@ -23,6 +23,18 @@ class FeatureOptimizationMethod:
         else:
             return f"{fieldName}-优选特征0"
 
+    # 检测连续数据判断是否回归模型
+    @staticmethod
+    def detectReliefFContinueColumn(dfT, columnT):
+        # 根据唯一值数据占比判断
+        unique_values = dfT[columnT].nunique()
+        total_values = len(dfT[columnT])
+        # 占比<0.005
+        if unique_values / total_values < (5 * 0.001):
+            return True
+        else:
+            return False
+
     # t检验
     def tTest(self, methodParam):
         # param:['年', 'DayOfYear 上级单位 测报站点', '0.02']
