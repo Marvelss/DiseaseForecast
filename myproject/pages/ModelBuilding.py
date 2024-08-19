@@ -609,9 +609,21 @@ with modelACM:
             with tempCol3:
                 agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
 
+            # 检测判断精度指标回归/分类
+            classify_models = ['SVM', 'FLDA', 'KNN', 'RF']
+            regression_models = ['LR', 'SVR', 'PLSR', 'SEIR机理模型']
+
+            model_name = getModelName(st.session_state["modelName"]['checkBoxModel'])
+
+            if model_name in classify_models:
+                if agree8 or agree9 or agree10:
+                    st.toast(f'该指标不支持回归模型', icon="⚠️")
+            if model_name in regression_models:
+                if agree6 or agree7:
+                    st.toast(f'该指标不支持分类模型', icon="⚠️")
+
             interval_col1, interval_col2 = st.columns([5, 1])
             # 传入指标
-            # tempArgs =
             btn21 = interval_col2.button(
                 "下一步",
                 on_click=onPrecision,
