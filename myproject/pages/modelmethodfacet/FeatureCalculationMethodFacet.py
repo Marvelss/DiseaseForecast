@@ -16,9 +16,10 @@ import rasterio
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr
-from geopy.distance import geodesic
 import geopandas as gpd
 from scipy.spatial import cKDTree
+
+from lib.share import RESOURCE_TEMPDIR_PATH
 
 
 class FeatureCalculationMethodFacet:
@@ -195,8 +196,6 @@ class FeatureCalculationMethodFacet:
             transpose_result = np.transpose(result)
             return transpose_result
 
-        rootPath = os.path.join(os.getcwd(), 'resource', 'surfaceProcessData')
-
         print('--------测试----------')
         print(param)
         temperature = param[0]
@@ -240,9 +239,8 @@ class FeatureCalculationMethodFacet:
 
         # 获取项目根目录，假设项目根目录在当前文件目录的上两级目录
         project_root = os.path.abspath(os.path.join(current_file_dir, '..', '..'))
-        sorted_temperature_listT = [os.path.join(
-            project_root, 'resource', 'uploadFileDir', file) for file in
-            sorted_temperature_list]
+        sorted_temperature_listT = [os.path.join(RESOURCE_TEMPDIR_PATH, file) for file in
+                                    sorted_temperature_list]
         # print(sorted_temperature_listT)
         extractFeaturePathList = []
 
@@ -258,9 +256,8 @@ class FeatureCalculationMethodFacet:
 
             # 获取项目根目录，假设项目根目录在当前文件目录的上两级目录
             project_root = os.path.abspath(os.path.join(current_file_dir, '..', '..'))
-            sorted_feature_listT = [os.path.join(
-                project_root, 'resource', 'uploadFileDir', file) for file in
-                sorted_feature_list]
+            sorted_feature_listT = [os.path.join(RESOURCE_TEMPDIR_PATH, file) for file in
+                                    sorted_feature_list]
             extractFeaturePathList.append(sorted_feature_listT)
         # print(f'======特征文件============:{extractFeaturePathList}')
         resultPathList = []
@@ -272,9 +269,8 @@ class FeatureCalculationMethodFacet:
             #     project_root, 'resource', 'surfaceProcessData',
             #     'resultData',
             #     f'{extractFeatureList[i]}_2015_SEResult.tif')
-            saved_path = os.path.join(
-                project_root, 'resource', 'uploadFileDir',
-                f'{extractFeatureList[i]}_2015_SEResult.tif')
+            saved_path = os.path.join(RESOURCE_TEMPDIR_PATH,
+                                      f'{extractFeatureList[i]}_2015_SEResult.tif')
             FeatureCalculationMethodFacet.generate_tif(result1, extractFeaturePathList[i][0], saved_path)
             resultPathList.append(saved_path)
         return resultPathList
@@ -510,15 +506,11 @@ class FeatureCalculationMethodFacet:
         # 注册所有的gdal驱动
         gdal.AllRegister()
         df1 = FeatureCalculationMethodFacet.shpToExcel(
-            os.path.join(os.getcwd(),
-                         'resource',
-                         'uploadFileDir', standardFile)
+            os.path.join(RESOURCE_TEMPDIR_PATH, standardFile)
         )
         for tempFile in inputFile:
-            filePath = os.path.join(
-                os.getcwd(), 'resource',
-                'uploadFileDir', tempFile
-            )
+            filePath = os.path.join(RESOURCE_TEMPDIR_PATH, tempFile
+                                    )
             featureFiledName = tempFile.split('.')[0].split('_')[0]
             # 打开tif文件
             dataset = gdal.Open(filePath)
@@ -571,9 +563,7 @@ class FeatureCalculationMethodFacet:
 
             # 添加新列到df1
             df1[featureFiledName] = results
-        outputFileT = os.path.join(os.getcwd(),
-                                   'resource',
-                                   'uploadFileDir',
+        outputFileT = os.path.join(RESOURCE_TEMPDIR_PATH,
                                    outputFile)
         # 保存到 Excel
         df1.to_excel(outputFileT, index=False)

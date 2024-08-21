@@ -12,6 +12,8 @@ from st_pages import hide_pages
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 from collections import deque
+
+from lib.share import RESOURCE_TEMPDIR_PATH
 from pages import pages_utils
 from streamlit_pills import pills
 from warnings import simplefilter
@@ -79,11 +81,8 @@ hide_pages(
 
 # 保存文件到本地
 def savedFile(uploadedFile):
-    filePath = os.path.join(
-        os.getcwd(),
-        'resource',
-        'uploadFileDir',
-        uploadedFile.name)
+    filePath = os.path.join(RESOURCE_TEMPDIR_PATH,
+                            uploadedFile.name)
     # 模型文件保存到本地
     with open(filePath, 'wb') as f:
         f.write(uploadedFile.read())
@@ -152,22 +151,19 @@ with dataSCMap:
 
         # 后续删除,为结果可视化而用
         # # 点
-        # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo137\test_fo_p\02_05shp.shp', layer_name="point")
+        # m.add_shp(r'E:\a_python\program\testPlatform\demo1\demo137\test_fo_p\02_05shp.shp', layer_name="point")
         # # 插值后
-        # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file2.tif',layer_name='interpolation')
+        # m.add_raster(r'E:\a_python\program\testPlatform\demo1\demo138\reveal\output_file2.tif',layer_name='interpolation')
         # # 掩膜模板
-        # m.add_shp(r'E:\a_python\program\testPlatform\demo\demo138\reveal\zjsshp.shp',layer_name='coverTemplate')
+        # m.add_shp(r'E:\a_python\program\testPlatform\demo1\demo138\reveal\zjsshp.shp',layer_name='coverTemplate')
         # # 裁剪后
-        # m.add_raster(r'E:\a_python\program\testPlatform\demo\demo138\reveal\output_file_cropped.tif',layer_name='cropped')
+        # m.add_raster(r'E:\a_python\program\testPlatform\demo1\demo138\reveal\output_file_cropped.tif',layer_name='cropped')
         with st.status('加载数据中...'):
             # 排除初次加载时
             if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
                 for name in leftBarsRawData['checked']:
                     if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
-                        path = os.path.join(
-                            os.getcwd(),
-                            'resource',
-                            'uploadFileDir', name)
+                        path = os.path.join(RESOURCE_TEMPDIR_PATH, name)
                         print('=============')
                         print(path)
                         st.session_state.dSMapLayer.append(path)
@@ -175,10 +171,7 @@ with dataSCMap:
                 if not onDS:
                     st.session_state.dSMapLayer.clear()
                 for layer in st.session_state.dSMapLayer:
-                    path = os.path.join(
-                        os.getcwd(),
-                        'resource',
-                        'uploadFileDir', layer)
+                    path = os.path.join(RESOURCE_TEMPDIR_PATH, layer)
                     addLayer(map1, path)
                     st.header(f'{layer}加载完成')
         map1.to_streamlit()

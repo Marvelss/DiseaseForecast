@@ -13,6 +13,8 @@ import streamlit as st
 from st_pages import hide_pages
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
+
+from lib.share import RESOURCE_TEMPDIR_PATH
 from pages import pages_utils
 from pages.modelmethodfacet.FeatureCalculationMethodFacet import FeatureCalculationMethodFacet
 
@@ -27,9 +29,6 @@ hide_pages(
         "模型构建",
     ]
 )
-
-tempRP = os.path.join(os.getcwd(),
-                      'resource', 'uploadFileDir')
 
 
 # 更新左侧目标显示(可添加至pages_utils)
@@ -200,10 +199,7 @@ with colFCF2:
                 if not onFC:
                     st.session_state.fCMapLayer.clear()
                 for layer in st.session_state.fCMapLayer:
-                    path = os.path.join(
-                        os.getcwd(),
-                        'resource',
-                        'uploadFileDir', layer)
+                    path = os.path.join(RESOURCE_TEMPDIR_PATH, layer)
                     addLayer(m, path)
                     st.header(f'{layer}加载完成')
         m.to_streamlit()
@@ -263,10 +259,10 @@ with colFCF3:
             value=optionInputFile)
 
         st.session_state["featureMethodFacetName"]['param1'] = optionVegetationIndex
-        st.session_state["featureMethodFacetName"]['param2'] = os.path.join(tempRP, optionInputFile)
+        st.session_state["featureMethodFacetName"]['param2'] = os.path.join(RESOURCE_TEMPDIR_PATH, optionInputFile)
         st.session_state["featureMethodFacetName"]['param3'] = optionRed
         st.session_state["featureMethodFacetName"]['param4'] = optionNir
-        st.session_state["featureMethodFacetName"]['param5'] = os.path.join(tempRP, optionOutput)
+        st.session_state["featureMethodFacetName"]['param5'] = os.path.join(RESOURCE_TEMPDIR_PATH, optionOutput)
 
     if option22:
         shp_files = [item for item in leftBarsRawData['checked'] if item.endswith('.shp')]
@@ -289,10 +285,7 @@ with colFCF3:
         # print(extractFileList)
         if extractFileList:
             for temp in extractFileList:
-                tempPath = os.path.join(
-                    os.getcwd(),
-                    'resource',
-                    'uploadFileDir', temp)
+                tempPath = os.path.join(RESOURCE_TEMPDIR_PATH, temp)
                 st.session_state.fCMapLayer.append(tempPath)
         with pe:
             mapTemp1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
@@ -302,10 +295,7 @@ with colFCF3:
             mapTemp1.to_streamlit()
 
         if standardFile:
-            tempPath = os.path.join(
-                os.getcwd(),
-                'resource',
-                'uploadFileDir', standardFile)
+            tempPath = os.path.join(RESOURCE_TEMPDIR_PATH, standardFile)
             st.session_state.fCMapLayer.append(tempPath)
             # 可读取数据格式: excel, csv, shp, geojson
             # 读取含经纬度excel表格
