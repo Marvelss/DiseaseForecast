@@ -182,16 +182,21 @@ if st.button('初始化数据', on_click=emptyValue):
 # </style>
 # """, unsafe_allow_html=True)
 category("🗣️ 点/面数据建模入口")
-colAppBtn1, colAppBtn2, = st.columns([0.4, 0.6])
-
-with colAppBtn2:
-    if st.button('点状数据建模'):
-        st.session_state.isPlanarInterface = False
-        switch_page(os.path.join(PAGES_PATH, 'DataSet.py'))
-
-    if st.button('面状数据建模'):
-        st.session_state.isPlanarInterface = True
-        switch_page(os.path.join(PAGES_PATH, 'DataSetFacet.py'))
+colAppImg1, colAppImg2, = st.columns(2)
+with colAppImg1:
+    st.image(os.path.join(RESOURCE_IMAGES_PATH, 'pointBtn.png'))
+    _, colAppBtn2, = st.columns([0.4, 0.6])
+    with colAppBtn2:
+        if st.button('点状数据建模'):
+            st.session_state.isPlanarInterface = False
+            switch_page(os.path.join(PAGES_PATH, 'DataSet.py'))
+with colAppImg2:
+    st.image(os.path.join(RESOURCE_IMAGES_PATH, 'facetBtn.png'))
+    _, colAppBtn3, = st.columns([0.4, 0.6])
+    with colAppBtn3:
+        if st.button('面状数据建模'):
+            st.session_state.isPlanarInterface = True
+            switch_page(os.path.join(PAGES_PATH, 'DataSetFacet.py'))
 
 
 def navbar():
