@@ -13,6 +13,12 @@ import seaborn as sns
 st.set_page_config(
     layout="wide"
 )
+# 取消链接跳转
+st.markdown("""
+    <style>
+    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
 if 'page13' not in st.session_state:
     st.session_state.page13 = 0
 if 'page12' not in st.session_state:

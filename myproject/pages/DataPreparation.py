@@ -16,6 +16,12 @@ from pages.modelandmethod.PretreatmentMethod import PretreatmentMethod
 st.set_page_config(
     layout="wide"
 )
+# 取消链接跳转
+st.markdown("""
+    <style>
+    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 

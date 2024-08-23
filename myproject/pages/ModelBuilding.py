@@ -16,6 +16,12 @@ from pages.modelandmethod.Model import Model
 st.set_page_config(
     layout="wide"
 )
+# 取消链接跳转
+st.markdown("""
+    <style>
+    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
 if 'page' not in st.session_state:
     st.session_state.page = 0
 if 'page15' not in st.session_state:

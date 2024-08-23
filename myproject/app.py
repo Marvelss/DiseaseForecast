@@ -21,8 +21,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Establish communication between pygwalker and streamlit
-# init_streamlit_comm()
+# 取消链接跳转
+st.markdown("""
+    <style>
+    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
 
 HORIZONTAL_BLUE = os.path.join(RESOURCE_IMAGES_PATH, 'icon.png')
 ICON_BLUE = os.path.join(RESOURCE_IMAGES_PATH, 'HDU_Logo.png')

@@ -30,7 +30,12 @@ st.set_page_config(
     layout="wide"
 )
 
-
+# 取消链接跳转
+st.markdown("""
+    <style>
+    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
 # 获取模型
 def getModel(modelName):
     modelPathRoot = os.path.join(r'/',
