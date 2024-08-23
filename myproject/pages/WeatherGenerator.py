@@ -14,14 +14,12 @@ import numpy as np
 import pandas as pd
 import matlab.engine
 from PIL import Image
-from sklearn.preprocessing import StandardScaler
 from st_pages import hide_pages
 from streamlit_pills import pills
 
 from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_PROCESS_PATH, RESOURCE_IMAGES_PATH, RESOURCE_TEMPDIR_PATH, \
-    RESOURCE_MODELRESULT_PATH
+    RESOURCE_MODELRESULT_PATH, MATLAB_FILE_PATH
 from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
-from pages.modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
 
 from pages import pages_utils
 
@@ -76,10 +74,8 @@ if 'modelSituationIndexResult' not in st.session_state:
     st.session_state.modelSituationIndexResult = {}
 
 
-# 函数替换数据
+# 替换气象数据
 def replace_data(df1, df2):
-    # df1.to_excel('测试1.xlsx')
-    # df2.to_excel('测试2.xlsx')
     df1T = df1.copy()
     # 根据条件筛选并替换原始数据表格中的值
     for index, row in df2.iterrows():
@@ -140,8 +136,8 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
         # 情景转换为对应数字
         weatherNumList = pages_utils.getWeatherNum(selectedWeatherScenesList)
         eng = matlab.engine.start_matlab()
-        eng.cd(r'E:\a_python\program\testForMatlab\weather_generation', nargout=0)
-        simulateDataDirRoot = r'E:\a_python\program\diseaseForecastStreamlit\resource\weatherGeneratorOutput'
+        eng.cd(MATLAB_FILE_PATH, nargout=0)
+        simulateDataDirRoot = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
         # 清空上一次生成数据
         pages_utils.delete_files_in_folder(simulateDataDirRoot)
         for weatherNum, weatherScene in zip(weatherNumList, selectedWeatherScenesList):
@@ -155,27 +151,27 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                                               ParamsTemp[1],
                                               ParamsTemp[2] * 0.01,
                                               ParamsTemp[3] * 0.01)
-            result = eng.myPython('0', 'out', year, weatherNum, sigama, sigama_max, PA, PA_max,
-                                  nargout=1)
+            eng.myPython('0', 'out', year, weatherNum, sigama, sigama_max, PA, PA_max,
+                         nargout=1)
             # matlab返回结果
             # print(result)
             # 读取数据
-            pathM = r'E:\a_python\program\testForMatlab\weather_generation\out.mat'
+            pathM = os.path.join(MATLAB_FILE_PATH, 'out.mat')
             # 加载结果
             mat = scipy.io.loadmat(pathM)
             data1 = np.array((mat['gP']))
             data2 = np.array(mat['gTmax'])
             data3 = np.array(mat['gTmin'])
-            for i in range(len(data1)):
-                tempPath = os.path.join(sceneDataDir, '第' + str(i + 1) + '年.xlsx')
+            for tempi in range(len(data1)):
+                tempPath = os.path.join(sceneDataDir, '第' + str(tempi + 1) + '年.xlsx')
                 # 创建DayOfYear列
                 day_of_year = range(1, 366)
                 # 将数据转换为DataFrame
                 my_large_df = pd.DataFrame({
                     'DayOfYear': day_of_year,
-                    '降水': data1[i].flatten(),
-                    '最高温度': data2[i].flatten(),
-                    '最低温度': data3[i].flatten()
+                    '降水': data1[tempi].flatten(),
+                    '最高温度': data2[tempi].flatten(),
+                    '最低温度': data3[tempi].flatten()
                 })
                 my_large_df.to_excel(tempPath, index=False)
             st.toast(f'{weatherScene}情景数据准备完毕', icon='✅')
@@ -190,26 +186,29 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
         # station = '湘阴县'
         # sd, ed = '2010', '2010'
 
-        # 调用天气情景生成器,获取数据
-        # 根据上级单位、测报站点、年份范围替换原始数据
+        # 调用天气情景生成器获取数据
         for weatherScenes in selectedWeatherScenesList:
-            # 多个情景遍历, 这里目前用一个
             df3T = getSimulateWeather(
                 weatherScenes,
                 weatherGeneratorProvinceSelected,
                 weatherGeneratorStationSelected,
                 generatedYears[0].year)
             # df3T.to_excel(weatherScenes + '_' + 'weatherSimulate.xlsx', index=False)
+
+            # 替换原始气象数据,并选取截取指定地区
             rawData = replace_data(pages_utils.TempDataSet[0], df3T)
             # print('=========================替换后数据=========================')
             # rawData.to_excel(weatherScenes + '_' + 'weatherReplaced.xlsx', index=False)
+            # =========================预处理及读取执行方法=========================
+            # 若含缺失值则进一步处理
+
             # =========================特征计算及读取执行方法=========================
             # 读取记录
-            featureCalculateDF = pages_utils.TempDataSetField[2]
-            # featureCalculateDF = pd.read_excel(
-            #     r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型应用\特征计算记录.xlsx')
+            featureCalculateDF = featureCalculationLog
+
             inputFeature1 = featureCalculateDF["输入特征"].tolist()
-            # outputFeature1 = featureCalculateDF["备选特征"].tolist()
+            # 筛选针对降水和温度的处理
+
             featureCalculateList = featureCalculateDF["特征计算方法"].tolist()
             modelParam1 = featureCalculateDF["方法参数"].tolist()
             # print(modelParam1)
@@ -220,44 +219,27 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                 # print(rawData)
                 # print(reservedField)
                 tool1 = FeatureCalculationMethod(rawData, reservedField)
+
+                # 这部分可用字典优化代码, 查看, 在特征计算方法界面注册字典与返回函数名称方法
                 if tempMethod == '降雨日数计算':
                     rawData, newColumn = tool1.rainfallDaysAccumulation(
                         [inputFeature1[indexT]], modelParam1[indexT])
                     # 若自定义上传excel此处需要modelParam1[indexT].split(','),下方特征计算和模型同理
                 elif tempMethod == '降水累积量计算':
-
                     rawData, newColumn = tool1.precipitationAccumulation(
                         [inputFeature1[indexT]], modelParam1[indexT])
 
             print(f'=============特征字段计算完成=============')
             # rawData.to_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\featureCalculated.xlsx')
             # =========================特征优选及读取执行方法=========================
-            featureOptimalDF = pages_utils.TempDataSetField[3]
-            # featureOptimalDF = pd.read_excel(
-            #     r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型应用\特征优选记录.xlsx')
-
-            inputFeature2 = featureOptimalDF["输入特征"].tolist()
-            # outputFeature2 = featureOptimalDF["优选特征"].tolist()
-            featureOptimalList = featureOptimalDF["特征优选方法"].tolist()
-            modelParam2 = featureOptimalDF["方法参数"].tolist()
-
-            # print('==========测试列=============')
-            # print(rawData.columns)
-            # print(type(rawData.columns))
-            tool2 = FeatureOptimizationMethod(rawData, rawData.columns.tolist())
-            # # 初始化特征优选方法
-            # for indexT, tempMethod in enumerate(featureOptimalList):
-            #     if tempMethod == 'Pearson相关性分析':
-            #         # print('=============Pearson相关性分析检测============')
-            #         # print(modelParam2[indexT].split(','))
-            #         rawData, _ = tool2.Pearson(modelParam2[indexT])
-            #     elif tempMethod == 'Relief-F互相关分析':
-            #         rawData, _ = tool2.ReliefF(
-            #             modelParam2[indexT])
-
+            featureOptimalDF = featureOptimalLog
+            inputFeature2 = featureOptimalDF["优选特征"].tolist()
+            tempField = []
+            for temp1 in inputFeature2:
+                tempField.append(eval(temp1))
+            # 只取最终的优选特征集字段
+            rawData = rawData[list(set(tempField))]
             print(f'=============特征字段优选完成=============')
-            # rawData.to_excel(r'E:\a_python\program\diseaseForecastStreamlit\resource\uploadFileDir\featureOptimized.xlsx')
-
             # =========================提取有效值=========================
             # 使用groupby分组并提取每个分组的第一个非空值
             ultimateFeatures = rawData.groupby(['上级单位', '测报站点', '年']).first().reset_index()
@@ -269,38 +251,25 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
 
             # =========================模型构建及读取执行方法=========================
             modelDF = pages_utils.TempDataSetField[4]
-            # modelDF = pd.read_excel(
-            #     r'E:\a_python\program\diseaseForecastStreamlit\resource\预测病害峰值 - 测试模型应用\最后-模型记录.xlsx')
+            dataModel = pages_utils.TempDataSet[4]
+            # df_cleaned和dataModel合并(相同字段就替换)
 
             models = modelDF["模型"].tolist()
-            # modelsParam = modelDF["模型参数"].tolist()
-            feature = modelDF["特征"].tolist()
-            label = modelDF["标签"].tolist()
-            # precision = modelDF["评价指标"].tolist()
-            # ratio = modelDF["数据集划分比例"].tolist()
-            for indexT, (tempModel, tempFeature,
-                         tempLabel) in enumerate(zip(models, feature, label)):
+            labels = modelDF["标签"].tolist()
+
+            # 检测特征是否完整
+            for tempModel, tempLabel in zip(models, labels):
                 # 只运行指定模型
                 if tempModel not in trainedModelsList:
                     continue
-                # 模型读取
-                model = getModel(tempModel)
-                inputDF = df_cleaned[tempFeature]
-                # print('=============测试数据集====')
-                # print(inputDF)
-                # 筛选出省份为'湖南省'和测报站点为'湘阴县'的所有行(不能删除,否则少特征)
-                # filtered_df = df_cleaned[(df_cleaned['上级单位'] == province) & (df_cleaned['测报站点'] == station)]
-                # 选取包含在 tempFeature 中的列
-                # inputDF = filtered_df[tempFeature]
-                # print(model)
-                X = None
-                if '上级单位' and '测报站点' in tempFeature:
-                    X = pd.get_dummies(inputDF, columns=['上级单位', '测报站点'])
-                scaler = StandardScaler()
-                X_scaled = scaler.fit_transform(X)
-                # 接下来您可以使用X_scaled进行进一步的模型训练和预测
-                # model.predict() 方法需要接受和训练时相同的特征列
-                predictions = model.predict(X_scaled)
+                # 加载已经训练好的模型
+                model = joblib.load('path_to_saved_model.pkl')
+                # 准备新数据，假设数据已经经过适当的预处理（如标准化）
+                X_new = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
+                # 使用加载的模型进行预测
+                predictions = model.predict(X_new)
+                print("Predictions:", predictions)
+
                 # 创建一个 DataFrame 包含预测值
                 predictions_df = pd.DataFrame(predictions, columns=['Predicted_value'])
                 # 重新调整表格索引,以确保predictions_df与df_cleaned合并大小一致
@@ -310,17 +279,14 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                 data = pd.concat([df_cleaned_reset, predictions_df_reset], axis=1)
                 # 提取指定区域的相关数据
                 # print('-------------测试指定地区-------------')
-                # print(weatherGeneratorProvinceSelected)
-                # print(weatherGeneratorStationSelected)
+
                 filtered_df = data[
                     (data['上级单位'] == weatherGeneratorProvinceSelected) &
                     (data['测报站点'] == weatherGeneratorStationSelected)]
-
                 resultTempPath = os.path.join(
                     RESOURCE_MODELRESULT_PATH,
                     'modelsSimulateWeatherIndexResult',
-                    str(tempModel) + '_'
-                    + weatherScenes +
+                    str(tempModel) + '_' + weatherScenes +
                     '_applicationPredict' +
                     '.xlsx')
                 filtered_df.to_excel(resultTempPath, index=False)
@@ -328,7 +294,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                 # =========================计算静态偏差指标=========================
                 # 计算指标
                 data_B = st.session_state.historicalWeatherData['实际标签']  # 实际
-                data_A = filtered_df['Predicted_value']  # 预测
+                data_A = data1['Predicted_value']  # 预测
                 # 计算两组数据相减的均值之和除以长度
                 mean_diff = ((data_A - data_B).sum()) / len(data_A)
 
@@ -342,7 +308,6 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                     resultTempPath, round(mean_diff / std_dev_B, 3)]
                 st.toast(f'{weatherScenes}---{tempModel}模型评测完毕\n'
                          f'Dev_s:{round(mean_diff / std_dev_B, 3)}', icon='✅')
-        # st.markdown(st.session_state.modelSituationIndexResult)
 
 
 # ==============================界面==============================
@@ -355,11 +320,13 @@ with weatherGeneratorInfo:
         label='province',
         options=pages_utils.TempDataSet[4]['上级单位'].drop_duplicates().tolist(),
         label_visibility='collapsed')
+
     weatherGeneratorStationSelected = st.selectbox(
         label='station',
         options=pages_utils.TempDataSet[4]['测报站点'].drop_duplicates().tolist(),
         label_visibility='collapsed')
-
+    if not weatherGeneratorProvinceSelected:
+        st.toast('请先完成模型构建,再进行地区与模型选择', icon="⚠️")
 with weatherGeneratorInstruction:
     st.markdown("###### 选择待评价模型")
     modelsList = pages_utils.multiselect_all(
@@ -454,6 +421,7 @@ dec_31 = datetime.date(today.year, 12, 31)
 st.markdown("###### 生成数据长度")
 colYear1, colYear2 = st.columns(2)
 with colYear1:
+    # 检测 :读取标签数据集并提示最小输入年限
     generatedYears = st.date_input(
         "选择起止年月",
         (jan_1, datetime.date(today.year - 12, 1, 7)),
@@ -462,16 +430,14 @@ with colYear1:
         format="YYYY.MM.DD", label_visibility='collapsed'
     )
     year_difference = generatedYears[1].year - generatedYears[0].year
+    data_year = len(list(set(pages_utils.TempDataSet[4]['年'].tolist())))
+    # 检测数据长度至少比模型数据多
+    if year_difference < data_year:
+        st.toast(f'生成数据较短,请延迟至少{data_year}', icon="⚠️")
     print(f'生成年份长度:{year_difference}')
 with colYear2:
     st.warning('注意事项:生成年份需要与模型训练数据集内部年份相对应', icon="⚠️")
-# print('----------')
-# print(float(generatedYears), float(weatherScenes))
 
-# st.info('生成的气象情景:\n'
-#         '* 1:高温多雨 2:高温常雨 3:高温少雨\n'
-#         '* 4:常温常雨 5:常温多雨 6:常温少雨\n'
-#         '* 7:低温少雨 8:低温常雨 9:低温多雨\n', icon="ℹ️")
 st.markdown("###### 生成模拟气象情景")
 # ==============================生成气象情景==============================
 weatherScenesList = pages_utils.multiselect_all(
@@ -486,27 +452,28 @@ if not weatherScenesList:
 
 st.markdown("###### 异常程度设置")
 # ==============================异常程度设置==============================
-# ============================气温标准差============================
+# ********************气温标准差********************
 selectedWeather = pills("异常程度设置", weatherScenesList, label_visibility='collapsed')
 
 # 获取天气情景对应异常程度值
 anomalyValue = st.session_state.weatherSituationParams.get(selectedWeather)
 col1231, col1232 = st.columns(2)
 with col1231:
-    st.info('标准差气温评价指标和等级:\n'
-            '* 异常偏低:$$\Delta T<-2.0\sigma$$       \n* 明显偏低:$$-2.0\sigma \leq \Delta T<-1.5\sigma$$      \n'
-            '* 偏低:$$-1.5\sigma \leq \Delta T<-0.5\sigma$$      \n* 正常(接近常年):$$-0.5\sigma \leq \Delta T\leq 0.5\sigma$$      \n'
-            '* 偏高:$$0.5\sigma \leq \Delta T \leq1.5\sigma$$       \n* 明显偏高:$$1.5\sigma \leq \Delta T \leq2.0\sigma$$      \n'
-            '* 异常偏高:$$\Delta T>2.0\sigma$$', icon="ℹ️")
+    st.info(
+        '标准差气温评价指标和等级:  \n'
+        '* 异常偏低:$$\Delta T<-2.0\sigma$$  \n* 明显偏低:$$-2.0\sigma \leq \Delta T<-1.5\sigma$$  \n'
+        '* 偏低:$$-1.5\sigma \leq \Delta T<-0.5\sigma$$  \n* 正常(接近常年):$$-0.5\sigma \leq \Delta T\leq 0.5\sigma$$  \n'
+        '* 偏高:$$0.5\sigma \leq \Delta T \leq1.5\sigma$$  \n* 明显偏高:$$1.5\sigma \leq \Delta T \leq2.0\sigma$$  \n'
+        '* 异常偏高:$$\Delta T>2.0\sigma$$', icon="ℹ️")
 with col1232:
     number51 = st.number_input("气温标准差下限", value=anomalyValue[0], max_value=10.0, min_value=-10.0, step=0.1)
     number52 = st.number_input("气温标准差上限", value=anomalyValue[1], max_value=10.0, min_value=-10.0, step=0.1)
-# ============================降水量距平百分率============================
+# ********************降水量距平百分率********************
 col12313, col12323 = st.columns(2)
 with col12313:
-    st.info('降水量距平百分率干旱等级划分(月尺度):\n'
-            '* 无旱:$$-40<PA$$       \n* 轻旱:$$-60<PA \leq -40$$      \n'
-            '* 中旱:$$-80<PA \leq -60$$      \n* 重旱:$$-95<PA \leq -80$$      \n'
+    st.info('降水量距平百分率干旱等级划分(月尺度):  \n'
+            '* 无旱:$$-40<PA$$  \n* 轻旱:$$-60<PA \leq -40$$  \n'
+            '* 中旱:$$-80<PA \leq -60$$  \n* 重旱:$$-95<PA \leq -80$$  \n'
             '* 特旱:$$PA \leq -95$$', icon="ℹ️")
 with col12323:
     number53 = st.number_input("降水量距平百分率下限(PA)/%", value=anomalyValue[2], max_value=100, min_value=-100,
@@ -514,21 +481,52 @@ with col12323:
     number54 = st.number_input("降水量距平百分率上限(PA)/%", value=anomalyValue[3], max_value=100, min_value=-100,
                                step=5)
 
-# =============================保存异常程度参数==============================
+# ********************保存异常程度参数********************
 # 更新场景对应的值
 st.session_state.weatherSituationParams[selectedWeather] = [number51, number52, number53, number54]
 # 打印更新后的值
 # st.markdown(st.session_state.weatherSituationParams[selectedWeather])
 
 
-sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = number51, number53 * 0.01, number52, number54 * 0.01
+# sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = number51, number53 * 0.01, number52, number54 * 0.01
+st.markdown('---')
+st.markdown("##### 执行记录及特征集选择")
+colPro1, colPro2 = st.columns([0.3, 0.7])
+with colPro1:
+    st.markdown('')
+    st.info('注意:  \n'
+            '1.特征计算  \n将右侧不需要执行的特征计算方法删除  \n'
+            '2.特征优选  \n根据优选特征列保留需要的特征  \n'
+            '3.点击运行程序按钮  \n生成模拟气象数据以进行模型应用得到预测结果', icon="ℹ️")
+
+with colPro2:
+    # 预处理
+    # 特征计算
+    path1 = r'E:\a_python\program\diseaseForecastStreamlit\testscene\预测病害峰值 - 测试模型应用\特征计算记录.xlsx'
+    path2 = r'E:\a_python\program\diseaseForecastStreamlit\testscene\预测病害峰值 - 测试模型应用\特征优选记录.xlsx'
+    pages_utils.TempDataSetField[2] = pd.read_excel(path1)
+    pages_utils.TempDataSetField[3] = pd.read_excel(path2)
+    tab1, tab2, tab3 = st.tabs(["特征计算", "特征优选", "预处理"])
+    with tab1:
+        featureCalculationLog = st.data_editor(
+            pages_utils.TempDataSetField[2],
+            height=190, width=900, num_rows="dynamic",
+            column_order=["输入特征", "特征计算方法", "备选特征", "数据类型", '时间'])
+    with tab2:
+        # 特征优选(只取最优特征)
+        featureOptimalLog = st.data_editor(
+            pages_utils.TempDataSetField[3], height=190, width=900, num_rows="dynamic",
+            column_order=["优选特征", "特征优选方法", "数据类型", '时间'])
+    with tab3:
+        pass
 
 btn = st.button('运行程序', on_click=onRun,
                 args=[float(year_difference), weatherScenesList, st.session_state.weatherSituationParams, modelsList])
 
+# 左侧表格,右侧可视化
 # =======================预测评价结果及数据下载=======================
 st.markdown('---')
-st.markdown("##### 模型评价指标结果及可视化")
+st.markdown("##### 模型预测和评价指标结果可视化")
 with st.popover("效果图预览"):
     img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'weatherGeneratorEvaluateResult2.jpg'))
     st.image(img)
@@ -539,9 +537,9 @@ with st.popover("效果图预览"):
         st.metric("Dev_S", "0.0899")
 # ==============================准备下载数据==============================
 if btn:
-    zipPath = r'E:\a_python\program\diseaseForecastStreamlit\resource\基于天气情景生成器的模拟数据.zip'
+    zipPath = os.path.join(RESOURCE_TEMPDIR_PATH, '基于天气情景生成器的模拟数据.zip')
     # 压缩生成的xlsx数据
-    pathEE = r'E:\a_python\program\diseaseForecastStreamlit\resource\weatherGeneratorOutput'
+    pathEE = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
     pages_utils.zip_folder(pathEE, zipPath)
     with open(zipPath, "rb") as file:
         st.download_button(

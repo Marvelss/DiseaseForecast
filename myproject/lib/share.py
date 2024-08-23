@@ -16,6 +16,8 @@ RESOURCE_IMAGES_PATH = os.path.join(RESOURCE_PATH, 'images')
 RESOURCE_TEMPDIR_PATH = os.path.join(RESOURCE_PATH, 'tempdir')
 # 模型训练保存结果:模型结构+预测结果+评价指标结果
 RESOURCE_MODELRESULT_PATH = os.path.join(RESOURCE_PATH, 'modelresult')
+# Matlab代码及文件路径
+MATLAB_FILE_PATH = r'E:\a_matlab\program\weather_generation'
 # 配置文件路径
 # CONFIG_PATH = os.path.join(BASE_DIR, "conf", "db_config.ini")
 # 日志路径

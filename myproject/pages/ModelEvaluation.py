@@ -454,7 +454,7 @@ with col23:
 #         "Create machine learning tools for others to use your models. This app generates images using the Deep Dream technique.",
 #         "images/DCRSetup.png",
 #         "https://snowflake-labs-sfquickstart-data-cle-dcr-setup-assistant-bkx7gg.streamlit.app/",
-#         "demo-deepdream",
+#         "demo1-deepdream",
 #     )
 # with col3:
 #     app(
