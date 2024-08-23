@@ -265,10 +265,10 @@ with colFCF3:
         st.session_state["featureMethodFacetName"]['param5'] = os.path.join(RESOURCE_TEMPDIR_PATH, optionOutput)
 
     if option22:
-        shp_files = [item for item in leftBarsRawData['checked'] if item.endswith('.shp')]
+        shp_files = [item for item in leftBarsRawData['checked'] if item.endswith('.shp') or item.endswith('.xlsx')]
         extractFileList = pages_utils.multiselect_all(
             st, '全选-待提取特征文件',
-            shp_files + leftBarsFCalData['checked'],
+            shp_files + tempList,
             'tempModels', 'collapsed')
         # 获取年和day of year
         # numDate = st.date_input(label='日期')

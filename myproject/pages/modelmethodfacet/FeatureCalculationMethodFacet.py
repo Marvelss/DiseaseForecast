@@ -505,9 +505,15 @@ class FeatureCalculationMethodFacet:
         outputFile = methodParma[3]
         # 注册所有的gdal驱动
         gdal.AllRegister()
-        df1 = FeatureCalculationMethodFacet.shpToExcel(
-            os.path.join(RESOURCE_TEMPDIR_PATH, standardFile)
-        )
+        # 判断文件格式shp则转为excel
+        if standardFile.endswith('.shp'):
+            df1 = FeatureCalculationMethodFacet.shpToExcel(
+                os.path.join(RESOURCE_TEMPDIR_PATH, standardFile)
+            )
+        else:
+            df1 = pd.read_excel(
+                os.path.join(RESOURCE_TEMPDIR_PATH, standardFile)
+            )
         for tempFile in inputFile:
             filePath = os.path.join(RESOURCE_TEMPDIR_PATH, tempFile
                                     )
