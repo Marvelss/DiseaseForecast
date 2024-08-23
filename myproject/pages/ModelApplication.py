@@ -15,7 +15,7 @@ from pages.modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMe
 
 # 原始数据
 if "dataSet" not in st.session_state:
-    st.session_state["dataSet"] = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
+    st.session_state["dataSet"] = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
 # 已训练模型路径
 if "trainedModel" not in st.session_state:
     st.session_state["trainedModel"] = {}
@@ -99,7 +99,7 @@ def onModelApplication(rawData, processedDataRecorderList):
 
     # =========================提取有效值=========================
     # 使用groupby分组并提取每个分组的第一个非空值
-    ultimateFeatures = rawData.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+    ultimateFeatures = rawData.groupby(['经度', '纬度', '年']).first().reset_index()
     # ******删除包含缺失值的行******
     df_cleaned = ultimateFeatures.dropna()
     print(f'=============提取有效值=============')
@@ -123,13 +123,13 @@ def onModelApplication(rawData, processedDataRecorderList):
         print('=============测试数据集====')
         print(inputDF)
         # 筛选出省份为'湖南省'和测报站点为'湘阴县'的所有行(不能删除,否则少特征)
-        # filtered_df = df_cleaned[(df_cleaned['上级单位'] == province) & (df_cleaned['测报站点'] == station)]
+        # filtered_df = df_cleaned[(df_cleaned['经度'] == province) & (df_cleaned['纬度'] == station)]
         # 选取包含在 tempFeature 中的列
         # inputDF = filtered_df[tempFeature]
         print(model)
         X = None
-        if '上级单位' and '测报站点' in tempFeature:
-            X = pd.get_dummies(inputDF, columns=['上级单位', '测报站点'])
+        if '经度' and '纬度' in tempFeature:
+            X = pd.get_dummies(inputDF, columns=['经度', '纬度'])
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
         # 接下来您可以使用 X_scaled 进行进一步的模型训练和预测
@@ -138,7 +138,7 @@ def onModelApplication(rawData, processedDataRecorderList):
         # 创建一个 DataFrame 包含预测值
         predictions_df = pd.DataFrame(predictions, columns=['Predicted_value'])
 
-        # df_cleaned = df_cleaned[['上级单位', '测报站点', '年']]
+        # df_cleaned = df_cleaned[['经度', '纬度', '年']]
         # 合并特征数值和预测值到一个新的 DataFrame
         # result_df = pd.concat([df_cleaned, predictions_df], axis=1)
         # 打印包含预测值和特征值的 DataFrame

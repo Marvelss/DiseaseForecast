@@ -404,7 +404,7 @@ with dataPCM:
             with interval_col33:
                 # residualField = [arr for arr in pages_utils.TempDataSet[0].columns if
                 #                  arr not in mergeArray4(
-                #                      ['上级单位', '测报站点',
+                #                      ['经度', '纬度',
                 #                       "年", "DayOfYear"], result1, result2, result3)]
                 # print(f'剩余字段{residualField}')
                 # 默认保留上一环节所有字段
@@ -593,12 +593,12 @@ with dataPCM:
                             # 绘制对比折线图
                             plt.figure(figsize=(10, 6))
                             # print(pages_utils.TempDataSet[1]['DayOfYear'])
-                            # 取第一个缺失值对应前15行和后15行'上级单位', '测报站点', '年'数据
+                            # 取第一个缺失值对应前15行和后15行'经度', '纬度', '年'数据
                             missing_rows = \
                                 pages_utils.TempDataSet[1].loc[
-                                    missing_indices, ['上级单位', '测报站点', '年', 'DayOfYear']].to_dict(
+                                    missing_indices, ['经度', '纬度', '年', 'DayOfYear']].to_dict(
                                     'records')[0]
-                            province, station, year = missing_rows['上级单位'], missing_rows['测报站点'], missing_rows[
+                            province, station, year = missing_rows['经度'], missing_rows['纬度'], missing_rows[
                                 '年']
                             print(missing_rows['DayOfYear'])
                             # 整理前后15天dayOfYear为x轴

@@ -37,7 +37,7 @@ class FeatureOptimizationMethod:
 
     # t检验
     def tTest(self, methodParam):
-        # param:['年', 'DayOfYear 上级单位 测报站点', '0.02']
+        # param:['年', 'DayOfYear 经度 纬度', '0.02']
         # param1:目标变量
         # param2:被比较变量
         # param3:提取条件
@@ -82,7 +82,7 @@ class FeatureOptimizationMethod:
         # print(methodParam)
         # =========================提取有效值=========================
         # 使用groupby分组并提取每个分组的第一个非空值
-        ultimateFeatures = self.dataFrame.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+        ultimateFeatures = self.dataFrame.groupby(['经度', '纬度', '年']).first().reset_index()
         # ******删除包含缺失值的行******
         df_cleaned = ultimateFeatures.dropna()
         # 准备数据
@@ -172,7 +172,7 @@ class FeatureOptimizationMethod:
 
     # Pearson相关分析
     def Pearson(self, methodParam):
-        # param:['年 DayOfYear 上级单位 测报站点', '0.9']
+        # param:['年 DayOfYear 经度 纬度', '0.9']
         # param1:所有变量
         # param2:提取条件
         print('============测试============')
@@ -185,12 +185,12 @@ class FeatureOptimizationMethod:
         # 遍历输入变量进行pearson分析
         tempResultP = {}
         # 选择需要计算相关性的列
-        result = newDataFrame.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+        result = newDataFrame.groupby(['经度', '纬度', '年']).first().reset_index()
         # ******删除包含缺失值的行******
         df_cleaned = result.dropna()
         data = df_cleaned[fieldList]
         # print(data)
-        # result = data.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+        # result = data.groupby(['经度', '纬度', '年']).first().reset_index()
         # # ******删除包含缺失值的行******
         # df_cleaned = result.dropna()
         # 计算相关性矩阵

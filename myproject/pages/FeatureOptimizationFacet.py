@@ -286,7 +286,7 @@ with dataPCV:
             # 展示备选特征数据
             temp_df = pages_utils.TempDataSetFacet[2]
             # 排除指定列，获取其他列的名称
-            exclude_columns = ['上级单位', '测报站点', '经度', '纬度', '年', 'DayOfYear']
+            exclude_columns = ['经度', '纬度', '经度', '纬度', '年', 'DayOfYear']
             remaining_columns = [col for col in temp_df.columns if col not in exclude_columns]
 
             # 创建空的 DataFrame
@@ -443,7 +443,7 @@ with dataPCM:
                 #         st.markdown('保留字段选择')
                 #         residualField = [arr for arr in pages_utils.TempDataSet[2].columns if
                 #                          arr not in mergeArray4(
-                #                              ['上级单位', '测报站点',
+                #                              ['经度', '纬度',
                 #                               "年", "DayOfYear"], result1, result2, result3)]
                 #         # print(f'剩余字段{residualField}')
                 #         reservedFiled = pages_utils.multiselect_all(

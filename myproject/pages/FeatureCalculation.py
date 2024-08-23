@@ -164,7 +164,7 @@ def onRun():
                     'before': None,
                     'name': tempMethod,
                     'column': newColumn,
-                    'after': afterHandleData[[newColumn, '上级单位', '测报站点', '年']]}
+                    'after': afterHandleData[[newColumn, '经度', '纬度', '年']]}
                 # 可视化信息添加
                 st.session_state["FCVisualInformation"].append(FCVisualInformationTemp)
                 # print(st.session_state["FCVisualInformation"])
@@ -393,7 +393,7 @@ with (featureCCM):
             #         st.markdown('保留字段选择')
             #         residualField = [arr for arr in pages_utils.TempDataSet[1].columns if
             #                          arr not in mergeArray4(
-            #                              ['上级单位', '测报站点',
+            #                              ['经度', '纬度',
             #                               "年", "DayOfYear"], result1, result2, result3)]
             #         # print(f'剩余字段{residualField}')
             #         reservedFiled = pages_utils.multiselect_all(
@@ -430,9 +430,9 @@ with (featureCCM):
                         data_after = data_after.drop_duplicates()
 
                         if idFMethods[o] == '基于活动积温的生育期计算':
-                            # 选择最多8个测报站点
-                            top_stations = data_after['测报站点'].value_counts().nlargest(8).index
-                            df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
+                            # 选择最多8个纬度
+                            top_stations = data_after['纬度'].value_counts().nlargest(8).index
+                            df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
 
                             # 选择最多3个年份
                             top_years = data_after['年'].value_counts().nlargest(3).index
@@ -442,13 +442,13 @@ with (featureCCM):
                             plt.figure(figsize=(10, 6))
                             sns.lineplot(
                                 data=df_filtered,
-                                x="测报站点",
+                                x="纬度",
                                 y=dataColumn,
                                 hue="年",
                                 marker="o"
                             )
                             # 设置标签和标题
-                            plt.xlabel("测报站点")
+                            plt.xlabel("纬度")
                             plt.ylabel(f'{dataColumn}(Day Of Year)')
                             plt.title(f"部分县市各年份{dataColumn}", fontsize=16)
                             st.pyplot(plt)
@@ -457,9 +457,9 @@ with (featureCCM):
                             integratedDataColumnT = dataColumn.split('_')
                             integratedDataColumn = integratedDataColumnT[0] + '至' + integratedDataColumnT[1] + \
                                                    integratedDataColumnT[2]
-                            # 选择最多8个测报站点
-                            top_stations = data_after['测报站点'].value_counts().nlargest(8).index
-                            df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
+                            # 选择最多8个纬度
+                            top_stations = data_after['纬度'].value_counts().nlargest(8).index
+                            df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
                             # 选择最多5个年份
                             top_years = data_after['年'].value_counts().nlargest(5).index
                             df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
@@ -467,14 +467,14 @@ with (featureCCM):
                             plt.figure(figsize=(10, 6))
                             sns.barplot(
                                 data=df_filtered,
-                                x="测报站点",
+                                x="纬度",
                                 y=dataColumn,
                                 hue="年",
                                 dodge=True,
                                 saturation=1
                             )
                             # 设置标签和标题
-                            plt.xlabel("测报站点")
+                            plt.xlabel("纬度")
                             plt.ylabel("降水累积量(mm)")
                             plt.title(f"部分县市各年份{integratedDataColumn}")
                             st.pyplot(plt)
@@ -483,9 +483,9 @@ with (featureCCM):
                             integratedDataColumnRT = dataColumn.split('_')
                             integratedDataColumnR = integratedDataColumnRT[0] + '至' + integratedDataColumnRT[1] + \
                                                     integratedDataColumnRT[2]
-                            # 选择最多8个测报站点
-                            top_stations = data_after['测报站点'].value_counts().nlargest(8).index
-                            df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
+                            # 选择最多8个纬度
+                            top_stations = data_after['纬度'].value_counts().nlargest(8).index
+                            df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
 
                             # 选择最多3个年份
                             top_years = data_after['年'].value_counts().nlargest(3).index
@@ -494,13 +494,13 @@ with (featureCCM):
                             plt.figure(figsize=(10, 6))
                             sns.lineplot(
                                 data=df_filtered,
-                                x="测报站点",
+                                x="纬度",
                                 y=dataColumn,
                                 hue="年",
                                 marker="o"
                             )
                             # 设置标签和标题
-                            plt.xlabel("测报站点")
+                            plt.xlabel("纬度")
                             plt.ylabel("降雨日数(天)")
                             plt.title(f"部分县市各年份{integratedDataColumnR}")
                             st.pyplot(plt)

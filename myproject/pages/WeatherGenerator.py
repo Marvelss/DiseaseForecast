@@ -66,7 +66,7 @@ if 'weatherSituationParams' not in st.session_state:
 
 # 应用原始数据
 if "applicationDataSet" not in st.session_state:
-    st.session_state.historicalWeatherData = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
+    st.session_state.historicalWeatherData = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
 
 # 基于天气情景生成器的模型评价,包含xlsx结果路径和指标值
 # 模型名称+天气情景:[path,Dev_s]
@@ -79,7 +79,7 @@ def replace_data(df1, df2):
     df1T = df1.copy()
     # 根据条件筛选并替换原始数据表格中的值
     for index, row in df2.iterrows():
-        condition = (df1T['上级单位'] == row['上级单位']) & (df1T['测报站点'] == row['测报站点']) & \
+        condition = (df1T['经度'] == row['经度']) & (df1T['纬度'] == row['纬度']) & \
                     (df1T['年'] == row['年']) & (df1T['DayOfYear'] == row['DayOfYear'])
         df1T.loc[condition, '降水'] = round(row['降水'], 2)
         df1T.loc[condition, '温度'] = round(row['温度'], 2)
@@ -110,8 +110,8 @@ def getSimulateWeather(weatherSituation, province, station, startYear):
             # Merge the data using the 'left' method
             merged_data = pd.merge(merged_data, data, how='outer')
         # Add additional columns
-        merged_data['上级单位'] = province
-        merged_data['测报站点'] = station
+        merged_data['经度'] = province
+        merged_data['纬度'] = station
         # Calculate average temperature
         merged_data['温度'] = (merged_data['最高温度'] + merged_data['最低温度']) / 2
     return merged_data
@@ -181,7 +181,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
         st.toast('运行完成,所有数据准备完毕', icon='✅')
         st.write('数据生成完毕,准备运行各环节方法和计算评价指标')
         # =========================替换模拟气象数据=========================
-        # 用户输入:上级单位、测报站点、年份范围
+        # 用户输入:经度、纬度、年份范围
         # province = '湖南省'
         # station = '湘阴县'
         # sd, ed = '2010', '2010'
@@ -242,7 +242,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
             print(f'=============特征字段优选完成=============')
             # =========================提取有效值=========================
             # 使用groupby分组并提取每个分组的第一个非空值
-            ultimateFeatures = rawData.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+            ultimateFeatures = rawData.groupby(['经度', '纬度', '年']).first().reset_index()
             # ******删除包含缺失值的行******
             df_cleaned = ultimateFeatures.dropna()
 
@@ -281,8 +281,8 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                 # print('-------------测试指定地区-------------')
 
                 filtered_df = data[
-                    (data['上级单位'] == weatherGeneratorProvinceSelected) &
-                    (data['测报站点'] == weatherGeneratorStationSelected)]
+                    (data['经度'] == weatherGeneratorProvinceSelected) &
+                    (data['纬度'] == weatherGeneratorStationSelected)]
                 resultTempPath = os.path.join(
                     RESOURCE_MODELRESULT_PATH,
                     'modelsSimulateWeatherIndexResult',
@@ -318,12 +318,12 @@ with weatherGeneratorInfo:
     st.markdown("###### 选择地区")
     weatherGeneratorProvinceSelected = st.selectbox(
         label='province',
-        options=pages_utils.TempDataSet[4]['上级单位'].drop_duplicates().tolist(),
+        options=pages_utils.TempDataSet[4]['经度'].drop_duplicates().tolist(),
         label_visibility='collapsed')
 
     weatherGeneratorStationSelected = st.selectbox(
         label='station',
-        options=pages_utils.TempDataSet[4]['测报站点'].drop_duplicates().tolist(),
+        options=pages_utils.TempDataSet[4]['纬度'].drop_duplicates().tolist(),
         label_visibility='collapsed')
     if not weatherGeneratorProvinceSelected:
         st.toast('请先完成模型构建,再进行地区与模型选择', icon="⚠️")
@@ -395,11 +395,11 @@ with col22332:
         dataTemplate = pages_utils.TempDataSet[4]
 
         filteredTemplate = dataTemplate[
-            (dataTemplate['上级单位'] == weatherGeneratorProvinceSelected) &
-            (dataTemplate['测报站点'] == weatherGeneratorStationSelected)]
+            (dataTemplate['经度'] == weatherGeneratorProvinceSelected) &
+            (dataTemplate['纬度'] == weatherGeneratorStationSelected)]
 
         # 只保留特定列，并加入实际标签列
-        filteredTemplate = filteredTemplate[['上级单位', '测报站点', '年', 'DayOfYear']]
+        filteredTemplate = filteredTemplate[['经度', '纬度', '年', 'DayOfYear']]
         filteredTemplate['实际标签'] = None  # 添加新的一列
 
         filteredTemplate.to_excel(path2, index=False)

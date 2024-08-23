@@ -402,8 +402,7 @@ with modelACV:
     # 数组元素去重
     featureList = list(set(columnArrayT))  # 特征变量
     # 过滤特定元素
-    filtered_columns = [col for col in featureList if col not in ["上级单位",
-                                                                  "测报站点",
+    filtered_columns = [col for col in featureList if col not in [
                                                                   "经度", "纬度",
                                                                   "年", "DayOfYear"]]
 

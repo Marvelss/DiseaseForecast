@@ -49,10 +49,10 @@ class Model:
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
         # 对分类变量进行one-hot编码
-        if '上级单位' and '测报站点' in self.featureVariable:
-            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        # if '上级单位' and '测报站点' in self.featureVariable:
+        #     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        # scaler = StandardScaler()
+        X_scaled = X
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
@@ -138,10 +138,10 @@ class Model:
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
         # 对分类变量进行one-hot编码
-        if '上级单位' and '测报站点' in self.featureVariable:
-            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        # if '上级单位' and '测报站点' in self.featureVariable:
+        #     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        # scaler = StandardScaler()
+        X_scaled = X
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
@@ -229,10 +229,10 @@ class Model:
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
         # 对分类变量进行one-hot编码
-        if '上级单位' and '测报站点' in self.featureVariable:
-            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        # if '上级单位' and '测报站点' in self.featureVariable:
+        #     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        # scaler = StandardScaler()
+        X_scaled = X
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
@@ -318,10 +318,10 @@ class Model:
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
         # 对分类变量进行one-hot编码
-        if '上级单位' and '测报站点' in self.featureVariable:
-            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        # if '上级单位' and '测报站点' in self.featureVariable:
+        #     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        # scaler = StandardScaler()
+        X_scaled = X
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
@@ -627,10 +627,10 @@ class Model:
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
         # 对分类变量进行one-hot编码
-        if '上级单位' and '测报站点' in self.featureVariable:
-            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        # if '上级单位' and '测报站点' in self.featureVariable:
+        #     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        # scaler = StandardScaler()
+        X_scaled = X
 
         # =======================划分训练集和测试集=======================
         partition = 0.2

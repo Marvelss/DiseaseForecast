@@ -477,7 +477,7 @@ with dataPCM:
                 #         st.markdown('保留字段选择')
                 #         residualField = [arr for arr in pages_utils.TempDataSet[2].columns if
                 #                          arr not in mergeArray4(
-                #                              ['上级单位', '测报站点',
+                #                              ['经度', '纬度',
                 #                               "年", "DayOfYear"], result1, result2, result3)]
                 #         # print(f'剩余字段{residualField}')
                 #         reservedFiled = pages_utils.multiselect_all(

@@ -297,8 +297,8 @@ class FeatureCalculationMethodFacet:
             self.dataFrame['日期'] = pd.to_datetime(
                 self.dataFrame['年'].astype(str) +
                 self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
-            # 根据上级单位、测报站点、年分类
-            grouped = self.dataFrame.groupby(['上级单位', '测报站点', '年'])
+            # 根据"经度", "纬度"、年分类
+            grouped = self.dataFrame.groupby(['经度', '纬度', '年'])
             for (key, group) in grouped:
                 start_date_range = datetime(key[2], startM, startD)
                 end_date_range = datetime(key[2], endM, endD)
@@ -315,7 +315,7 @@ class FeatureCalculationMethodFacet:
                 #         (group[inputFields[0]] >= float(minNum))])
                 # print(f'长度{rainy_days_count}')
                 # Assign the calculated rainy days count to the '降雨日数' column within the specified date range
-                mask = (self.dataFrame['上级单位'] == key[0]) & (self.dataFrame['测报站点'] == key[1]) & (
+                mask = (self.dataFrame['经度'] == key[0]) & (self.dataFrame['纬度'] == key[1]) & (
                         self.dataFrame['日期'] >= start_date_range) & (
                                self.dataFrame['日期'] <= end_date_range)
                 self.dataFrame.loc[mask, newColumn] = rainy_days_count
@@ -338,7 +338,7 @@ class FeatureCalculationMethodFacet:
         start_day = param[1]
         end_day = param[2]
         threshold = int(param[3])
-        # 根据上级单位、测报站点、年分类
+        # 根据'经度', '纬度'、年分类
         self.dataFrame['日期'] = pd.to_datetime(
             self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
 
@@ -349,7 +349,7 @@ class FeatureCalculationMethodFacet:
         date_filter = (self.dataFrame['年内日期'] >= start_day) & (self.dataFrame['年内日期'] <= end_day)
         filtered_df = self.dataFrame.loc[date_filter]
 
-        grouped = filtered_df.groupby(['上级单位', '测报站点', '年'])
+        grouped = filtered_df.groupby(['经度', '纬度', '年'])
         for (key, group) in grouped:
 
             # Calculate the cumulative temperature for each day in the range
@@ -360,9 +360,9 @@ class FeatureCalculationMethodFacet:
                 true_indices = group[mask].index[0]
                 # 获取true_indices对应的DayOfYear值
                 doy = group.loc[true_indices, 'DayOfYear']
-                # 为该组的'上级单位', '测报站点', '年'赋值
-                self.dataFrame.loc[(self.dataFrame['上级单位'] == key[0]) &
-                                   (self.dataFrame['测报站点'] == key[1]) &
+                # 为该组的'经度', '纬度', '年'赋值
+                self.dataFrame.loc[(self.dataFrame['经度'] == key[0]) &
+                                   (self.dataFrame['纬度'] == key[1]) &
                                    (self.dataFrame['年'] == key[2]), growthPeriod] = doy
         self.dataFrame = self.dataFrame.drop(['日期'], axis=1)
 

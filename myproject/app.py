@@ -131,11 +131,11 @@ def emptyValue():
                      "处理状态"])]
 
     pages_utils.TempDataSet = [
-        pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"]),
-        pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"]),
-        pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"]),
-        pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"]),
-        pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])]
+        pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"]),
+        pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"]),
+        pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"]),
+        pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"]),
+        pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])]
 
     # 初始化面状数据
     pages_utils.TempDataSetFieldFacet = [

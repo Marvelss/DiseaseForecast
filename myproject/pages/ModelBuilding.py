@@ -647,7 +647,7 @@ with modelACM:
 
                 # isExtract = st.checkbox('提取有效值')
                 # 分组并提取每个分组的第一个非空值
-                result = beforeDF.groupby(['上级单位', '测报站点', '年']).first().reset_index()
+                result = beforeDF.groupby(['经度', '纬度', '年']).first().reset_index()
                 # ******删除包含缺失值的行******
                 df_cleaned = result.dropna()
 

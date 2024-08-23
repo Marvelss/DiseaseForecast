@@ -125,8 +125,8 @@ with dataSCM:
                     for column in subset.columns:
                         if not pd.to_numeric(subset[column], errors='coerce').notna().all():
                             non_numeric_columns.append(column)
-                    # 去除上级单位、测报站点(固定)
-                    tempT1 = [col for col in non_numeric_columns if col not in ['上级单位', '测报站点']]
+                    # 去除经度、纬度(固定)
+                    tempT1 = [col for col in non_numeric_columns if col not in ['经度', '纬度']]
 
                     # 防止重复添加
                     if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():

@@ -85,7 +85,7 @@ st.markdown(
 
 colDS1, colDS2 = st.columns(2)
 with colDS1:
-    st.metric('原始字段', '上级单位、测报站点、年、DayOfYear、温度')
+    st.metric('原始字段', '经度、纬度、年、DayOfYear、温度')
 with colDS2:
     st.metric('数据大小', '5*30')
 colDS3, colDS4 = st.columns(2)

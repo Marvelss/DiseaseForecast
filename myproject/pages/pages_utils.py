@@ -179,11 +179,11 @@ TempDataSetField = [RawDataSetField, PreprocessedDataSetField,
                     ModelSet]
 
 # 特征值
-RawDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
-PreprocessedDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
-FeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
-OptimalFeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
-UltimateFeatureDataSet = pd.DataFrame(columns=["上级单位", "测报站点", "年", "DayOfYear"])
+RawDataSet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+PreprocessedDataSet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+FeatureDataSet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+OptimalFeatureDataSet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+UltimateFeatureDataSet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
 TempDataSet = [RawDataSet, PreprocessedDataSet,
                FeatureDataSet, OptimalFeatureDataSet, OptimalFeatureDataSet]
 
