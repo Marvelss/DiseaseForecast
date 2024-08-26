@@ -5,6 +5,7 @@ import pandas as pd
 import streamlit as st
 from st_pages import hide_pages
 
+from lib.utils import filterUnique, mergeExcludeArray
 from pages import pages_utils
 from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 import matplotlib.pyplot as plt
@@ -44,14 +45,6 @@ if "featureMethodName" not in st.session_state:
     }
 if 'FCVisualInformation' not in st.session_state:
     st.session_state["FCVisualInformation"] = []
-
-
-def mergeArray4(list1, list2, list3, list4):
-    return list(set().union(*[list1, list2, list3, list4]))
-
-
-def mergeArray(list1, list2, list3):
-    return list(set().union(*[list1, list2, list3]))
 
 
 # 获取选项值对应名称
@@ -246,13 +239,13 @@ with featureCCV:
     agricultureNameList = agricultureNameT1 + agricultureNameT0
     # 按照数据类型显示左侧字段或特征
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', list(set(weatherNameList)),
+        st, '全选-气象数据', filterUnique(weatherNameList, pages_utils.reservedField),
         'tempTemperature', 'collapsed')
     result2 = pages_utils.multiselect_all(
-        st, '全选-植保特征', list(set(plantNameList)),
+        st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
         'tempPlant', 'collapsed')
     result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', list(set(agricultureNameList)),
+        st, '全选-农学数据', filterUnique(agricultureNameList, pages_utils.reservedField),
         'tempAgriculture', 'collapsed')
 
 # ===============显示右上处理方法选项===============
@@ -371,7 +364,7 @@ with (featureCCM):
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
-            "输入特征": mergeArray(result1, result2, result3),
+            "输入特征": mergeExcludeArray(result1, result2, result3, pages_utils.reservedField),
             "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]['checkBox']),
             "方法参数": [value for key, value in st.session_state["featureMethodName"].items() if key != 'checkBox'],
             "时间": datetime.datetime.now().time(),

@@ -1,45 +1,64 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from leafmap import leafmap
 from streamlit import switch_page
 from streamlit_tree_select import tree_select
 import extra_streamlit_components as stx
-
+import itertools
+from pages import ui
 # add_page_title()
 # st.header('模型评估')
 # st.markdown('---')
+import streamlit.components.v1 as components
 
-import itertools
-from pages import ui
+m = leafmap.Map()
+m.add_basemap("HYBRID")
+html1 = m.to_html()
+
+st.html(html1)
+
+import streamlit as st
+
+
+# Read file and keep in variable
+with open(r"E:\a_python\program\diseaseForecastStreamlit\mymap.html", "r") as f:
+    html_data = f.read()
+
+## Show in webpage
+st.header("Show an external HTML")
+st.components.v1.html(html_data, height=200)
 
 nodes1 = [
-        {"label": "气象数据", "value": "气象数据"},
-        {
-            "label": "植保数据",
-            "value": "植保数据",
-            "children": [
-                {"label": "feature1", "value": "sub_a"},
-                {"label": "feature2", "value": "sub_b"},
-                {"label": "feature3", "value": "sub_c"},
-            ],
-        },
-        {
-            "label": "农学数据",
-            "value": "folder_c",
-            "children": [
-                {"label": "晚稻移栽期", "value": "sub_d"},
-                {
-                    "label": "预测峰值",
-                    "value": "sub_e",
-                    "children": [
-                        {"label": "测报站点", "value": "sub_sub4"},
-                        {"label": "生化指标", "value": "sub_s5"},
-                    ],
-                },
-                {"label": "生化指标", "value": "sub_f"},
-            ],
-        },
-    ]
+    {"label": "气象数据", "value": "气象数据"},
+    {
+        "label": "植保数据",
+        "value": "植保数据",
+        "children": [
+            {"label": "feature1", "value": "sub_a"},
+            {"label": "feature2", "value": "sub_b"},
+            {"label": "feature3", "value": "sub_c"},
+        ],
+    },
+    {
+        "label": "农学数据",
+        "value": "folder_c",
+        "children": [
+            {"label": "晚稻移栽期", "value": "sub_d"},
+            {
+                "label": "预测峰值",
+                "value": "sub_e",
+                "children": [
+                    {"label": "测报站点", "value": "sub_sub4"},
+                    {"label": "生化指标", "value": "sub_s5"},
+                ],
+            },
+            {"label": "生化指标", "value": "sub_f"},
+        ],
+    },
+]
+
+
 # import folium
 
 # from streamlit_folium import st_folium
@@ -357,59 +376,59 @@ def app(image, link, name, description, developer, repo_link):
     st.write("")
 
 
-category("🗣️ 各项特征计算方法API")
-col1, col2, col3 = st.columns(3)
-with col1:
-    app("pages/images/GPTLab.png",
-        '#',
-        "降雨日数计算",
-        "基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数",
-        "Vagrant",
-        "https://github.com/Marvelss",
-        )
-
-with col2:
-    app("pages/images/AskMyPDF.png",
-        '#',
-        "降水累积量计算",
-        "累加某个时间段内降雨量以计算降水累积量",
-        "Vagrant",
-        "https://github.com/Marvelss",
-        )
-with col3:
-    app("pages/images/HugChat.png",
-        '#',
-        "基于活动积温的生育期计算",
-        "基于每日累积温度达到特定积温阈值的时间即为相应生育期",
-        "孙轨迹",
-        "https://github.com/Marvelss",
-        )
-col21, col22, col23 = st.columns(3)
-with col21:
-    app("pages/images/KnowledgeGPT.png",
-        '#',
-        "时空抽取",
-        "基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数",
-        "Vagrant",
-        "https://github.com/Marvelss",
-        )
-
-with col22:
-    app("pages/images/NYC.png",
-        '#',
-        "植被指数计算",
-        "累加某个时间段内降雨量以计算降水累积量",
-        "Vagrant",
-        "https://github.com/Marvelss",
-        )
-with col23:
-    app("pages/images/Roadmap.png",
-        '#',
-        "景观指数计算",
-        "基于每日累积温度达到特定积温阈值的时间即为相应生育期",
-        "Landscapemetrics",
-        "https://github.com/r-spatialecology/landscapemetrics",
-        )
+# category("🗣️ 各项特征计算方法API")
+# col1, col2, col3 = st.columns(3)
+# with col1:
+#     app("pages/images/GPTLab.png",
+#         '#',
+#         "降雨日数计算",
+#         "基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数",
+#         "Vagrant",
+#         "https://github.com/Marvelss",
+#         )
+#
+# with col2:
+#     app("pages/images/AskMyPDF.png",
+#         '#',
+#         "降水累积量计算",
+#         "累加某个时间段内降雨量以计算降水累积量",
+#         "Vagrant",
+#         "https://github.com/Marvelss",
+#         )
+# with col3:
+#     app("pages/images/HugChat.png",
+#         '#',
+#         "基于活动积温的生育期计算",
+#         "基于每日累积温度达到特定积温阈值的时间即为相应生育期",
+#         "孙轨迹",
+#         "https://github.com/Marvelss",
+#         )
+# col21, col22, col23 = st.columns(3)
+# with col21:
+#     app("pages/images/KnowledgeGPT.png",
+#         '#',
+#         "时空抽取",
+#         "基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数",
+#         "Vagrant",
+#         "https://github.com/Marvelss",
+#         )
+#
+# with col22:
+#     app("pages/images/NYC.png",
+#         '#',
+#         "植被指数计算",
+#         "累加某个时间段内降雨量以计算降水累积量",
+#         "Vagrant",
+#         "https://github.com/Marvelss",
+#         )
+# with col23:
+#     app("pages/images/Roadmap.png",
+#         '#',
+#         "景观指数计算",
+#         "基于每日累积温度达到特定积温阈值的时间即为相应生育期",
+#         "Landscapemetrics",
+#         "https://github.com/r-spatialecology/landscapemetrics",
+#         )
 
 # col1, col2, col3 = st.columns(3)
 # with col1:
@@ -640,22 +659,22 @@ with col23:
 # st.pyplot(plt)
 
 # 创建DataFrame
-df = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\tests\test26\2024-05-22T11-04_export.xlsx')
+# df = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\tests\test26\2024-05-22T11-04_export.xlsx')
 
 # 删除含有缺失值的行
-df = df.dropna()
+# df = df.dropna()
 
 # 去除重复值
-df = df.drop_duplicates()
+# df = df.drop_duplicates()
 # plt.rcParams['font.sans-serif'] = 'SimHei'
 
 # 选择最多8个测报站点
-top_stations = df['测报站点'].value_counts().nlargest(8).index
-df_filtered_stations = df[df['测报站点'].isin(top_stations)]
-
+# top_stations = df['测报站点'].value_counts().nlargest(8).index
+# df_filtered_stations = df[df['测报站点'].isin(top_stations)]
+#
 # 选择最多3个年份
-top_years = df['年'].value_counts().nlargest(3).index
-df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+# top_years = df['年'].value_counts().nlargest(3).index
+# df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
 
 # # 绘制柱状图
 # plt.figure(figsize=(12, 8))

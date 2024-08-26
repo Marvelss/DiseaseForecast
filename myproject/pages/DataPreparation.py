@@ -10,6 +10,7 @@ from PIL import Image
 from st_pages import hide_pages
 
 from lib.share import RESOURCE_IMAGES_PATH
+from lib.utils import mergeExcludeArray, filterUnique
 from pages import pages_utils
 from pages.modelandmethod.PretreatmentMethod import PretreatmentMethod
 
@@ -65,14 +66,6 @@ def getCheckboxName(checkbox):
         return '剔除异常值'
     elif checkbox == 'checkbox1':
         return '缺失值插补'
-
-
-def mergeArray(list1, list2, list3):
-    return list(set().union(*[list1, list2, list3]))
-
-
-def mergeArray4(list1, list2, list3, list4):
-    return list(set().union(*[list1, list2, list3, list4]))
 
 
 # 取消选中所有选项
@@ -250,13 +243,13 @@ with dataPCV:
     agricultureNameList = agricultureNameT1 + agricultureNameT2
     # 按照数据类型显示左侧字段或特征
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', list(set(weatherNameList)),
+        st, '全选-气象数据', filterUnique(weatherNameList, pages_utils.reservedField),
         'tempTemperature', 'collapsed')
     result2 = pages_utils.multiselect_all(
-        st, '全选-植保数据', list(set(plantNameList)),
+        st, '全选-植保数据', filterUnique(plantNameList, pages_utils.reservedField),
         'tempPlant', 'collapsed')
     result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', list(set(agricultureNameList)),
+        st, '全选-农学数据', filterUnique(agricultureNameList, pages_utils.reservedField),
         'tempAgriculture', 'collapsed')
 
 # ===============显示右上预处理方法选项===============
@@ -373,7 +366,7 @@ with dataPCM:
             new_data = {
                 "编号": pages_utils.generateID(),
                 "数据类型": dataType,
-                "输入字段": mergeArray(result1, result2, result3),
+                "输入字段": mergeExcludeArray(result1, result2, result3, pages_utils.reservedField),
                 "预处理后字段": None,
                 "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
                 "方法参数": [value for key, value in st.session_state["preMethodName"].items() if

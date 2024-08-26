@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from st_pages import hide_pages
 
 from lib.share import RESOURCE_MODELRESULT_PATH
+from lib.utils import filterUnique
 from pages import pages_utils
 from pages.modelandmethod.Model import Model
 
@@ -452,19 +453,19 @@ with modelACV:
     with modelACVCol1:
         # 按照数据类型显示左侧字段或特征
         result1 = pages_utils.multiselect_all(
-            st, '全选-气象特征', list(set(weatherNameList)),
+            st, '全选-气象特征', filterUnique(weatherNameList, pages_utils.reservedField),
             'tempTemperature', 'collapsed')
         result2 = pages_utils.multiselect_all(
-            st, '全选-植保特征', list(set(plantNameList)),
+            st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
             'tempPlant', 'collapsed')
         result3 = pages_utils.multiselect_all(
-            st, '全选-农学特征', list(set(agricultureNameList)),
+            st, '全选-农学特征', filterUnique(agricultureNameList, pages_utils.reservedField),
             'tempAgriculture', 'collapsed')
     with modelACVCol2:
         st.markdown("###### 标签\n")
         resultLabel = st.selectbox(
             'predictLabel',
-            list(set(weatherNameList + plantNameList + agricultureNameList)),
+            filterUnique(weatherNameList + plantNameList + agricultureNameList, pages_utils.reservedField),
             label_visibility='collapsed')
 
 # ===============显示右上模型选项===============
@@ -585,7 +586,7 @@ with modelACM:
                             "编号": pages_utils.generateID(),
                             "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
                             "模型参数": st.session_state["modelParamName"],
-                            "特征": result1 + result3 + result2,
+                            "特征": result1 + result3 + result2 + pages_utils.reservedField,
                             "标签": resultLabel,
                             "时间": datetime.datetime.now().time(),
                             "处理状态": False}
@@ -646,7 +647,7 @@ with modelACM:
                 if not beforeDF.empty:
                     break
             print(result1)
-            beforeDF = beforeDF[result1 + result2 + result3 + [resultLabel]]
+            beforeDF = beforeDF[result1 + result2 + result3 + [resultLabel] + pages_utils.reservedField]
             missing_values = beforeDF.isnull().sum()
             if missing_values.any() and 'SEIR机理模型' not in pages_utils.TempDataSetField[4]["模型"].tolist():
                 # st.toast('优选特征中含有缺失值,请选中下方选项以提取有效值', icon="⚠️")

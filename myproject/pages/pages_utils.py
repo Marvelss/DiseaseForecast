@@ -1,4 +1,3 @@
-import ast
 import random
 import shutil
 
@@ -227,3 +226,5 @@ OptimalFeatureDataSetFacet = pd.DataFrame(columns=["经度", "纬度", "年", "D
 UltimateFeatureDataSetFacet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
 TempDataSetFacet = [RawDataSetFacet, PreprocessedDataSetFacet,
                     FeatureDataSetFacet, OptimalFeatureDataSetFacet, OptimalFeatureDataSetFacet]
+# 保留字段(贯穿整个环节)
+reservedField = ['经度', '纬度', '年', 'DayOfYear']

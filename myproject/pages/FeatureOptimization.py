@@ -4,6 +4,8 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from st_pages import hide_pages
+
+from lib.utils import mergeExcludeArray, filterUnique
 from pages import pages_utils
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -54,14 +56,6 @@ def getCheckboxName(checkbox):
         return 't检验'
     elif checkbox == 'checkbox2':
         return 'Relief-F互相关分析'
-
-
-def mergeArray4(list1, list2, list3, list4):
-    return list(set().union(*[list1, list2, list3, list4]))
-
-
-def mergeArray(list1, list2, list3):
-    return list(set().union(*[list1, list2, list3]))
 
 
 def simulate_temperature_data1():
@@ -218,7 +212,7 @@ def onPreviewResults():
                 ["气象数据"] * len(result1) +
                 ["植保数据"] * len(result2) +
                 ["农学数据"] * len(result3),
-            "输入特征": mergeArray(result1, result2, result3),
+            "输入特征": mergeExcludeArray(result1, result2, result3, pages_utils.reservedField),
             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
             "方法参数":
                 [value for key, value in st.session_state["OptimizationMethodName"].items() if
@@ -378,13 +372,13 @@ with dataPCV:
 
     # 按照数据类型显示左侧字段或特征
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象特征', list(set(weatherNameList)),
+        st, '全选-气象特征', filterUnique(weatherNameList, pages_utils.reservedField),
         'tempTemperature', 'collapsed')
     result2 = pages_utils.multiselect_all(
-        st, '全选-植保特征', list(set(plantNameList)),
+        st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
         'tempPlant', 'collapsed')
     result3 = pages_utils.multiselect_all(
-        st, '全选-农学特征', list(set(agricultureNameList)),
+        st, '全选-农学特征', filterUnique(agricultureNameList, pages_utils.reservedField),
         'tempAgriculture', 'collapsed')
 # ===============显示右上处理方法选项===============
 with dataPCM:
@@ -401,7 +395,7 @@ with dataPCM:
     if genre:
         option1132 = st.multiselect(
             '变量',
-            mergeArray(result1, result2, result3))
+            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
         number33 = st.number_input("剔除相关系数阈值(R)",
                                    value=0.8,
                                    min_value=0.1,
@@ -413,10 +407,10 @@ with dataPCM:
     if genre1:
         option112 = st.selectbox(
             '目标变量',
-            mergeArray(result1, result2, result3))
+            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
         option1122 = st.multiselect(
             '被比较变量',
-            mergeArray(result1, result2, result3))
+            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
         number112 = st.number_input("提取敏感性阈值(p-value)",
                                     value=0.01,
                                     min_value=0.01,
@@ -430,10 +424,10 @@ with dataPCM:
         # st.markdown('提取条件')
         option111 = st.selectbox(
             '目标变量',
-            mergeArray(result1, result2, result3))
+            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
         option11122 = st.multiselect(
             '被比较变量',
-            mergeArray(result1, result2, result3))
+            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
         st.session_state["OptimizationMethodName"]['param1'] = option111
         st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option11122)
         option = st.selectbox(
