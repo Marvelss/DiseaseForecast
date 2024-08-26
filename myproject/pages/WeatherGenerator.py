@@ -413,7 +413,7 @@ with col22332:
     with col233232:
         # 根据模型构建最终数据集制作实际标签模板
         path2 = os.path.join(
-            RESOURCE_TEMPDIR_PATH, '上传实际标签数据.xlsx')
+            RESOURCE_TEMPLATE_PATH, '上传实际标签数据.xlsx')
 
         dataTemplate = pages_utils.TempDataSet[4]
 
