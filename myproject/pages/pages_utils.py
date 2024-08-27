@@ -160,6 +160,23 @@ def getWeatherNum(situations):
     return result
 
 
+# 特征优选获取数据类型
+def getDataType(featureList):
+    dataTypeList = []
+    for feature in featureList:
+        if '-' in feature:
+            feature = feature.split('-')[0]
+        # 查找值对应的行，并获取对应行的'数据类型'列的值
+        for index, row in TempDataSetField[0].iterrows():
+            # 判断 '字段' 列中是否包含 feature
+            if feature in row['字段']:
+                # 获取该行的 '数据类型' 列的值
+                data_type = row['数据类型']
+                dataTypeList.append(data_type)
+                break  # 找到匹配的行后，跳出循环
+    return dataTypeList
+
+
 # 其他字段值
 RawDataSetField = pd.DataFrame(
     columns=["编号", "数据类型", "文件名称", "字段", "传输状态", "上传时间"])

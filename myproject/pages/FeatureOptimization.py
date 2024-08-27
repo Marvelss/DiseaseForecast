@@ -37,6 +37,9 @@ hide_pages(
     ]
 )
 checkBoxNum = 3
+# 预期保留特征
+if "expectedRetentionFeature" not in st.session_state:
+    st.session_state.expectedRetentionFeature = []
 if "OptimizationMethodName" not in st.session_state:
     st.session_state["OptimizationMethodName"] = {
         'checkBox': None
@@ -150,9 +153,10 @@ def onPreviewResults():
         plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
         plt.tight_layout()  # 调整布局以防止标签重叠
         st.pyplot(plt)
-        st.multiselect('预期保留特征:',
-                       options=optimalFeatureListT,
-                       default=optimalFeatureListT)
+        st.session_state.expectedRetentionFeature = st.multiselect(
+            '预期保留特征:',
+            options=optimalFeatureListT,
+            default=optimalFeatureListT)
     elif tempMethod == 'Pearson相关性分析':
         afterHandleData, tempResultP, optimalFeatureList = FeatureOptimizationMethod(
             dataFrameTemp.copy(), None).Pearson(
@@ -164,9 +168,10 @@ def onPreviewResults():
         sns.heatmap(tempResultP, annot=True, cmap='coolwarm', center=0)
         plt.title('互相关分析矩阵')
         st.pyplot(plt)
-        st.multiselect('预期保留特征:',
-                       options=optimalFeatureList,
-                       default=optimalFeatureList)
+        st.session_state.expectedRetentionFeature = st.multiselect(
+            '预期保留特征:',
+            options=optimalFeatureList,
+            default=optimalFeatureList)
     elif tempMethod == 'Relief-F互相关分析':
         afterHandleData, tempResultR, optimalFeatureListR = FeatureOptimizationMethod(
             dataFrameTemp.copy(), None).ReliefF(
@@ -201,22 +206,22 @@ def onPreviewResults():
         plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
         plt.tight_layout()  # 调整布局以防止标签重叠
         st.pyplot(plt)
-        st.multiselect('预期保留特征:',
-                       options=optimalFeatureListR,
-                       default=optimalFeatureListR)
+        st.session_state.expectedRetentionFeature = st.multiselect(
+            '预期保留特征:',
+            options=optimalFeatureListR,
+            default=optimalFeatureListR)
     # 选择后变化
     if st.button("添加处理", on_click=clear_all):
+        print(st.session_state.expectedRetentionFeature)
         new_data = {
             "编号": pages_utils.generateID(),
-            "数据类型":
-                ["气象数据"] * len(result1) +
-                ["植保数据"] * len(result2) +
-                ["农学数据"] * len(result3),
+            "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
             "输入特征": mergeExcludeArray(result1, result2, result3, pages_utils.reservedField),
             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
             "方法参数":
                 [value for key, value in st.session_state["OptimizationMethodName"].items() if
                  key != 'checkBox'],
+            "优选特征": ','.join(st.session_state.expectedRetentionFeature),
             "时间": datetime.datetime.now().time(),
             "处理状态": False}
         print('======================特征优选-添加任务清单记录======================')
@@ -290,7 +295,6 @@ def onRun():
                 # ===============更新左侧显示内容===============
                 update_values = {
                     # "数据类型": "气象数据", "输入特征": fields[0],
-                    "优选特征": ','.join(newColumns),
                     "大小": '1*' + str(row_size),
                     # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
                     "时间": datetime.datetime.now().time(),
