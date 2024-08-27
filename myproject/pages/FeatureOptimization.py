@@ -47,6 +47,8 @@ if "OptimizationMethodName" not in st.session_state:
 # 获取当前选中的方法名称
 if "nowMethodName" not in st.session_state:
     st.session_state.nowMethodName = ''
+if 'FOVisualInformation' not in st.session_state:
+    st.session_state["FOVisualInformation"] = []
 
 emptyHeadFOP = st.empty()
 
@@ -166,7 +168,7 @@ def onPreviewResults():
         # 使用Seaborn绘制热图
         plt.figure(figsize=(10, 8))
         sns.heatmap(tempResultP, annot=True, cmap='coolwarm', center=0)
-        plt.title('互相关分析矩阵')
+        plt.title('Pearson互相关分析矩阵')
         st.pyplot(plt)
         st.session_state.expectedRetentionFeature = st.multiselect(
             '预期保留特征:',
@@ -210,6 +212,27 @@ def onPreviewResults():
             '预期保留特征:',
             options=optimalFeatureListR,
             default=optimalFeatureListR)
+    if tempMethod == 't检验':
+        FOVisualInformationTemp = {
+            'before': None,
+            'name': tempMethod,
+            'column': optimalFeatureListT,
+            'after': afterHandleData[optimalFeatureListT]}
+    elif tempMethod == 'Pearson相关性分析':
+        FOVisualInformationTemp = {
+            'before': None,
+            'name': tempMethod,
+            'column': tempResultP,
+            'after': tempResultP}
+    elif tempMethod == 'Relief-F互相关分析':
+        FOVisualInformationTemp = {
+            'before': None,
+            'name': tempMethod,
+            'column': optimalFeatureListR,
+            'after': afterHandleData[optimalFeatureListR]}
+    # 可视化信息添加
+    st.session_state["FOVisualInformation"].append(FOVisualInformationTemp)
+
     # 选择后变化
     if st.button("添加处理", on_click=clear_all):
         print(st.session_state.expectedRetentionFeature)
@@ -494,51 +517,87 @@ with dataPCM:
         # =======================显示右下可视化图表=======================
         with placeholder.container():
             st.markdown('##### 可视化')
-            st.markdown('待优化中')
-            # plt.rc("font", family='Microsoft YaHei')
-            # # idFMethods = pages_utils.TempDataSetField[2]["特征优选方法"].tolist()
-            #
-            # # 若无方法处理,则直接跳过该环节
-            # if len(idFMethods):
-            #     # 创建新的从 1 开始的编号列表
-            #     new_ids = list(range(0, len(idFMethods)))
-            #     # 创建标签页并重新命名记录
-            #     new_ids = [f'记录编号_{h}' for h in new_ids]
-            #
-            #     tt1 = st.tabs(new_ids)
-            #     for o in range(len(idFMethods)):
-            #         with tt1[o]:
-            #             # 创建DataFrame
-            #             data_after = st.session_state["FCVisualInformation"][o]['after']
-            #             # 特征名称
-            #             dataColumn = st.session_state["FCVisualInformation"][o]['column']
-            #             if idFMethods[o] == 't检验':
-            #                 # 选择最多8个测报站点
-            #                 top_stations = data_after['测报站点'].value_counts().nlargest(8).index
-            #                 df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
-            #
-            #                 # 选择最多3个年份
-            #                 top_years = data_after['年'].value_counts().nlargest(3).index
-            #                 df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-            #
-            #                 # 绘制折线图
-            #                 plt.figure(figsize=(10, 6))
-            #                 sns.lineplot(
-            #                     data=df_filtered,
-            #                     x="测报站点",
-            #                     y=dataColumn,
-            #                     hue="年",
-            #                     marker="o"
-            #                 )
-            #                 # 设置标签和标题
-            #                 plt.xlabel("测报站点")
-            #                 plt.ylabel(dataColumn)
-            #                 plt.title(f"部分县市与各年份{dataColumn}", fontsize=16)
-            #                 st.pyplot(plt)
-            #             elif idFMethods[o] == 'Pearson相关性分析':
-            #                 pass
-            #             elif idFMethods[o] == 'Relief-F互相关分析':
-            #                 pass
+            plt.rc("font", family='Microsoft YaHei')
+            idFMethods = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()
+            # 若无方法处理,则直接跳过该环节
+            if len(idFMethods):
+                # 创建新的从 1 开始的编号列表
+                new_ids = list(range(0, len(idFMethods)))
+                # 创建标签页并重新命名记录
+                new_ids = [f'记录编号_{h}' for h in new_ids]
+
+                tt1 = st.tabs(new_ids)
+                for o in range(len(idFMethods)):
+                    with tt1[o]:
+                        if len(st.session_state["FOVisualInformation"]):
+                            # 创建DataFrame
+                            data_after = st.session_state["FOVisualInformation"][o]['after']
+                            # 特征名称
+                            dataColumn = st.session_state["FOVisualInformation"][o]['column']
+                            if idFMethods[o] == 't检验':
+                                # 选择最多8个测报站点
+                                top_stations = data_after['测报站点'].value_counts().nlargest(8).index
+                                df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
+
+                                # 选择最多3个年份
+                                top_years = data_after['年'].value_counts().nlargest(3).index
+                                df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+
+                                # 绘制折线图
+                                plt.figure(figsize=(10, 6))
+                                sns.lineplot(
+                                    data=df_filtered,
+                                    x="测报站点",
+                                    y=dataColumn,
+                                    hue="年",
+                                    marker="o"
+                                )
+                                # 设置标签和标题
+                                plt.xlabel("测报站点")
+                                plt.ylabel(dataColumn)
+                                plt.title(f"部分县市与各年份{dataColumn}", fontsize=16)
+                                st.pyplot(plt)
+                            elif idFMethods[o] == 'Pearson相关性分析':
+                                # 可视化
+                                # 使用Seaborn绘制热图
+                                plt.figure(figsize=(10, 8))
+                                sns.heatmap(data_after, annot=True, cmap='coolwarm', center=0)
+                                plt.title('Pearson互相关分析矩阵')
+                                st.pyplot(plt)
+                            elif idFMethods[o] == 'Relief-F互相关分析':
+                                st.markdown('Relief-F互相关分析可视化正优化中')
+                                # 可视化
+                                # keys = list(tempResultR.keys())
+                                # values = list(tempResultR.values())
+                                # # 创建柱状图
+                                # plt.figure(figsize=(10, 6))
+                                # plt.bar(keys, values, color='blue')
+                                # # 添加标题和标签
+                                # plt.title('基于Relief-F特征因子权值排序图')
+                                # plt.xlabel('特征')
+                                # plt.ylabel('特征权值')
+                                #
+                                # standard = 0.5
+                                # if methodParam[2] == '按百分比选取':
+                                #     # 计算TOP元素的数量,向上取整
+                                #     num_top_percent = int(np.ceil(len(values) * float(methodParam[3]) * 0.01))
+                                #     # 提取TOP的元素值
+                                #     top_percent_values = values[:num_top_percent + 1]
+                                #     # 获取前40%元素的最大值
+                                #     threshold_value = top_percent_values[-1]
+                                #     # print(num_top_percent)
+                                #     # print(threshold_value)
+                                #     standard = threshold_value
+                                # if methodParam[2] == '按权重值选取':
+                                #     standard = float(methodParam[3])
+                                # # 基准线
+                                # plt.axhline(y=standard, color='red', linestyle='--', linewidth=1, label='基准线')
+                                # # 显示图表
+                                # plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
+                                # plt.tight_layout()  # 调整布局以防止标签重叠
+                                # st.pyplot(plt)
+                        else:
+                            st.markdown('待选择')
             interval_col34, interval_col33 = st.columns([5, 1])
             # want_to_contribute = interval_col34.button("跳转至可视化界面")
             # if want_to_contribute:
