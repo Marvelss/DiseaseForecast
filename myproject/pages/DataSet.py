@@ -40,22 +40,12 @@ path1 = os.path.join(RESOURCE_TEMPLATE_PATH, '气象数据-模板.xlsx')
 path2 = os.path.join(RESOURCE_TEMPLATE_PATH, '植保数据-模板.xlsx')
 path3 = os.path.join(RESOURCE_TEMPLATE_PATH, '农学数据-模板.xlsx')
 
-warningMInfo = '''
+warningInfo = '''
 注意事项
-1. 模版中的表头名称不可更改,表头行不可删除;
-2. 删除示例数据后,添加新数据.
+1. 字段名称不能包含 '-' , '_' 和数字字符;
+2. 模版中表头行不可删除;
+3. 删除示例数据后,按需填充数据或删减和扩充字段.
 '''
-warningPInfo = '''
-    注意事项
-1. 植保站数据每5天为周期记录一次数据;
-2. 模版中的表头名称不可更改,表头行不可删除;
-3. 删除示例数据后,添加新数据.
-    '''
-warningAInfo = '''
-    注意事项
-1. 模版中的表头名称不可更改,表头行不可删除;
-2. 删除示例数据后,添加新数据.
-    '''
 
 emptyHeadDSP = st.empty()
 # ==============================文件上传显示==============================
@@ -84,7 +74,7 @@ with dataSCM:
     placeholder1 = st.empty()
     if selectedTemplate == '气象数据':
         with placeholder1.container():
-            st.warning(warningMInfo, icon="⚠️")
+            st.warning(warningInfo, icon="⚠️")
             with open(path1, "rb") as file:
                 st.download_button(
                     label="下载气象数据模板",
@@ -94,7 +84,7 @@ with dataSCM:
                 )
     if selectedTemplate == '植保数据':
         with placeholder1.container():
-            st.warning(warningPInfo, icon="⚠️")
+            st.warning(warningInfo, icon="⚠️")
             with open(path2, "rb") as file:
                 st.download_button(
                     label="下载植保数据模板",
@@ -104,7 +94,7 @@ with dataSCM:
                 )
     if selectedTemplate == '农学数据':
         with placeholder1.container():
-            st.warning(warningAInfo, icon="⚠️")
+            st.warning(warningInfo, icon="⚠️")
             with open(path3, "rb") as file:
                 st.download_button(
                     label="下载农学数据模板",
