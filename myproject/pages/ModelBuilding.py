@@ -586,7 +586,7 @@ with modelACM:
                             "编号": pages_utils.generateID(),
                             "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
                             "模型参数": st.session_state["modelParamName"],
-                            "特征": result1 + result3 + result2 + pages_utils.reservedField,
+                            "特征": None,
                             "标签": resultLabel,
                             "时间": datetime.datetime.now().time(),
                             "处理状态": False}
@@ -646,7 +646,6 @@ with modelACM:
                 beforeDF = pages_utils.TempDataSet[p]
                 if not beforeDF.empty:
                     break
-            print(result1)
             beforeDF = beforeDF[result1 + result2 + result3 + [resultLabel] + pages_utils.reservedField]
             missing_values = beforeDF.isnull().sum()
             if missing_values.any() and 'SEIR机理模型' not in pages_utils.TempDataSetField[4]["模型"].tolist():
@@ -656,15 +655,20 @@ with modelACM:
                 # 分组并提取每个分组的第一个非空值
                 result = beforeDF.groupby(['经度', '纬度', '年']).first().reset_index()
                 # ******删除包含缺失值的行******
-                df_cleaned = result.dropna()
-
+                # 若DayOfYear列都为空表明已经以年为单位
+                if result['DayOfYear'].isna().all():
+                    df_cleaned = result.drop('DayOfYear', axis=1)
+                else:
+                    df_cleaned = result.dropna().drop('DayOfYear', axis=1)
                 # if isExtract:
                 pages_utils.TempDataSet[4] = df_cleaned
                 # st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
                 # else:
                 #     st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
                 #     pages_utils.TempDataSet[4] = beforeDF
+
             st.markdown('###### 最终输入模型特征预览')
+
             st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
             # st.markdown('---')
             st.markdown("###### 训练与验证数据集划分")
@@ -688,6 +692,10 @@ with modelACM:
 
             for index, row in pages_utils.TempDataSetField[4].iterrows():
                 pages_utils.TempDataSetField[4].loc[index, '数据集划分比例'] = option
+
+            # 将列名列表赋值给 '特征' 列
+            pages_utils.TempDataSetField[4]['特征'] = [pages_utils.TempDataSet[4].columns.tolist()] * len(
+                pages_utils.TempDataSetField[4])
             interval_col1, interval_col2 = st.columns([5, 1])
             interval_col2.button("保存", on_click=firstPage)
 
