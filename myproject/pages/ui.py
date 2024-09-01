@@ -148,6 +148,24 @@ def colored_header(label, color=None, description=None):
         st.caption(description)
 
 
+# 带有按钮
+def colored_header_btn(label, color=None, description=None):
+    """Shows a header with a colored underline and an optional description."""
+    colBtn1, colBtn2 = st.columns([0.9, 0.1])
+    with colBtn1:
+        st.header(label)
+    with colBtn2:
+        st.markdown('')
+        btnTemp = st.button(f'隐藏{description}')
+
+    st.write(
+        f'<hr style="background-color: {color}; margin-top: 0; margin-bottom: 0; height: 3px; border: none; border-radius: 3px;">',
+        unsafe_allow_html=True,
+    )
+
+    return btnTemp
+
+
 def colored_subHeader(label, color=None, description=None):
     """Shows a header with a colored underline and an optional description."""
     st.subheader(label)

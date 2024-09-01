@@ -8,6 +8,7 @@ import itertools
 import os.path
 
 import streamlit as st
+import leafmap.foliumap as leafmap
 
 from PIL import Image
 from st_pages import hide_pages
@@ -61,23 +62,21 @@ category_colors_cycle = itertools.cycle(
 
 
 def category(name, description=None):
-    # if current_category_index != 0:
-    # st.write("---")
-    # st.write("")
-    # pass
-    # ui.colored_header(name, "rgba(38, 39, 48, 0.6)")
-    ui.colored_header(name, next(category_colors_cycle), description)
-    # st.header(name)
+    btnTemp1 = ui.colored_header_btn(name, next(category_colors_cycle), description)
     st.write("")
-
-    # current_category_index += 1
+    return btnTemp1
 
 
 # st.header('建模报告')
-st.title('建模报告')
+colHead1, colHead2 = st.columns([0.7, 0.2])
+with colHead1:
+    st.title('多场景作物病虫害预测系统建模报告')
+with colHead2:
+    st.markdown(' ')
+    st.markdown('#### 日期:2024年8月31日')
+    st.markdown('#### 时间:11点01分')
 # st.markdown('# 建模报告')
-category("📊️ 原始数据")
-
+on = st.toggle("面状数据")
 st.markdown(
     """
 <style>
@@ -89,95 +88,230 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-colDS1, colDS2 = st.columns(2)
-with colDS1:
-    st.metric('原始字段', '经度、纬度、年、DayOfYear、温度')
-with colDS2:
-    st.metric('数据大小', '5*30')
-colDS3, colDS4 = st.columns(2)
-with colDS3:
-    st.metric('数据类型', '气象数据 植保数据')
-with colDS4:
-    st.metric('影响因素', '气温 降水 湿度')
+pl1 = st.empty()
 
-category("🌌 预处理")
-colPre1, colPre2 = st.columns(2)
-with colPre1:
-    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '数据预处理-缺失值插补.png'))
-    st.image(img, width=680)
-    colPart1, colPart2, colPart3 = st.columns(3)
-    colPart1.metric('预处理字段', '降水')
-    colPart2.metric('预处理方法', '缺失值插补')
-    colPart3.metric('预处理数据条数', '30')
-with colPre2:
-    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '数据预处理-剔除异常值.png'))
-    st.image(img, width=800)
-    colPart1, colPart2, colPart3 = st.columns(3)
-    colPart1.metric('预处理字段', '温度')
-    colPart2.metric('预处理方法', '异常值剔除')
-    colPart3.metric('预处理数据条数', '50')
+if not on:
+    with pl1.container():
+        btn1 = category("ℹ️ 简介", '简介')
+        st.markdown('##### &emsp;&emsp;本次构建的场景为<u>水稻纹枯病峰值模型</u>,', unsafe_allow_html=True)
+        colInfo1, colInfo2, colInfo3, colInfo4 = st.columns(4)
+        colInfo1.metric('编号', '00000000')
+        colInfo2.metric('场景名称', '水稻纹枯病峰值模型')
+        colInfo3.metric('模型类型', '点状数据+动态模型')
+        colInfo4.metric('报告时间', '2024年8月1日')
+        if btn1:
+            pl1.empty()
+    category("📊️ 原始数据", '原始数据')
+    colDS1, colDS2 = st.columns(2)
+    with colDS1:
+        st.metric('原始字段', '经度、纬度、年、DayOfYear、温度')
+    with colDS2:
+        st.metric('数据大小', '5*30')
+    colDS3, colDS4 = st.columns(2)
+    with colDS3:
+        st.metric('数据类型', '气象数据 植保数据')
+    with colDS4:
+        st.metric('影响因素', '气温 降水 湿度')
 
-category("🌍 特征计算")
-# 命名: 界面名称缩写
-colFC1, colFC2 = st.columns(2)
-with colFC1:
-    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征计算-降水累积量.png'))
-    st.image(img, width=760)
-    colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
-    colFCPart1.metric('输入字段', '降水')
-    colFCPart2.metric('特征计算方法', '降水累积量计算')
-    colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
-    colFCPart3.metric('输出特征', '降水累积量')
-    colFCPart4.metric('特征条数', '30')
-with colFC2:
-    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征计算-移栽期.png'))
-    st.image(img, width=700)
-    colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
-    colFCPart1.metric('输入字段', '温度')
-    colFCPart2.metric('特征计算方法', '基于活动积温的生育期计算')
-    colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
-    colFCPart3.metric('输出特征', '生育期')
-    colFCPart4.metric('特征条数', '30')
+    category("🌌 预处理", '预处理')
+    colPre1, colPre2 = st.columns(2)
+    with colPre1:
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '数据预处理-缺失值插补.png'))
+        st.image(img, width=680)
+        colPart1, colPart2, colPart3 = st.columns(3)
+        colPart1.metric('预处理字段', '降水')
+        colPart2.metric('预处理方法', '缺失值插补')
+        colPart3.metric('预处理数据条数', '30')
+    with colPre2:
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '数据预处理-剔除异常值.png'))
+        st.image(img, width=800)
+        colPart1, colPart2, colPart3 = st.columns(3)
+        colPart1.metric('预处理字段', '温度')
+        colPart2.metric('预处理方法', '异常值剔除')
+        colPart3.metric('预处理数据条数', '50')
 
-category("🌎 特征优选")
-colFO1, colFO2 = st.columns(2)
-with colFO1:
-    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征优选-Pearson.png'))
-    st.image(img, width=670)
-    colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
-    colFCPart1.metric('输入特征', '降水、温度')
-    colFCPart2.metric('特征优选方法', 'Pearson相关性分析')
-    colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
-    colFCPart3.metric('优选特征集', '温度')
-    colFCPart4.metric('筛选条件', '相关系数(R)<0.8')
-with colFO2:
-    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征优选-Relief-F.png'))
-    st.image(img, width=740)
-    colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
-    colFCPart1.metric('输入特征', '降水、温度')
-    colFCPart2.metric('特征优选方法', 'Relief-F互相关分析')
-    colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
-    colFCPart3.metric('优选特征集', '温度')
-    colFCPart4.metric('筛选条件', 'TOP80(%)')
-category("🌏 模型构建")
+    category("🌍 特征计算", '特征计算')
+    # 命名: 界面名称缩写
+    colFC1, colFC2 = st.columns(2)
+    with colFC1:
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征计算-降水累积量.png'))
+        st.image(img, width=760)
+        colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
+        colFCPart1.metric('输入字段', '降水')
+        colFCPart2.metric('特征计算方法', '降水累积量计算')
+        colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
+        colFCPart3.metric('输出特征', '降水累积量')
+        colFCPart4.metric('特征条数', '30')
+    with colFC2:
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征计算-移栽期.png'))
+        st.image(img, width=700)
+        colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
+        colFCPart1.metric('输入字段', '温度')
+        colFCPart2.metric('特征计算方法', '基于活动积温的生育期计算')
+        colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
+        colFCPart3.metric('输出特征', '生育期')
+        colFCPart4.metric('特征条数', '30')
 
-colMB1, colMB2 = st.columns(2)
-img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '模型构建-回归模型1.png'))
-img1 = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '模型构建-预测结果图.png'))
-with colMB1:
-    st.image(img1, width=750)
-    st.metric('特征集', '降水、温度、降水累积量、降雨日数')
-    colMBPart1, colMBPart2 = st.columns(2)
-    colMBPart1.metric('标签', '病害峰值')
-    colMBPart2.metric('特征大小', '5*90')
-with colMB2:
-    st.image(img, width=720)
-    st.metric('模型', 'Random Forest')
-    colMBPart3, colMBPart4 = st.columns(2)
-    colMBPart3.metric('评价指标', 'MSE、R方')
-    colMBPart4.metric('数据集分配比例', '5:6')
+    category("🌎 特征优选", '特征优选')
+    colFO1, colFO2 = st.columns(2)
+    with colFO1:
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征优选-Pearson.png'))
+        st.image(img, width=670)
+        colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
+        colFCPart1.metric('输入特征', '降水、温度')
+        colFCPart2.metric('特征优选方法', 'Pearson相关性分析')
+        colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
+        colFCPart3.metric('优选特征集', '温度')
+        colFCPart4.metric('筛选条件', '相关系数(R)<0.8')
+    with colFO2:
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征优选-Relief-F.png'))
+        st.image(img, width=740)
+        colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
+        colFCPart1.metric('输入特征', '降水、温度')
+        colFCPart2.metric('特征优选方法', 'Relief-F互相关分析')
+        colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
+        colFCPart3.metric('优选特征集', '温度')
+        colFCPart4.metric('筛选条件', 'TOP80(%)')
+    category("🌏 模型构建", '模型构建')
 
-category("🌐 基于天气情景生成器的模型评估")
+    colMB1, colMB2 = st.columns(2)
+    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '模型构建-回归模型1.png'))
+    img1 = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '模型构建-预测结果图.png'))
+    with colMB1:
+        st.image(img1, width=750)
+        st.metric('特征集', '降水、温度、降水累积量、降雨日数')
+        colMBPart1, colMBPart2 = st.columns(2)
+        colMBPart1.metric('标签', '病害峰值')
+        colMBPart2.metric('特征大小', '5*90')
+    with colMB2:
+        st.image(img, width=720)
+        st.metric('模型', 'Random Forest')
+        colMBPart3, colMBPart4 = st.columns(2)
+        colMBPart3.metric('评价指标', 'MSE、R方')
+        colMBPart4.metric('数据集分配比例', '5:6')
+else:
+    category("ℹ️ 简介", '简介')
+    colInfo1, colInfo2, colInfo3, colInfo4 = st.columns(4)
+    colInfo1.metric('编号', '00000001')
+    colInfo2.metric('场景名称', '茶树炭疽病模型')
+    colInfo3.metric('模型类型', '面状数据+静态模型')
+    colInfo4.metric('报告时间', '2024年8月1日')
+
+    category("📊️ 原始数据", '原始数据')
+    colDS1, colDS2 = st.columns(2)
+    with colDS1:
+        st.metric('原始字段', '经度、纬度、年、DayOfYear、温度')
+    with colDS2:
+        st.metric('数据大小', '5*30')
+    colDS3, colDS4 = st.columns(2)
+    with colDS3:
+        st.metric('数据类型', '气象数据 植保数据')
+    with colDS4:
+        st.metric('影响因素', '气温 降水 湿度')
+
+    category("🌌 预处理", '预处理')
+    colPre1, colPre2 = st.columns(2)
+    with colPre1:
+        mapTT = leafmap.Map(
+            center=[30.314207, 120.343200], zoom_start=16,
+            fullscreen_control=False, draw_control=False,
+            measure_control=False, search_control=False,
+            layersControl=False)
+        mapTT.add_shp(
+            r'F:\A_postgraduate\病虫害多场景系统\a_系统测试\系统测试数据集\面-静-茶树炭疽病面状(发生程度)\病害分布清洗后问卷-总\清洗后All.shp')
+        mapTT.to_streamlit()
+        colPart1, colPart2, colPart3 = st.columns(3)
+        colPart1.metric('预处理字段', '温度')
+        colPart2.metric('预处理方法', '空间插值')
+        colPart3.metric('预处理数据条数', '30')
+    with colPre2:
+        mapTT1 = leafmap.Map(
+            center=[30.314207, 120.343200], zoom_start=16,
+            fullscreen_control=False, draw_control=False,
+            measure_control=False, search_control=False,
+            layersControl=False)
+        mapTT1.add_raster(
+            r'F:\A_postgraduate\病虫害多场景系统\a_系统测试\系统测试数据集\面-静-茶树炭疽病面状(发生程度)\调整名字后\EVI_2015\EVI_2015_1.tif')
+        mapTT1.to_streamlit()
+        colPart1, colPart2, colPart3 = st.columns(3)
+        colPart1.metric('预处理字段', '温度')
+        colPart2.metric('预处理方法', '空间插值')
+        colPart3.metric('预处理数据条数', '50')
+
+    category("🌍 特征计算", '特征计算')
+    # 命名: 界面名称缩写
+    colFC1, colFC2 = st.columns(2)
+    with colFC1:
+        mapTT2 = leafmap.Map(
+            center=[30.314207, 120.343200], zoom_start=16,
+            fullscreen_control=False, draw_control=False,
+            measure_control=False, search_control=False,
+            layersControl=False)
+        mapTT2.add_raster(
+            r'E:\a_python\program\diseaseForecastStreamlit\testscene\a_test_resource\landsat\1984.tif')
+        mapTT2.to_streamlit()
+        colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
+        colFCPart1.metric('输入字段', '多波段遥感数据')
+        colFCPart2.metric('特征计算方法', '植被指数计算')
+        colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
+        colFCPart3.metric('输出特征', 'NDVI')
+        colFCPart4.metric('特征条数', '30')
+    with colFC2:
+        mapTT3 = leafmap.Map(
+            center=[30.314207, 120.343200], zoom_start=16,
+            fullscreen_control=False, draw_control=False,
+            measure_control=False, search_control=False,
+            layersControl=False)
+        mapTT3.add_raster(
+            r'E:\a_python\program\testPlatform\demo\demo140\fengtai2010.tif')
+        mapTT3.to_streamlit()
+        colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
+        colFCPart1.metric('输入字段', '土地覆盖类型')
+        colFCPart2.metric('特征计算方法', '景观格局指数计算')
+        colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
+        colFCPart3.metric('输出特征', 'LPI')
+        colFCPart4.metric('特征条数', '30')
+
+    category("🌎 特征优选", '特征优选')
+    colFO1, colFO2 = st.columns(2)
+    with colFO1:
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征优选-Pearson.png'))
+        st.image(img, width=670)
+        colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
+        colFCPart1.metric('输入特征', '降水、温度')
+        colFCPart2.metric('特征优选方法', 'Pearson相关性分析')
+        colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
+        colFCPart3.metric('优选特征集', '温度')
+        colFCPart4.metric('筛选条件', '相关系数(R)<0.8')
+    with colFO2:
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征优选-Relief-F.png'))
+        st.image(img, width=740)
+        colFCPart1, colFCPart2 = st.columns([0.3, 0.5])
+        colFCPart1.metric('输入特征', '降水、温度')
+        colFCPart2.metric('特征优选方法', 'Relief-F互相关分析')
+        colFCPart3, colFCPart4 = st.columns([0.3, 0.5])
+        colFCPart3.metric('优选特征集', '温度')
+        colFCPart4.metric('筛选条件', 'TOP80(%)')
+    category("🌏 模型构建", '模型构建')
+
+    colMB1, colMB2 = st.columns(2)
+    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '模型构建-回归模型1.png'))
+    img1 = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '模型构建-预测结果图.png'))
+    with colMB1:
+        st.image(img1, width=750)
+        st.metric('特征集', '降水、温度、降水累积量、降雨日数')
+        colMBPart1, colMBPart2 = st.columns(2)
+        colMBPart1.metric('标签', '病害峰值')
+        colMBPart2.metric('特征大小', '5*90')
+    with colMB2:
+        st.image(img, width=720)
+        st.metric('模型', 'Random Forest')
+        colMBPart3, colMBPart4 = st.columns(2)
+        colMBPart3.metric('评价指标', 'MSE、R方')
+        colMBPart4.metric('数据集分配比例', '5:6')
+
+btnModelEvaluation = category("🌐 基于天气情景生成器的模型评估", '模型评估')
+
 colWG1, colWG2 = st.columns(2)
 with colWG1:
     st.metric('地区', '湖南省湘阴县')
@@ -202,9 +336,15 @@ with co3:
     st.metric("Dev_S", "0.0799")
 with co4:
     st.metric("Dev_S", "0.0899")
-category("🌑 模型稳定性评估结果")
+btnResult = category("🌑 模型稳定性评估结果", '所有按钮')
 st.markdown('##### 在高温多雨的条件下，RF模型极易受到温度的影响，可能导致决策树中的特征选择不稳定。'
             '原因可能在于树模型对高维度数据的分裂规则过于敏感，高温可能使某些特征权重过高或过低。'
             '这种情况下，模型的输出可能波动较大，预测结果不稳定。\n'
             '##### RF模型在高温多雨的极端气象情景下,极易遭受温度的影响,模型极不稳定\n'
             '##### KNN模型在低温多雨的极端气象情景下,不易遭受温度的影响,模型十分稳定')
+if btnResult:
+    st.markdown("""
+    <style>
+    .st-emotion-cache-15hul6a.ef3psqc12 {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
