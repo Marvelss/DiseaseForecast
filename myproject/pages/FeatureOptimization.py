@@ -63,42 +63,6 @@ def getCheckboxName(checkbox):
         return 'Relief-F互相关分析'
 
 
-def simulate_temperature_data1():
-    # 模拟生成数据
-    np.random.seed(42)  # 设置随机种子以确保可重复性
-
-    # 创建一个包含随机数据的数据框
-    data = {
-        'Feature1': np.random.normal(0, 1, 100),
-        'Feature2': np.random.normal(0, 1, 100),
-        'Feature3': np.random.normal(0, 1, 100),
-        'Target': np.random.choice([0, 1], size=100)
-    }
-    dfT = pd.DataFrame(data)
-    return dfT
-
-
-def simulate_temperature_data():
-    # 模拟生成温度数据
-    np.random.seed(15)
-    N = 15
-
-    temperature1 = np.random.normal(loc=20, scale=2, size=(N,))
-    temperature2 = np.random.normal(loc=25, scale=4, size=(N,))
-    temperature3 = np.random.normal(loc=18, scale=1.5, size=(N,))
-    temperature4 = np.random.normal(loc=22, scale=3, size=(N,))
-
-    # 创建DataFrame
-    dfT = pd.DataFrame({
-        'Temperature1': temperature1,
-        'Temperature2': temperature2,
-        'Temperature3': temperature3,
-        'Temperature4': temperature4,
-        'Target': np.random.choice([0, 1], size=N)  # 二分类目标
-    })
-    return dfT
-
-
 # 取消所有选项按钮
 def clear_all():
     for h in range(checkBoxNum):
@@ -215,9 +179,11 @@ def onPreviewResults():
     if tempMethod == 't检验':
         FOVisualInformationTemp = {
             'before': None,
+            'after': tempResult,
             'name': tempMethod,
-            'column': optimalFeatureListT,
-            'after': afterHandleData[optimalFeatureListT]}
+            'column': list(tempResult.keys()),
+            'value': list(tempResult.values()),
+            'standard': float(methodParam[2])}
     elif tempMethod == 'Pearson相关性分析':
         FOVisualInformationTemp = {
             'before': None,
@@ -225,11 +191,26 @@ def onPreviewResults():
             'column': tempResultP,
             'after': tempResultP}
     elif tempMethod == 'Relief-F互相关分析':
+        standard = 0.5
+        valuesT = list(tempResultR.values())
+        if methodParam[2] == '按百分比选取':
+            # 计算TOP元素的数量,向上取整
+            num_top_percent = int(np.ceil(len(valuesT) * float(methodParam[3]) * 0.01))
+            # 提取TOP的元素值
+            top_percent_values = valuesT[:num_top_percent + 1]
+            # 获取前40%元素的最大值
+            threshold_value = top_percent_values[-1]
+            # print(num_top_percent)
+            # print(threshold_value)
+            standard = threshold_value
+        if methodParam[2] == '按权重值选取':
+            standard = float(methodParam[3])
         FOVisualInformationTemp = {
             'before': None,
-            'name': tempMethod,
-            'column': optimalFeatureListR,
-            'after': afterHandleData[optimalFeatureListR]}
+            'after': tempResultR,
+            'column': list(tempResultR.keys()),
+            'value': list(tempResultR.values()),
+            'standard': standard}
     # 可视化信息添加
     st.session_state["FOVisualInformation"].append(FOVisualInformationTemp)
 
@@ -530,6 +511,7 @@ with dataPCM:
                 for o in range(len(idFMethods)):
                     with tt1[o]:
                         if len(st.session_state["FOVisualInformation"]):
+                            print(st.session_state["FOVisualInformation"][o])
                             # 创建DataFrame
                             data_after = st.session_state["FOVisualInformation"][o]['after']
                             # 特征名称
@@ -565,37 +547,23 @@ with dataPCM:
                                 plt.title('Pearson互相关分析矩阵')
                                 st.pyplot(plt)
                             elif idFMethods[o] == 'Relief-F互相关分析':
-                                st.markdown('Relief-F互相关分析可视化正优化中')
                                 # 可视化
-                                # keys = list(tempResultR.keys())
-                                # values = list(tempResultR.values())
-                                # # 创建柱状图
-                                # plt.figure(figsize=(10, 6))
-                                # plt.bar(keys, values, color='blue')
-                                # # 添加标题和标签
-                                # plt.title('基于Relief-F特征因子权值排序图')
-                                # plt.xlabel('特征')
-                                # plt.ylabel('特征权值')
-                                #
-                                # standard = 0.5
-                                # if methodParam[2] == '按百分比选取':
-                                #     # 计算TOP元素的数量,向上取整
-                                #     num_top_percent = int(np.ceil(len(values) * float(methodParam[3]) * 0.01))
-                                #     # 提取TOP的元素值
-                                #     top_percent_values = values[:num_top_percent + 1]
-                                #     # 获取前40%元素的最大值
-                                #     threshold_value = top_percent_values[-1]
-                                #     # print(num_top_percent)
-                                #     # print(threshold_value)
-                                #     standard = threshold_value
-                                # if methodParam[2] == '按权重值选取':
-                                #     standard = float(methodParam[3])
-                                # # 基准线
-                                # plt.axhline(y=standard, color='red', linestyle='--', linewidth=1, label='基准线')
-                                # # 显示图表
-                                # plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
-                                # plt.tight_layout()  # 调整布局以防止标签重叠
-                                # st.pyplot(plt)
+                                # 创建柱状图
+                                plt.figure(figsize=(10, 6))
+                                plt.bar(st.session_state["FOVisualInformation"][o]['column'],
+                                        st.session_state["FOVisualInformation"][o]['value'], color='blue')
+                                # 添加标题和标签
+                                plt.title('基于Relief-F特征因子权值排序图')
+                                plt.xlabel('特征')
+                                plt.ylabel('特征权值')
+
+                                # 基准线
+                                plt.axhline(y=st.session_state["FOVisualInformation"][o]['standard'], color='red',
+                                            linestyle='--', linewidth=1, label='基准线')
+                                # 显示图表
+                                plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
+                                plt.tight_layout()  # 调整布局以防止标签重叠
+                                st.pyplot(plt)
                         else:
                             st.markdown('待选择')
             interval_col34, interval_col33 = st.columns([5, 1])
