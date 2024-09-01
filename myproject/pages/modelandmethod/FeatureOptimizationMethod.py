@@ -84,7 +84,12 @@ class FeatureOptimizationMethod:
         # 使用groupby分组并提取每个分组的第一个非空值
         ultimateFeatures = self.dataFrame.groupby(['经度', '纬度', '年']).first().reset_index()
         # ******删除包含缺失值的行******
-        df_cleaned = ultimateFeatures.dropna()
+        # 若DayOfYear列都为空表明已经以年为单位
+        if ultimateFeatures['DayOfYear'].isna().all():
+            df_cleaned = ultimateFeatures
+        else:
+            df_cleaned = ultimateFeatures.dropna()
+
         # 准备数据
         X = df_cleaned[comparedVariableList + [target]].drop(columns=[target])  # 假设我们已经从df中删除了目标列和不需要的列
         y = df_cleaned[target]
@@ -103,7 +108,6 @@ class FeatureOptimizationMethod:
         # X_scaled = scaler.fit_transform(X)
         # print(X_scaled)
         # 划分训练集和测试集
-
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
         # 重置索引并转换为NumPy数组
