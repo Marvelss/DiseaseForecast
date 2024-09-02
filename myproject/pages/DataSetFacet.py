@@ -61,16 +61,16 @@ def get_database_session():
     return st.session_state.dSFmap
 
 
-if 'leftBars' not in st.session_state:
-    st.session_state.leftBars = [
-        {
-            "label": "原始数据集",
-            "value": "原始数据集",
-            "children": [
-                {"label": "气象数据", "value": "气象数据"}
-            ],
-        },
-    ]
+# if 'leftBars' not in st.session_state:
+#     st.session_state.leftBars = [
+#         {
+#             "label": "原始数据集",
+#             "value": "原始数据集",
+#             "children": [
+#                 {"label": "气象数据", "value": "气象数据"}
+#             ],
+#         },
+#     ]
 
 # 隐藏页面
 hide_pages(
@@ -105,7 +105,7 @@ with dataSCM:
         pages_utils.RawDataSetFieldFacet['数据格式'])]
     with st.container(height=750, border=False):
         if len(pages_utils.RawDataSetFieldFacet['编号']) == 0:
-            tree_select([{"label": "原始数据集", "value": "原始数据集","children": []}])
+            tree_select([{"label": "原始数据集", "value": "原始数据集", "children": []}])
         else:
             leftBarsRawData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.RawDataSetFieldFacet),
                                           checked=checkedNameList)
@@ -190,6 +190,9 @@ with dataSCR:
                 # 防止重复添加
                 if fileName in existing_file_names:
                     # st.toast(f"文件 {fileName} 已存在,跳过上传", icon="⚠️")
+                    continue
+                # 不添加除shp外的相关数据
+                if fileFormat.lower() in ['shx', 'cpg', 'dbf', 'prj', 'xml']:
                     continue
                 new_entry = {
                     "编号": pages_utils.generateID(),
