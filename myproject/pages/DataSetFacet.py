@@ -103,6 +103,7 @@ def updateLeftBars(raw_data_facet):
     for i in range(len(raw_data_facet["编号"])):
         root = raw_data_facet["根节点"][i]
         child = raw_data_facet["子节点"][i]
+        field = raw_data_facet["字段"][i]  # 获取字段信息
         file_name1 = raw_data_facet["文件名称"][i]
         file_value = f"{file_name1}.{raw_data_facet['数据格式'][i]}"
 
@@ -110,14 +111,20 @@ def updateLeftBars(raw_data_facet):
             structure[root] = {}
 
         if child not in structure[root]:
-            structure[root][child] = []
+            structure[root][child] = {}
 
-        structure[root][child].append({"label": file_name1, "value": file_value})
+        if field not in structure[root][child]:
+            structure[root][child][field] = []
+
+        structure[root][child][field].append({"label": file_name1, "value": file_value})
 
     for root, children in structure.items():
         root_node = {"label": root, "value": root, "children": []}
-        for child, files in children.items():
-            child_node = {"label": child, "value": child, "children": files}
+        for child, fields in children.items():
+            child_node = {"label": child, "value": child, "children": []}
+            for field, files in fields.items():
+                field_node = {"label": field, "value": field, "children": files}
+                child_node["children"].append(field_node)
             root_node["children"].append(child_node)
         left_bars.append(root_node)
 
@@ -226,11 +233,12 @@ with dataSCR:
                     "数据类型": selectedTemplate,
                     "根节点": '原始数据集',
                     "子节点": suuDirName,
+                    "字段": fileName.split('_')[0] if '_' in fileName else "其他",
                     "文件名称": fileName,
                     "数据格式": fileFormat,
                     "传输状态": "已上传",
-                    "上传时间": datetime.now().strftime("%H:%M:%S"),
-                    "字段": '暂无'}
+                    "上传时间": datetime.now().strftime("%H:%M:%S")
+                }
                 # 添加到TempDataSetFieldFacet[0]
                 for key in pages_utils.TempDataSetFieldFacet[0].keys():
                     pages_utils.TempDataSetFieldFacet[0][key].append(new_entry[key])

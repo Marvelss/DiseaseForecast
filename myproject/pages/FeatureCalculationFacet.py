@@ -442,13 +442,16 @@ with colFCF3:
 
         else:
             tempEntryT = os.path.basename(handledFile)
+            fileName = tempEntryT.split('.')[0]
+            fileFormat = tempEntryT.split('.')[1]
             new_entry = {
                 "编号": pages_utils.generateID(),
                 "数据类型": '气象数据',
                 "根节点": '备选特征集',
                 "子节点": '气象数据',
-                "文件名称": tempEntryT.split('.')[0],
-                "数据格式": tempEntryT.split('.')[1],
+                "字段": fileName.split('_')[0] if '_' in fileName else "其他",
+                "文件名称": fileName,
+                "数据格式": fileFormat,
                 "输入文件": None,
                 "特征计算方法": tempMethod,
                 "方法参数": [value for key, value in st.session_state["featureMethodFacetName"].items() if
