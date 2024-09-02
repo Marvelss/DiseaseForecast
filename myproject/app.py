@@ -141,27 +141,41 @@ def emptyValue():
         pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])]
 
     # 初始化面状数据
+    pages_utils.RawDataSetFieldFacet = {"编号": [], "文件名称": [], "数据类型": [], "数据格式": [],
+                                        "根节点": [], "子节点": [], "字段": [], "传输状态": [], "上传时间": []}
+    pages_utils.PreprocessedDataSetFieldFacet = {"编号": [], "数据类型": [], "数据格式": [], "根节点": [],
+                                                 "子节点": [], "字段": [], "输入文件": [], "文件名称": [],
+                                                 "预处理方法": [], "方法参数": [], "时间": [], "处理状态": []}
+    pages_utils.FeatureDataSetFieldFacet = {"编号": [], "输入文件": [], "文件名称": [], "数据类型": [],
+                                            "数据格式": [], "根节点": [], "子节点": [], "字段": [],
+                                            "特征计算方法": [], "方法参数": [], "时间": [], "处理状态": []}
+    pages_utils.OptimalFeatureDataSetFieldFacet = {"编号": [], "数据类型": [], "输入特征": [], "优选特征": [],
+                                                   "大小": [],
+                                                   "特征优选方法": [], "方法参数": [], "时间": [], "处理状态": []}
+    pages_utils.UltimateFeatureDataSetFacet = {"编号": [], "模型": [], "模型参数": [], "特征": [], "标签": [],
+                                               "评价指标": [],
+                                               "数据集划分比例": [], "模型结构": [], "模型训练结果": [], "时间": [],
+                                               "处理状态": []}
     pages_utils.TempDataSetFieldFacet = [
-        {"编号": [], "文件名称": [], "数据类型": [], "数据格式": [],
-         "根节点": [], "子节点": [], "字段": [], "传输状态": [], "上传时间": []},
-        {"编号": [], "数据类型": [], "数据格式": [], "根节点": [],
-         "子节点": [], "字段": [], "输入文件": [], "文件名称": [],
-         "预处理方法": [], "方法参数": [], "时间": [], "处理状态": []},
-        {"编号": [], "输入文件": [], "文件名称": [], "数据类型": [],
-         "数据格式": [], "根节点": [], "子节点": [], "字段": [],
-         "特征计算方法": [], "方法参数": [], "时间": [], "处理状态": []},
-        {"编号": [], "数据类型": [], "输入特征": [], "优选特征": [], "大小": [],
-         "特征优选方法": [], "方法参数": [], "时间": [], "处理状态": []},
-        {"编号": [], "模型": [], "模型参数": [], "特征": [], "标签": [], "评价指标": [],
-         "数据集划分比例": [], "模型结构": [], "模型训练结果": [], "时间": [], "处理状态": []}]
+        pages_utils.RawDataSetFieldFacet,
+        pages_utils.PreprocessedDataSetFieldFacet,
+        pages_utils.FeatureDataSetFieldFacet,
+        pages_utils.OptimalFeatureDataSetFieldFacet,
+        pages_utils.UltimateFeatureDataSetFacet
+    ]
 
     # 特征值
+    pages_utils.RawDataSet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+    pages_utils.PreprocessedDataSet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+    pages_utils.FeatureDataSet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+    pages_utils.OptimalFeatureDataSet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+    pages_utils.UltimateFeatureDataSet = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
     pages_utils.TempDataSetFacet = [
-        pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"]),
-        pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"]),
-        pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"]),
-        pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"]),
-        pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])]
+        pages_utils.RawDataSet,
+        pages_utils.PreprocessedDataSet,
+        pages_utils.FeatureDataSet,
+        pages_utils.OptimalFeatureDataSet,
+        pages_utils.OptimalFeatureDataSet]
 
     # 预处理界面初始化(使用系统界面右上角界面clear cache自动清空)
     # st.session_state["preMethodName"] = {'checkBox': None}
