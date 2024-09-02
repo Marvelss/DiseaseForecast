@@ -94,43 +94,6 @@ def savedFile(uploadedFile):
         f.write(uploadedFile.read())
 
 
-# 更新左侧目标显示
-def updateLeftBars(raw_data_facet):
-    # 初始化 leftBars 从 RawDataSetFieldFacet 获取数据
-    left_bars = []
-    structure = {}
-
-    for i in range(len(raw_data_facet["编号"])):
-        root = raw_data_facet["根节点"][i]
-        child = raw_data_facet["子节点"][i]
-        field = raw_data_facet["字段"][i]  # 获取字段信息
-        file_name1 = raw_data_facet["文件名称"][i]
-        file_value = f"{file_name1}.{raw_data_facet['数据格式'][i]}"
-
-        if root not in structure:
-            structure[root] = {}
-
-        if child not in structure[root]:
-            structure[root][child] = {}
-
-        if field not in structure[root][child]:
-            structure[root][child][field] = []
-
-        structure[root][child][field].append({"label": file_name1, "value": file_value})
-
-    for root, children in structure.items():
-        root_node = {"label": root, "value": root, "children": []}
-        for child, fields in children.items():
-            child_node = {"label": child, "value": child, "children": []}
-            for field, files in fields.items():
-                field_node = {"label": field, "value": field, "children": files}
-                child_node["children"].append(field_node)
-            root_node["children"].append(child_node)
-        left_bars.append(root_node)
-
-    return left_bars
-
-
 # st.markdown(f'测试左侧数据不显示问题:{st.session_state.leftBars}')
 # ==============================文件上传显示==============================
 dataSCM, dataSCMap, dataSCR = st.columns([0.2, 0.9, 0.3])
@@ -142,9 +105,9 @@ with dataSCM:
         pages_utils.RawDataSetFieldFacet['数据格式'])]
     with st.container(height=750, border=False):
         if len(pages_utils.RawDataSetFieldFacet['编号']) == 0:
-            tree_select([{"label": "原始数据集", "value": "原始数据集"}])
+            tree_select([{"label": "原始数据集", "value": "原始数据集","children": []}])
         else:
-            leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet),
+            leftBarsRawData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.RawDataSetFieldFacet),
                                           checked=checkedNameList)
 
 # ==============================右侧文件上传状态显示==============================

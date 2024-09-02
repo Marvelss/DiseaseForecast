@@ -39,37 +39,6 @@ hide_pages(
     ]
 )
 
-
-# 更新左侧目标显示(可添加至pages_utils)
-def updateLeftBars(raw_data_facet):
-    # 初始化 leftBars 从 RawDataSetFieldFacet 获取数据
-    left_bars = []
-    structure = {}
-
-    for i in range(len(raw_data_facet["编号"])):
-        root = raw_data_facet["根节点"][i]
-        child = raw_data_facet["子节点"][i]
-        file_name1 = raw_data_facet["文件名称"][i]
-        file_value = f"{file_name1}.{raw_data_facet['数据格式'][i]}"
-
-        if root not in structure:
-            structure[root] = {}
-
-        if child not in structure[root]:
-            structure[root][child] = []
-
-        structure[root][child].append({"label": file_name1, "value": file_value})
-
-    for root, children in structure.items():
-        root_node = {"label": root, "value": root, "children": []}
-        for child, files in children.items():
-            child_node = {"label": child, "value": child, "children": files}
-            root_node["children"].append(child_node)
-        left_bars.append(root_node)
-
-    return left_bars
-
-
 if "featureMethodFacetName" not in st.session_state:
     st.session_state["featureMethodFacetName"] = {
         'checkBox': None
@@ -186,12 +155,12 @@ with colFCF1:
         if len(pages_utils.RawDataSetFieldFacet['编号']) == 0:
             leftBarsRawData = [{"label": "原始数据集", "value": "原始数据集"}]
         else:
-            leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet))
+            leftBarsRawData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.RawDataSetFieldFacet))
         if len(pages_utils.PreprocessedDataSetFieldFacet['编号']) == 0:
             leftBarsPreData = [{"label": "预处理后数据", "value": "预处理后数据"}]
         else:
-            leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
-        leftBarsFCalData = tree_select(nodes=updateLeftBars(pages_utils.FeatureDataSetFieldFacet))
+            leftBarsPreData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
+        leftBarsFCalData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.FeatureDataSetFieldFacet))
 with colFCF2:
     onFC = st.toggle(label="选中文件时自动显示对应图层", help='图层加载时间较长')
     # 初始化地图

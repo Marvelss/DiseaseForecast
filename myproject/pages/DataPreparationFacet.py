@@ -51,46 +51,16 @@ tempRP = os.path.join(os.getcwd(),
 
 # 添加图层
 def addLayer(mapTemp, filePath):
-    fileName = os.path.basename(filePath)
-    if 'tif' in fileName:
+    fileNameT = os.path.basename(filePath)
+    if 'tif' in fileNameT:
         mapTemp.add_raster(filePath,
-                           layer_name=fileName.split('.')[0])
-    elif 'shp' in fileName:
+                           layer_name=fileNameT.split('.')[0])
+    elif 'shp' in fileNameT:
         mapTemp.add_shp(filePath,
-                        layer_name=fileName.split('.')[0])
-    elif 'json' in fileName:
+                        layer_name=fileNameT.split('.')[0])
+    elif 'json' in fileNameT:
         mapTemp.add_json(filePath,
-                         layer_name=fileName.split('.')[0])
-
-
-# 更新左侧目标显示(可添加至pages_utils)
-def updateLeftBars(raw_data_facet):
-    # 初始化 leftBars 从 RawDataSetFieldFacet 获取数据
-    left_bars = []
-    structure = {}
-
-    for i in range(len(raw_data_facet["编号"])):
-        root = raw_data_facet["根节点"][i]
-        child = raw_data_facet["子节点"][i]
-        file_name1 = raw_data_facet["文件名称"][i]
-        file_value = f"{file_name1}.{raw_data_facet['数据格式'][i]}"
-
-        if root not in structure:
-            structure[root] = {}
-
-        if child not in structure[root]:
-            structure[root][child] = []
-
-        structure[root][child].append({"label": file_name1, "value": file_value})
-
-    for root, children in structure.items():
-        root_node = {"label": root, "value": root, "children": []}
-        for child, files in children.items():
-            child_node = {"label": child, "value": child, "children": files}
-            root_node["children"].append(child_node)
-        left_bars.append(root_node)
-
-    return left_bars
+                         layer_name=fileNameT.split('.')[0])
 
 
 checkBoxNum = 3
@@ -143,8 +113,8 @@ with colDPF1:
         if len(pages_utils.RawDataSetFieldFacet['编号']) == 0:
             leftBarsRawData = [{"label": "原始数据集", "value": "原始数据集"}]
         else:
-            leftBarsRawData = tree_select(nodes=updateLeftBars(pages_utils.RawDataSetFieldFacet))
-        leftBarsPreData = tree_select(nodes=updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
+            leftBarsRawData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.RawDataSetFieldFacet))
+        leftBarsPreData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
 
 with colDPF21:
     colDPF21col1, colDPF21col2 = st.columns([3, 10])
