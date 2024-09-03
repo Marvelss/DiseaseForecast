@@ -646,6 +646,8 @@ with modelACM:
                 beforeDF = pages_utils.TempDataSet[p]
                 if not beforeDF.empty:
                     break
+            if 'DayOfYear' not in beforeDF.columns:
+                beforeDF['DayOfYear'] = 0
             beforeDF = beforeDF[result1 + result2 + result3 + [resultLabel] + pages_utils.reservedField]
             missing_values = beforeDF.isnull().sum()
             if missing_values.any() and 'SEIR机理模型' not in pages_utils.TempDataSetField[4]["模型"].tolist():
