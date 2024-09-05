@@ -122,9 +122,9 @@ def mergeArray(list1, list2, list3):
 
 # 获取模型选项值对应名称
 def getCheckboxName():
-    for h in range(checkBoxModelNum):
-        if st.session_state[f'checkBoxModel{h}']:
-            temp1 = f'checkBoxModel{h}'
+    for indexH in range(checkBoxModelNum):
+        if st.session_state[f'checkBoxModel{indexH}']:
+            temp1 = f'checkBoxModel{indexH}'
             if temp1 == 'checkBoxModel0':
                 return 'SVM'
             elif temp1 == 'checkBoxModel2':
@@ -642,35 +642,24 @@ with modelACM:
         with ph.container():
             # st.markdown("###### 有效特征集提取")
             # 检查是否有缺失值
-            for p in range(len(pages_utils.TempDataSet))[::-1]:
+            for p in range(len(pages_utils.TempDataSet) - 2, -1, -1):
                 beforeDF = pages_utils.TempDataSet[p]
                 if not beforeDF.empty:
                     break
             if 'DayOfYear' not in beforeDF.columns:
                 beforeDF['DayOfYear'] = 0
             beforeDF = beforeDF[result1 + result2 + result3 + [resultLabel] + pages_utils.reservedField]
-            missing_values = beforeDF.isnull().sum()
-            if missing_values.any() and 'SEIR机理模型' not in pages_utils.TempDataSetField[4]["模型"].tolist():
-                # st.toast('优选特征中含有缺失值,请选中下方选项以提取有效值', icon="⚠️")
 
-                # isExtract = st.checkbox('提取有效值')
+            # 若是SEIR机理模型则保留DayOfYear
+            if 'SEIR机理模型' not in pages_utils.TempDataSetField[4]["模型"].tolist():
                 # 分组并提取每个分组的第一个非空值
                 result = beforeDF.groupby(['经度', '纬度', '年']).first().reset_index()
-                # ******删除包含缺失值的行******
-                # 若DayOfYear列都为空表明已经以年为单位
-                if result['DayOfYear'].isna().all():
-                    df_cleaned = result.drop('DayOfYear', axis=1)
-                else:
-                    df_cleaned = result.dropna().drop('DayOfYear', axis=1)
-                # if isExtract:
+                # ******删除DayOfYear列******
+                df_cleaned = result.drop('DayOfYear', axis=1)
                 pages_utils.TempDataSet[4] = df_cleaned
-                # st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
-                # else:
-                #     st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
-                #     pages_utils.TempDataSet[4] = beforeDF
-
+            else:
+                pages_utils.TempDataSet[4] = beforeDF
             st.markdown('###### 最终输入模型特征预览')
-
             st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
             # st.markdown('---')
             st.markdown("###### 训练与验证数据集划分")
@@ -747,47 +736,52 @@ with modelACM:
                     # 假设第一列包含要绘制的数据
                     actual_values = testLabelDF.iloc[:, 0]
                     predicted_values = predictLabelDF.iloc[:, 0]
+                    try:
+                        # 回归模型
+                        if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[
+                            i] == 'SEIR机理模型':
+                            # 绘制散点图
+                            fig, ax = plt.subplots()
 
-                    # 回归模型
-                    if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or 'SEIR机理模型':
-                        # 绘制散点图
-                        fig, ax = plt.subplots()
+                            sns.scatterplot(x=actual_values, y=predicted_values)
+                            plt.plot([actual_values.min(), actual_values.max()],
+                                     [actual_values.min(), actual_values.max()],
+                                     'r--')
+                            ax.set_xlabel('实际峰值(%)')
+                            ax.set_ylabel('预测峰值(%)')
+                            # plt.figure(figsize=(10, 6))
+                            plt.title('回归模型精度评价-散点图')
+                            # 精度结果直接显示在图中
+                            metrics_text = "\n".join(
+                                [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
+                            plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
+                                     verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
+                            st.pyplot(fig)
 
-                        sns.scatterplot(x=actual_values, y=predicted_values)
-                        plt.plot([actual_values.min(), actual_values.max()], [actual_values.min(), actual_values.max()],
-                                 'r--')
-                        ax.set_xlabel('实际峰值(%)')
-                        ax.set_ylabel('预测峰值(%)')
-                        # plt.figure(figsize=(10, 6))
-                        plt.title('回归模型精度评价-散点图')
-                        # 精度结果直接显示在图中
-                        metrics_text = "\n".join(
-                            [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
-                        plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
-                                 verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
-                        st.pyplot(fig)
-
-                    # 分类模型
-                    elif models[i] == 'SVM' or models[i] == 'RF' or models[i] == 'FLDA' or models[i] == 'KNN':
-                        # 绘制混淆矩阵图
-                        fig, ax = plt.subplots()
-                        conf_matrix = confusion_matrix(testLabelDF, predictLabelDF)
-                        sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax)
-                        ax.set_xlabel('实际病害发生程度')
-                        ax.set_ylabel('预测病害发生程度')
-                        plt.title('分类模型精度评价-混淆矩阵')
-                        st.pyplot(fig)
-
-                    # Populate the array with key-value pairs
-                    metrics = []
-                    for key, value in evaluationIndex[i].items():
-                        metrics.append((key, round(value, 3)))
-                    # Display the metrics in two columns
-                    half = len(metrics) // 2
-                    col1, col2 = st.columns(2)
-                    for h in range(half):
-                        col2.metric(metrics[h][0], metrics[h][1])
-                    for h in range(half, len(metrics)):
-                        col1.metric(metrics[h][0], metrics[h][1])
+                        # 分类模型
+                        elif models[i] == 'SVM' or models[i] == 'RF' or models[i] == 'FLDA' or models[i] == 'KNN':
+                            # 绘制混淆矩阵图
+                            fig, ax = plt.subplots()
+                            conf_matrix = confusion_matrix(testLabelDF, predictLabelDF)
+                            sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax)
+                            ax.set_xlabel('实际病害发生程度')
+                            ax.set_ylabel('预测病害发生程度')
+                            plt.title('分类模型精度评价-混淆矩阵')
+                            st.pyplot(fig)
+                        # Populate the array with key-value pairs
+                        metrics = []
+                        for key, value in evaluationIndex[i].items():
+                            metrics.append((key, round(value, 3)))
+                        # Display the metrics in two columns
+                        half = len(metrics) // 2
+                        col1, col2 = st.columns(2)
+                        for h in range(half):
+                            col2.metric(metrics[h][0], metrics[h][1])
+                        for h in range(half, len(metrics)):
+                            col1.metric(metrics[h][0], metrics[h][1])
+                    except BaseException:
+                        st.toast('运行出错,点击返回上一步', icon="⚠️")
+                    finally:
+                        st.session_state.page = 0
             interval_col34, interval_col33 = st.columns([5, 1])
             btn3 = interval_col33.button('返回', on_click=backPage)
