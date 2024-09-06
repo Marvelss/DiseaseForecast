@@ -119,7 +119,8 @@ with dataSCM:
                     non_numeric_columns = []
 
                     for column in subset.columns:
-                        if not pd.to_numeric(subset[column], errors='coerce').notna().all():
+                        non_null_data = subset[column].dropna()
+                        if not pd.to_numeric(non_null_data, errors='coerce').notna().all():
                             non_numeric_columns.append(column)
                     # 去除经度、纬度(固定)
                     tempT1 = [col for col in non_numeric_columns if col not in ['经度', '纬度']]
@@ -151,6 +152,7 @@ with dataSCM:
                 # 上传出错提示
                 except BaseException as e:
                     st.toast('上传错误  \n请检查文件内容及格式无误后重新上传', icon="⚠️")
+                    print(e)
                     # new_data = {
                     #     "编号": pages_utils.generateID(),
                     #     "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "上传出错",
