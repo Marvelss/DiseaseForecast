@@ -313,21 +313,25 @@ with dataPCM:
     if agree:
         # 异常值检测(温度和降水)
         # 显示缺失值信息
-        info = '异常字段:\n'
+        info = '疑似异常字段:\n'
         # 第一次使用原始数据集,而后基于预处理后数据集多次处理
         if pages_utils.TempDataSet[1].shape[0] == 0:
             dataFrameTemp = pages_utils.TempDataSet[0]
         else:
             dataFrameTemp = pages_utils.TempDataSet[1]
 
-        infoT1 = PretreatmentMethod.detectLinearInterpolationWeather(dataFrameTemp)
-        infoT2 = PretreatmentMethod.detectLinearInterpolationRain(dataFrameTemp)
-
-        if not len(infoT1) and not len(infoT2):
+        # infoT1 = PretreatmentMethod.detectLinearInterpolationWeather(dataFrameTemp)
+        # infoT2 = PretreatmentMethod.detectLinearInterpolationRain(dataFrameTemp)
+        columnList, lowNum, upNum, lowCount, upCount = PretreatmentMethod.detect_outliers_iqr(dataFrameTemp,
+                                                                                              pages_utils.reservedField)
+        if not len(columnList):
             info = '无异常字段\n'
             st.info(f"{info}\n", icon="ℹ️️")
         else:
-            st.warning(f"{info}  \n{infoT1}  \n{infoT2}", icon="⚠️")
+            infoT1 = ''
+            for columnT, lowNumT, upNumT, lowCountT, upCountT in zip(columnList, lowNum, upNum, lowCount, upCount):
+                infoT1 += f"* {columnT} 下限:{round(lowNumT,3)} 个数:{lowCountT} 上限:{round(upNumT,3)} 个数:{upCountT}\n"
+            st.warning(f"{info}  \n{infoT1}", icon="⚠️")
 
         coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:
@@ -343,7 +347,8 @@ with dataPCM:
 
         with coll22:
             st.info('剔除方法介绍\n'
-                    '* 描述:剔除最大值和最小值区域外的异常值\n', icon="ℹ️")
+                    '* 描述:剔除最大值和最小值区域外的异常值\n'
+                    '* 疑似异常值检测:基于四分位数上下限\n', icon="ℹ️")
             img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '3.png'))
             st.image(img)
 

@@ -32,7 +32,37 @@ class PretreatmentMethod:
         else:
             return False
 
-    # 检测温度
+    # 检测异常值(基于四分位数)
+    @staticmethod
+    def detect_outliers_iqr(dataT, exceptList):
+        data = dataT.drop(exceptList, axis=1)
+        lower_bound_list, upper_bound_list = [], []
+        lower_outliers_list, upper_outliers_list = [], []
+        for column in data.columns.tolist():
+            # 计算四分位数
+            Q1 = data[column].quantile(0.25)
+            Q3 = data[column].quantile(0.75)
+            IQR = Q3 - Q1
+
+            # 定义异常值范围
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
+
+            # print(lower_bound)
+            # print(upper_bound)
+            # 检测异常值
+            lower_outliers = data[data[column] < lower_bound]
+            upper_outliers = data[data[column] > upper_bound]
+            # print(min(lower_outliers[column].tolist()))
+            # print(max(upper_outliers[column].tolist()))
+            if len(lower_outliers) != 0 or len(upper_outliers) != 0:
+                lower_bound_list.append(lower_bound)
+                upper_bound_list.append(upper_bound)
+                lower_outliers_list.append(len(lower_outliers))
+                upper_outliers_list.append(len(upper_outliers))
+        return data.columns.tolist(), lower_bound_list, upper_bound_list, lower_outliers_list, upper_outliers_list
+        # 检测温度
+
     @staticmethod
     def detectLinearInterpolationWeather(dfT1):
         result = ''
