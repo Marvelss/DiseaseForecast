@@ -118,9 +118,14 @@ class Model:
         actualAndPredictResult = 'SVM_predictLabel.xlsx'
         savePath1 = os.path.join(self.modelsPredictPath, actualAndPredictResult)
         savePath2 = os.path.join(self.modelsPredictPath, 'SVM_testLabel.xlsx')
-        pd.DataFrame(pd.concat([X_test, y_pred]),
+        print(type(X_test))
+        print(type(y_pred))
+        pd.DataFrame(y_pred,
                      columns=['predictLabel']).to_excel(
             savePath1, index=False)
+        # pd.DataFrame(pd.concat([X_test, y_pred]),
+        #              columns=['predictLabel']).to_excel(
+        #     savePath1, index=False)
         y_test.to_excel(
             savePath2, index=False)
         # 保存评价指标
@@ -167,9 +172,9 @@ class Model:
         if 'n_neighbors' in parameters_dict:
             parameters_dict['n_neighbors'] = int(parameters_dict['n_neighbors'])
         if 'leaf_size' in parameters_dict:
-            parameters_dict['max_iter'] = int(parameters_dict['max_iter'])
+            parameters_dict['leaf_size'] = int(parameters_dict['leaf_size'])
         if 'n_jobs' in parameters_dict:
-            parameters_dict['max_iter'] = int(parameters_dict['max_iter'])
+            parameters_dict['n_jobs'] = int(parameters_dict['n_jobs'])
         # 使用KNN回归模型进行拟合
         model1 = KNeighborsClassifier(**parameters_dict)
         model1.fit(X_train, y_train)
@@ -255,9 +260,10 @@ class Model:
         for i in range(len(param_names)):
             parameters_dict[param_names[i]] = param_values[i]
         # # 转换参数格式
+        # if 'n_components' in parameters_dict:
+        #     parameters_dict['n_components'] = int(parameters_dict['n_components'])
         if 'store_covariance' in parameters_dict:
             parameters_dict['store_covariance'] = bool(parameters_dict['store_covariance'])
-        # 使用KNN回归模型进行拟合
         # 使用FLDA回归模型进行拟合
         model1 = LinearDiscriminantAnalysis(**parameters_dict)
         model1.fit(X_train, y_train)
@@ -297,7 +303,7 @@ class Model:
             self.modelsStructurePath, modelStruct))
         # 保存预测结果
         actualAndPredictResult = 'FLDA_predictLabel.xlsx'
-        savePath1 = os.path.join(self.modelsPredictPath, )
+        savePath1 = os.path.join(self.modelsPredictPath, actualAndPredictResult)
         savePath2 = os.path.join(self.modelsPredictPath, 'FLDA_testLabel.xlsx')
         pd.DataFrame(y_pred,
                      columns=['predictLabel']).to_excel(
