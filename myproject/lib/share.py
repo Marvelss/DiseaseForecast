@@ -20,6 +20,9 @@ RESOURCE_MODELRESULT_PATH = os.path.join(RESOURCE_PATH, 'modelresult')
 MATLAB_FILE_PATH = r'E:\a_matlab\program\weather_generation'
 # 建模报告编号
 MODEL_REPORT_NUMBER = 1
+# 图表可视化编号
+IMAGECOUNT = 1
+
 # 配置文件路径
 # CONFIG_PATH = os.path.join(BASE_DIR, "conf", "db_config.ini")
 # 日志路径
