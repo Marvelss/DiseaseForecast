@@ -103,6 +103,10 @@ def onPreviewResults():
         afterHandleData, tempResult, optimalFeatureListT = FeatureOptimizationMethod(
             dataFrameTemp.copy(), None).tTest(
             methodParam)
+        print('-检测--')
+        print(afterHandleData)
+        print(tempResult)
+        print(optimalFeatureListT)
         # 可视化
         keys = list(tempResult.keys())
         values = list(tempResult.values())
@@ -429,7 +433,6 @@ with dataPCM:
         st.session_state["OptimizationMethodName"]['param3'] = str(number112)
     # st.markdown('---')
     if genre3:
-        # st.markdown('提取条件')
         option111 = st.selectbox(
             '目标变量',
             mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
@@ -481,18 +484,6 @@ with dataPCM:
                 disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
             with interval_col33:
-                #     with st.popover("准备运行"):
-                #         st.markdown('保留字段选择')
-                #         residualField = [arr for arr in pages_utils.TempDataSet[2].columns if
-                #                          arr not in mergeArray4(
-                #                              ['经度', '纬度',
-                #                               "年", "DayOfYear"], result1, result2, result3)]
-                #         # print(f'剩余字段{residualField}')
-                #         reservedFiled = pages_utils.multiselect_all(
-                #             st, '全选',
-                #             residualField,
-                #             'temp2', 'collapsed')
-                #         btn = st.button('运行', on_click=onRun, args=[reservedFiled])
                 btn = st.button('运行', on_click=onRun)
     elif st.session_state.page14 == 1:
         # =======================显示右下可视化图表=======================
@@ -518,8 +509,8 @@ with dataPCM:
                             dataColumn = st.session_state["FOVisualInformation"][o]['column']
                             if idFMethods[o] == 't检验':
                                 # 选择最多8个测报站点
-                                top_stations = data_after['测报站点'].value_counts().nlargest(8).index
-                                df_filtered_stations = data_after[data_after['测报站点'].isin(top_stations)]
+                                top_stations = data_after['纬度'].value_counts().nlargest(8).index
+                                df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
 
                                 # 选择最多3个年份
                                 top_years = data_after['年'].value_counts().nlargest(3).index
@@ -529,13 +520,13 @@ with dataPCM:
                                 plt.figure(figsize=(10, 6))
                                 sns.lineplot(
                                     data=df_filtered,
-                                    x="测报站点",
+                                    x="纬度",
                                     y=dataColumn,
                                     hue="年",
                                     marker="o"
                                 )
                                 # 设置标签和标题
-                                plt.xlabel("测报站点")
+                                plt.xlabel("纬度")
                                 plt.ylabel(dataColumn)
                                 plt.title(f"部分县市与各年份{dataColumn}", fontsize=16)
                                 st.pyplot(plt)

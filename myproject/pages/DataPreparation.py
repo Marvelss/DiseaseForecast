@@ -606,7 +606,7 @@ with dataPCM:
                                 '年']
                             print(missing_rows['DayOfYear'])
                             # 整理前后15天dayOfYear为x轴
-                            figure_x = pd.DataFrame({'DayOfYear': pages_utils.TempDataSet[1]['DayOfYear']}).iloc[
+                            figure_x = pd.DataFrame({'3月上旬温度': pages_utils.TempDataSet[1][inputFields[o][0]]}).iloc[
                                        start_index:end_index]
                             # 绘制插补前的折线图
                             plt.plot(figure_x, data_before_surrounding_data[inputFields[o][0]],
@@ -619,9 +619,9 @@ with dataPCM:
                                      label='插补后数据', color='blue',
                                      linestyle='--',
                                      marker='o', alpha=0.3)
-                            plt.xlabel('Day of Year')
+                            plt.xlabel('纬度')
                             plt.ylabel(inputFields[o][0])
-                            plt.title(f'{province}{station}{year}年部分{inputFields[o][0]}数据插补前后对比图',
+                            plt.title(f'{inputFields[o][0]}数据插补前后对比图',
                                       fontsize=16)
                             plt.legend()
                             st.pyplot(plt)

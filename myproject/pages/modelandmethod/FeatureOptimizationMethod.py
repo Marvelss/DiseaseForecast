@@ -65,6 +65,11 @@ class FeatureOptimizationMethod:
             new_column_name = self.getHandledFieldPoint(feature)
             self.dataFrame[new_column_name] = self.dataFrame[feature]
             newColumnsList.append(new_column_name)
+
+        print('aaaaaaaaaaaaaaaaaaaaaaa')
+        print(tempResult)
+        print(newColumnsList)
+
         return self.dataFrame, tempResult, newColumnsList
 
     # RF互相关分析
@@ -191,7 +196,8 @@ class FeatureOptimizationMethod:
         # 选择需要计算相关性的列
         result = newDataFrame.groupby(['经度', '纬度', '年']).first().reset_index()
         # ******删除包含缺失值的行******
-        df_cleaned = result.dropna()
+        # df_cleaned = result.dropna()
+        df_cleaned = result
         data = df_cleaned[fieldList]
         # print(data)
         # result = data.groupby(['经度', '纬度', '年']).first().reset_index()

@@ -514,6 +514,7 @@ class FeatureCalculationMethodFacet:
             df1 = pd.read_excel(
                 os.path.join(RESOURCE_TEMPDIR_PATH, standardFile)
             )
+        resultDF = df1
         for tempFile in inputFile:
             filePath = os.path.join(RESOURCE_TEMPDIR_PATH, tempFile
                                     )
@@ -543,7 +544,13 @@ class FeatureCalculationMethodFacet:
 
             # 将结果转换为DataFrame
             df = pd.DataFrame(arrSlope, columns=['待提取经度', '待提取纬度', featureFiledName + 'temp'])
+            parts = tempFile.split('_')
+            year = parts[1]  # 假设文件名格式为 feature_2019_120.tif
+            day_of_year = parts[2].split('.')[0]
 
+            # 添加新列到df1，根据经度、纬度、年、DayOfYear合并
+            df['年'] = int(year)
+            df['DayOfYear'] = int(day_of_year)
             # 构建 cKDTree
             coords = df[['待提取经度', '待提取纬度']].values
             tree = cKDTree(coords)
@@ -554,23 +561,40 @@ class FeatureCalculationMethodFacet:
                 neighbors = df.iloc[indices].copy()
                 neighbors.loc[:, '经度'] = lon
                 neighbors.loc[:, '纬度'] = lat
-
                 return neighbors
 
             # 保存结果
             results = []
-
+            if featureFiledName not in df1.columns:
+                df1[featureFiledName] = np.nan
             for index, row in df1.iterrows():
                 lon, lat = row['经度'], row['纬度']
-                neighbors = find_nearest_neighbors(lon, lat)
-                # 取邻近经纬度对应值的平均值
-                avg_value = neighbors[featureFiledName + 'temp'].mean()
-                results.append(avg_value)
+                year1, doy1 = row['年'], row['DayOfYear']
 
-            # 添加新列到df1
-            df1[featureFiledName] = results
-        outputFileT = os.path.join(RESOURCE_TEMPDIR_PATH,
-                                   outputFile)
+                # 筛选出同一年和 DayOfYear 的数据
+                df_filtered = df[(df['年'] == year1) & (df['DayOfYear'] == doy1)]
+                if not df_filtered.empty:
+                    # 更新KD树并找到最近的点
+                    neighbors = find_nearest_neighbors(lon, lat)
+                    avg_value = neighbors[featureFiledName + 'temp'].mean()
+                else:
+                    avg_value = None  # 如果没有匹配的记录，返回 None
+                # 将结果和对应的行信息保存
+                results.append({
+                    '经度': lon,
+                    '纬度': lat,
+                    '年': year1,
+                    'DayOfYear': doy1,
+                    featureFiledName: avg_value
+                })
+            # 将 results 转换为 DataFrame
+            results_df = pd.DataFrame(results)
+            # 将 results_df 与 df1 合并
+            print(results_df)
+            print(df1)
+            resultDF = pd.merge(results_df, resultDF, on=['经度', '纬度', '年', 'DayOfYear', featureFiledName],
+                                how='left')
+        outputFileT = os.path.join(RESOURCE_TEMPDIR_PATH, outputFile)
         # 保存到 Excel
-        df1.to_excel(outputFileT, index=False)
+        resultDF.to_excel(outputFileT, index=False)
         return outputFileT
