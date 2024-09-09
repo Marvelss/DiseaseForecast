@@ -9,7 +9,7 @@ import streamlit as st
 from PIL import Image
 from st_pages import hide_pages
 
-from lib.share import RESOURCE_IMAGES_PATH
+from lib.share import RESOURCE_IMAGES_PATH, IMAGECOUNT
 from lib.utils import mergeExcludeArray, filterUnique
 from pages import pages_utils
 from pages.modelandmethod.PretreatmentMethod import PretreatmentMethod
@@ -330,7 +330,7 @@ with dataPCM:
         else:
             infoT1 = ''
             for columnT, lowNumT, upNumT, lowCountT, upCountT in zip(columnList, lowNum, upNum, lowCount, upCount):
-                infoT1 += f"* {columnT} 下限:{round(lowNumT,3)} 个数:{lowCountT} 上限:{round(upNumT,3)} 个数:{upCountT}\n"
+                infoT1 += f"* {columnT} 下限:{round(lowNumT, 3)} 个数:{lowCountT} 上限:{round(upNumT, 3)} 个数:{upCountT}\n"
             st.warning(f"{info}  \n{infoT1}", icon="⚠️")
 
         coll11, coll22 = st.columns([0.3, 0.6])
@@ -583,14 +583,14 @@ with dataPCM:
                             data_after = pd.DataFrame({inputFields[o][0]: data_after_temp})
                             # 查找缺失值的索引
                             missing_indices = data_before[data_before[inputFields[o][0]].isna()].index
-
                             # 获取第一个缺失值的索引
                             first_missing_index = missing_indices[0]
+                            # 获取第一个缺失值的行号
+                            # print(f"第一个缺失值的行号: {first_missing_index}")
 
-                            # 计算前15行和后15行的起始和结束索引
-                            start_index = max(first_missing_index - 15, 0)
-                            end_index = min(first_missing_index + 15 + 1, len(data_before))
-
+                            # 计算前5行和后5行的起始和结束索引
+                            start_index = max(first_missing_index - 5, 0)
+                            end_index = min(first_missing_index + 5 + 1, len(data_before))
                             # 取第一个缺失值对应前15行和后15行预处理数据
                             data_before_surrounding_data = data_before.iloc[start_index:end_index]
                             data_after_surrounding_data = data_after.iloc[start_index:end_index]
@@ -604,27 +604,29 @@ with dataPCM:
                                     'records')[0]
                             province, station, year = missing_rows['经度'], missing_rows['纬度'], missing_rows[
                                 '年']
-                            print(missing_rows['DayOfYear'])
+                            # print(missing_rows['DayOfYear'])
                             # 整理前后15天dayOfYear为x轴
-                            figure_x = pd.DataFrame({'3月上旬温度': pages_utils.TempDataSet[1][inputFields[o][0]]}).iloc[
-                                       start_index:end_index]
+                            # 提取数据列，获取从 start_index 到 end_index 范围内的行数
+                            # 生成从 start_index 到 end_index 的数字序列
+                            figure_x = pd.DataFrame({'row': list(range(start_index, end_index))})
                             # 绘制插补前的折线图
                             plt.plot(figure_x, data_before_surrounding_data[inputFields[o][0]],
                                      label='原始数据',
                                      color='black',
                                      linestyle='-', marker='o')
-
                             # 绘制插补后的折线图
                             plt.plot(figure_x, data_after_surrounding_data[inputFields[o][0]],
                                      label='插补后数据', color='blue',
                                      linestyle='--',
                                      marker='o', alpha=0.3)
-                            plt.xlabel('纬度')
+                            plt.xlabel('行号')
                             plt.ylabel(inputFields[o][0])
-                            plt.title(f'{inputFields[o][0]}数据插补前后对比图',
-                                      fontsize=16)
+                            plt.figtext(0.5, -0.01,
+                                        f'图{IMAGECOUNT} {inputFields[o][0]}字段部分数据插补前后对比图',
+                                        ha='center', fontsize=16)
                             plt.legend()
                             st.pyplot(plt)
+                            IMAGECOUNT += 1
                         elif idPreMethods[o] == '剔除异常值':
                             # 剔除异常值-箱型图
                             data_before = st.session_state["DPVisualInformation"][o]['before']
