@@ -131,8 +131,6 @@ def getSimulateWeather(weatherSituation, province, station, startYear):
         merged_data['纬度'] = station
         # Calculate average temperature
         merged_data['温度'] = (merged_data['最高温度'] + merged_data['最低温度']) / 2
-        # 替换大于500的异常值为0
-        merged_data['降水'] = merged_data['降水'].apply(lambda x: 0 if x > 500 else x)
     return merged_data
 
 
@@ -192,6 +190,8 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                     '最高温度': data2[tempi].flatten(),
                     '最低温度': data3[tempi].flatten()
                 })
+                # 替换大于500的异常值为0
+                my_large_df['降水'] = my_large_df['降水'].apply(lambda x: 0 if x > 500 else x)
                 my_large_df.to_excel(tempPath, index=False)
             st.toast(f'{weatherScene}情景数据准备完毕', icon='✅')
 
@@ -275,38 +275,46 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                     df_cleaned = inputModelData
                 # df_cleaned.to_excel('提取有效值后数据集.xlsx')
 
-                # df_cleaned和dataModel合并(相同字段就替换)
+                # df_cleaned和与模型构建/特征优选数据全合并(相同字段就替换)
                 # 排除要合并的字段,防止重复
                 filtered_array = [elem for elem in df_cleaned.columns if
                                   elem not in ['经度', '纬度', '年']]
                 columns_to_merge = [col for col in pages_utils.TempDataSet[4].columns if col not in filtered_array]
                 # print(f 'columns_to_merge:{columns_to_merge}')
+
                 inputModelData = pd.merge(df_cleaned,
                                           pages_utils.TempDataSet[4][columns_to_merge],
                                           on=['经度', '纬度', '年'])
-
                 inputModelData.to_excel('合并DataSet[4]后所有特征数据.xlsx', index=False)
+
+                # 排除要合并的字段,防止重复
+                filtered_array = [elem for elem in inputModelData.columns if
+                                  elem not in ['经度', '纬度', '年']]
+                # print(f'排除重复:{filtered_array}')
+                columns_to_merge = [col for col in pages_utils.TempDataSet[3].columns if col not in filtered_array]
+
+                # 去重
+                inputModelData = pd.merge(inputModelData,
+                                          pages_utils.TempDataSet[3][columns_to_merge],
+                                          on=['经度', '纬度', '年'])
+                inputModelData.to_excel('合并DataSet[3]后所有特征数据.xlsx', index=False)
+
+                # 使用groupby分组并提取每个分组的第一个非空值
+                ultimateFeatures1 = inputModelData.groupby(['经度', '纬度', '年']).first().reset_index()
+                # ******删除包含缺失值的行******
+                inputModelData = ultimateFeatures1.dropna()
 
                 model = joblib.load(
                     os.path.join(RESOURCE_MODELRESULT_PATH, 'structure',
                                  f'{tempModel}_structure.pkl'))
                 # 使用加载的模型进行预测
                 # print(featureTemp)
-                tempS = featureTemp
-
-                processed_array = {}
-                # 获取预测数据集名称
-                for elem in tempS:
-                    if '-优选' in elem:
-                        processed_array[elem.split('-优选')[0]] = elem
-                    else:
-                        processed_array[elem] = elem
-                # print(processed_array.items())
-                predictDF = inputModelData[list(processed_array.keys())].rename(columns=processed_array)
+                print(f'预测特征:{featureTemp}')
+                predictDF = inputModelData[featureTemp]
 
                 # predictDF.to_excel('最终输入模型数据.xlsx')
                 predictions = model.predict(predictDF)
-                print("Predictions:", predictions)
+                print("基于模型气象数据的应用结果:", predictions)
 
                 # 创建一个 DataFrame 包含预测值
                 predictions_df = pd.DataFrame(predictions, columns=['Predicted_value'])
