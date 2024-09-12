@@ -9,7 +9,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from st_pages import hide_pages
 
-from lib.share import RESOURCE_MODELRESULT_PATH
+from lib.share import RESOURCE_MODELRESULT_PATH, IMAGECOUNT
 from lib.utils import filterUnique
 from pages import pages_utils
 from pages.modelandmethod.Model import Model
@@ -750,7 +750,9 @@ with modelACM:
                             ax.set_xlabel('实际峰值(%)')
                             ax.set_ylabel('预测峰值(%)')
                             # plt.figure(figsize=(10, 6))
-                            plt.title('回归模型精度评价-散点图')
+                            plt.figtext(0.5, -0.03,
+                                        f'图{IMAGECOUNT+1} {models[i]}模型精度评价散点图',
+                                        ha='center', fontsize=16)
                             # 精度结果直接显示在图中
                             metrics_text = "\n".join(
                                 [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])

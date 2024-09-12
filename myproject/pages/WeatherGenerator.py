@@ -422,7 +422,11 @@ with col22332:
             (dataTemplate['纬度'] == weatherGeneratorStationSelected)]
 
         # 只保留特定列，并加入实际标签列
-        filteredTemplate = filteredTemplate[['经度', '纬度', '年', 'DayOfYear']]
+        if 'DayOfYear' in filteredTemplate.columns.tolist():
+            tempList = ['经度', '纬度', '年', 'DayOfYear']
+        else:
+            tempList = ['经度', '纬度', '年']
+        filteredTemplate = filteredTemplate[tempList]
         filteredTemplate['实际标签'] = None  # 添加新的一列
 
         filteredTemplate.to_excel(path2, index=False)

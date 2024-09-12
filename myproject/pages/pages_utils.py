@@ -1,10 +1,12 @@
+import os
 import random
 import shutil
+import zipfile
 
 import pandas as pd
 from sklearn.metrics import confusion_matrix, roc_curve, precision_recall_curve
-import zipfile
-import os
+
+from lib.share import RESOURCE_TEMPDIR_PATH
 
 
 # 带有全选的多选框
@@ -212,6 +214,7 @@ def updateLeftBars(raw_data_facet):
         left_bars.append(root_node)
 
     return left_bars
+
 
 
 # 其他字段值

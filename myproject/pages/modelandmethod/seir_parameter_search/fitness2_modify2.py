@@ -18,7 +18,7 @@ def getCellDate(doyList):
 def fitness2_modify2(ka, kb, kc, q, r, OPT_PRI, w, beta0,
                      optimumTEM, temStep, preStep, slideStep, mergedDataSet):
     df = mergedDataSet
-    grouped = df.groupby(['测报站点', '年'])
+    grouped = df.groupby(['纬度', '年'])
     precisionDiseaseResultList = []
     # 全部预测值和实际值
     allPredictList, allActualList = [], []
