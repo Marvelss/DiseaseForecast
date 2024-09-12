@@ -119,6 +119,9 @@ def getSimulateWeather(weatherSituation, province, station, startYear):
         merged_data['纬度'] = station
         # Calculate average temperature
         merged_data['温度'] = (merged_data['最高温度'] + merged_data['最低温度']) / 2
+        # 替换大于500的异常值为0
+        merged_data['降水'] = merged_data['降水'].apply(lambda x: 0 if x > 500 else x)
+        merged_data.to_excel('检测降水.xlsx')
     return merged_data
 
 
