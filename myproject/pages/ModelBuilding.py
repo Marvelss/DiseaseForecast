@@ -586,7 +586,7 @@ with modelACM:
                             "编号": pages_utils.generateID(),
                             "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
                             "模型参数": st.session_state["modelParamName"],
-                            "特征": None,
+                            "特征": result1 + result2 + result3,
                             "标签": resultLabel,
                             "时间": datetime.datetime.now().time(),
                             "处理状态": False}
@@ -685,7 +685,7 @@ with modelACM:
                 pages_utils.TempDataSetField[4].loc[index, '数据集划分比例'] = option
 
             # 将列名列表赋值给 '特征' 列
-            pages_utils.TempDataSetField[4]['特征'] = [pages_utils.TempDataSet[4].columns.tolist()] * len(
+            pages_utils.TempDataSetField[4]['特征'] = [result1 + result2 + result3] * len(
                 pages_utils.TempDataSetField[4])
             interval_col1, interval_col2 = st.columns([5, 1])
             interval_col2.button("保存", on_click=firstPage)
@@ -751,7 +751,7 @@ with modelACM:
                             ax.set_ylabel('预测峰值(%)')
                             # plt.figure(figsize=(10, 6))
                             plt.figtext(0.5, -0.03,
-                                        f'图{IMAGECOUNT+1} {models[i]}模型精度评价散点图',
+                                        f'图{IMAGECOUNT + 1} {models[i]}模型精度评价散点图',
                                         ha='center', fontsize=16)
                             # 精度结果直接显示在图中
                             metrics_text = "\n".join(

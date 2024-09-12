@@ -80,8 +80,20 @@ if 'modelSituationIndexResult' not in st.session_state:
     st.session_state.modelSituationIndexResult = {}
 
 
-# 替换气象数据
+# 替换气象数据(以DayOfYear为单位)
 def replace_data(df1, df2):
+    df1T = df1.copy()
+    # 根据条件筛选并替换原始数据表格中的值
+    for index, row in df2.iterrows():
+        condition = (df1T['经度'] == row['经度']) & (df1T['纬度'] == row['纬度']) & \
+                    (df1T['年'] == row['年']) & (df1T['DayOfYear'] == row['DayOfYear'])
+        df1T.loc[condition, '降水'] = round(row['降水'], 2)
+        df1T.loc[condition, '温度'] = round(row['温度'], 2)
+    return df1T
+
+
+# 替换气象数据(指定时段)
+def replace_data2(df1, df2):
     df1T = df1.copy()
     # 根据条件筛选并替换原始数据表格中的值
     for index, row in df2.iterrows():
@@ -121,7 +133,6 @@ def getSimulateWeather(weatherSituation, province, station, startYear):
         merged_data['温度'] = (merged_data['最高温度'] + merged_data['最低温度']) / 2
         # 替换大于500的异常值为0
         merged_data['降水'] = merged_data['降水'].apply(lambda x: 0 if x > 500 else x)
-        merged_data.to_excel('检测降水.xlsx')
     return merged_data
 
 
@@ -211,6 +222,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
 
             # rawDataSetArea.to_excel('选取截取指定地区.xlsx', index=False)
             # 替换原始气象数据
+
             rawDataSetArea = replace_data(rawDataSetArea, df3T)
             # print('=========================替换后数据=========================')
             # rawDataSetArea.to_excel('替换原始气象数据.xlsx', index=False)
@@ -266,14 +278,14 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                 # df_cleaned和dataModel合并(相同字段就替换)
                 # 排除要合并的字段,防止重复
                 filtered_array = [elem for elem in df_cleaned.columns if
-                                  elem not in ['经度', '纬度', '年', 'DayOfYear']]
+                                  elem not in ['经度', '纬度', '年']]
                 columns_to_merge = [col for col in pages_utils.TempDataSet[4].columns if col not in filtered_array]
                 # print(f 'columns_to_merge:{columns_to_merge}')
                 inputModelData = pd.merge(df_cleaned,
                                           pages_utils.TempDataSet[4][columns_to_merge],
-                                          on=['经度', '纬度', '年', 'DayOfYear'])
+                                          on=['经度', '纬度', '年'])
 
-                # inputModelData.to_excel('合并DataSet[4]后所有特征数据.xlsx', index=False)
+                inputModelData.to_excel('合并DataSet[4]后所有特征数据.xlsx', index=False)
 
                 model = joblib.load(
                     os.path.join(RESOURCE_MODELRESULT_PATH, 'structure',
