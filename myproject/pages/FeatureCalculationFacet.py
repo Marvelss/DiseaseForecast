@@ -70,19 +70,16 @@ def findFeatureFile(featureList, fileList):
 
 # 添加图层
 def addLayer(mapTemp, filePath):
-    fileName = os.path.basename(filePath)
-    print('============')
-    print(filePath)
-    print(fileName)
-    if 'tif' in fileName:
+    fileNameT = os.path.basename(filePath)
+    if 'tif' in fileNameT:
         mapTemp.add_raster(filePath,
-                           layer_name=fileName.split('.')[0])
-    elif 'shp' in fileName:
+                           layer_name=fileNameT.split('.')[0])
+    elif 'shp' in fileNameT:
         mapTemp.add_shp(filePath,
-                        layer_name=fileName.split('.')[0])
-    elif 'json' in fileName:
+                        layer_name=fileNameT.split('.')[0])
+    elif 'json' in fileNameT:
         mapTemp.add_json(filePath,
-                         layer_name=fileName.split('.')[0])
+                         layer_name=fileNameT.split('.')[0])
 
 
 checkBoxNum = 4
@@ -297,10 +294,6 @@ with colFCF3:
             '待抽取特征文件',
             unique_first_elements_list,
             help='以特征名称筛选选中所以文件')
-        templateFile = st.selectbox(
-            '模板文件',
-            ('模板文件.tif', 'e.tif'),
-            help='默认取各特征第一个时间文件作为模板用于输出结果')
         accumulatedTemperatureThreshold = st.number_input(
             "积温阈值温度(50-300℃)", value=50, step=50,
             min_value=50, max_value=300)
@@ -316,11 +309,10 @@ with colFCF3:
 
         st.session_state["featureMethodFacetName"]['param1'] = str(weatherDataDir)
         st.session_state["featureMethodFacetName"]['param2'] = str(extractDataFile)
-        st.session_state["featureMethodFacetName"]['param3'] = str(templateFile)
-        st.session_state["featureMethodFacetName"]['param4'] = str(accumulatedTemperatureThreshold)
-        st.session_state["featureMethodFacetName"]['param5'] = str(duration)
-        st.session_state["featureMethodFacetName"]['param6'] = str(computeMode)
-        st.session_state["featureMethodFacetName"]['param7'] = str(savedFile)
+        st.session_state["featureMethodFacetName"]['param3'] = str(accumulatedTemperatureThreshold)
+        st.session_state["featureMethodFacetName"]['param4'] = str(duration)
+        st.session_state["featureMethodFacetName"]['param5'] = str(computeMode)
+        st.session_state["featureMethodFacetName"]['param6'] = str(savedFile)
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([1.5, 1])
@@ -338,10 +330,14 @@ with colFCF3:
         if tempMethod == '时空抽取':
             with emptyHead:
                 with st.spinner('正在计算时空抽取,预计耗时1分半'):
-                    paramT = [value for key, value in st.session_state["featureMethodFacetName"].items() if
-                              key != 'checkBox']
-                    # print(f'========测试参数======={paramT}')
-                    resultFilePathList = FeatureCalculationMethodFacet().spatiotemporalExtraction(tempList, paramT)
+                    # 转换处理传入的名称
+                    # 获取温度文件
+                    methodParam[0] = FeatureCalculationMethodFacet().featureNameToMultiFile([methodParam[0]], tempList)
+                    # 获取待提取特征文件
+                    methodParam[1] = FeatureCalculationMethodFacet().featureNameToMultiFile(eval(methodParam[1]),
+                                                                                            tempList)
+                    # print(f'========转换处理传入的名称======={methodParam}')
+                    resultFilePathList = FeatureCalculationMethodFacet().spatiotemporalExtraction(methodParam)
                     handledFile = resultFilePathList
                     # 添加记录时该处需要修改
                     # handledFile = ' '.join()
@@ -390,11 +386,13 @@ with colFCF3:
         if isinstance(handledFile, list):
             for tempEntry in handledFile:
                 tempEntryT = os.path.basename(tempEntry)
+                fileName = tempEntryT.split('.')[0]
                 new_entry = {
                     "编号": pages_utils.generateID(),
                     "数据类型": '气象数据',
                     "根节点": '备选特征集',
                     "子节点": '气象数据',
+                    "字段": fileName.split('_')[0] if '_' in fileName else "其他",
                     "文件名称": tempEntryT.split('.')[0],
                     "数据格式": tempEntryT.split('.')[1],
                     "输入文件": None,

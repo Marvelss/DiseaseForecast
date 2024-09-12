@@ -19,7 +19,7 @@ from rpy2.robjects.packages import importr
 import geopandas as gpd
 from scipy.spatial import cKDTree
 
-from lib.share import RESOURCE_TEMPDIR_PATH
+from lib.share import RESOURCE_TEMPDIR_PATH, RESOURCE_PROCESS_PATH
 
 
 class FeatureCalculationMethodFacet:
@@ -70,9 +70,47 @@ class FeatureCalculationMethodFacet:
             dst.write(result_array, 1)
         print('保存成功,路径为:{}'.format(os.path.join(os.getcwd(), saved_path)))
 
+    @staticmethod
+    # 从文件名提取特征名称、年、DayOfYear
+    def extract_info(filename):
+        # 去掉文件扩展名
+        base_name = filename.split('.')[0]
+        # 根据'_'分割
+        parts = base_name.split('_')
+        temperature_type = parts[0]
+        year = int(parts[1])
+        day_of_year = int(parts[2])
+        return temperature_type, year, day_of_year, filename
+
+    @staticmethod
+    # 输入特征名称批量转为多个文件
+    def featureNameToMultiFile(extractFeatureList, featurePathList):
+        extractResultPathList = []
+        # 提取文件信息
+        for feature in extractFeatureList:
+            featureFileListT = [file for file in featurePathList if feature in file and file.endswith('.tif')]
+            print('提取特征相关的文件')
+            print(featureFileListT)
+            # 提取文件信息
+            file_info = [FeatureCalculationMethodFacet.extract_info(file) for file in featureFileListT]
+            # 按照 day_of_year 排序
+            sorted_files = sorted(file_info, key=lambda x: x[2])
+            sorted_feature_list = [file[3] for file in sorted_files]
+            # 获取项目根目录，假设项目根目录在当前文件目录的上两级目录
+            sorted_feature_listT = [os.path.join(RESOURCE_TEMPDIR_PATH, file) for file in
+                                    sorted_feature_list]
+            extractResultPathList.append(sorted_feature_listT)
+        return extractResultPathList
+
     # 时空抽取
     @staticmethod
-    def spatiotemporalExtraction(inputFileList, param):
+    def spatiotemporalExtraction(param):
+        """
+        :param param: [['温度_2020_1.tif'], ['降水_2020_2.tif'],
+          '50', '1',
+         '平均值', ' 'spatiotemporalExtraction.tif']
+        :return:
+        """
 
         # ['气象数据', '待抽取特征文件.tif',
         #  '模板文件.tif', '50', '1',
@@ -97,16 +135,24 @@ class FeatureCalculationMethodFacet:
             # result = np.where(result == 0, -9999, result)
             return result
 
-        def space_time_extract(template_tif_path, temperatureFileList, featureFileList, cumulated_temperature,
+        def space_time_extract(template_tif_pathT, temperatureFileListT, featureFileListT1, cumulated_temperature,
                                durationTemp):
             """
-            :param template_tif_path: 模板tif文件路径,主要用于获取tif图像属性
-            :param temperatureFileList: 包含全部气象或遥感等数据的文件路径
+            :param featureFileListT1: 特征
+            :param template_tif_pathT: 模板tif文件路径,主要用于获取tif图像属性
+            :param temperatureFileListT: 包含全部气象或遥感等数据的文件路径
             :param cumulated_temperature: 达到病害敏感时段起点的活动积温
             :param durationTemp: 抽取天数
             :return: result: 输出结果,二维数据
             """
-            template_data = rasterio.open(template_tif_path[0])
+
+            # 使用 os.path.normpath() 来转换路径
+            # temperatureFileList = [file.replace('\\', '/') for file in temperatureFileListT]
+            # temperatureFileList = [os.path.normpath(file) for file in temperatureFileListT]
+            # print('转换路径')
+            # print(temperatureFileList)
+            template_tif_path = os.path.normpath(template_tif_pathT)
+            template_data = rasterio.open(template_tif_path)
             rows = template_data.width
             cols = template_data.height
             template_list = np.transpose(template_data.read(1))
@@ -114,9 +160,8 @@ class FeatureCalculationMethodFacet:
 
             # 获取温度数据
             # 获取该文件夹下所有tif文件(得按照一年中的第几天的大小一次排序)
-            tif_files = temperatureFileList
+            tif_files = temperatureFileListT
             # print(tif_files)
-
             # z轴为现存数据天数，通过文件个数确定
             days_max = len(tif_files)
             # 汇聚全部气象数据数组
@@ -143,8 +188,6 @@ class FeatureCalculationMethodFacet:
             # 转置结果
             # doy_list_result = np.transpose(doy_list)
             print('生成DOY图像')
-            # FeatureCalculationMethodFacet.generate_tif(doy_list_result, template_tif_path[0], saved_path2)
-
             print(doy_list[116, 909])
             print(doy_list[216, 909])
             print(doy_list[316, 909])
@@ -157,7 +200,7 @@ class FeatureCalculationMethodFacet:
             tif_files = [0] * days_max
             # tif_files = 输入特征, 根据z赋值, 根据dayofyear赋值
             # 根据文件名中的 day_of_year 给 tif_files 赋值
-            for file in featureFileList:
+            for file in featureFileListT1:
                 fileT = os.path.basename(file)
                 day_of_year = str(fileT).split('.')[0].split('_')[2]
                 tif_files[int(day_of_year) - 1] = file  # day_of_year - 1 用于将 day_of_year 转换为0索引
@@ -198,80 +241,21 @@ class FeatureCalculationMethodFacet:
 
         print('--------测试----------')
         print(param)
-        temperature = param[0]
-        extractFeatureList = eval(param[1])
-        templateFile = param[2]
-        threshold = int(param[3])
-        duration = int(param[4])
-        mode = param[5]
-
-        # saved_path1 = param[6]
-
-        # 起点温度暂时不保存
-        # saved_path2 = os.path.join(
-        #     rootPath,
-        #     'resultData',
-        #     'DayOfYear-ActiveAccumulatedTemperature.tif')
-
-        def extract_info(filename):
-            # 去掉文件扩展名
-            base_name = filename.split('.')[0]
-            # 根据'_'分割
-            parts = base_name.split('_')
-            temperature_type = parts[0]
-            year = int(parts[1])
-            day_of_year = int(parts[2])
-            return temperature_type, year, day_of_year, filename
-
-        temperatureFileListT = [file for file in inputFileList if temperature in file]
-
-        # 提取文件信息
-        file_info = [extract_info(file) for file in temperatureFileListT]
-
-        # 按照 day_of_year 排序
-        sorted_files = sorted(file_info, key=lambda x: x[2])
-        # 提取排序后的温度文件名
-        sorted_temperature_list = [file[3] for file in sorted_files]
-
-        # 添加文件完整路径
-        # 获取当前文件的目录
-        current_file_dir = os.path.abspath(os.path.dirname(__file__))
-
-        # 获取项目根目录，假设项目根目录在当前文件目录的上两级目录
-        project_root = os.path.abspath(os.path.join(current_file_dir, '..', '..'))
-        sorted_temperature_listT = [os.path.join(RESOURCE_TEMPDIR_PATH, file) for file in
-                                    sorted_temperature_list]
-        # print(sorted_temperature_listT)
-        extractFeaturePathList = []
-
-        for feature in extractFeatureList:
-            featureFileListT = [file for file in inputFileList if feature in file]
-            # 提取文件信息
-            file_info = [extract_info(file) for file in featureFileListT]
-            # 按照 day_of_year 排序
-            sorted_files = sorted(file_info, key=lambda x: x[2])
-            sorted_feature_list = [file[3] for file in sorted_files]
-            # 添加文件完整路径
-            current_file_dir = os.path.abspath(os.path.dirname(__file__))
-
-            # 获取项目根目录，假设项目根目录在当前文件目录的上两级目录
-            project_root = os.path.abspath(os.path.join(current_file_dir, '..', '..'))
-            sorted_feature_listT = [os.path.join(RESOURCE_TEMPDIR_PATH, file) for file in
-                                    sorted_feature_list]
-            extractFeaturePathList.append(sorted_feature_listT)
-        # print(f'======特征文件============:{extractFeaturePathList}')
+        temperatureList = param[0]
+        extractFeatureList = param[1]
+        threshold = int(param[2])
+        duration = int(param[3])
+        mode = param[4]
         resultPathList = []
-        for i in range(len(extractFeaturePathList)):
-            result1 = space_time_extract(sorted_temperature_listT,
-                                         sorted_temperature_listT, extractFeaturePathList[i],
-                                         threshold, duration)
-            # saved_path = os.path.join(
-            #     project_root, 'resource', 'surfaceProcessData',
-            #     'resultData',
-            #     f'{extractFeatureList[i]}_2015_SEResult.tif')
+        for i in range(len(extractFeatureList)):
+            result1 = space_time_extract(
+                temperatureList[0][0],
+                temperatureList[0], extractFeatureList[i],
+                threshold, duration)
+            nameT = os.path.basename(extractFeatureList[i][0]).split('.')[0].split('_')
             saved_path = os.path.join(RESOURCE_TEMPDIR_PATH,
-                                      f'{extractFeatureList[i]}_2015_SEResult.tif')
-            FeatureCalculationMethodFacet.generate_tif(result1, extractFeaturePathList[i][0], saved_path)
+                                      f'{nameT[0]}-时空抽取_{nameT[1]}_777.tif')
+            FeatureCalculationMethodFacet.generate_tif(result1, temperatureList[0][0], saved_path)
             resultPathList.append(saved_path)
         return resultPathList
 
