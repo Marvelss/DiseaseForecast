@@ -45,6 +45,8 @@ if "OptimizationMethodName" not in st.session_state:
     st.session_state["OptimizationMethodName"] = {
         'checkBox': None
     }
+if "inputFeatureList" not in st.session_state:
+    st.session_state.inputFeatureList = []
 # 获取当前选中的方法名称
 if "nowMethodName" not in st.session_state:
     st.session_state.nowMethodName = ''
@@ -100,16 +102,11 @@ def onPreviewResults():
         dataFrameTempT = pages_utils.TempDataSet[2]
     else:
         dataFrameTempT = pages_utils.TempDataSet[3]
-    print('----测试11--')
-    print(dataFrameTempT)
     if tempMethod == 't检验':
         afterHandleData, tempResult, optimalFeatureListT = FeatureOptimizationMethod(
             dataFrameTempT.copy(), None).tTest(
             methodParam)
-        print('-检测--')
-        print(afterHandleData)
-        print(tempResult)
-        print(optimalFeatureListT)
+
         # 可视化
         keys = list(tempResult.keys())
         values = list(tempResult.values())
@@ -230,7 +227,7 @@ def onPreviewResults():
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
-            "输入特征": mergeExcludeArray(result1, result2, result3, pages_utils.reservedField),
+            "输入特征": st.session_state.inputFeatureList,
             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
             "方法参数":
                 [value for key, value in st.session_state["OptimizationMethodName"].items() if
@@ -411,18 +408,22 @@ with dataPCM:
 
     # ===============显示和处理右中各个处理方法设置参数===============
     if genre:
+        option1122 = st.selectbox(
+            '目标变量',
+            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
         option1132 = pages_utils.multiselect_all(
-            st, '全选-变量', mergeExcludeArray(
-                result1, result2, result3, pages_utils.reservedField),
+            st, '全选-被比较变量', mergeExcludeArray(
+                result1, result2, result3, [option1122]),
             'tempFiled', 'collapsed')
         number33 = st.number_input("剔除相关系数阈值(R)",
                                    value=0.8,
                                    min_value=0.1,
                                    max_value=0.9,
                                    step=0.1)
-        st.session_state["OptimizationMethodName"]['param1'] = ' '.join(option1132)
-        st.session_state["OptimizationMethodName"]['param2'] = str(number33)
-
+        st.session_state["OptimizationMethodName"]['param1'] = option1122
+        st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1132)
+        st.session_state["OptimizationMethodName"]['param3'] = str(number33)
+        st.session_state.inputFeatureList = option1132
     if genre1:
         option112 = st.selectbox(
             '目标变量',
@@ -439,6 +440,8 @@ with dataPCM:
         st.session_state["OptimizationMethodName"]['param1'] = option112
         st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1122)
         st.session_state["OptimizationMethodName"]['param3'] = str(number112)
+        st.session_state.inputFeatureList = option1122
+
     # st.markdown('---')
     if genre3:
         option111 = st.selectbox(
@@ -449,6 +452,8 @@ with dataPCM:
             mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
         st.session_state["OptimizationMethodName"]['param1'] = option111
         st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option11122)
+        st.session_state.inputFeatureList = option11122
+
         option = st.selectbox(
             '提取条件',
             ('按百分比选取', '按权重值选取'))
@@ -533,7 +538,8 @@ with dataPCM:
                                 plt.xlabel('特征')
                                 plt.ylabel('p-value')
                                 # 基准线
-                                plt.axhline(y=st.session_state["FOVisualInformation"][o]['standard'], color='red', linestyle='--', linewidth=1,
+                                plt.axhline(y=st.session_state["FOVisualInformation"][o]['standard'], color='red',
+                                            linestyle='--', linewidth=1,
                                             label='基准线 (p=0.01)')
                                 # 显示图表
                                 plt.xticks(rotation=45, ha='right')  # 旋转x轴标签

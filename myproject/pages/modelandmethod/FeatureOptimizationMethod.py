@@ -186,8 +186,9 @@ class FeatureOptimizationMethod:
         # param2:提取条件
         print('============测试============')
         print(methodParam)
-        fieldList = methodParam[0].split(' ')
-        condition = methodParam[1]
+        labelField = methodParam[0]
+        fieldList = methodParam[1].split(' ') + [labelField]
+        condition = methodParam[2]
         # print(pValue)
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
@@ -235,6 +236,8 @@ class FeatureOptimizationMethod:
         newColumnsList = []
         selected_features_list = list(selected_features)
         for feature in selected_features_list:
+            if feature == labelField:
+                continue
             new_column_name = self.getHandledFieldPoint(feature)
             self.dataFrame[new_column_name] = self.dataFrame[feature]
             newColumnsList.append(new_column_name)
