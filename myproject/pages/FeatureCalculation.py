@@ -5,7 +5,6 @@ import pandas as pd
 import streamlit as st
 from st_pages import hide_pages
 
-from lib.share import IMAGECOUNT
 from lib.utils import filterUnique, mergeExcludeArray
 from pages import pages_utils
 from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
@@ -451,7 +450,7 @@ with (featureCCM):
                             plt.xlabel("地区")
                             plt.ylabel(f'{dataColumn}(Day Of Year)')
                             plt.figtext(0.5, -0.01,
-                                        f'图{IMAGECOUNT} 部分地区各年份{dataColumn}图',
+                                        f'图{st.session_state.IMAGECOUNT} 部分地区各年份{dataColumn}图',
                                         ha='center', fontsize=16)
                             st.pyplot(plt)
                         elif idFMethods[o] == '降水累积量计算':
@@ -479,10 +478,10 @@ with (featureCCM):
                             plt.xlabel("地区")
                             plt.ylabel("降水累积量(mm)")
                             plt.figtext(0.5, -0.01,
-                                        f'图{IMAGECOUNT} 部分地区各年份{integratedDataColumn}图',
+                                        f'图{st.session_state.IMAGECOUNT} 部分地区各年份{integratedDataColumn}图',
                                         ha='center', fontsize=16)
                             st.pyplot(plt)
-                            IMAGECOUNT += 1
+                            st.session_state.IMAGECOUNT += 1
                         elif idFMethods[o] == '降雨日数计算':
                             # 时期范围名称修剪
                             integratedDataColumnRT = dataColumn.split('_')
@@ -508,10 +507,10 @@ with (featureCCM):
                             plt.xlabel("地区")
                             plt.ylabel("降雨日数(天)")
                             plt.figtext(0.5, -0.01,
-                                        f'图{IMAGECOUNT} 部分地区各年份{integratedDataColumnR}图',
+                                        f'图{st.session_state.IMAGECOUNT} 部分地区各年份{integratedDataColumnR}图',
                                         ha='center', fontsize=16)
                             st.pyplot(plt)
-                            IMAGECOUNT += 1
+                            st.session_state.IMAGECOUNT += 1
             else:
                 st.info('跳过特征计算', icon="ℹ️️")
             interval_col34, interval_col33 = st.columns([5, 1])

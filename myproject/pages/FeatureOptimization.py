@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from st_pages import hide_pages
 
-from lib.share import IMAGECOUNT
 from lib.utils import mergeExcludeArray, filterUnique
 from pages import pages_utils
 import seaborn as sns
@@ -137,7 +136,7 @@ def onPreviewResults():
         plt.figure(figsize=(10, 8))
         sns.heatmap(tempResultP, annot=True, cmap='coolwarm', center=0)
         plt.figtext(0.5, -0.13,
-                    f'图{IMAGECOUNT} Pearson互相关分析矩阵图',
+                    f'图{st.session_state.IMAGECOUNT} Pearson互相关分析矩阵图',
                     ha='center', fontsize=16)
         st.pyplot(plt)
         st.session_state.expectedRetentionFeature = st.multiselect(
@@ -552,9 +551,9 @@ with dataPCM:
                                 sns.heatmap(data_after, annot=True, cmap='coolwarm', center=0)
 
                                 plt.figtext(0.5, -0.13,
-                                            f'图{IMAGECOUNT} Pearson互相关分析矩阵图',
+                                            f'图{st.session_state.IMAGECOUNT} Pearson互相关分析矩阵图',
                                             ha='center', fontsize=16)
-                                IMAGECOUNT += 1
+                                st.session_state.IMAGECOUNT += 1
                                 st.pyplot(plt)
 
                             elif idFMethods[o] == 'Relief-F互相关分析':

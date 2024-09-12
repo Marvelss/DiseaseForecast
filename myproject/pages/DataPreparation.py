@@ -9,7 +9,7 @@ import streamlit as st
 from PIL import Image
 from st_pages import hide_pages
 
-from lib.share import RESOURCE_IMAGES_PATH, IMAGECOUNT
+from lib.share import RESOURCE_IMAGES_PATH
 from lib.utils import mergeExcludeArray, filterUnique
 from pages import pages_utils
 from pages.modelandmethod.PretreatmentMethod import PretreatmentMethod
@@ -485,11 +485,11 @@ with dataPCM:
                             plt.xlabel('行号')
                             plt.ylabel(inputFields[o][0])
                             plt.figtext(0.5, -0.01,
-                                        f'图{IMAGECOUNT} {inputFields[o][0]}字段部分数据插补前后对比图',
+                                        f'图{st.session_state.IMAGECOUNT} {inputFields[o][0]}字段部分数据插补前后对比图',
                                         ha='center', fontsize=16)
                             plt.legend()
                             st.pyplot(plt)
-                            IMAGECOUNT += 1
+                            st.session_state.IMAGECOUNT += 1
                         elif idPreMethods[o] == '剔除异常值':
                             # 剔除异常值-箱型图
                             data_before = st.session_state["DPVisualInformation"][o]['before']
@@ -512,9 +512,10 @@ with dataPCM:
                             # axes[1].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
                             # axes[1].legend(loc='upper left')
                             # 设置主标题
-                            fig.suptitle(f'{data_before.name}数据剔除前后对比箱型图',
+                            fig.suptitle(f'图{st.session_state.IMAGECOUNT} {data_before.name}数据剔除前后对比箱型图',
                                          fontsize=16)
                             st.pyplot(fig)
+                            st.session_state.IMAGECOUNT += 1
 
             else:
                 st.info('跳过预处理', icon="ℹ️️")

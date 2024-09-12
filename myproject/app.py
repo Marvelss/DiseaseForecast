@@ -8,7 +8,7 @@ from streamlit import switch_page
 
 import itertools
 
-from lib.share import PROJECT_PATH, PAGES_PATH, RESOURCE_IMAGES_PATH
+from lib.share import PROJECT_PATH, PAGES_PATH, RESOURCE_IMAGES_PATH, IMAGECOUNT
 from pages import ui, pages_utils
 
 # add_page_title()
@@ -85,6 +85,9 @@ if "leftTabsFacet" not in st.session_state:
 # 控制模型构建等后续步骤点/面界面显示
 if "isPlanarInterface" not in st.session_state:
     st.session_state.isPlanarInterface = False
+
+if "IMAGECOUNT" not in st.session_state:
+    st.session_state.IMAGECOUNT = IMAGECOUNT
 # 设置网页标题
 st.title('多场景病虫害预测系统')
 
