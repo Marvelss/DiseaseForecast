@@ -355,7 +355,7 @@ with dataPCM:
     # =======================添加处理至任务清单=======================
 
     interval_col1, interval_col2 = st.columns([5, 1])
-    btn = interval_col2.button('添加处理', on_click=clearOption)
+    btn = interval_col2.button('添加处理', on_click=clearOption, type='primary')
     if btn:
         # 检测用户行为-输入特征为空(预处理方法空判定未添加)
         if not len(result1 + result2 + result3):
@@ -404,7 +404,7 @@ with dataPCM:
                 pages_utils.TempDataSetField[1], height=190, width=800,
                 column_order=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", '时间', '处理状态'],
                 disabled=["数据类型", "输入字段", "预处理后字段", "时间", '处理状态'], num_rows="dynamic", )
-            interval_col34, interval_col33 = st.columns([5, 1])
+            interval_col34, interval_col33 = st.columns([6, 1])
             with interval_col33:
                 # residualField = [arr for arr in pages_utils.TempDataSet[0].columns if
                 #                  arr not in mergeArray4(
@@ -416,7 +416,7 @@ with dataPCM:
                 #     st, '全选',
                 #     residualField,
                 #     'temp1', 'collapsed')
-                btn2 = st.button('运行', on_click=onRun)
+                btn2 = st.button('运行', on_click=onRun, type='primary')
 
             # btn2 = interval_col33.button('运行', on_click=onRun)
 
@@ -438,143 +438,6 @@ with dataPCM:
                 tt1 = st.tabs(new_ids)
                 for o in range(len(idPreMethods)):
                     with tt1[o]:
-                        # # 模拟气温和降水数据
-                        # def simulate_weather_data():
-                        #     np.random.seed(42)
-                        #     date_range = pd.date_range(start='2024-01-01', end='2024-02-20')
-                        #     temperature = np.random.normal(loc=15, scale=5, size=len(date_range))
-                        #     precipitation = np.random.normal(loc=5, scale=2, size=len(date_range))
-                        #     continuous_rain_days = np.random.randint(0, 10, size=len(date_range))
-                        #
-                        #     data = pd.DataFrame({
-                        #         'Date': date_range,
-                        #         '温度': temperature,
-                        #         'Precipitation': precipitation,
-                        #         '01-21_01-31_降雨日数': continuous_rain_days
-                        #     })
-                        #     return data
-                        #
-                        #
-                        # # 生成累计降水量特征
-                        # def generate_cumulative_precipitation_features(df):
-                        #     df['01-21_01-31_累计降水量'] = df['Precipitation'].rolling(window=11, min_periods=1).sum()
-                        #     df['01-01_01-20_累计降水量'] = df['Precipitation'].rolling(window=20, min_periods=1).sum()
-                        #     df['02-01_02-20_累计降水量'] = df['Precipitation'].rolling(window=20, min_periods=1).sum()
-                        #     return df
-                        #
-                        #
-                        # # 模拟气温和降水数据
-                        # df = simulate_weather_data()
-                        # plt.rcParams['font.sans-serif'] = 'SimHei'
-                        #
-                        # # 生成累计降水量特征
-                        # df = generate_cumulative_precipitation_features(df)
-                        #
-                        # # 随机生成目标变量
-                        # df['Target'] = np.random.choice([0, 1], size=len(df))
-                        #
-                        # # 划分特征和目标
-                        # X = df.drop(['Date', 'Precipitation', 'Target'], axis=1)
-                        # y = df['Target']
-                        #
-                        # # 使用随机森林模型拟合数据
-                        # rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
-                        # rf_model.fit(X, y)
-                        #
-                        # # 获取特征重要性
-                        # feature_importance = rf_model.feature_importances_
-                        #
-                        # # 创建特征重要性数据框
-                        # feature_importance_df = pd.DataFrame(
-                        #     {'Feature': X.columns,
-                        #      'Importance': feature_importance})
-                        #
-                        # # 排序特征重要性
-                        # feature_importance_df = feature_importance_df.sort_values(by='Importance', ascending=False)
-                        #
-                        # # 创建子图和轴
-                        # fig, ax = plt.subplots(figsize=(10, 6))
-                        #
-                        # # 使用Seaborn的barplot生成特征重要性图
-                        # sns.barplot(x='Feature', y='Importance', data=feature_importance_df, ax=ax)
-                        #
-                        # # 设置图形标题和轴标签
-                        # plt.title('基于Relief-F算法的各特征因子权值排序图', fontsize=16)
-                        # plt.xlabel('')
-                        # plt.ylabel('特征权值')
-                        # plt.xticks(rotation=90)
-                        # st.pyplot(plt)
-
-                        # 移栽期
-                        # # 创建DataFrame
-                        # df = pd.read_excel(r'E:\a_python\program\diseaseForecastStreamlit\tests\test26\2024-05-22T11-04_export.xlsx')
-                        #
-                        # # 删除含有缺失值的行
-                        # df = df.dropna()
-                        #
-                        # # 去除重复值
-                        # df = df.drop_duplicates()
-                        # plt.rcParams['font.sans-serif'] = 'SimHei'
-                        #
-                        # # 选择最多8个测报站点
-                        # top_stations = df['测报站点'].value_counts().nlargest(8).index
-                        # df_filtered_stations = df[df['测报站点'].isin(top_stations)]
-                        #
-                        # # 选择最多3个年份
-                        # top_years = df['年'].value_counts().nlargest(3).index
-                        # df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                        #
-                        # # 绘制柱状图
-                        # plt.figure(figsize=(12, 8))
-                        # sns.lineplot(
-                        #     data=df_filtered,
-                        #     x="测报站点",
-                        #     y="移栽期",
-                        #     hue="年",
-                        #     marker="o"
-                        # )
-                        # # 设置标签和标题
-                        # plt.xlabel("测报站点")
-                        # plt.ylabel("移栽期")
-                        # plt.title("部分县市不同年份移栽期", fontsize=16)
-                        #
-                        # st.pyplot(plt)
-
-                        # # 创建DataFrame
-                        # df = pd.read_excel(
-                        #     r'E:\a_python\program\diseaseForecastStreamlit\tests\test26\预测病害峰值-降水累积量.xlsx')
-                        #
-                        # # 删除含有缺失值的行
-                        # df = df.dropna()
-                        #
-                        # # 去除重复值
-                        # df = df.drop_duplicates()
-                        # plt.rcParams['font.sans-serif'] = 'SimHei'
-                        #
-                        # # 选择最多8个测报站点
-                        # top_stations = df['测报站点'].value_counts().nlargest(8).index
-                        # df_filtered_stations = df[df['测报站点'].isin(top_stations)]
-                        #
-                        # # 选择最多5个年份
-                        # top_years = df['年'].value_counts().nlargest(5).index
-                        # df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                        #
-                        # # 绘制柱状图
-                        # plt.figure(figsize=(10, 6))
-                        # sns.barplot(
-                        #     data=df_filtered,
-                        #     x="测报站点",
-                        #     y="01-01_01-20_降水累积量",
-                        #     hue="年",
-                        #     dodge=True,
-                        #     saturation=1
-                        # )
-                        # # 设置标签和标题
-                        # plt.xlabel("测报站点")
-                        # plt.ylabel("降水累积量")
-                        # plt.title("部分县市不同年份01-01至01-20降水累积量")
-                        # st.pyplot(plt)
-
                         if idPreMethods[o] == '缺失值插补':
                             data_before_temp = st.session_state["DPVisualInformation"][o]['before']
                             data_after_temp = st.session_state["DPVisualInformation"][o]['after']
@@ -652,6 +515,9 @@ with dataPCM:
                             fig.suptitle(f'{data_before.name}数据剔除前后对比箱型图',
                                          fontsize=16)
                             st.pyplot(fig)
+
+            else:
+                st.info('跳过预处理', icon="ℹ️️")
 
             interval_col34, interval_col33 = st.columns([5, 1])
             # want_to_contribute = interval_col34.button("跳转至可视化界面")

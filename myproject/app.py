@@ -8,7 +8,7 @@ from streamlit import switch_page
 
 import itertools
 
-from lib.share import PROJECT_PATH, RESOURCE_PATH, PAGES_PATH, RESOURCE_IMAGES_PATH
+from lib.share import PROJECT_PATH, PAGES_PATH, RESOURCE_IMAGES_PATH
 from pages import ui, pages_utils
 
 # add_page_title()
@@ -185,8 +185,12 @@ def emptyValue():
 
 
 category("🌈 初始化建模数据")
-if st.button('初始化数据', on_click=emptyValue):
-    st.toast("初始化完毕", icon="ℹ️️")
+colDPF21col1, colDPF21col2 = st.columns([8, 10])
+with colDPF21col1:
+    pass
+with colDPF21col2:
+    if st.button('↩️初始化数据', on_click=emptyValue, type='primary'):
+        st.toast("初始化完毕", icon="ℹ️️")
 
 # st.markdown("""
 # <style>
@@ -204,14 +208,14 @@ with colAppImg1:
     st.image(os.path.join(RESOURCE_IMAGES_PATH, 'pointBtn.png'))
     _, colAppBtn2, = st.columns([0.4, 0.6])
     with colAppBtn2:
-        if st.button('点状数据建模'):
+        if st.button('点状数据建模', type='primary'):
             st.session_state.isPlanarInterface = False
             switch_page(os.path.join(PAGES_PATH, 'DataSet.py'))
 with colAppImg2:
     st.image(os.path.join(RESOURCE_IMAGES_PATH, 'facetBtn.png'))
     _, colAppBtn3, = st.columns([0.4, 0.6])
     with colAppBtn3:
-        if st.button('面状数据建模'):
+        if st.button('面状数据建模', type='primary'):
             st.session_state.isPlanarInterface = True
             switch_page(os.path.join(PAGES_PATH, 'DataSetFacet.py'))
 
@@ -358,17 +362,32 @@ st.markdown(
 )
 
 
-@st.experimental_dialog("有效值提取", width='large')
-def vote():
-    isExtract = st.checkbox('提取有效值')
-    # 分组并提取每个分组的第一个非空值
-    # a = st.data_editor(pd.DataFrame([]), num_rows="dynamic", width=700, height=300)
-
-    # 选择后变化
-    if st.button("Submit"):
-        if isExtract:
-            print('开始')
-        st.rerun()
+@st.experimental_dialog("接口调用", width='large')
+def vote(titleName):
+    if titleName == '降雨日数计算':
+        # 上传数据集
+        # col1321, col1322 = st.columns([0.4, 0.6])
+        # with col1321:
+        st.info("说明:  \n"
+                "字段内容必须包含", icon="ℹ️️")
+        # with col1322:
+        uploaded_files = st.file_uploader(
+            "上传数据集",
+            accept_multiple_files=False,
+            label_visibility='collapsed',
+            type=['xlsx', 'csv', 'txt', 'xls', 'zip'],
+            help='help')
+        interval_col1, interval_col2 = st.columns([6, 1])
+        btn = interval_col2.button('运行')
+        if btn:
+            btn2 = interval_col2.button('下载结果')
+            with open('zipPath', "rb") as file:
+                st.download_button(
+                    label="下载",
+                    data=file,
+                    file_name="模型结构与训练结果.zip",
+                    mime="application/zip",
+                )
 
 
 def app(image, link, name, description, developer, repo_link):
@@ -386,7 +405,7 @@ def app(image, link, name, description, developer, repo_link):
 
     # st.write("[调用接口](%s)" % repo_link)
     if st.button(f"调用API:{name}"):
-        vote()
+        vote(name)
         st.markdown(link)
     # st.text("[调用该接口](%s)" % repo_link)
 
@@ -447,3 +466,17 @@ with col23:
         "Landscapemetrics",
         "https://github.com/r-spatialecology/landscapemetrics",
         )
+category("🌾 各项建模方法API")
+col31, col32, col33 = st.columns(3)
+with col31:
+    app(os.path.join(RESOURCE_IMAGES_PATH, '11.png'),
+        '#',
+        " 水稻SEIR机理模型",
+        "待补充",
+        "团队",
+        "https://github.com/Marvelss",
+        )
+with col32:
+    pass
+with col33:
+    pass

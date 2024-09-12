@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from st_pages import hide_pages
 
+from lib.share import IMAGECOUNT
 from lib.utils import mergeExcludeArray, filterUnique
 from pages import pages_utils
 import seaborn as sns
@@ -96,12 +97,14 @@ def onPreviewResults():
 
     # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
     if pages_utils.TempDataSet[3].shape[0] == 0:
-        dataFrameTemp = pages_utils.TempDataSet[2]
+        dataFrameTempT = pages_utils.TempDataSet[2]
     else:
-        dataFrameTemp = pages_utils.TempDataSet[3]
+        dataFrameTempT = pages_utils.TempDataSet[3]
+    print('----测试11--')
+    print(dataFrameTempT)
     if tempMethod == 't检验':
         afterHandleData, tempResult, optimalFeatureListT = FeatureOptimizationMethod(
-            dataFrameTemp.copy(), None).tTest(
+            dataFrameTempT.copy(), None).tTest(
             methodParam)
         print('-检测--')
         print(afterHandleData)
@@ -129,22 +132,25 @@ def onPreviewResults():
             default=optimalFeatureListT)
     elif tempMethod == 'Pearson相关性分析':
         afterHandleData, tempResultP, optimalFeatureList = FeatureOptimizationMethod(
-            dataFrameTemp.copy(), None).Pearson(
+            dataFrameTempT.copy(), None).Pearson(
             methodParam)
 
         # 可视化
         # 使用Seaborn绘制热图
         plt.figure(figsize=(10, 8))
         sns.heatmap(tempResultP, annot=True, cmap='coolwarm', center=0)
-        plt.title('Pearson互相关分析矩阵')
+        plt.figtext(0.5, -0.13,
+                    f'图{IMAGECOUNT} Pearson互相关分析矩阵图',
+                    ha='center', fontsize=16)
         st.pyplot(plt)
         st.session_state.expectedRetentionFeature = st.multiselect(
             '预期保留特征:',
             options=optimalFeatureList,
             default=optimalFeatureList)
+
     elif tempMethod == 'Relief-F互相关分析':
         afterHandleData, tempResultR, optimalFeatureListR = FeatureOptimizationMethod(
-            dataFrameTemp.copy(), None).ReliefF(
+            dataFrameTempT.copy(), None).ReliefF(
             methodParam)
         # 可视化
         keys = list(tempResultR.keys())
@@ -265,28 +271,28 @@ def onRun():
                     continue
                 # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
                 if pages_utils.TempDataSet[3].shape[0] == 0:
-                    dataFrameTemp = pages_utils.TempDataSet[2]
+                    dataFrameTempT1 = pages_utils.TempDataSet[2]
                 else:
-                    dataFrameTemp = pages_utils.TempDataSet[3]
+                    dataFrameTempT1 = pages_utils.TempDataSet[3]
                 reservedField = pages_utils.TempDataSet[2].columns.tolist()
                 afterHandleData = None
                 # print(tempMethod)
                 if tempMethod == 't检验':
                     afterHandleData, _, newColumns = FeatureOptimizationMethod(
-                        dataFrameTemp, reservedField).tTest(
+                        dataFrameTempT1, reservedField).tTest(
                         methodParam[indexT])
                 elif tempMethod == 'Pearson相关性分析':
                     # print('-------Pearson相关性分析-测试-------')
                     # print(methodParam[indexT])
                     afterHandleData, _, newColumns = FeatureOptimizationMethod(
-                        dataFrameTemp, reservedField).Pearson(
+                        dataFrameTempT1, reservedField).Pearson(
                         methodParam[indexT])
                 elif tempMethod == 'Relief-F互相关分析':
                     # print('-------Pearson相关性分析-测试-------')
                     # print(fields[0])
                     # print(methodParam[indexT])
                     afterHandleData, _, newColumns = FeatureOptimizationMethod(
-                        dataFrameTemp, reservedField).ReliefF(methodParam[indexT])
+                        dataFrameTempT1, reservedField).ReliefF(methodParam[indexT])
                 # print('=============返回数据=============')
                 # print(afterHandleData)
                 # ===============合并处理后数据集===============
@@ -405,9 +411,10 @@ with dataPCM:
 
     # ===============显示和处理右中各个处理方法设置参数===============
     if genre:
-        option1132 = st.multiselect(
-            '变量',
-            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
+        option1132 = pages_utils.multiselect_all(
+            st, '全选-变量', mergeExcludeArray(
+                result1, result2, result3, pages_utils.reservedField),
+            'tempFiled', 'collapsed')
         number33 = st.number_input("剔除相关系数阈值(R)",
                                    value=0.8,
                                    min_value=0.1,
@@ -420,9 +427,10 @@ with dataPCM:
         option112 = st.selectbox(
             '目标变量',
             mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
-        option1122 = st.multiselect(
-            '被比较变量',
-            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
+        option1122 = pages_utils.multiselect_all(
+            st, '全选-被比较变量', mergeExcludeArray(
+                result1, result2, result3, pages_utils.reservedField),
+            'tempFiled', 'collapsed')
         number112 = st.number_input("提取敏感性阈值(p-value)",
                                     value=0.01,
                                     min_value=0.01,
@@ -460,12 +468,12 @@ with dataPCM:
             isContinueModel = False
             # 检测Relief-F不接受回归
             if pages_utils.TempDataSet[3].shape[0] == 0:
-                dataFrameTemp = pages_utils.TempDataSet[2]
+                dataFrameTempT2 = pages_utils.TempDataSet[2]
             else:
-                dataFrameTemp = pages_utils.TempDataSet[3]
+                dataFrameTempT2 = pages_utils.TempDataSet[3]
             if getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']) == 'Relief-F互相关分析':
                 isContinueModel = FeatureOptimizationMethod.detectReliefFContinueColumn(
-                    dataFrameTemp, option111)
+                    dataFrameTempT2, option111)
             if isContinueModel:
                 st.toast('Relief-F不支持回归模型,请重新选择', icon="⚠️")
             else:
@@ -509,34 +517,40 @@ with dataPCM:
                             dataColumn = st.session_state["FOVisualInformation"][o]['column']
                             if idFMethods[o] == 't检验':
                                 # 选择最多8个测报站点
-                                top_stations = data_after['纬度'].value_counts().nlargest(8).index
-                                df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
+                                # top_stations = data_after['纬度'].value_counts().nlargest(8).index
+                                # df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
+                                #
+                                # # 选择最多3个年份
+                                # top_years = data_after['年'].value_counts().nlargest(3).index
+                                # df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
 
-                                # 选择最多3个年份
-                                top_years = data_after['年'].value_counts().nlargest(3).index
-                                df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-
-                                # 绘制折线图
+                                # 创建柱状图
                                 plt.figure(figsize=(10, 6))
-                                sns.lineplot(
-                                    data=df_filtered,
-                                    x="纬度",
-                                    y=dataColumn,
-                                    hue="年",
-                                    marker="o"
-                                )
-                                # 设置标签和标题
-                                plt.xlabel("纬度")
-                                plt.ylabel(dataColumn)
-                                plt.title(f"部分县市与各年份{dataColumn}", fontsize=16)
+                                plt.bar(st.session_state["FOVisualInformation"][o]['column'],
+                                        st.session_state["FOVisualInformation"][o]['value'], color='blue')
+                                # 添加标题和标签
+                                plt.title('敏感性结果可视化')
+                                plt.xlabel('特征')
+                                plt.ylabel('p-value')
+                                # 基准线
+                                plt.axhline(y=st.session_state["FOVisualInformation"][o]['standard'], color='red', linestyle='--', linewidth=1,
+                                            label='基准线 (p=0.01)')
+                                # 显示图表
+                                plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
+                                plt.tight_layout()  # 调整布局以防止标签重叠
                                 st.pyplot(plt)
                             elif idFMethods[o] == 'Pearson相关性分析':
                                 # 可视化
                                 # 使用Seaborn绘制热图
                                 plt.figure(figsize=(10, 8))
                                 sns.heatmap(data_after, annot=True, cmap='coolwarm', center=0)
-                                plt.title('Pearson互相关分析矩阵')
+
+                                plt.figtext(0.5, -0.13,
+                                            f'图{IMAGECOUNT} Pearson互相关分析矩阵图',
+                                            ha='center', fontsize=16)
+                                IMAGECOUNT += 1
                                 st.pyplot(plt)
+
                             elif idFMethods[o] == 'Relief-F互相关分析':
                                 # 可视化
                                 # 创建柱状图
@@ -555,8 +569,8 @@ with dataPCM:
                                 plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
                                 plt.tight_layout()  # 调整布局以防止标签重叠
                                 st.pyplot(plt)
-                        else:
-                            st.markdown('待选择')
+            else:
+                st.info('跳过特征优选', icon="ℹ️️")
             interval_col34, interval_col33 = st.columns([5, 1])
             # want_to_contribute = interval_col34.button("跳转至可视化界面")
             # if want_to_contribute:
