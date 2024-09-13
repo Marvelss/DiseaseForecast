@@ -50,6 +50,9 @@ else:
             "特征计算-面状",
             "特征优选-面状",
             "模型构建-面状",
+            "基于天气情景生成器的模型评价-面状",
+            "建模报告-面状",
+            "数据下载中心-面状",
         ]
     )
 # 处理方法内容记录(任务清单各项值)
@@ -462,6 +465,7 @@ with modelACV:
             st, '全选-农学特征', filterUnique(agricultureNameList, pages_utils.reservedField),
             'tempAgriculture', 'collapsed')
     with modelACVCol2:
+        st.markdown("")
         st.markdown("###### 标签\n")
         resultLabel = st.selectbox(
             'predictLabel',

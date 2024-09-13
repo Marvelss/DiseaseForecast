@@ -36,6 +36,9 @@ hide_pages(
         "特征计算",
         "特征优选",
         "模型构建",
+        "基于天气情景生成器的模型评价",
+        "建模报告",
+        "数据下载中心",
     ]
 )
 
@@ -258,10 +261,11 @@ with colFCF3:
         # 联合特征计算表格放入methodParam
         # methodParam[4]
         # print(extractFileList)
-        if extractFileList:
-            for temp in extractFileList:
-                tempPath = os.path.join(RESOURCE_TEMPDIR_PATH, temp)
-                st.session_state.fCMapLayer.append(tempPath)
+        # 待提取特征显示在地图上
+        # if extractFileList:
+        #     for temp in extractFileList:
+        #         tempPath = os.path.join(RESOURCE_TEMPDIR_PATH, temp)
+        #         st.session_state.fCMapLayer.append(tempPath)
         with pe:
             mapTemp1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
             with st.status('加载数据中...'):
@@ -305,7 +309,7 @@ with colFCF3:
         savedFile = st.text_input(
             label='保存文件名称',
             help='每个特征计算结果文件名称格式为:特征+年份',
-            placeholder='LAI_2016_SEResult.tif')
+            placeholder=f'{extractDataFile[0]}_SEResult.tif')
 
         st.session_state["featureMethodFacetName"]['param1'] = str(weatherDataDir)
         st.session_state["featureMethodFacetName"]['param2'] = str(extractDataFile)
@@ -364,7 +368,10 @@ with colFCF3:
                     # 待提取字段名称、年、DayOfYear、基准文件
                     # st.session_state.fCMapLayer.append(handledFile)
 
-                    pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
+                    # pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
+                    pages_utils.TempDataSetFacet[2] = pd.read_excel(r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\面-动-SEIR机理模型(病株率)\四个数据集合并(系统原始数据上传有误时使用).xlsx')
+
+
                     print('----------------特征优选数据集----------------')
                     print(pages_utils.TempDataSetFacet[2])
             st.toast("空间点提取执行完毕", icon="ℹ️️")

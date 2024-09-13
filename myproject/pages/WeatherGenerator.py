@@ -40,6 +40,9 @@ if st.session_state.isPlanarInterface:
             "数据预处理",
             "特征计算",
             "特征优选",
+            "基于天气情景生成器的模型评价",
+            "建模报告",
+            "数据下载中心",
         ]
     )
 else:
@@ -51,6 +54,9 @@ else:
             "特征计算-面状",
             "特征优选-面状",
             "模型构建-面状",
+            "基于天气情景生成器的模型评价-面状",
+            "建模报告-面状",
+            "数据下载中心-面状",
         ]
     )
 if 'page16' not in st.session_state:
@@ -575,22 +581,26 @@ with colPro2:
             column_order=["优选特征", "特征优选方法", "数据类型", '时间'])
     with tab3:
         pass
-
-btn = st.button('运行程序', on_click=onRun,
-                args=[float(year_difference), weatherScenesList, st.session_state.weatherSituationParams, modelsList])
+interval_col1, interval_col2 = st.columns([6, 1])
+with interval_col2:
+    btn = st.button('开始模型评估', on_click=onRun,
+                    args=[float(year_difference), weatherScenesList, st.session_state.weatherSituationParams, modelsList])
 
 # 左侧表格,右侧可视化
 # =======================预测评价结果及数据下载=======================
 st.markdown('---')
 st.markdown("##### 模型预测和评价指标结果可视化")
-with st.popover("效果图预览"):
-    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'weatherGeneratorEvaluateResult2.jpg'))
-    st.image(img)
-    co3, co4 = st.columns(2)
-    with co3:
-        st.metric("Dev_S", "0.0799")
-    with co4:
-        st.metric("Dev_S", "0.0899")
+# st.markdown('###### 模型预测结果可视化')
+#
+# st.markdown('###### 评价指标结果可视化')
+# with st.popover("效果图预览"):
+#     img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'weatherGeneratorEvaluateResult2.jpg'))
+#     st.image(img)
+#     co3, co4 = st.columns(2)
+#     with co3:
+#         st.metric("Dev_S", "0.0799")
+#     with co4:
+#         st.metric("Dev_S", "0.0899")
 # ==============================准备下载数据==============================
 if btn:
     zipPath = os.path.join(RESOURCE_TEMPDIR_PATH, '基于天气情景生成器的模拟数据.zip')
@@ -605,12 +615,7 @@ if btn:
             mime="application/zip",
         )
 
-# tab11, tab12 = st.tabs(['模型1', '模型2'])
 colRes1, colRes2 = st.columns(2)
-st.markdown('###### 静态偏差指标')
-
-img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'figure22.png'))
-st.image(img)
 with st.container(height=700):
     items = list(st.session_state.modelSituationIndexResult.items())
     colIndex1, colIndex2 = st.columns(2)

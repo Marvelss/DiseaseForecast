@@ -188,11 +188,11 @@ class FeatureCalculationMethodFacet:
             # 转置结果
             # doy_list_result = np.transpose(doy_list)
             print('生成DOY图像')
-            print(doy_list[116, 909])
-            print(doy_list[216, 909])
-            print(doy_list[316, 909])
-            print(doy_list[416, 909])
-            print(doy_list[516, 909])
+            # print(doy_list[116, 909])
+            # print(doy_list[216, 909])
+            # print(doy_list[316, 909])
+            # print(doy_list[416, 909])
+            # print(doy_list[516, 909])
             print('获取输出tif图数据中...')
             # time.sleep(1)
 
@@ -499,13 +499,13 @@ class FeatureCalculationMethodFacet:
                 os.path.join(RESOURCE_TEMPDIR_PATH, standardFile)
             )
         resultDF = df1
+        # 遍历每个输入文件
         for tempFile in inputFile:
-            filePath = os.path.join(RESOURCE_TEMPDIR_PATH, tempFile
-                                    )
+            filePath = os.path.join(RESOURCE_TEMPDIR_PATH, tempFile)
             featureFiledName = tempFile.split('.')[0].split('_')[0]
-            # 打开tif文件
+
+            # 打开TIF文件，并获取地理变换参数
             dataset = gdal.Open(filePath)
-            # 获取地理变换参数
             adfGeoTransform = dataset.GetGeoTransform()
 
             # 获取栅格的列数和行数
@@ -514,55 +514,37 @@ class FeatureCalculationMethodFacet:
 
             # 获取第一个波段
             band = dataset.GetRasterBand(1)
-            data = band.ReadAsArray()
 
-            # 用于存储每个像素的经纬度和对应的值
-            arrSlope = []
-
-            for i in range(nYSize):
-                for j in range(nXSize):
-                    px = adfGeoTransform[0] + j * adfGeoTransform[1] + i * adfGeoTransform[2]
-                    py = adfGeoTransform[3] + j * adfGeoTransform[4] + i * adfGeoTransform[5]
-                    value = data[i, j]
-                    arrSlope.append([px, py, value])
-
-            # 将结果转换为DataFrame
-            df = pd.DataFrame(arrSlope, columns=['待提取经度', '待提取纬度', featureFiledName + 'temp'])
+            # 从文件名提取年和DayOfYear信息
             parts = tempFile.split('_')
-            year = parts[1]  # 假设文件名格式为 feature_2019_120.tif
-            day_of_year = parts[2].split('.')[0]
+            year = int(parts[1])  # 假设文件名格式为 feature_2019_120.tif
+            day_of_year = int(parts[2].split('.')[0])
 
-            # 添加新列到df1，根据经度、纬度、年、DayOfYear合并
-            df['年'] = int(year)
-            df['DayOfYear'] = int(day_of_year)
-            # 构建 cKDTree
-            coords = df[['待提取经度', '待提取纬度']].values
-            tree = cKDTree(coords)
-
-            # 找到 df1 中每个点的最近的4个点
-            def find_nearest_neighbors(lon, lat, k=4):
-                distance, indices = tree.query([lon, lat], k=k)
-                neighbors = df.iloc[indices].copy()
-                neighbors.loc[:, '经度'] = lon
-                neighbors.loc[:, '纬度'] = lat
-                return neighbors
-
-            # 保存结果
-            results = []
+            # 新增列到df1
             if featureFiledName not in df1.columns:
                 df1[featureFiledName] = np.nan
+
+            # 根据 df1 遍历每个点，直接读取对应的栅格数据
+            results = []
             for index, row in df1.iterrows():
                 lon, lat = row['经度'], row['纬度']
                 year1, doy1 = row['年'], row['DayOfYear']
 
-                # 筛选出同一年和 DayOfYear 的数据
-                df_filtered = df[(df['年'] == year1) & (df['DayOfYear'] == doy1)]
-                if not df_filtered.empty:
-                    # 更新KD树并找到最近的点
-                    neighbors = find_nearest_neighbors(lon, lat)
-                    avg_value = neighbors[featureFiledName + 'temp'].mean()
+                # 筛选出同一年和DayOfYear的记录
+                if year1 == year and doy1 == day_of_year:
+                    # 根据经纬度获取栅格像素索引
+                    px = int((lon - adfGeoTransform[0]) / adfGeoTransform[1])
+                    py = int((lat - adfGeoTransform[3]) / adfGeoTransform[5])
+
+                    # 确保像素坐标在栅格范围内
+                    if 0 <= px < nXSize and 0 <= py < nYSize:
+                        value = band.ReadAsArray(px, py, 1, 1)[0, 0]
+                        avg_value = round(value, 2) if not np.isinf(value) else 0  # 处理无穷大
+                    else:
+                        avg_value = None  # 经纬度超出范围时
                 else:
-                    avg_value = None  # 如果没有匹配的记录，返回 None
+                    avg_value = None
+
                 # 将结果和对应的行信息保存
                 results.append({
                     '经度': lon,
@@ -571,14 +553,15 @@ class FeatureCalculationMethodFacet:
                     'DayOfYear': doy1,
                     featureFiledName: avg_value
                 })
+
             # 将 results 转换为 DataFrame
             results_df = pd.DataFrame(results)
+
             # 将 results_df 与 df1 合并
-            print(results_df)
-            print(df1)
             resultDF = pd.merge(results_df, resultDF, on=['经度', '纬度', '年', 'DayOfYear', featureFiledName],
-                                how='left')
-        outputFileT = os.path.join(RESOURCE_TEMPDIR_PATH, outputFile)
+                                how='outer')
+
         # 保存到 Excel
+        outputFileT = os.path.join(RESOURCE_TEMPDIR_PATH, outputFile)
         resultDF.to_excel(outputFileT, index=False)
         return outputFileT

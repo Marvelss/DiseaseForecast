@@ -8,6 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from st_pages import hide_pages
 
+from lib.share import RESOURCE_MODELRESULT_PATH
 from pages import pages_utils
 from pages.modelandmethod.Model import Model
 
@@ -37,6 +38,9 @@ if st.session_state.isPlanarInterface:
             "特征计算",
             "特征优选",
             "模型构建",
+            "基于天气情景生成器的模型评价",
+            "建模报告",
+            "数据下载中心",
         ]
     )
 else:
@@ -539,8 +543,6 @@ with modelACM:
     elif st.session_state.page == 2:
         # =======================添加验证与训练数据集划分=======================
         with ph.container():
-            st.markdown("###### 有效特征集提取")
-
             # 检查是否有缺失值
             for p in range(len(pages_utils.TempDataSetFacet))[::-1]:
                 df11 = pages_utils.TempDataSetFacet[p]
@@ -548,11 +550,7 @@ with modelACM:
                     break
             beforeDF = df11
             pages_utils.TempDataSetFacet[4] = beforeDF
-            missing_values = pages_utils.TempDataSetFacet[4].isnull().sum()
-            if missing_values.any():
-                st.toast('优选特征中含有缺失值,请选中下方选项以提取有效值', icon="⚠️")
 
-            st.markdown('---')
             st.markdown("###### 训练与验证数据集划分")
             colOP1, colOP2 = st.columns(2)
             with colOP1:
@@ -613,8 +611,7 @@ with modelACM:
                     # y_Predicted = actualAndPredictList[i]['actualLabel']
                     # print(f'=============可视化{y_Actual}{y_Predicted}=============')
                     # 创建模拟的混淆矩阵
-                    rootPath = os.path.join(os.getcwd(), 'resource',
-                                            'modelresult',
+                    rootPath = os.path.join(RESOURCE_MODELRESULT_PATH,
                                             'predict')
                     testLabelDF = pd.read_excel(
                         os.path.join(rootPath,

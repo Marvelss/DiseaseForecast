@@ -33,6 +33,9 @@ hide_pages(
         "特征计算",
         "特征优选",
         "模型构建",
+        "基于天气情景生成器的模型评价",
+        "建模报告",
+        "数据下载中心",
     ]
 )
 if 'dPmap' not in st.session_state:
