@@ -6,7 +6,8 @@
 """
 import datetime
 import os.path
-
+import seaborn as sns
+import matplotlib.pyplot as plt
 import joblib
 import scipy
 import streamlit as st
@@ -85,6 +86,9 @@ if "applicationDataSet" not in st.session_state:
 # 模型名称+天气情景:[path,Dev_s]
 if 'modelSituationIndexResult' not in st.session_state:
     st.session_state.modelSituationIndexResult = {}
+
+# 显示可视化中文图例
+plt.rcParams['font.sans-serif'] = 'SimHei'
 
 
 # 替换气象数据(以DayOfYear为单位)
@@ -522,9 +526,43 @@ with st.container(height=700):
     items = list(st.session_state.modelSituationIndexResult.items())
     colIndex1, colIndex2 = st.columns(2)
     for i, (metric_name, metric_value) in enumerate(items):
+        path = os.path.join(
+            RESOURCE_MODELRESULT_PATH,
+            'modelsSimulateWeatherIndexResult',
+            metric_name +
+            '_applicationPredict' +
+            '.xlsx')
+        weatherNameT = metric_name.split('_')[1]
         if i % 2 == 0:
+            # 创建 DataFrame
             with colIndex1:
+                df = pd.read_excel(path)
+                # 绘制折线图
+                plt.figure(figsize=(10, 6))
+                plt.plot(df['DayOfYear'], df['实际标签'], label='实际标签', marker='o', color='blue')
+                plt.plot(df['DayOfYear'], df['Predicted_value'], label='Predicted_value', marker='x', color='red')
+                # 添加标题和标签
+                plt.title(f'{weatherNameT}情景下实际与预测病株率不同时相的走势对比图')
+                plt.xlabel('DayOfYear')
+                plt.ylabel('病株率')
+                # 添加图例
+                plt.legend()
+                st.pyplot(plt)
                 st.metric(f'{metric_name}-Dev_S:', metric_value[1])
         else:
             with colIndex2:
+                df = pd.read_excel(path)
+                # 绘制折线图
+                plt.figure(figsize=(10, 6))
+                plt.plot(df['DayOfYear'], df['实际标签'], label='实际标签', marker='o', color='blue')
+                plt.plot(df['DayOfYear'], df['Predicted_value'], label='Predicted_value', marker='x', color='red')
+
+                # 添加标题和标签
+                plt.title(f'{weatherNameT}情景下实际与预测病株率不同时相的走势对比图')
+                plt.xlabel('DayOfYear')
+                plt.ylabel('病株率')
+
+                # 添加图例
+                plt.legend()
+                st.pyplot(plt)
                 st.metric(f'{metric_name}-Dev_S:', metric_value[1])
