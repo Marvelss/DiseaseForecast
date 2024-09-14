@@ -13,7 +13,9 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matlab.engine
-from PIL import Image
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
+
 from st_pages import hide_pages
 from streamlit_pills import pills
 
@@ -77,13 +79,16 @@ if 'weatherSituationParams' not in st.session_state:
     }
 
 # 应用原始数据
-if "applicationDataSet" not in st.session_state:
-    st.session_state.historicalWeatherData = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
+if "applicationDataSetPoint" not in st.session_state:
+    st.session_state.historicalWeatherDataPoint = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
 
 # 基于天气情景生成器的模型评价,包含xlsx结果路径和指标值
 # 模型名称+天气情景:[path,Dev_s]
 if 'modelSituationIndexResult' not in st.session_state:
     st.session_state.modelSituationIndexResult = {}
+
+# 显示可视化中文图例
+plt.rcParams['font.sans-serif'] = 'SimHei'
 
 
 # 替换气象数据(以DayOfYear为单位)
@@ -98,16 +103,55 @@ def replace_data(df1, df2):
     return df1T
 
 
-# 替换气象数据(指定时段)
+# 替换气象数据(指定时段,年为单位)
 def replace_data2(df1, df2):
     df1T = df1.copy()
+    df2.columns.tolist()
     # 根据条件筛选并替换原始数据表格中的值
     for index, row in df2.iterrows():
         condition = (df1T['经度'] == row['经度']) & (df1T['纬度'] == row['纬度']) & \
-                    (df1T['年'] == row['年']) & (df1T['DayOfYear'] == row['DayOfYear'])
-        df1T.loc[condition, '降水'] = round(row['降水'], 2)
-        df1T.loc[condition, '温度'] = round(row['温度'], 2)
+                    (df1T['年'] == row['年'])
+        df1T.loc[condition, '3月下旬温度'] = round(row['3月下旬温度'], 2)
+        df1T.loc[condition, '4月上旬温度'] = round(row['4月上旬温度'], 2)
+        df1T.loc[condition, '4月中旬温度'] = round(row['4月中旬温度'], 2)
+        df1T.loc[condition, '4月下旬温度'] = round(row['4月下旬温度'], 2)
+        df1T.loc[condition, '5月上旬温度'] = round(row['5月上旬温度'], 2)
+        df1T.loc[condition, '5月中旬温度'] = round(row['5月中旬温度'], 2)
+        df1T.loc[condition, '5月下旬温度'] = round(row['5月下旬温度'], 2)
+        df1T.loc[condition, '6月上旬温度'] = round(row['6月上旬温度'], 2)
     return df1T
+
+
+# 计算旬温度
+def getPeriodTemperature(df, year, longitude, latitude):
+    # 定义分段的时间范围
+    result = {}
+    # 定义不同时间段的范围
+    march_late = df[(df['DayOfYear'] >= 79) & (df['DayOfYear'] <= 90)]
+    april_early = df[(df['DayOfYear'] >= 91) & (df['DayOfYear'] <= 100)]
+    april_mid = df[(df['DayOfYear'] >= 101) & (df['DayOfYear'] <= 110)]
+    april_late = df[(df['DayOfYear'] >= 111) & (df['DayOfYear'] <= 120)]
+    may_early = df[(df['DayOfYear'] >= 121) & (df['DayOfYear'] <= 130)]
+    may_mid = df[(df['DayOfYear'] >= 131) & (df['DayOfYear'] <= 140)]
+    may_late = df[(df['DayOfYear'] >= 141) & (df['DayOfYear'] <= 150)]
+    june_early = df[(df['DayOfYear'] >= 151) & (df['DayOfYear'] <= 160)]
+
+    # 加入年、经度、纬度信息
+    result['经度'] = longitude
+    result['纬度'] = latitude
+    result['年'] = year
+
+    # 计算每个时间段的平均温度并存入字典
+    result['3月下旬温度'] = march_late['温度'].mean()
+    result['4月上旬温度'] = april_early['温度'].mean()
+    result['4月中旬温度'] = april_mid['温度'].mean()
+    result['4月下旬温度'] = april_late['温度'].mean()
+    result['5月上旬温度'] = may_early['温度'].mean()
+    result['5月中旬温度'] = may_mid['温度'].mean()
+    result['5月下旬温度'] = may_late['温度'].mean()
+    result['6月上旬温度'] = june_early['温度'].mean()
+
+    return pd.DataFrame([result])
 
 
 # 获取每个情景多年模拟气象数据
@@ -117,6 +161,8 @@ def getSimulateWeather(weatherSituation, province, station, startYear):
 
     fileDirPath = os.path.join(modelPathRoot, weatherSituation)
     merged_data = None
+    merged_data1 = None
+
     for fileTemp in os.listdir(fileDirPath):
         # Get the file name
         file_name = os.path.join(fileDirPath, fileTemp)
@@ -124,7 +170,7 @@ def getSimulateWeather(weatherSituation, province, station, startYear):
         data = pd.read_excel(file_name)
         # print(yearNum)
         # startYear = 2011  # 测试
-        data['年'] = int(yearNum) + int(startYear)
+        data['年'] = int(yearNum) + int(startYear) - 1
         if merged_data is None:
             merged_data = data.copy()  # Initialize merged_data with the first file's data
         # Read the Excel file
@@ -137,7 +183,13 @@ def getSimulateWeather(weatherSituation, province, station, startYear):
         merged_data['纬度'] = station
         # Calculate average temperature
         merged_data['温度'] = (merged_data['最高温度'] + merged_data['最低温度']) / 2
-    return merged_data
+        temp_result = getPeriodTemperature(merged_data, int(yearNum) + int(startYear) - 1, province, station)
+        # 将文件数据与旬温度数据合并
+        if merged_data1 is None:
+            merged_data1 = temp_result.copy()  # 初始化 merged_data
+        else:
+            merged_data1 = pd.merge(merged_data1, temp_result, how='outer')
+    return merged_data1
 
 
 # 获取模型
@@ -218,24 +270,23 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                 weatherGeneratorProvinceSelected,
                 weatherGeneratorStationSelected,
                 generatedYears[0].year)
-            # df3T.to_excel('模拟生成的气象数据.xlsx', index=False)
+            df3T.to_excel('模拟生成的气象数据.xlsx', index=False)
 
             # 筛选数据集
             # 截取指定地区
             rawDataSet = pages_utils.TempDataSet[0]
             rawDataSetArea = rawDataSet[(rawDataSet['经度'] == weatherGeneratorProvinceSelected) & (
                     rawDataSet['纬度'] == weatherGeneratorStationSelected)]
-
-            # rawDataSetArea.to_excel('选取截取指定地区.xlsx', index=False)
+            rawDataSetArea.to_excel('选取截取指定地区.xlsx', index=False)
             # 替换原始气象数据
-
-            rawDataSetArea = replace_data(rawDataSetArea, df3T)
+            inputModelData = replace_data2(rawDataSetArea, df3T)
             # print('=========================替换后数据=========================')
-            # rawDataSetArea.to_excel('替换原始气象数据.xlsx', index=False)
+            inputModelData.to_excel('替换气象后数据.xlsx', index=False)
             # rawData.to_excel(weatherScenes + '_' + 'weatherReplaced.xlsx', index=False)
             # 只处理降水和温度
-            rawDataSetArea = rawDataSetArea[['经度', '纬度', '年', 'DayOfYear', '温度', '降水']]
-            # rawDataSetArea.to_excel('只处理降水和温度数据集.xlsx', index=False)
+            # if 'DayOfYear' in rawDataSetArea.columns.tolist():
+            #     rawDataSetArea = rawDataSetArea[['经度', '纬度', '年', 'DayOfYear', '温度', '降水']]
+            # # rawDataSetArea.to_excel('只处理降水和温度数据集.xlsx', index=False)
 
             # =========================预处理及读取执行方法=========================
             # 若含缺失值则进一步处理
@@ -318,7 +369,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                 print(f'预测特征:{featureTemp}')
                 predictDF = inputModelData[featureTemp]
 
-                # predictDF.to_excel('最终输入模型数据.xlsx')
+                predictDF.to_excel('最终输入模型数据.xlsx')
                 predictions = model.predict(predictDF)
                 print("基于模型气象数据的应用结果:", predictions)
 
@@ -345,7 +396,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
 
                 # =========================计算静态偏差指标=========================
                 # 计算指标
-                data_B = st.session_state.historicalWeatherData['实际标签']  # 实际
+                data_B = st.session_state.historicalWeatherDataPoint['实际标签']  # 实际
                 data_A = dataPAData['Predicted_value']  # 预测
                 # 计算两组数据相减的均值之和除以长度
                 mean_diff = ((data_A - data_B).sum()) / len(data_A)
@@ -429,7 +480,7 @@ with col12331:
     )
     if uploadedActualLabelData:
         bytes_data = uploadedActualLabelData.read()
-        st.session_state.historicalWeatherData = pd.read_excel(bytes_data)
+        st.session_state.historicalWeatherDataPoint = pd.read_excel(bytes_data)
 
 with col22332:
     warningMInfo = '''
@@ -584,7 +635,8 @@ with colPro2:
 interval_col1, interval_col2 = st.columns([6, 1])
 with interval_col2:
     btn = st.button('开始模型评估', on_click=onRun,
-                    args=[float(year_difference), weatherScenesList, st.session_state.weatherSituationParams, modelsList])
+                    args=[float(year_difference), weatherScenesList, st.session_state.weatherSituationParams,
+                          modelsList])
 
 # 左侧表格,右侧可视化
 # =======================预测评价结果及数据下载=======================
@@ -620,9 +672,55 @@ with st.container(height=700):
     items = list(st.session_state.modelSituationIndexResult.items())
     colIndex1, colIndex2 = st.columns(2)
     for i, (metric_name, metric_value) in enumerate(items):
+        path = os.path.join(
+            RESOURCE_MODELRESULT_PATH,
+            'modelsSimulateWeatherIndexResult',
+            metric_name +
+            '_applicationPredict' +
+            '.xlsx')
+        weatherNameT = metric_name.split('_')[1]
         if i % 2 == 0:
             with colIndex1:
+                df = pd.read_excel(path)
+                # Plotting
+                fig, ax = plt.subplots(figsize=(10, 6))
+
+                # Bar chart for Predicted_value
+                ax.bar(df['年'] - 0.2, df['Predicted_value'], width=0.4, label='Predicted_value', color='b',
+                       align='center')
+
+                # Bar chart for 病害发生程度
+                ax.bar(df['年'] + 0.2, df['病害发生程度'], width=0.4, label='病害发生程度', color='r', align='center')
+                # 添加标题和标签
+                plt.title(f'{weatherNameT}情景下实际与预测病害发生程度对比图')
+                plt.xlabel('年')
+                plt.ylabel('病害发生程度')
+                # Set x-ticks to be integers
+                ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+                # 添加图例
+                plt.legend()
+                st.pyplot(plt)
                 st.metric(f'{metric_name}-Dev_S:', metric_value[1])
         else:
             with colIndex2:
+                df = pd.read_excel(path)
+                # 绘制折线图
+                # Plotting
+                fig, ax = plt.subplots(figsize=(10, 6))
+
+                # Bar chart for Predicted_value
+                ax.bar(df['年'] - 0.2, df['Predicted_value'], width=0.4, label='预测病害发生程度', color='b',
+                       align='center')
+
+                # Bar chart for 病害发生程度
+                ax.bar(df['年'] + 0.2, df['病害发生程度'], width=0.4, label='实际病害发生程度', color='r', align='center')
+                # 添加标题和标签
+                plt.title(f'{weatherNameT}情景下实际与预测病害发生程度对比图')
+                plt.xlabel('年')
+                plt.ylabel('病害发生程度')
+                # Set x-ticks to be integers
+                ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+                # 添加图例
+                plt.legend()
+                st.pyplot(plt)
                 st.metric(f'{metric_name}-Dev_S:', metric_value[1])
