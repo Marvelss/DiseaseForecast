@@ -125,7 +125,7 @@ def getSimulateWeather(weatherSituation, province, station, startYear):
         data = pd.read_excel(file_name)
         # print(yearNum)
         # startYear = 2011  # 测试
-        data['年'] = int(yearNum) + int(startYear)
+        data['年'] = int(yearNum) + int(startYear) - 1
         if merged_data is None:
             merged_data = data.copy()  # Initialize merged_data with the first file's data
         # Read the Excel file
@@ -219,7 +219,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                 weatherGeneratorProvinceSelected,
                 weatherGeneratorStationSelected,
                 generatedYears[0].year)
-            # df3T.to_excel('模拟生成的气象数据.xlsx', index=False)
+            df3T.to_excel('模拟生成的气象数据.xlsx', index=False)
 
             # 筛选数据集
             # 截取指定地区
@@ -262,6 +262,8 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                 predictions_df = pd.DataFrame(allPredictList, columns=['Predicted_value'])
                 # 重新调整表格索引,以确保predictions_df与df_cleaned合并大小一致
                 df_cleaned_reset = st.session_state.historicalWeatherData.reset_index(drop=True)
+                df_cleaned_reset.to_excel('调整索引后实际标签后最终数据.xlsx', index=False)
+
                 predictions_df_reset = predictions_df.reset_index(drop=True)
                 # 合并实际标签
                 dataPAData = pd.concat([df_cleaned_reset, predictions_df_reset], axis=1)
