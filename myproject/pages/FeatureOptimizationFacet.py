@@ -203,12 +203,12 @@ def onRun():
     st.session_state.page14 += 1
 
     # ===============获取任务清单内容===============
+
     idNumber = pages_utils.TempDataSetFieldFacet[3]["编号"].tolist()
     fields = pages_utils.TempDataSetFieldFacet[3]["输入特征"].tolist()
     methodParam = pages_utils.TempDataSetFieldFacet[3]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetFieldFacet[3]["特征优选方法"].tolist()
     isHandledFlags = pages_utils.TempDataSetFieldFacet[3]["处理状态"].tolist()
-
     # 若为空则跳过该步骤
     if not idNumber:
         pages_utils.TempDataSetFacet[3] = pages_utils.TempDataSetFacet[2]

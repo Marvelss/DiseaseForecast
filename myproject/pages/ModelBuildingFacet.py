@@ -622,41 +622,45 @@ with modelACM:
                     # 假设第一列包含要绘制的数据
                     actual_values = testLabelDF.iloc[:, 0]
                     predicted_values = predictLabelDF.iloc[:, 0]
+                    try:
+                        # 回归模型
+                        if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[i] == 'SEIR机理模型':
+                            # 绘制散点图
+                            fig, ax = plt.subplots()
 
-                    # 回归模型
-                    if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[i] == 'SEIR机理模型':
-                        # 绘制散点图
-                        fig, ax = plt.subplots()
+                            sns.scatterplot(x=actual_values, y=predicted_values)
+                            plt.plot([actual_values.min(), actual_values.max()], [actual_values.min(), actual_values.max()],
+                                     'r--')
+                            ax.set_xlabel('实际峰值(%)')
+                            ax.set_ylabel('预测峰值(%)')
+                            # plt.figure(figsize=(10, 6))
+                            plt.title('回归模型精度评价-散点图')
+                            st.pyplot(fig)
 
-                        sns.scatterplot(x=actual_values, y=predicted_values)
-                        plt.plot([actual_values.min(), actual_values.max()], [actual_values.min(), actual_values.max()],
-                                 'r--')
-                        ax.set_xlabel('实际峰值(%)')
-                        ax.set_ylabel('预测峰值(%)')
-                        # plt.figure(figsize=(10, 6))
-                        plt.title('回归模型精度评价-散点图')
-                        st.pyplot(fig)
-
-                    # 分类模型
-                    elif models[i] == 'SVM' or models[i] == 'RF' or models[i] == 'FLDA' or models[i] == 'KNN':
-                        # 绘制混淆矩阵图
-                        fig, ax = plt.subplots()
-                        conf_matrix = confusion_matrix(testLabelDF, predictLabelDF)
-                        sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax)
-                        ax.set_xlabel('实际病害发生程度')
-                        ax.set_ylabel('预测病害发生程度')
-                        plt.title('分类模型精度评价-混淆矩阵')
-                        st.pyplot(fig)
-                        # Populate the array with key-value pairs
-                    metrics = []
-                    for key, value in evaluationIndex[i].items():
-                        metrics.append((key, round(value, 3)))
-                    # Display the metrics in two columns
-                    half = len(metrics) // 2
-                    col1, col2 = st.columns(2)
-                    for h in range(half):
-                        col2.metric(metrics[h][0], metrics[h][1])
-                    for h in range(half, len(metrics)):
-                        col1.metric(metrics[h][0], metrics[h][1])
+                        # 分类模型
+                        elif models[i] == 'SVM' or models[i] == 'RF' or models[i] == 'FLDA' or models[i] == 'KNN':
+                            # 绘制混淆矩阵图
+                            fig, ax = plt.subplots()
+                            conf_matrix = confusion_matrix(testLabelDF, predictLabelDF)
+                            sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax)
+                            ax.set_xlabel('实际病害发生程度')
+                            ax.set_ylabel('预测病害发生程度')
+                            plt.title('分类模型精度评价-混淆矩阵')
+                            st.pyplot(fig)
+                            # Populate the array with key-value pairs
+                        metrics = []
+                        for key, value in evaluationIndex[i].items():
+                            metrics.append((key, round(value, 3)))
+                        # Display the metrics in two columns
+                        half = len(metrics) // 2
+                        col1, col2 = st.columns(2)
+                        for h in range(half):
+                            col2.metric(metrics[h][0], metrics[h][1])
+                        for h in range(half, len(metrics)):
+                            col1.metric(metrics[h][0], metrics[h][1])
+                    except BaseException:
+                        st.toast('运行出错,点击返回上一步', icon="⚠️")
+                    finally:
+                        st.session_state.page = 0
             interval_col34, interval_col33 = st.columns([5, 1])
             btn3 = interval_col33.button('返回', on_click=backPage)

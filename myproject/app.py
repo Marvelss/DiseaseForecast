@@ -158,13 +158,12 @@ def emptyValue():
     pages_utils.FeatureDataSetFieldFacet = {"编号": [], "输入文件": [], "文件名称": [], "数据类型": [],
                                             "数据格式": [], "根节点": [], "子节点": [], "字段": [],
                                             "特征计算方法": [], "方法参数": [], "时间": [], "处理状态": []}
-    pages_utils.OptimalFeatureDataSetFieldFacet = {"编号": [], "数据类型": [], "输入特征": [], "优选特征": [],
-                                                   "大小": [],
-                                                   "特征优选方法": [], "方法参数": [], "时间": [], "处理状态": []}
-    pages_utils.UltimateFeatureDataSetFacet = {"编号": [], "模型": [], "模型参数": [], "特征": [], "标签": [],
-                                               "评价指标": [],
-                                               "数据集划分比例": [], "模型结构": [], "模型训练结果": [], "时间": [],
-                                               "处理状态": []}
+    pages_utils.OptimalFeatureDataSetFieldFacet = pd.DataFrame(
+        columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间", "处理状态"])
+    pages_utils.UltimateFeatureDataSetFacet = pd.DataFrame(
+        columns=["编号", "模型", "模型参数", "特征", "标签", "评价指标", "数据集划分比例", "模型结构", "模型训练结果",
+                 "时间",
+                 "处理状态"])
     pages_utils.TempDataSetFieldFacet = [
         pages_utils.RawDataSetFieldFacet,
         pages_utils.PreprocessedDataSetFieldFacet,

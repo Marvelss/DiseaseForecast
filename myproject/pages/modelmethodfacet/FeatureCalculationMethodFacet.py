@@ -499,69 +499,116 @@ class FeatureCalculationMethodFacet:
                 os.path.join(RESOURCE_TEMPDIR_PATH, standardFile)
             )
         resultDF = df1
-        # 遍历每个输入文件
+        all_results = []
+
         for tempFile in inputFile:
+            print('=----处理文件=----')
+            print(tempFile)
+
+            # 构建文件路径并提取特征名
             filePath = os.path.join(RESOURCE_TEMPDIR_PATH, tempFile)
             featureFiledName = tempFile.split('.')[0].split('_')[0]
 
-            # 打开TIF文件，并获取地理变换参数
+            # 打开 TIF 文件并获取必要的数据
             dataset = gdal.Open(filePath)
             adfGeoTransform = dataset.GetGeoTransform()
-
-            # 获取栅格的列数和行数
-            nXSize = dataset.RasterXSize  # 列数
-            nYSize = dataset.RasterYSize  # 行数
-
-            # 获取第一个波段
+            nXSize, nYSize = dataset.RasterXSize, dataset.RasterYSize
             band = dataset.GetRasterBand(1)
+            data = band.ReadAsArray()
 
-            # 从文件名提取年和DayOfYear信息
+            # 计算像素的地理位置，使用 NumPy 加快速度
+            x_indices, y_indices = np.meshgrid(np.arange(nXSize), np.arange(nYSize))
+            px = adfGeoTransform[0] + x_indices * adfGeoTransform[1] + y_indices * adfGeoTransform[2]
+            py = adfGeoTransform[3] + x_indices * adfGeoTransform[4] + y_indices * adfGeoTransform[5]
+
+            # 将数据存入 DataFrame
+            arrSlope = np.column_stack((px.ravel(), py.ravel(), data.ravel()))
+            df = pd.DataFrame(arrSlope, columns=['待提取经度', '待提取纬度', featureFiledName + 'temp'])
+
+            # 从文件名提取年份和 DayOfYear
             parts = tempFile.split('_')
-            year = int(parts[1])  # 假设文件名格式为 feature_2019_120.tif
-            day_of_year = int(parts[2].split('.')[0])
+            year, day_of_year = int(parts[1]), int(parts[2].split('.')[0])
+            df['年'], df['DayOfYear'] = year, day_of_year
+            if day_of_year != 777:
+                # print('处理日')
+                # 构建 KDTree
+                coords = df[['待提取经度', '待提取纬度']].values
+                tree = cKDTree(coords)
 
-            # 新增列到df1
-            if featureFiledName not in df1.columns:
-                df1[featureFiledName] = np.nan
+                # 过滤 df1 中与当前文件匹配的年份和 DayOfYear 的数据
+                df1_filtered = df1[(df1['年'] == year) & (df1['DayOfYear'] == day_of_year)]
+                if df1_filtered.empty:
+                    continue
 
-            # 根据 df1 遍历每个点，直接读取对应的栅格数据
-            results = []
-            for index, row in df1.iterrows():
-                lon, lat = row['经度'], row['纬度']
-                year1, doy1 = row['年'], row['DayOfYear']
+                # 找到 df1 中点的最近邻
+                df1_coords = df1_filtered[['经度', '纬度']].values
+                distances, indices = tree.query(df1_coords, k=2)
 
-                # 筛选出同一年和DayOfYear的记录
-                if year1 == year and doy1 == day_of_year:
-                    # 根据经纬度获取栅格像素索引
-                    px = int((lon - adfGeoTransform[0]) / adfGeoTransform[1])
-                    py = int((lat - adfGeoTransform[3]) / adfGeoTransform[5])
+                # 计算最近邻的平均值
+                nearest_values = df.iloc[indices.flatten()][featureFiledName + 'temp'].values.reshape(indices.shape)
+                avg_values = np.mean(nearest_values, axis=1)
+                avg_values = np.where(np.isinf(avg_values), 0, np.round(avg_values, 2))
 
-                    # 确保像素坐标在栅格范围内
-                    if 0 <= px < nXSize and 0 <= py < nYSize:
-                        value = band.ReadAsArray(px, py, 1, 1)[0, 0]
-                        avg_value = round(value, 2) if not np.isinf(value) else 0  # 处理无穷大
-                    else:
-                        avg_value = None  # 经纬度超出范围时
-                else:
-                    avg_value = None
+                # 将结果存入临时 DataFrame
+                results_df = df1_filtered.copy()
+                results_df[featureFiledName] = avg_values
 
-                # 将结果和对应的行信息保存
-                results.append({
-                    '经度': lon,
-                    '纬度': lat,
-                    '年': year1,
-                    'DayOfYear': doy1,
-                    featureFiledName: avg_value
-                })
+                # 将每次计算的结果添加到 all_results 列表
+                all_results.append(results_df)
 
-            # 将 results 转换为 DataFrame
-            results_df = pd.DataFrame(results)
+            else:
+                # print('处理年')
+                # 构建 KDTree
+                coords = df[['待提取经度', '待提取纬度']].values
+                tree = cKDTree(coords)
 
-            # 将 results_df 与 df1 合并
-            resultDF = pd.merge(results_df, resultDF, on=['经度', '纬度', '年', 'DayOfYear', featureFiledName],
-                                how='outer')
+                # 过滤 df1 中与当前文件匹配的年份和 DayOfYear 的数据
+                df1_filtered = df1[(df1['年'] == year)]
+                if df1_filtered.empty:
+                    continue
 
-        # 保存到 Excel
+                # 找到 df1 中点的最近邻
+                df1_coords = df1_filtered[['经度', '纬度']].values
+                distances, indices = tree.query(df1_coords, k=2)
+
+                # 计算最近邻的平均值
+                nearest_values = df.iloc[indices.flatten()][featureFiledName + 'temp'].values.reshape(indices.shape)
+                avg_values = np.ceil(np.mean(nearest_values, axis=1))
+                avg_values = np.where(np.isinf(avg_values), 0, avg_values.astype(int))
+
+                # 将结果存入临时 DataFrame
+                results_df = df1_filtered.copy()
+                results_df[featureFiledName] = avg_values
+                # all_days_df = pd.DataFrame()
+                # for day in range(1, 366):
+                #     temp_df = results_df.copy()  # 复制原结果
+                #     temp_df['DayOfYear'] = day  # 修改为 1 到 365 的 DayOfYear
+                #     all_days_df = pd.concat([all_days_df, temp_df], ignore_index=True)
+                #
+                # results_df = all_days_df  # 用生成的所有记录覆盖
+
+                # 将每次计算的结果添加到 all_results 列表
+                all_results.append(results_df)
+        # 将所有结果合并为一个 DataFrame
+        all_results_df = pd.concat(all_results, ignore_index=True)
+        # 在合并前删除 all_results_df 中的 '病株率' 列
+        if '病株率' in all_results_df.columns:
+            all_results_df = all_results_df.drop(columns=['病株率'])
+        # 更新 df1 中已有的病株率字段和新添加的数据
+        # 指定需要保留的列
+        group_cols = ['经度', '纬度', '年', 'DayOfYear']
+
+        # 找到除 group_cols 之外的其他列
+        agg_cols = {col: 'max' for col in all_results_df.columns if col not in group_cols}
+
+        # 使用 groupby 并聚合，同时重置索引
+        all_results_df = all_results_df.groupby(group_cols, as_index=False).agg(agg_cols).reset_index(drop=True)
+        # 删除 Unnamed: 0 列
+        # all_results_df = df_cleaned.drop(columns=['Unnamed: 0'])
+        all_results_df.to_excel('抽取.xlsx')
+        resultDF = pd.merge(df1, all_results_df, on=['经度', '纬度', '年', 'DayOfYear'], how='left')
+
+        # Save the final result to Excel
         outputFileT = os.path.join(RESOURCE_TEMPDIR_PATH, outputFile)
         resultDF.to_excel(outputFileT, index=False)
         return outputFileT

@@ -620,8 +620,15 @@ class Model:
         pd.DataFrame(predictResult,
                      columns=['predictLabel']).to_excel(
             savePath1, index=False)
+        print('使用数据')
+        print(self.dataFrame)
+        dataPAData = pd.concat([self.dataFrame,
+                                pd.DataFrame(predictResult,
+                                             columns=['predictLabel'])], axis=1)
+        dataPAData.to_excel(
+            '保存所有数据.xlsx', index=False)
         pd.DataFrame(allActualResultList,
-                     columns=['实际病株率']).to_excel(
+                     columns=['病株率']).to_excel(
             savePath2, index=False)
 
         return precision, actualAndPredictResult, modelStructPath

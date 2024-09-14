@@ -64,7 +64,7 @@ def fitness2_modify2(ka, kb, kc, q, r, OPT_PRI, w, beta0,
         e = effectiveIntervalDataT
         # print(e)
         erow = len(e)
-        tempActualDiseaseData = e['实际病株率'].values
+        tempActualDiseaseData = e['病株率'].values
         tempPData = e['降水'].values
         tempTData = e['温度'].values
         # print(f'降水:{tempPData}')
@@ -148,7 +148,7 @@ def fitness2_modify2(ka, kb, kc, q, r, OPT_PRI, w, beta0,
         # 峰值模块
         DOYData = e['DayOfYear'].values
         transplantingData = e['移栽期'].values
-        peakData = e['病害峰值'].values
+        peakData = e['峰值'].values
         predictDiseaseResult = []
         for doy, transplanting, peak in zip(DOYData, transplantingData, peakData):
             z = doy - transplanting
