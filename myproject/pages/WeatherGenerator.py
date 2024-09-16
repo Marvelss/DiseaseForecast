@@ -87,6 +87,15 @@ if "applicationDataSetPoint" not in st.session_state:
 if 'modelSituationIndexResult' not in st.session_state:
     st.session_state.modelSituationIndexResult = {}
 
+if 'modelReportWeatherInfo' not in st.session_state:
+    st.session_state.modelReportWeatherInfo = {
+        '经度': None,
+        '纬度': None,
+        '年限': None,
+        '情景': None,
+        '模型': None,
+    }
+
 # 显示可视化中文图例
 plt.rcParams['font.sans-serif'] = 'SimHei'
 
@@ -428,14 +437,18 @@ with weatherGeneratorInfo:
         label='station',
         options=pages_utils.TempDataSet[4]['纬度'].drop_duplicates().tolist(),
         label_visibility='collapsed')
-    if not weatherGeneratorProvinceSelected:
+
+    if not len(pages_utils.TempDataSet[4]['经度'].drop_duplicates().tolist()):
         st.toast('请先完成模型构建,再进行地区与模型选择', icon="⚠️")
+    st.session_state.modelReportWeatherInfo['经度'] = weatherGeneratorProvinceSelected
+    st.session_state.modelReportWeatherInfo['纬度'] = weatherGeneratorStationSelected
 with weatherGeneratorInstruction:
     st.markdown("###### 选择待评价模型")
     modelsList = pages_utils.multiselect_all(
         st, '全选-模型',
         pages_utils.TempDataSetField[4]['模型'].tolist(),
         'tempModels', 'collapsed')
+    st.session_state.modelReportWeatherInfo['模型'] = modelsList
 col123, col223 = st.columns(2)
 with col123:
     st.markdown("###### 上传历史气象站点数据")
@@ -550,6 +563,8 @@ with colYear1:
     if year_difference < yearLength:
         st.toast(f'生成数据较短,请延迟至少{yearLength}', icon="⚠️")
     # print(f'生成年份长度:{year_difference}')
+    st.session_state.modelReportWeatherInfo['年限'] = year_difference
+
 with colYear2:
     st.warning('注意事项:生成年份需要与模型训练数据集内部年份相对应', icon="⚠️")
 
@@ -564,6 +579,8 @@ weatherScenesList = pages_utils.multiselect_all(
     'temp111', 'collapsed')
 if not weatherScenesList:
     weatherScenesList = ['常温常雨']
+
+st.session_state.modelReportWeatherInfo['情景'] = weatherScenesList
 
 st.markdown("###### 异常程度设置")
 # ==============================异常程度设置==============================
@@ -713,7 +730,8 @@ with st.container(height=700):
                        align='center')
 
                 # Bar chart for 病害发生程度
-                ax.bar(df['年'] + 0.2, df['病害发生程度'], width=0.4, label='实际病害发生程度', color='r', align='center')
+                ax.bar(df['年'] + 0.2, df['病害发生程度'], width=0.4, label='实际病害发生程度', color='r',
+                       align='center')
                 # 添加标题和标签
                 plt.title(f'{weatherNameT}情景下实际与预测病害发生程度对比图')
                 plt.xlabel('年')

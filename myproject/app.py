@@ -200,6 +200,7 @@ with colDPF21col2:
     if st.button('↩️初始化数据', on_click=emptyValue, type='primary'):
         st.toast("初始化完毕", icon="ℹ️️")
 
+
 # st.markdown("""
 # <style>
 # button {
@@ -210,6 +211,25 @@ with colDPF21col2:
 # }
 # </style>
 # """, unsafe_allow_html=True)
+@st.experimental_dialog("请输入建模场景名称")
+def inputName(dataType):
+    name = st.text_input("输入",
+                         placeholder='水稻稻瘟病峰值动态预测模型',
+                         autocomplete='水稻稻瘟病峰值动态预测模型',
+                         label_visibility='collapsed')
+    if st.button("提交并跳转界面"):
+        st.session_state.modelingName = name
+        if dataType == '点状数据建模':
+            st.session_state.isPlanarInterface = False
+            switch_page(os.path.join(PAGES_PATH, 'DataSet.py'))
+        else:
+            st.session_state.isPlanarInterface = True
+            switch_page(os.path.join(PAGES_PATH, 'DataSetFacet.py'))
+
+
+if "modelingName" not in st.session_state:
+    st.session_state.modelingName = None
+
 category("🗣️ 点/面数据建模入口")
 colAppImg1, colAppImg2, = st.columns(2)
 with colAppImg1:
@@ -217,15 +237,14 @@ with colAppImg1:
     _, colAppBtn2, = st.columns([0.4, 0.6])
     with colAppBtn2:
         if st.button('点状数据建模', type='primary'):
-            st.session_state.isPlanarInterface = False
-            switch_page(os.path.join(PAGES_PATH, 'DataSet.py'))
+            inputName('点状数据建模')
+
 with colAppImg2:
     st.image(os.path.join(RESOURCE_IMAGES_PATH, 'facetBtn.png'))
     _, colAppBtn3, = st.columns([0.4, 0.6])
     with colAppBtn3:
         if st.button('面状数据建模', type='primary'):
-            st.session_state.isPlanarInterface = True
-            switch_page(os.path.join(PAGES_PATH, 'DataSetFacet.py'))
+            inputName('面状数据建模')
 
 
 def navbar():
