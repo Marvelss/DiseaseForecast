@@ -10,14 +10,22 @@ import os.path
 import random
 from datetime import datetime
 
-import pandas as pd
 import streamlit as st
 
 from PIL import Image
+from matplotlib.ticker import MaxNLocator
 from st_pages import hide_pages
 
-from lib.share import RESOURCE_IMAGES_PATH
+from lib.share import RESOURCE_IMAGES_PATH, RESOURCE_PROCESS_PATH, RESOURCE_MODELRESULT_PATH
 from pages import ui, pages_utils
+import matplotlib
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 显示可视化中文图例
+plt.rcParams['font.sans-serif'] = 'SimHei'
+matplotlib.rcParams['axes.unicode_minus'] = False
 
 st.set_page_config(
     layout="wide"
@@ -181,8 +189,8 @@ with hideBtnBrief.container():
     aInfoModelName = st.session_state.modelingName
     abstractInfo = f"""
     ##### &emsp;&emsp;本次建模使用了<u>{aInfoGap1}</u>，通过<u>{aInfoGap2}</u>预处理步骤，结合<u>{aInfoGap3}</u>环节，并利用<u>{aInfoGap4}</u>筛选出优选特征集，包括<u>{aInfoGap5}</u>，数据维度为<u>{aInfoGap6}</u>，最后采用<u>{aInfoGap7}方法</u>，构建了<u>{aInfoModelName}</u>，模型精度为<u>{aInfoGap8}</u>。
-    ##### &emsp;&emsp;此外，基于天气情景生成器模拟生成了{aInfoGap9}的气象情景，对{aInfoGap13}进行模型评估，结果显示静态偏差指标Dev_S，分别为{aInfoGap10}。模型预测值与实际观测结果在多次模拟中的趋势<u>{aInfoGap11}</u>。
-    ##### &emsp;&emsp;综合上述结果，PLSR模型表现出<u>{aInfoGap12[0]}</u>的可靠性和预测效果，参数设置合理，具有<u>{aInfoGap12[1]}</u>的鲁棒性。
+    ##### &emsp;&emsp;此外，基于天气情景生成器模拟生成了<u>{aInfoGap9}</u>的气象情景，对<u>{aInfoGap13}</u>进行模型评估，结果显示静态偏差指标Dev_S，分别为<u>{aInfoGap10}</u>。模型预测值与实际观测结果在多次模拟中的趋势<u>{aInfoGap11}</u>。
+    ##### &emsp;&emsp;综合上述结果，<u>{aInfoGap13}</u>模型表现出<u>{aInfoGap12[0]}</u>的可靠性和预测效果，参数设置合理，具有<u>{aInfoGap12[1]}</u>的鲁棒性。
     """
     st.markdown(abstractInfo, unsafe_allow_html=True)
     colInfo1, colInfo2, colInfo3, colInfo4 = st.columns(4)
@@ -191,7 +199,6 @@ with hideBtnBrief.container():
 
 with hideBtnRaw.container():
     category("📊️ 原始数据")
-    print(pages_utils.TempDataSetField[0]['字段'].tolist())
     array_1d = [item for sublist in pages_utils.TempDataSetField[0]['字段'] for item in sublist]
 
     rInfo1 = '、'.join(list(set(array_1d)))
@@ -250,7 +257,7 @@ with hideBtnFO.container():
     if len(pages_utils.TempDataSetField[3]['特征优选方法'].tolist()):
         category("🌎 特征优选")
         foInfo1 = '、'.join(list(set(pages_utils.TempDataSetField[3]['特征优选方法'].tolist())))
-        pages_utils.TempDataSetField[3]["优选特征"] = ["特征A", "特征B", "特征C"]
+        # pages_utils.TempDataSetField[3]["优选特征"] = ["特征A", "特征B", "特征C"]
 
         foInfo2 = '、'.join(pages_utils.TempDataSetField[3]['优选特征'].tolist())
 
@@ -277,15 +284,18 @@ with hideBtnMB.container():
         mbInfo1 = '、'.join(pages_utils.TempDataSetField[4]['模型'].tolist())
         mbInfo2 = st.session_state.modelingName
         mbInfo3 = pages_utils.TempDataSetField[4]['数据集划分比例'].tolist()[0]
-        print(pages_utils.TempDataSetField[4]['评价指标'].tolist())
-        mbInfo4 = '、'.join(
-            [f'{key}={round(value, 3)}' for key, value in
-             pages_utils.TempDataSetField[4]['评价指标'].tolist()[0].items()])
+        # print(pages_utils.TempDataSetField[4]['评价指标'].tolist())
+        # 处理多条评价指标，并将每个字典的键值对格式化为 "key=value"
+        mbInfo4_list = []
+        for item in pages_utils.TempDataSetField[4]['评价指标']:
+            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in item.items()])
+            mbInfo4_list.append(formatted)
+        mbInfo4 = '；'.join(mbInfo4_list)
 
         st.markdown(f'##### &emsp;&emsp;本次建模基于优选特征集，'
-                    f'使用了{mbInfo1}方法构建了{mbInfo2}。'
-                    f'训练集与验证集比例为{mbInfo3}，'
-                    f'模型精度为{mbInfo4}，具体内容如下：',
+                    f'使用了<u>{mbInfo1}</u>方法构建了<u>{mbInfo2}</u>。'
+                    f'训练集与验证集比例为<u>{mbInfo3}</u>，'
+                    f'模型精度分别为<u>{mbInfo4}</u>。',
                     unsafe_allow_html=True)
         img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '模型构建-回归模型1.png'))
         st.image(img)
@@ -309,15 +319,51 @@ with hideBtnWG.container():
         wgInfo3 = st.session_state.modelReportWeatherInfo['年限']
         wgInfo4 = '、'.join(st.session_state.modelReportWeatherInfo['情景'])
         wgInfo5 = '、'.join(st.session_state.modelReportWeatherInfo['模型'])
-        st.markdown(f'##### &emsp;&emsp;本模块基于经度:{wgInfo1}、纬度:{wgInfo2}地区的历史气象数据，'
-                    f'利用天气情景生成器模拟生成了为期{wgInfo3}年的{wgInfo4}气象情景，'
-                    f'对{wgInfo5}模型进行应用,具体内容如下：',
+        st.markdown(f'##### &emsp;&emsp;本模块基于经度:<u>{wgInfo1}</u>、纬度:<u>{wgInfo2}</u>地区的历史气象数据，'
+                    f'利用天气情景生成器模拟生成了为期<u>{wgInfo3}</u>年的<u>{wgInfo4}</u>气象情景，'
+                    f'各情景部分气象数据具体内容如下：',
                     unsafe_allow_html=True)
 
-        img2 = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'Figure_1.png'))
-        img3 = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'Figure_2.png'))
-        st.image(img2)
-        st.image(img3)
+        # 获取目录下的所有条目
+        path1 = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
+        for root, dirs, files in os.walk(path1):
+            # 获取当前文件夹名称
+            current_folder = os.path.basename(root)
+            for j, file in enumerate(files):
+                if file == '第1年.xlsx':
+                    # 读取表格
+                    df = pd.read_excel(os.path.join(root, file))
+                    # 创建一个新的图形对象
+                    plt.figure(figsize=(12, 6))
+                    # 使用 Seaborn 绘制折线图
+                    sns.lineplot(data=df, x="DayOfYear", y="最高温度", label="最高温度")
+                    sns.lineplot(data=df, x="DayOfYear", y="最低温度", label="最低温度")
+                    # 设置 x 和 y 轴标签、标题、图例等
+                    plt.xlabel('日期 (Day of Year)')
+                    plt.ylabel('温度 (℃)')
+                    plt.title(f'({current_folder}) 每日最高温度和最低温度')
+                    # 保存图片到本地
+                    # plt.savefig(f'{label_list[j]}_温度.png', dpi=300, bbox_inches='tight')  # 保存为高分辨率 PNG 文件
+                    # 添加图例
+                    plt.legend()
+                    # 显示图表
+                    st.pyplot(plt)
+                    # 创建一个新的图形对象
+                    plt.figure(figsize=(12, 6))
+                    # 使用 Seaborn 绘制折线图
+                    sns.barplot(data=df, x="DayOfYear", y="降水", label="每日降水量")
+
+                    # 设置 x 和 y 轴标签、标题、图例等
+                    plt.xlabel('日期 (Day of Year)')
+                    plt.ylabel('降水量(mm)')
+                    plt.title(f'({current_folder}) 每日降水量')
+                    # 设置 x 轴的刻度间隔为每 30 天显示一次
+                    plt.xticks(ticks=range(1, 365, 30))
+                    # 添加图例
+                    plt.legend()
+                    # 显示图表
+                    st.pyplot(plt)
+
         # colWG1, colWG2 = st.columns(2)
         # with colWG1:
         #     st.metric('地区', '湖南省湘阴县')
@@ -413,33 +459,51 @@ def displayLocalGIF2(placeholder, localImagePath1, localImagePath2, caption1, ca
     """, unsafe_allow_html=True)
 
 
-category("🌑 模型评估与应用")
+category("🌑 模型应用与评估")
+
 if len(st.session_state.modelReportWeatherInfo['模型']):
-    st.markdown(f'##### &emsp;&emsp;本次模型预测结果与基于气象多情景仿真器输出情景的应用结果如下：',
+    st.markdown(f'##### &emsp;&emsp;针对经度:<u>{wgInfo1}</u>、纬度:<u>{wgInfo2}</u>地区，'
+                f'基于气象多情景仿真器输出各情景的的应用结果如下：',
                 unsafe_allow_html=True)
-    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'weatherGeneratorEvaluateResult2.jpg'))
-    st.image(img)
+    items = list(st.session_state.modelSituationIndexResult.items())
+    for i, (metric_name, metric_value) in enumerate(items):
+        path = os.path.join(
+            RESOURCE_MODELRESULT_PATH,
+            'modelsSimulateWeatherIndexResult',
+            metric_name +
+            '_applicationPredict' +
+            '.xlsx')
+        weatherNameT = metric_name.split('_')[1]
+        df = pd.read_excel(path)
+        # Plotting
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # Bar chart for Predicted_value
+        ax.bar(df['年'] - 0.2, df['Predicted_value'], width=0.4, label='预测病害发生程度', color='b',
+               align='center')
+
+        # Bar chart for 病害发生程度
+        ax.bar(df['年'] + 0.2, df['病害发生程度'], width=0.4, label='实际病害发生程度', color='r', align='center')
+        # 添加标题和标签
+        plt.title(f'{weatherNameT}情景下实际与预测病害发生程度对比图')
+        plt.xlabel('年')
+        plt.ylabel('病害发生程度')
+        # Set x-ticks to be integers
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        # 添加图例
+        plt.legend()
+        st.pyplot(plt)
+
     endInfo1 = st.session_state.modelingName
     # pages_utils.TempDataSetFacet[4] = pd.DataFrame({'标签': ['病害峰值', 2, 3]})
     endInfo2 = pages_utils.TempDataSetField[4]['标签'].tolist()[0]
     endInfo3 = '、'.join(st.session_state.modelReportWeatherInfo['情景'])
     endInfo4 = '、'.join(formatted_list)
     st.markdown(
-        f'##### &emsp;&emsp;由于本次建模为{endInfo1}，使用相关预测模型评价方法对其进行评价，模型输出为{endInfo2}。'
-        f'计算可得{endInfo3}情景下模型预测输出的偏差指标分别为{endInfo4}。'
-        '已知茶小绿叶蝉虫害的发生与温度、降雨量等关系密切，适宜的温度和降雨'
-        '将促进小绿叶蝉的生长，否则会抑制生长，且一年中茶小绿叶蝉虫害的发生'
-        '存在两个高峰期，分别在<u>5月和9月</u>。\n'
-        '##### &emsp;&emsp;通过比对中各情景'
-        '下预测模型输出的预测发生程度及预测压力值，可看到预测模型预测的整体'
-        '虫害趋势未发生改变，各情景在5月和9月均存在虫害高峰期。由于温度降水'
-        '影响，高温多雨情景下虫害发生期在<u>2月和3月</u>略有延长，该情景下模型动态'
-        '偏差指标均呈现<u>正向</u>偏移，整体预测虫害压力值<u>高于</u>普通常温常雨情景；低'
-        '温少雨情景下虫害发生期在3月略有缩短，模型动态偏差指标均呈现负向偏'
-        '移，压力值低于普通常温常雨情景。预测结果与病虫害习性较为相符，且在'
-        '多次模拟过程中结果趋势均保持较高程度的一致，模型输出较为合理。\n'
-        '##### &emsp;&emsp;根据上述计算结果进行综合评估，可认为该模型<u>可靠性较高</u>，参数设置较为'
-        '合理，具有良好的预测效果和鲁棒性。', unsafe_allow_html=True)
+        f'##### &emsp;&emsp;本次建模场景为<u>{endInfo1}</u>，模型输出为<u>{endInfo2}</u>。'
+        f'基于静态预测模型评价方法计算可得<u>{endInfo3}</u>情景下各模型预测输出的偏差指标分别为<u>{endInfo4}</u>。  \n'
+        f'##### &emsp;&emsp;根据上述计算结果进行综合评估，可认为上述模型<u>可靠性较高</u>，参数设置较为合理，具有良好的预测效果和鲁棒性。',
+        unsafe_allow_html=True)
 # if btnResult:
 #     st.markdown("""
 #     <style>
