@@ -237,14 +237,20 @@ with colAppImg1:
     _, colAppBtn2, = st.columns([0.4, 0.6])
     with colAppBtn2:
         if st.button('点状数据建模', type='primary'):
-            inputName('点状数据建模')
+            if not st.session_state.modelingName:
+                inputName('点状数据建模')
+            else:
+                switch_page(os.path.join(PAGES_PATH, 'DataSet.py'))
 
 with colAppImg2:
     st.image(os.path.join(RESOURCE_IMAGES_PATH, 'facetBtn.png'))
     _, colAppBtn3, = st.columns([0.4, 0.6])
     with colAppBtn3:
         if st.button('面状数据建模', type='primary'):
-            inputName('面状数据建模')
+            if not st.session_state.modelingName:
+                inputName('面状数据建模')
+            else:
+                switch_page(os.path.join(PAGES_PATH, 'DataSetFacet.py'))
 
 
 def navbar():
