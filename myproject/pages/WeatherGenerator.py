@@ -703,11 +703,11 @@ with st.container(height=700):
                 fig, ax = plt.subplots(figsize=(10, 6))
 
                 # Bar chart for Predicted_value
-                ax.bar(df['年'] - 0.2, df['Predicted_value'], width=0.4, label='Predicted_value', color='b',
+                ax.bar(df['年'] - 0.2, df['Predicted_value'], width=0.4, label='预测病害发生程度', color='b',
                        align='center')
 
                 # Bar chart for 病害发生程度
-                ax.bar(df['年'] + 0.2, df['病害发生程度'], width=0.4, label='病害发生程度', color='r', align='center')
+                ax.bar(df['年'] + 0.2, df['病害发生程度'], width=0.4, label='实际病害发生程度', color='r', align='center')
                 # 添加标题和标签
                 plt.title(f'{weatherNameT}情景下实际与预测病害发生程度对比图')
                 plt.xlabel('年')
