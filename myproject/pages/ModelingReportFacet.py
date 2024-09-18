@@ -142,7 +142,7 @@ with hideBtnBrief.container():
     category("ℹ️ 摘要")
     # pages_utils.TempDataSetField[3]["特征优选方法"] = ["方法A", "方法B", "方法C"]
 
-    aInfoGap1 = '、'.join(pages_utils.TempDataSetFieldFacet[0]['数据类型']) if len(
+    aInfoGap1 = '、'.join(list(set(pages_utils.TempDataSetFieldFacet[0]['数据类型']))) if len(
         pages_utils.TempDataSetFieldFacet[0]['数据类型']) else '(待进行处理)'
     aInfoGap2 = '、'.join(pages_utils.TempDataSetFieldFacet[1]['预处理方法']) if len(
         pages_utils.TempDataSetFieldFacet[1]['预处理方法']) else '(待进行处理)'
@@ -158,10 +158,13 @@ with hideBtnBrief.container():
     aInfoGap6 = f'{rows}*{columns}'
     aInfoGap7 = '、'.join(pages_utils.TempDataSetFieldFacet[4]['模型'].tolist()) if len(
         pages_utils.TempDataSetFieldFacet[4]['特征'].tolist()) else '(待进行处理)'
-    aInfoGap8 = '、'.join(
-        [f'{key}={round(value, 3)}' for key, value in
-         pages_utils.TempDataSetFieldFacet[4]['评价指标'].tolist()[0].items()]) if len(
-        pages_utils.TempDataSetFieldFacet[4]['特征'].tolist()) else '(待进行处理)'
+    print('---测试----')
+    print(pages_utils.TempDataSetFieldFacet[4]['评价指标'].tolist()[0])
+    aInfoGap8 = ''
+    # aInfoGap8 = '、'.join(
+    #     [f'{key}={round(value, 3)}' for key, value in
+    #      pages_utils.TempDataSetFieldFacet[4]['评价指标'].tolist()[0].items()]) if len(
+    #     pages_utils.TempDataSetFieldFacet[4]['特征'].tolist()) else '(待进行处理)'
     # st.session_state.modelSituationIndexResult = {'高温多雨': 0.45}
     # st.session_state.modelSituationIndexResult = {}
     aInfoGap9 = '、'.join(st.session_state.modelReportWeatherInfoFacet['情景']) if len(
@@ -222,8 +225,8 @@ with hideBtnPre.container():
         st.markdown(f'##### &emsp;&emsp;本次预处理使用了<u>{preInfo1}</u>方法，'
                     f'处理字段为：<u>{preInfo2}</u>，'
                     f'处理后剩余数据为<u>{preInfo3}</u>条，具体内容如下', unsafe_allow_html=True)
-        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '数据预处理-缺失值插补.png'))
-        st.image(img)
+        # img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '数据预处理-缺失值插补.png'))
+        # st.image(img)
         # colPart1, colPart2, colPart3 = st.columns(3)
         # colPart1.metric('预处理字段', '温度')
         # colPart2.metric('预处理方法', '缺失值插补')
@@ -233,11 +236,11 @@ with hideBtnPre.container():
 with hideBtnFC.container():
     if len(pages_utils.TempDataSetFieldFacet[2]['特征计算方法']):
         category("🌍 特征计算")
-        fcInfo1 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['特征计算方法'])
+        fcInfo1 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['数据类型'])
         # fcInfo2 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['输入文件'])
         # fcInfo3 = '、'.join(list(set(pages_utils.TempDataSetFieldFacet[2]['备选特征'])))
-        fcInfo2 = pages_utils.TempDataSetFieldFacet[2]['输入文件']
-        fcInfo3 = pages_utils.TempDataSetFieldFacet[2]['字段']
+        fcInfo2 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['特征计算方法'])
+        fcInfo3 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['字段'])
         st.markdown(f'##### &emsp;&emsp;本次特征计算基于<u>{fcInfo1}</u>数据，'
                     f'通过<u>{fcInfo2}</u>方法，得到了特征包括：<u>{fcInfo3}</u>，'
                     f'具体内容如下：', unsafe_allow_html=True)
@@ -286,7 +289,7 @@ with hideBtnMB.container():
         # pages_utils.TempDataSetFieldFacet[4]['模型'] = ['PLSR']
         mbInfo1 = '、'.join(pages_utils.TempDataSetFieldFacet[4]['模型'].tolist())
         mbInfo2 = st.session_state.modelingName
-        mbInfo3 = pages_utils.TempDataSetFieldFacet[4]['数据集划分比例'].tolist()[0]
+        # mbInfo3 = pages_utils.TempDataSetFieldFacet[4]['数据集划分比例'].tolist()[0]
         # print(pages_utils.TempDataSetFieldFacet[4]['评价指标'].tolist())
         # 处理多条评价指标，并将每个字典的键值对格式化为 "key=value"
         mbInfo4_list = []
@@ -297,11 +300,26 @@ with hideBtnMB.container():
 
         st.markdown(f'##### &emsp;&emsp;本次建模基于优选特征集，'
                     f'使用了<u>{mbInfo1}</u>方法构建了<u>{mbInfo2}</u>。'
-                    f'训练集与验证集比例为<u>{mbInfo3}</u>，'
                     f'模型精度分别为<u>{mbInfo4}</u>。',
                     unsafe_allow_html=True)
-        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '模型构建-回归模型1.png'))
-        st.image(img)
+        for temp in pages_utils.TempDataSetFieldFacet[4]['模型'].tolist():
+            path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+            testLabelDF = pd.read_excel(os.path.join(path1, f'{temp}_testLabel.xlsx'))
+            predictLabelDF = pd.read_excel(os.path.join(path1, f'{temp}_predictLabel.xlsx'))
+            actual_values = testLabelDF.iloc[:, 0]
+            predicted_values = predictLabelDF.iloc[:, 0]
+            # 绘制散点图
+            fig, ax = plt.subplots()
+
+            sns.scatterplot(x=actual_values, y=predicted_values)
+            plt.plot([actual_values.min(), actual_values.max()],
+                     [actual_values.min(), actual_values.max()],
+                     'r--')
+            ax.set_xlabel('实际病株率(%)')
+            ax.set_ylabel('预测病株率(%)')
+            # plt.figure(figsize=(10, 6))
+            plt.title(f'{temp}模型实际与预测病株率散点图')
+            st.pyplot(fig)
         # cc1, colMBPart1, colMBPart2 = st.columns([0.7, 0.3, 0.3])
         # cc1.metric('特征集', 'class-AREA_MN、land-FRAC_MN、class-FRAC_MN、01-01_01-31降雨日数、07-19_08-23_降水累积量')
         # colMBPart1.metric('标签', '病害峰值')
@@ -466,7 +484,7 @@ category("🌑 模型应用与评估")
 
 if len(st.session_state.modelReportWeatherInfoFacet['模型']):
     st.markdown(f'##### &emsp;&emsp;针对经度:<u>{wgInfo1}</u>、纬度:<u>{wgInfo2}</u>地区，'
-                f'基于气象多情景仿真器输出各情景的的应用结果如下：',
+                f'基于气象多情景仿真器输出的各情景应用结果如下：',
                 unsafe_allow_html=True)
     items = list(st.session_state.modelSituationIndexResult.items())
     for i, (metric_name, metric_value) in enumerate(items):
@@ -492,13 +510,13 @@ if len(st.session_state.modelReportWeatherInfoFacet['模型']):
     endInfo1 = st.session_state.modelingName
     # pages_utils.TempDataSetFacet[4] = pd.DataFrame({'标签': ['病害峰值', 2, 3]})
     endInfo2 = '病株率' if '病株率' in pages_utils.TempDataSetFieldFacet[4]['标签'].tolist()[0] else \
-    pages_utils.TempDataSetFieldFacet[4]['标签'].tolist()[0]
+        pages_utils.TempDataSetFieldFacet[4]['标签'].tolist()[0]
     endInfo3 = '、'.join(st.session_state.modelReportWeatherInfoFacet['情景'])
     endInfo4 = '、'.join(formatted_list)
     st.markdown(
         f'##### &emsp;&emsp;本次建模场景为<u>{endInfo1}</u>，模型输出为<u>{endInfo2}</u>。'
         f'基于动态预测模型评价方法计算可得<u>{endInfo3}</u>情景下各模型预测输出的偏差指标分别为<u>{endInfo4}</u>。  \n'
-        f'##### &emsp;&emsp;根据上述计算结果进行综合评估，可认为上述模型<u>可靠性较高</u>，参数设置较为合理，具有良好的预测效果和鲁棒性。',
+        f'##### &emsp;&emsp;根据上述计算结果进行综合评估，可认为上述模型可靠性<u>较高</u>，参数设置较为合理，具有良好的预测效果和鲁棒性。',
         unsafe_allow_html=True)
 # if btnResult:
 #     st.markdown("""
@@ -509,3 +527,14 @@ if len(st.session_state.modelReportWeatherInfoFacet['模型']):
 # imagePath1 = os.path.join(RESOURCE_TEMPDIR_PATH, "s_output1.gif")
 # imagePath2 = os.path.join(RESOURCE_TEMPDIR_PATH, "e_output1.gif")
 # displayLocalGIF2(st.empty(), imagePath1, imagePath2, "模型预测结果图", "模型预测结果图2")
+colFCPart1, colFCPart2 = st.columns(2)
+with colFCPart1:
+    img = Image.open(r'E:\a_python\program\diseaseForecastStreamlit\demo\demo13\Figure_1.png')
+    st.image(img)
+    img1 = Image.open(r'E:\a_python\program\diseaseForecastStreamlit\demo\demo13\Figure_3.png')
+    st.image(img1)
+with colFCPart2:
+    img = Image.open(r'E:\a_python\program\diseaseForecastStreamlit\demo\demo13\Figure_2.png')
+    st.image(img)
+    img2 = Image.open(r'E:\a_python\program\diseaseForecastStreamlit\demo\demo13\Figure_4.png')
+    st.image(img2)

@@ -307,7 +307,7 @@ with hideBtnMB.container():
             sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax)
             ax.set_xlabel('实际病害发生程度')
             ax.set_ylabel('预测病害发生程度')
-            plt.title(f'{temp}模型精度评价-混淆矩阵')
+            plt.title(f'{temp}模型混淆矩阵图')
             st.pyplot(fig)
         # cc1, colMBPart1, colMBPart2 = st.columns([0.7, 0.3, 0.3])
         # cc1.metric('特征集', 'class-AREA_MN、land-FRAC_MN、class-FRAC_MN、01-01_01-31降雨日数、07-19_08-23_降水累积量')

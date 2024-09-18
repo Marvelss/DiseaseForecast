@@ -117,7 +117,7 @@ with dataSCM:
 with dataSCMap:
     onDS = st.toggle(label="选中文件时自动显示对应图层",
                      help='图层加载时间较长',
-                     value=True)
+                     value=False)
 
     placeHolderDSF = st.empty()
     # st.markdown(temp['checked'])
@@ -157,8 +157,8 @@ with dataSCMap:
 with dataSCR:
     st.markdown("##### 上传数据集")
 
-    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据(未开放)', '遥感数据(未开放)'], ["🌨️️", "🌾", "🚁"])
-    suuDirName = st.text_input(label='子文件夹名称', value='气象数据')
+    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '遥感数据'], ["🌨️️", "🌾", "🚁"])
+    suuDirName = st.text_input(label='子文件夹名称', value=selectedTemplate)
     uploaded_files = st.file_uploader(
         "上传数据集",
         accept_multiple_files=True,
@@ -223,35 +223,6 @@ with dataSCR:
         # st.session_state.leftBars = updateLeftBars(pages_utils.RawDataSetFieldFacet)
 
     # ==============================右侧数据模板下载及注意事项==============================
-    st.markdown("##### 数据模板下载及注意事项")
+    st.markdown("##### 数据上传注意事项")
     placeholder1 = st.empty()
-    if selectedTemplate == '气象数据':
-        # with placeholder1.container():
-        st.warning('shp文件名称不能以shp结尾', icon="⚠️")
-    #     with open(path1, "rb") as file:
-    #         st.download_button(
-    #             label="下载气象数据模板",
-    #             data=file,
-    #             file_name="气象数据-模板.xlsx",
-    #             mime="application/octet-stream"
-    #         )
-    if selectedTemplate == '植保数据':
-        # with placeholder1.container():
-        st.warning('warningPInfo', icon="⚠️")
-    #     with open(path2, "rb") as file:
-    #         st.download_button(
-    #             label="下载植保数据模板",
-    #             data=file,
-    #             file_name="植保数据-模板.xlsx",
-    #             mime="application/octet-stream"
-    #         )
-    if selectedTemplate == '农学数据':
-        with placeholder1.container():
-            st.warning('warningAInfo', icon="⚠️")
-            # with open(path3, "rb") as file:
-            #     st.download_button(
-            #         label="下载农学数据模板",
-            #         data=file,
-            #         file_name="农学数据-模板.xlsx",
-            #         mime="application/octet-stream"
-            #     )
+    st.warning('shp文件名称不能以shp结尾', icon="⚠️")

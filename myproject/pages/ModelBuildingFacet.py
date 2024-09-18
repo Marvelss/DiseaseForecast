@@ -413,8 +413,8 @@ with modelACV:
     featureList = list(set(columnArrayT))  # 特征变量
     # 过滤特定元素
     filtered_columns = [col for col in featureList if col not in [
-                                                                  "经度", "纬度",
-                                                                  "年", "DayOfYear"]]
+        "经度", "纬度",
+        "年", "DayOfYear"]]
 
     # 将过滤后的元素放入集合中
     targetList = set(filtered_columns)  # 目标变量
@@ -556,18 +556,13 @@ with modelACM:
             with colOP1:
                 option1 = st.selectbox(
                     label="训练与验证数据集划分", label_visibility='collapsed',
-                    options=("按比例划分", "按年份划分(未实现)")
+                    options=("该模型无需划分", "按年份划分(未实现)"), disabled=True
                 )
             with colOP2:
-                if option1 == '按比例划分':
+                if option1 == '该模型无需划分':
                     option = st.selectbox(
                         label="比例", label_visibility='collapsed',
-                        options=("8:2", "7:3", "6:4")
-                    )
-                elif option1 == '按年份划分(未实现)':
-                    option = st.selectbox(
-                        label="年", label_visibility='collapsed',
-                        options=('待实现', '')
+                        options=("该模型无需划分", "7:3", "6:4"), disabled=True
                     )
 
             for index, row in pages_utils.TempDataSetFieldFacet[4].iterrows():
@@ -624,12 +619,14 @@ with modelACM:
                     predicted_values = predictLabelDF.iloc[:, 0]
                     try:
                         # 回归模型
-                        if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[i] == 'SEIR机理模型':
+                        if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[
+                            i] == 'SEIR机理模型':
                             # 绘制散点图
                             fig, ax = plt.subplots()
 
                             sns.scatterplot(x=actual_values, y=predicted_values)
-                            plt.plot([actual_values.min(), actual_values.max()], [actual_values.min(), actual_values.max()],
+                            plt.plot([actual_values.min(), actual_values.max()],
+                                     [actual_values.min(), actual_values.max()],
                                      'r--')
                             ax.set_xlabel('实际峰值(%)')
                             ax.set_ylabel('预测峰值(%)')

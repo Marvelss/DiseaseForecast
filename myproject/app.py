@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import pandas as pd
@@ -214,8 +215,8 @@ with colDPF21col2:
 @st.experimental_dialog("请输入建模场景名称")
 def inputName(dataType):
     name = st.text_input("输入",
-                         placeholder='水稻稻瘟病峰值动态预测模型',
-                         autocomplete='水稻稻瘟病峰值动态预测模型',
+                         placeholder='水稻纹枯病SEIR动态预测模型',
+                         autocomplete='水稻纹枯病SEIR动态预测模型',
                          label_visibility='collapsed')
     if st.button("提交并跳转界面"):
         st.session_state.modelingName = name
@@ -410,17 +411,27 @@ def vote(titleName):
             label_visibility='collapsed',
             type=['xlsx', 'csv', 'txt', 'xls', 'zip'],
             help='help')
+        d1 = st.date_input("开始时间(默认处理各年数据集)",
+                           value=datetime.date(1990, 7, 6),
+                           format='MM/DD/YYYY',
+                           )
+        d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 8, 9))
+        option = st.selectbox(
+            '计算阈值方式',
+            ('单日降水量',))
+        if option == '单日降水量':
+            number2 = st.text_input("单日降水量数值(mm)", value=0.1)
+        number1 = st.number_input("连续降雨日数时长(天数)", value=1, min_value=1)
         interval_col1, interval_col2 = st.columns([6, 1])
         btn = interval_col2.button('运行')
         if btn:
-            btn2 = interval_col2.button('下载结果')
-            with open('zipPath', "rb") as file:
-                st.download_button(
-                    label="下载",
+            with open(r'低温多雨_温度.png', "rb") as file:
+                interval_col2.download_button(
+                    label="下载数据",
                     data=file,
                     file_name="模型结构与训练结果.zip",
                     mime="application/zip",
-                )
+                    )
 
 
 def app(image, link, name, description, developer, repo_link):
