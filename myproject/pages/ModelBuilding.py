@@ -772,7 +772,7 @@ with modelACM:
                             sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax)
                             ax.set_xlabel('实际病害发生程度')
                             ax.set_ylabel('预测病害发生程度')
-                            plt.title('分类模型精度评价-混淆矩阵')
+                            plt.title(f'{models[i]}模型精度评价-混淆矩阵')
                             st.pyplot(fig)
                         # Populate the array with key-value pairs
                         metrics = []

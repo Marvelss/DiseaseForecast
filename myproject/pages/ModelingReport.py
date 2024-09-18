@@ -14,6 +14,7 @@ import streamlit as st
 
 from PIL import Image
 from matplotlib.ticker import MaxNLocator
+from sklearn.metrics import confusion_matrix
 from st_pages import hide_pages
 
 from lib.share import RESOURCE_IMAGES_PATH, RESOURCE_PROCESS_PATH, RESOURCE_MODELRESULT_PATH
@@ -157,10 +158,14 @@ with hideBtnBrief.container():
     aInfoGap6 = f'{rows}*{columns}'
     aInfoGap7 = '、'.join(pages_utils.TempDataSetField[4]['模型'].tolist()) if len(
         pages_utils.TempDataSetField[4]['特征'].tolist()) else '(待进行处理)'
-    aInfoGap8 = '、'.join(
-        [f'{key}={round(value, 3)}' for key, value in
-         pages_utils.TempDataSetField[4]['评价指标'].tolist()[0].items()]) if len(
-        pages_utils.TempDataSetField[4]['特征'].tolist()) else '(待进行处理)'
+    if len(pages_utils.TempDataSetField[4]['特征'].tolist()):
+        mbInfo4_list = []
+        for item in pages_utils.TempDataSetField[4]['评价指标']:
+            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in item.items()])
+            mbInfo4_list.append(formatted)
+        aInfoGap8 = '；'.join(mbInfo4_list)
+    else:
+        aInfoGap8 = '(待进行处理)'
     # st.session_state.modelSituationIndexResult = {'高温多雨': 0.45}
     # st.session_state.modelSituationIndexResult = {}
     aInfoGap9 = '、'.join(st.session_state.modelReportWeatherInfo['情景']) if len(
@@ -188,7 +193,7 @@ with hideBtnBrief.container():
     aInfoGap12 = ['较高', '较好'] if 0.45 < 1 else ['较低', '较差']  # 模型评价和天气情景都好
     aInfoModelName = st.session_state.modelingName
     abstractInfo = f"""
-    ##### &emsp;&emsp;本次建模使用了<u>{aInfoGap1}</u>，通过<u>{aInfoGap2}</u>预处理步骤，结合<u>{aInfoGap3}</u>环节，并利用<u>{aInfoGap4}</u>筛选出优选特征集，包括<u>{aInfoGap5}</u>，数据维度为<u>{aInfoGap6}</u>，最后采用<u>{aInfoGap7}方法</u>，构建了<u>{aInfoModelName}</u>，模型精度为<u>{aInfoGap8}</u>。
+    ##### &emsp;&emsp;本次建模使用了<u>{aInfoGap1}</u>，通过<u>{aInfoGap2}</u>预处理步骤，结合<u>{aInfoGap3}</u>环节，并利用<u>{aInfoGap4}</u>筛选出优选特征集，包括<u>{aInfoGap5}</u>，数据维度为<u>{aInfoGap6}</u>，最后采用<u>{aInfoGap7}方法</u>，构建了<u>{aInfoModelName}</u>，模型精度分别为<u>{aInfoGap8}</u>。
     ##### &emsp;&emsp;此外，基于天气情景生成器模拟生成了<u>{aInfoGap9}</u>的气象情景，对<u>{aInfoGap13}</u>进行模型评估，结果显示静态偏差指标Dev_S，分别为<u>{aInfoGap10}</u>。模型预测值与实际观测结果在多次模拟中的趋势<u>{aInfoGap11}</u>。
     ##### &emsp;&emsp;综合上述结果，<u>{aInfoGap13}</u>模型表现出<u>{aInfoGap12[0]}</u>的可靠性和预测效果，参数设置合理，具有<u>{aInfoGap12[1]}</u>的鲁棒性。
     """
@@ -286,19 +291,24 @@ with hideBtnMB.container():
         mbInfo3 = pages_utils.TempDataSetField[4]['数据集划分比例'].tolist()[0]
         # print(pages_utils.TempDataSetField[4]['评价指标'].tolist())
         # 处理多条评价指标，并将每个字典的键值对格式化为 "key=value"
-        mbInfo4_list = []
-        for item in pages_utils.TempDataSetField[4]['评价指标']:
-            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in item.items()])
-            mbInfo4_list.append(formatted)
         mbInfo4 = '；'.join(mbInfo4_list)
-
         st.markdown(f'##### &emsp;&emsp;本次建模基于优选特征集，'
                     f'使用了<u>{mbInfo1}</u>方法构建了<u>{mbInfo2}</u>。'
                     f'训练集与验证集比例为<u>{mbInfo3}</u>，'
                     f'模型精度分别为<u>{mbInfo4}</u>。',
                     unsafe_allow_html=True)
-        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '模型构建-回归模型1.png'))
-        st.image(img)
+        for temp in pages_utils.TempDataSetField[4]['模型'].tolist():
+            path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+            testLabelDF = pd.read_excel(os.path.join(path1, f'{temp}_testLabel.xlsx'))
+            predictLabelDF = pd.read_excel(os.path.join(path1, f'{temp}_predictLabel.xlsx'))
+            # 绘制混淆矩阵图
+            fig, ax = plt.subplots()
+            conf_matrix = confusion_matrix(testLabelDF, predictLabelDF)
+            sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax)
+            ax.set_xlabel('实际病害发生程度')
+            ax.set_ylabel('预测病害发生程度')
+            plt.title(f'{temp}模型精度评价-混淆矩阵')
+            st.pyplot(fig)
         # cc1, colMBPart1, colMBPart2 = st.columns([0.7, 0.3, 0.3])
         # cc1.metric('特征集', 'class-AREA_MN、land-FRAC_MN、class-FRAC_MN、01-01_01-31降雨日数、07-19_08-23_降水累积量')
         # colMBPart1.metric('标签', '病害峰值')
