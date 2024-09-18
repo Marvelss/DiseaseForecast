@@ -72,23 +72,47 @@ checkBoxModelNum = 8
 plt.rcParams['font.sans-serif'] = 'SimHei'
 # 初始化模型参数
 model_params = [
-    {"模型名称": "SVM", 'C': '1.0', 'kernel': 'rbf', 'gamma': 'scale'},
-    {"模型名称": "KNN", "n_neighbors": "5", "leaf_size": "30",
-     "n_jobs": "1"},
-    {"模型名称": "FLDA", "n_components": "sqrt", "solver": "eigen",
-     "store_covariance": "True"},
-    {"模型名称": "RF", "n_estimators": "100", "criterion": "gini",
-     "min_samples_split": "3"},
-    {"模型名称": "SEIR机理模型", "min_coefficient_ka": "1", "max_coefficient_ka": "4",
-     "min_coefficient_kb": "0", "max_coefficient_kb": "0.3", "min_coefficient_kc": "30",
-     "max_coefficient_kc": "60", "min_coefficient_OPT_PRI": "10", "max_coefficient_OPT_PRI": "30",
-     "min_coefficient_r": "10", "max_coefficient_r": "20",
-     "min_coefficient_q": "50", "max_coefficient_q": "90", "ω": "3",
-     "β0": "0.46", "optimumTEM": "28", "temStep": "3", "preStep": "5", "slideStep": "暂定",
-     "loopNumbers": "1", "popSize": "20", "chromLength": "10", "pc": "0.6", "pm": "0.001"},
-    {"模型名称": "PLSR", "n_components": "2", "scale": "True", "max_iter": "500"},
-    {"模型名称": "LR", "fit_intercept": "True", "normalize": "False", "alpha": "0.1"},
-    {"模型名称": "SVR", "kernel": "linear", "C": "1.0", "epsilon": "0.1"}
+    {"模型名称": "SVM",
+     "模型参数": {
+         'C': '1.0', 'kernel': 'rbf', 'gamma': 'scale'},
+     "备注": ['test_pretreatment_point', 'test_feature_calculation_point', 'test_feature_ optimization']},
+    {"模型名称": "KNN",
+     "模型参数": {"n_neighbors": "5", "leaf_size": "30", "n_jobs": "1"},
+     "备注": ['testA1', 'testA2', 'testA3']},
+    {"模型名称": "FLDA",
+     "模型参数": {"store_covariance": "True"},
+     "备注": ['testA3']},
+    {"模型名称": "RF",
+     "模型参数": {"n_estimators": "100", "criterion": "gini", "min_samples_split": "3"},
+     "备注": ['testA1', 'testA2', 'testA3']},
+    {"模型名称": "SEIR机理模型",
+     "模型参数": {
+         "min_coefficient_ka": "1", "max_coefficient_ka": "4",
+         "min_coefficient_kb": "0", "max_coefficient_kb": "0.3", "min_coefficient_kc": "30",
+         "max_coefficient_kc": "60", "min_coefficient_OPT_PRI": "10", "max_coefficient_OPT_PRI": "30",
+         "min_coefficient_r": "10", "max_coefficient_r": "20",
+         "min_coefficient_q": "50", "max_coefficient_q": "90", "ω": "3",
+         "β0": "0.46", "optimumTEM": "28", "temStep": "3", "preStep": "5", "slideStep": "暂定",
+         "loopNumbers": "1", "popSize": "20", "chromLength": "10", "pc": "0.6", "pm": "0.001"
+     },
+     "备注": [
+         '最小缓冲系数ka', '最大缓冲系数ka', '最小缓冲系数kb', '最大缓冲系数kb',
+         '温度T:函数方差(下限)', '温度T:函数方差(上限)', '降水P:最适降水量(下限)',
+         '降水P:最适降水量(上限)', '降水P:调节参数(下限)', '降水P:调节参数(上限)',
+         '平均感染期(下限)', '平均感染期(上限)', '平均潜伏期', '基本感染率',
+         '最适温度范围中心', '温度窗口步长', '降水窗口步长', '滑动窗口步长',
+         '迭代次数', '种群规模', '二进制编码长度', '交叉概率', '变异概率']},
+    {"模型名称": "PLSR",
+     "模型参数": {"n_components": "2", "scale": "True", "max_iter": "500"},
+     "备注": ['testB1', 'testB2', 'testB3']},
+    {"模型名称": "LR",
+     "模型参数": {"fit_intercept": "True"},
+     "备注": ['testA1', 'testA2', 'testA3']},
+    {"模型名称": "SVR", "模型参数": {
+        "kernel": "linear", "C": "1.0", "epsilon": "0.1"
+    },
+     "备注": ['testB1', 'testB2', 'testB3']}
+
 ]
 
 
@@ -348,7 +372,8 @@ def onPrecision(*cboxList):
     if cboxList[1]:
         st.session_state["modelPrecisionName"].append('Kappa')
     if cboxList[2]:
-        st.session_state["modelPrecisionName"].append('MSE')
+        pass
+        # st.session_state["modelPrecisionName"].append('MSE')
     if cboxList[3]:
         st.session_state["modelPrecisionName"].append('R方')
     if cboxList[4]:
@@ -472,17 +497,24 @@ with modelACM:
             if agree or agree1 or agree2 or agree2 or agree3 or agree4 or agree5 or agree6 or agree7:
                 model = getCheckboxName()
                 # print(f'--{model}--')
-                # 获取SVM模型的参数
-                svm_params_dict = {}
+                formatted_data = []
                 for entry in model_params:
                     if entry.get("模型名称") == model:
-                        svm_params_dict = {key: value for key, value in entry.items() if key != "模型名称"}
-
-                # 转换参数格式
-                formatted_params = [{"参数名": key, "参数值": value} for key, value in svm_params_dict.items()]
-                df = pd.DataFrame(formatted_params)
+                        # Unpack the parameters and remarks together
+                        for param_name, param_value in entry["模型参数"].items():
+                            remark = entry["备注"].pop(0)  # Get the corresponding remark for each parameter
+                            formatted_data.append({
+                                # "模型名称": model,
+                                "参数名": param_name,
+                                "参数值": param_value,
+                                "备注": remark
+                            })
+                df = pd.DataFrame(formatted_data)
+                # st.table(df)
                 edited_df = st.data_editor(df, height=190, width=800,
-                                           disabled=["参数名"])
+                                           disabled=["参数名", "备注"])
+                # 删除 '备注' 列
+                edited_df_no_remark = edited_df.drop(columns=["备注"])
                 st.session_state["modelParamName"] = edited_df.to_dict()
 
             # =======================准备任务清单内容=======================
@@ -529,7 +561,8 @@ with modelACM:
             with tempCol2:
                 agree9 = st.checkbox('R方', key='checkBoxPrecision3')
             with tempCol3:
-                agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
+                pass
+                # agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
 
             interval_col1, interval_col2 = st.columns([5, 1])
             # 传入指标
@@ -537,7 +570,7 @@ with modelACM:
             btn21 = interval_col2.button(
                 "下一步",
                 on_click=onPrecision,
-                args=[agree6, agree7, agree8, agree9, agree10])
+                args=[agree6, agree7, 'agree8', agree9, agree10])
 
     # Page 2
     elif st.session_state.page == 2:
@@ -580,7 +613,7 @@ with modelACM:
                 pages_utils.TempDataSetFieldFacet[4], height=190, width=800,
                 column_order=["编号", "模型", "时间", '处理状态'],
                 disabled=["时间", '处理状态'], num_rows="dynamic", )
-            interval_col34, interval_col33 = st.columns([4, 1])
+            interval_col34, interval_col33 = st.columns([3, 1])
             with interval_col33:
                 # st.info('当前时间分辨率为:1天')
                 # temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)
