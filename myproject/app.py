@@ -96,7 +96,7 @@ if "isPlanarInterface" not in st.session_state:
 if "IMAGECOUNT" not in st.session_state:
     st.session_state.IMAGECOUNT = IMAGECOUNT
 # 设置网页标题
-st.title('多场景病虫害预测系统')
+st.title('多场景作物病虫害预测系统')
 
 category_colors_cycle = itertools.cycle(
     [
@@ -403,7 +403,7 @@ def vote(titleName):
         # col1321, col1322 = st.columns([0.4, 0.6])
         # with col1321:
         st.info("说明:  \n"
-                "字段内容必须包含", icon="ℹ️️")
+                "上传的数据集字段内容必须包含", icon="ℹ️️")
         # with col1322:
         uploaded_files = st.file_uploader(
             "上传数据集",
