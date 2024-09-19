@@ -2,18 +2,18 @@
 @Author : SakuraFox
 @Time: 2024-02-26 9:49
 @File : Visualization.py
-@Description : 数据可视化-面状
+@Description : 数据下载-面状
 """
 import os
 import zipfile
 
-import pandas as pd
 import streamlit as st
-from matplotlib import pyplot as plt
-import seaborn as sns
-from st_pages import hide_pages
+import os
 
-from lib.share import RESOURCE_MODELRESULT_PATH
+from st_pages import hide_pages
+from streamlit_tree_select import tree_select
+import leafmap.foliumap as leafmap
+from lib.share import RESOURCE_MODELRESULT_PATH, RESOURCE_TEMPDIR_PATH, RESOURCE_PROCESS_PATH
 from pages import pages_utils
 
 st.set_page_config(
@@ -26,7 +26,6 @@ st.markdown("""
     .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
     </style>
     """, unsafe_allow_html=True)
-# 隐藏页面
 hide_pages(
     [
         "测试界面",
@@ -42,165 +41,153 @@ hide_pages(
 )
 
 
-@st.cache_data
-def convert_df(df):
-    # IMPORTANT: Cache the conversion to prevent computation on every rerun
-    return df.to_csv().encode("gbk")
+def findFeatureFile(featureList, fileList):
+    # 创建一个字典来存储特征名称及其对应的文件
+    feature_files = {}
+
+    # 遍历每个特征名称
+    for feature in featureList:
+        # 找出所有文件名中包含特征名称的文件
+        matched_files = [file for file in fileList if feature in file]
+
+        # 将结果存储在字典中
+        feature_files[feature] = matched_files
+    matched_files = [file for files in feature_files.values() for file in files]
+    return matched_files
 
 
-# with tab1:
-tab1, tab2 = st.tabs(['数据下载', '可视化(待完成)'])
+# 添加图层
+def addLayer(mapTemp, filePath):
+    fileNameT = os.path.basename(filePath)
+    if 'tif' in fileNameT:
+        mapTemp.add_raster(filePath,
+                           layer_name=fileNameT.split('.')[0])
+    elif 'shp' in fileNameT:
+        mapTemp.add_shp(filePath,
+                        layer_name=fileNameT.split('.')[0])
+    elif 'json' in fileNameT:
+        mapTemp.add_json(filePath,
+                         layer_name=fileNameT.split('.')[0])
 
-with tab1:
-    col1, col2 = st.columns([0.7, 0.2])
-    with col2:
-        st.markdown('###### 模型结构与训练结果下载')
-        # option55 = st.radio("选择下载内容",
-        #                     options=['数据集', '各环节方法执行记录'],
-        #                     label_visibility='collapsed')
-        # st.markdown('---')
-        # column = ['无数据']
-        # data = pd.DataFrame(columns=['无数据'])
-        #
-        # # 从第二个元素开始获取
-        # if not st.session_state["leftTabs"][1:]:
-        #     downloadList = ['空']
-        # else:
-        #     downloadList = st.session_state["leftTabs"][1:]
-        # option55 = pills("选择下载数据集类型或各环节数据名称", options=downloadList)
-        # st.markdown('---')
-        # if option55 == '模型':
-        #     result1 = pages_utils.multiselect_all(
-        #         st, '全选',
-        #         pages_utils.TempDataSetField[4]['模型'],
-        #         'temp11', 'collapsed')
-        #     btn11 = st.button('下载特征和标签、模型结构及训练结果')
-        # elif option55 == '预处理后数据集':
-        #     column = pages_utils.TempDataSet[1].columns.tolist()
-        #     data = pages_utils.TempDataSet[1]
-        # elif option55 == '备选特征':
-        #     column = pages_utils.TempDataSet[2].columns.tolist()
-        #     data = pages_utils.TempDataSet[2]
-        # elif option55 == '优选特征':
-        #     column = pages_utils.TempDataSet[3].columns.tolist()
-        #     data = pages_utils.TempDataSet[3]
-        result1 = pages_utils.multiselect_all(
-            st, '全选',
-            pages_utils.TempDataSetField[4]['模型'],
-            'temp111', 'collapsed')
-        if not pages_utils.TempDataSetField[4].empty:
-            models = pages_utils.TempDataSetField[4]['模型'].tolist()
-            modelsStruct = pages_utils.TempDataSetField[4]['模型结构'].tolist()
-            modelResult = pages_utils.TempDataSetField[4]['模型训练结果'].tolist()
 
-            zipPath = os.path.join(
-                RESOURCE_MODELRESULT_PATH, '模型结构与训练结果.zip')
+st.markdown('#### 面状数据集(预处理和特征计算环节)')
+colFCF1, colFCF2, colFCF3 = st.columns([0.3, 0.7, 0.2])
+with colFCF1:
+    st.markdown("##### 数据与特征选择")
+    with st.container(height=750, border=False):
+        if len(pages_utils.RawDataSetFieldFacet['编号']) == 0:
+            leftBarsRawData = [{"label": "原始数据集", "value": "原始数据集"}]
+        else:
+            leftBarsRawData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.RawDataSetFieldFacet))
+        if len(pages_utils.PreprocessedDataSetFieldFacet['编号']) == 0:
+            leftBarsPreData = [{"label": "预处理后数据", "value": "预处理后数据"}]
+        else:
+            leftBarsPreData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
+        leftBarsFCalData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.FeatureDataSetFieldFacet))
 
-            with zipfile.ZipFile(zipPath, 'w') as zipf:
-                pass  # 不添加任何文件
-            # 输入压缩包的文件路径
-            zipFilesPath = []
-            for model in result1:
-                row = pages_utils.TempDataSetField[4][pages_utils.TempDataSetField[4]['模型'] == model]
-                if not row.empty:
-                    model_structure = row['模型结构'].values[0]
-                    model_training_result = row['模型训练结果'].values[0]
-                    # print(f"匹配到模型: {model}")
-                    # print(f"模型结构: {model_structure}")
-                    # print(f"模型训练结果: {model_training_result}\n")
-
-                    rootPathTemp = RESOURCE_MODELRESULT_PATH
-
-                    modelStructurePath = os.path.join(rootPathTemp,
-                                                      'structure', model_structure)
-                    # 保存预测结果
-                    modelResultPath = os.path.join(rootPathTemp,
-                                                   'predict',
-                                                   model_training_result)
-                    # print(modelStructurePath)
-                    # print(modelResultPath)
-                    zipFilesPath.append(modelStructurePath)
-                    zipFilesPath.append(modelResultPath)
+with colFCF2:
+    # 初始化地图
+    pe = st.empty()
+    visualMapLayer = []
+    with pe:
+        m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        with st.status('加载数据中...'):
+            if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
+                tempList = leftBarsRawData['checked'] + leftBarsPreData['checked'] if len(leftBarsPreData) != 1 else \
+                    leftBarsRawData['checked']
+                for name in tempList:
+                    if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
+                        visualMapLayer.append(name)
+                path = os.path.join(RESOURCE_TEMPDIR_PATH, visualMapLayer[-1])
+                addLayer(m, path)
+                st.header(f'文件加载完成')
+        m.to_streamlit()
+with colFCF3:
+    st.markdown("##### 数据下载")
+    zipPath = os.path.join(
+        RESOURCE_PROCESS_PATH, '面状数据下载.zip')
+    tempList = leftBarsRawData['checked'] + leftBarsPreData['checked'] if len(leftBarsPreData) != 1 else \
+        leftBarsRawData['checked']
+    with zipfile.ZipFile(zipPath, 'w') as zipf:
+        pass  # 不添加任何文件
+    # 输入压缩包的文件路径
+    zipFilesPath = []
+    print(tempList)
+    for fileName in tempList:
+        if '.' not in fileName:
+            continue
+        # 遍历文件夹及子文件夹下的所有文件
+        for root, dirs, files in os.walk(RESOURCE_TEMPDIR_PATH):
+            for file_name in files:
+                # 打印文件名
+                # print(file_name)
+                if fileName == file_name:
+                    zipFilesPath.append(os.path.join(RESOURCE_TEMPDIR_PATH, file_name))
+                    break
                 else:
-                    print(f"模型 {model} 未找到\n")
+                    pass
+                    # print(f"文件:{fileName} 未找到\n")
 
-            pages_utils.zip_files(zipFilesPath, zipPath)
-            with open(zipPath, "rb") as file:
-                st.download_button(
-                    label="下载",
-                    data=file,
-                    file_name="模型结构与训练结果.zip",
-                    mime="application/zip",
-                )
+    pages_utils.zip_files(zipFilesPath, zipPath)
+    with open(zipPath, "rb") as file:
+        st.download_button(
+            label="下载",
+            data=file,
+            file_name="面状数据下载.zip",
+            mime="application/zip",
+        )
+st.markdown('#### 点状数据集(特征优选环节)')
 
-    with col1:
-        st.markdown('###### 数据集')
-        arr1 = st.session_state["leftTabs"]
-        tt1 = st.tabs(st.session_state["leftTabs"])
-        for i in range(len(st.session_state["leftTabs"])):
-            with tt1[i]:
-                st.dataframe(
-                    pages_utils.TempDataSet[i],
-                    height=250, width=1500)
-        st.markdown('###### 各环节方法执行记录')
-        tt2 = st.tabs(st.session_state["leftTabs"])
-        for j in range(len(st.session_state["leftTabs"])):
-            with tt2[j]:
-                st.dataframe(
-                    pages_utils.TempDataSetField[j],
-                    height=250, width=1500)
-with col2:
-    with tab2:
-        col111, col222 = st.columns([0.2, 0.7])
-        with col111:
-            column1 = ['无数据']
-            data1 = pd.DataFrame(columns=['无数据'])
-            option4 = st.selectbox(
-                '选择数据集或模型',
-                options=st.session_state["leftTabs"])
-            if option4 == '模型':
-                column1 = pages_utils.TempDataSet[4].columns.tolist()
-                data1 = pages_utils.TempDataSet[4]
-            elif option4 == '预处理后数据集':
-                column1 = pages_utils.TempDataSet[1].columns.tolist()
-                data1 = pages_utils.TempDataSet[1]
-            elif option4 == '备选特征':
-                column1 = pages_utils.TempDataSet[2].columns.tolist()
-                data1 = pages_utils.TempDataSet[2]
-            elif option4 == '优选特征':
-                column1 = pages_utils.TempDataSet[3].columns.tolist()
-                data1 = pages_utils.TempDataSet[3]
-            option1 = st.selectbox(
-                '选择图形',
-                options=('散点图', '直方图'))
-            option2 = st.selectbox(
-                '选择X轴',
-                options=column1)
-            option3 = st.selectbox(
-                '选择Y轴',
-                options=column1)
-            interval_col1, interval_col2 = st.columns([1.4, 1])
-            btn = interval_col2.button('添加图形')
+st.dataframe(
+    pages_utils.TempDataSetField[3],
+    height=250, width=1500)
 
-        with col222:
-            if btn:
-                if option1 == '散点图':
-                    # 取x,y轴数据
-                    # file = data[option3]
-                    print(option2)
-                    print(option3)
-                    print(file)
-                    # 以下未实现x轴和y轴数据合并成绘图格式
-                    plt.rc("font", family='Microsoft YaHei')
-                    tab1, tab2 = st.tabs(["1", "2"])
-                    with tab1:
-                        # 绘制最高温度和最低温度的折线图
-                        plt.figure(figsize=(10, 5))
-                        sns.lineplot(data=file, x="Year", y="Precipitation", label="降水量")
-                        plt.xlabel('日期')
-                        plt.ylabel('降水累积量(mm)')
-                        plt.title('降水累积量特征')
-                        plt.legend()
-                        st.pyplot(plt)
-            else:
-                st.markdown('可视化')
+st.markdown('#### 模型结构与训练结果下载')
+result1 = pages_utils.multiselect_all(
+    st, '全选',
+    pages_utils.TempDataSetField[4]['模型'],
+    'temp111', 'collapsed')
+if not pages_utils.TempDataSetField[4].empty:
+    models = pages_utils.TempDataSetField[4]['模型'].tolist()
+    modelsStruct = pages_utils.TempDataSetField[4]['模型结构'].tolist()
+    modelResult = pages_utils.TempDataSetField[4]['模型训练结果'].tolist()
+
+    zipPath = os.path.join(
+        RESOURCE_MODELRESULT_PATH, '模型结构与训练结果.zip')
+
+    with zipfile.ZipFile(zipPath, 'w') as zipf:
+        pass  # 不添加任何文件
+    # 输入压缩包的文件路径
+    zipFilesPath = []
+    for model in result1:
+        row = pages_utils.TempDataSetField[4][pages_utils.TempDataSetField[4]['模型'] == model]
+        if not row.empty:
+            model_structure = row['模型结构'].values[0]
+            model_training_result = row['模型训练结果'].values[0]
+            # print(f"匹配到模型: {model}")
+            # print(f"模型结构: {model_structure}")
+            # print(f"模型训练结果: {model_training_result}\n")
+
+            rootPathTemp = RESOURCE_MODELRESULT_PATH
+
+            modelStructurePath = os.path.join(rootPathTemp,
+                                              'structure', model_structure)
+            # 保存预测结果
+            modelResultPath = os.path.join(rootPathTemp,
+                                           'predict',
+                                           model_training_result)
+            # print(modelStructurePath)
+            # print(modelResultPath)
+            zipFilesPath.append(modelStructurePath)
+            zipFilesPath.append(modelResultPath)
+        else:
+            print(f"模型 {model} 未找到\n")
+
+    pages_utils.zip_files(zipFilesPath, zipPath)
+    with open(zipPath, "rb") as file:
+        st.download_button(
+            label="下载",
+            data=file,
+            file_name="模型结构与训练结果.zip",
+            mime="application/zip",
+        )
