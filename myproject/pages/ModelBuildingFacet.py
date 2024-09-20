@@ -75,16 +75,16 @@ model_params = [
     {"模型名称": "SVM",
      "模型参数": {
          'C': '1.0', 'kernel': 'rbf', 'gamma': 'scale'},
-     "备注": ['test_pretreatment_point', 'test_feature_calculation_point', 'test_feature_ optimization']},
+     "备注": ['惩罚系数', '核函数类型', '核系数']},
     {"模型名称": "KNN",
      "模型参数": {"n_neighbors": "5", "leaf_size": "30", "n_jobs": "1"},
-     "备注": ['testA1', 'testA2', 'testA3']},
+     "备注": ['邻居数量', '叶子大小', '并行作业数']},
     {"模型名称": "FLDA",
      "模型参数": {"store_covariance": "True"},
-     "备注": ['testA3']},
+     "备注": ['是否存储协方差矩阵']},
     {"模型名称": "RF",
      "模型参数": {"n_estimators": "100", "criterion": "gini", "min_samples_split": "3"},
-     "备注": ['testA1', 'testA2', 'testA3']},
+     "备注": ['树的数量', '切分标准', '最小分割样本数']},
     {"模型名称": "SEIR机理模型",
      "模型参数": {
          "min_coefficient_ka": "1", "max_coefficient_ka": "4",
@@ -104,15 +104,14 @@ model_params = [
          '迭代次数', '种群规模', '二进制编码长度', '交叉概率', '变异概率']},
     {"模型名称": "PLSR",
      "模型参数": {"n_components": "2", "scale": "True", "max_iter": "500"},
-     "备注": ['testB1', 'testB2', 'testB3']},
+     "备注": ['成分数量', '是否缩放', '最大迭代次数']},
     {"模型名称": "LR",
      "模型参数": {"fit_intercept": "True"},
-     "备注": ['testA1', 'testA2', 'testA3']},
+     "备注": ['是否拟合截距']},
     {"模型名称": "SVR", "模型参数": {
         "kernel": "linear", "C": "1.0", "epsilon": "0.1"
     },
-     "备注": ['testB1', 'testB2', 'testB3']}
-
+     "备注": ['核函数', '惩罚系数', ' 损失函数中的松弛变量']}
 ]
 
 
