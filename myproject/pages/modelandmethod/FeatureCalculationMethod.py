@@ -201,3 +201,39 @@ class FeatureCalculationMethod:
         self.dataFrame = self.dataFrame.drop(['日期'], axis=1)
 
         return self.dataFrame, growthPeriod
+
+    # 活动积温计算
+    def activeAccumulatedTemperature(self, inputFields, param):
+        # 复制新的变量
+        # print('===========接收参数===========')
+        # print(param)
+        # print(inputFields)
+        startMD = param[0]
+        tempS = startMD.split('-')
+        startM, startD = int(tempS[1]), int(tempS[2])
+        endMD = param[1]
+        tempE = endMD.split('-')
+        endM, endD = int(tempE[1]), int(tempE[2])
+        newColumn = str(startM) + '-' + str(startD) + '_' + str(endM) + '-' + str(endD) + '_' + '活动积温'
+
+        # 根据"经度", "纬度"、年分类
+        self.dataFrame['日期'] = pd.to_datetime(
+            self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
+        # 转换日期到年内的日期格式，忽略年份
+        self.dataFrame['年内日期'] = self.dataFrame['日期'].dt.strftime('%m-%d')
+        # 过滤数据，只保留在指定日期范围内的记录
+        date_filter = (self.dataFrame['年内日期'] >= datetime.strptime(startMD, '%Y-%m-%d').strftime('%m-%d')) & (
+                    self.dataFrame['年内日期'] <= datetime.strptime(endMD, '%Y-%m-%d').strftime('%m-%d'))
+        filtered_df = self.dataFrame.loc[date_filter]
+
+        grouped = filtered_df.groupby(['经度', '纬度', '年'])
+        # 创建新的列用于存储结果
+        self.dataFrame[newColumn] = np.nan
+        # 遍历每个分组并计算累计温度
+        for (key, group) in grouped:
+            # 计算累计温度
+            tempAAT = np.cumsum(group['温度']).iloc[-1]
+
+            # 更新原始 DataFrame 中对应的行
+            self.dataFrame.loc[group.index, newColumn] = tempAAT
+        return self.dataFrame, newColumn
