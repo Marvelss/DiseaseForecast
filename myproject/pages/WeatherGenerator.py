@@ -302,7 +302,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
 
             # =========================特征计算及读取执行方法=========================
             # 读取记录
-            featureCalculateDF = featureCalculationLog
+            featureCalculateDF = pages_utils.TempDataSetField[2]
 
             inputFeature1 = featureCalculateDF["输入特征"].tolist()
             featureCalculateList = featureCalculateDF["特征计算方法"].tolist()
@@ -621,34 +621,34 @@ st.session_state.weatherSituationParams[selectedWeather] = [number51, number52, 
 
 
 # sigama_temp, sigama_max_temp, PA_temp, PA_max_temp = number51, number53 * 0.01, number52, number54 * 0.01
-st.markdown('---')
-st.markdown("##### 执行记录及特征集选择")
-colPro1, colPro2 = st.columns([0.3, 0.7])
-with colPro1:
-    st.markdown('')
-    st.info('注意:  \n'
-            '1.特征计算  \n将右侧不需要执行的特征计算方法删除  \n'
-            '2.特征优选  \n根据优选特征列保留需要的特征  \n'
-            '3.点击运行程序按钮  \n生成模拟气象数据以进行模型应用得到预测结果', icon="ℹ️")
+# st.markdown('---')
+# st.markdown("##### 执行记录及特征集选择")
+# colPro1, colPro2 = st.columns([0.3, 0.7])
+# with colPro1:
+#     st.markdown('')
+#     st.info('注意:  \n'
+#             '1.特征计算  \n将右侧不需要执行的特征计算方法删除  \n'
+#             '2.特征优选  \n根据优选特征列保留需要的特征  \n'
+#             '3.点击运行程序按钮  \n生成模拟气象数据以进行模型应用得到预测结果', icon="ℹ️")
 
-with colPro2:
+# with colPro2:
     # 预处理
     # 特征计算
     # pages_utils.TempDataSetField[2] = pd.read_excel(path1)
     # pages_utils.TempDataSetField[3] = pd.read_excel(path2)
-    tab1, tab2, tab3 = st.tabs(["特征计算", "特征优选", "预处理"])
-    with tab1:
-        featureCalculationLog = st.data_editor(
-            pages_utils.TempDataSetField[2],
-            height=190, width=900, num_rows="dynamic",
-            column_order=["输入特征", "特征计算方法", "备选特征", "数据类型", '时间'])
-    with tab2:
-        # 特征优选(只取最优特征)
-        featureOptimalLog = st.data_editor(
-            pages_utils.TempDataSetField[3], height=190, width=900, num_rows="dynamic",
-            column_order=["优选特征", "特征优选方法", "数据类型", '时间'])
-    with tab3:
-        pass
+    # tab1, tab2, tab3 = st.tabs(["特征计算", "特征优选", "预处理"])
+    # with tab1:
+    #     featureCalculationLog = st.data_editor(
+    #         pages_utils.TempDataSetField[2],
+    #         height=190, width=900, num_rows="dynamic",
+    #         column_order=["输入特征", "特征计算方法", "备选特征", "数据类型", '时间'])
+    # with tab2:
+    #     # 特征优选(只取最优特征)
+    #     featureOptimalLog = st.data_editor(
+    #         pages_utils.TempDataSetField[3], height=190, width=900, num_rows="dynamic",
+    #         column_order=["优选特征", "特征优选方法", "数据类型", '时间'])
+    # with tab3:
+    #     pass
 interval_col1, interval_col2 = st.columns([6, 1])
 with interval_col2:
     btn = st.button('开始模型评估', on_click=onRun,
@@ -671,18 +671,8 @@ st.markdown("##### 模型预测和评价指标结果可视化")
 #     with co4:
 #         st.metric("Dev_S", "0.0899")
 # ==============================准备下载数据==============================
-if btn:
-    zipPath = os.path.join(RESOURCE_TEMPDIR_PATH, '基于天气情景生成器的模拟数据.zip')
-    # 压缩生成的xlsx数据
-    pathEE = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
-    pages_utils.zip_folder(pathEE, zipPath)
-    with open(zipPath, "rb") as file:
-        st.download_button(
-            label="下载模拟生成的气象数据",
-            data=file,
-            file_name="基于天气情景生成器的模拟数据.zip",
-            mime="application/zip",
-        )
+# if btn:
+
 
 colRes1, colRes2 = st.columns(2)
 with st.container(height=700):

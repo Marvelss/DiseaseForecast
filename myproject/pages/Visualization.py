@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from st_pages import hide_pages
 
-from lib.share import RESOURCE_MODELRESULT_PATH
+from lib.share import RESOURCE_MODELRESULT_PATH, RESOURCE_TEMPDIR_PATH, RESOURCE_PROCESS_PATH
 from pages import pages_utils
 
 st.set_page_config(
@@ -74,13 +74,12 @@ for i in range(len(st.session_state["leftTabs"])):
             pages_utils.TempDataSet[i],
             height=250, width=1500)
 st.markdown('###### 各环节方法执行记录')
-tt2 = st.tabs(st.session_state["leftTabs"])
-for j in range(len(st.session_state["leftTabs"])):
+tt2 = st.tabs(['原始数据', '预处理后数据', '备选特征', '优选特征', '模型'])
+for j in range(len(['原始数据', '预处理后数据', '备选特征', '优选特征', '模型'])):
     with tt2[j]:
         st.dataframe(
             pages_utils.TempDataSetField[j],
             height=250, width=1500)
-
 
 st.markdown('###### 模型结构与训练结果下载')
 result1 = pages_utils.multiselect_all(
@@ -131,3 +130,17 @@ if not pages_utils.TempDataSetField[4].empty:
             file_name="模型结构与训练结果.zip",
             mime="application/zip",
         )
+
+st.markdown('###### 模拟气象情景数据下载')
+
+zipPath = os.path.join(RESOURCE_TEMPDIR_PATH, '基于天气情景生成器的模拟数据.zip')
+# 压缩生成的xlsx数据
+pathEE = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
+pages_utils.zip_folder(pathEE, zipPath)
+with open(zipPath, "rb") as file:
+    st.download_button(
+        label="下载模拟生成的气象数据",
+        data=file,
+        file_name="基于天气情景生成器的模拟数据.zip",
+        mime="application/zip",
+    )
