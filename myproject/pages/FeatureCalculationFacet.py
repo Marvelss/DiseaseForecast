@@ -211,7 +211,7 @@ with colFCF3:
             tempList)
         landscapemetricsPattern = st.selectbox(
             '景观水平类型',
-            ('景观水平', '斑块类别水平', '斑块水平'))
+            ('斑块类别水平', '斑块水平', '景观水平'))
         landscapemetricsFunction = st.multiselect(
             '景观水平类型',
             ('lpi', 'pd'))
@@ -230,11 +230,11 @@ with colFCF3:
         optionInputFile = st.selectbox(
             '输入文件',
             tempList)
-        optionRed = st.number_input(label='红波段对应的波段数', value=3)
-        optionNir = st.number_input(label='近红波段对应的波段数', value=2)
+        optionRed = st.number_input(label='红波段对应的波段数', value=4)
+        optionNir = st.number_input(label='近红波段对应的波段数', value=8)
         optionOutput = st.text_input(
             label='输出文件名称',
-            value=optionInputFile)
+            value='NDVI_2010_777.tif')
 
         st.session_state["featureMethodFacetName"]['param1'] = optionVegetationIndex
         st.session_state["featureMethodFacetName"]['param2'] = os.path.join(RESOURCE_TEMPDIR_PATH, optionInputFile)
@@ -351,9 +351,11 @@ with colFCF3:
         elif tempMethod == '植被指数计算':
             resultFilePathList = fcTool.onNDVI(methodParam)
             handledFile = resultFilePathList
+            print(handledFile)
             st.session_state.fCMapLayer.append(handledFile)
 
         elif tempMethod == '景观指数计算':
+            print(methodParam)
             resultFilePathList = fcTool.onLandscapeIndex(methodParam)
             handledFile = resultFilePathList
             for tempH in resultFilePathList:
@@ -369,8 +371,8 @@ with colFCF3:
                     # st.session_state.fCMapLayer.append(handledFile)
 
                     # pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
-                    pages_utils.TempDataSetFacet[2] = pd.read_excel(r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\面-动-水稻纹枯病SEIR机理模型(病株率)\9省SEIR上传数据.xlsx')
-
+                    pages_utils.TempDataSetFacet[2] = pd.read_excel(
+                        r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\面-动-水稻纹枯病SEIR机理模型(病株率)\9省SEIR上传数据.xlsx')
 
                     print('----------------特征优选数据集----------------')
                     print(pages_utils.TempDataSetFacet[2])

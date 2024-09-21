@@ -471,8 +471,7 @@ class FeatureCalculationMethodFacet:
                     replacement_value = row['value']
                     raster_data[raster_data == class_value] = replacement_value
                 # Define the path for the output file
-                output_path = funcName + '_2010_1.tif'
-
+                output_path = os.path.join(RESOURCE_TEMPDIR_PATH, funcName + '_2010_1.tif')
                 # Write the modified raster data to a new TIFF file
                 with rasterio.open(output_path, 'w', **profile) as dst:
                     dst.write(raster_data, 1)
