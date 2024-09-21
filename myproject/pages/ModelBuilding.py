@@ -78,16 +78,16 @@ model_params = [
     {"模型名称": "SVM",
      "模型参数": {
          'C': '1.0', 'kernel': 'rbf', 'gamma': 'scale'},
-     "备注": ['test_pretreatment_point', 'test_feature_calculation_point', 'test_feature_ optimization']},
+     "备注": ['惩罚系数', '核函数类型', '核系数']},
     {"模型名称": "KNN",
      "模型参数": {"n_neighbors": "5", "leaf_size": "30", "n_jobs": "1"},
-     "备注": ['testA1', 'testA2', 'testA3']},
+     "备注": ['邻居数量', '叶子大小', '并行作业数']},
     {"模型名称": "FLDA",
      "模型参数": {"store_covariance": "True"},
-     "备注": ['testA3']},
+     "备注": ['是否存储协方差矩阵']},
     {"模型名称": "RF",
      "模型参数": {"n_estimators": "100", "criterion": "gini", "min_samples_split": "3"},
-     "备注": ['testA1', 'testA2', 'testA3']},
+     "备注": ['树的数量', '切分标准', '最小分割样本数']},
     {"模型名称": "SEIR机理模型",
      "模型参数": {
          "min_coefficient_ka": "1", "max_coefficient_ka": "4",
@@ -107,15 +107,14 @@ model_params = [
          '迭代次数', '种群规模', '二进制编码长度', '交叉概率', '变异概率']},
     {"模型名称": "PLSR",
      "模型参数": {"n_components": "2", "scale": "True", "max_iter": "500"},
-     "备注": ['testB1', 'testB2', 'testB3']},
+     "备注": ['成分数量', '是否缩放', '最大迭代次数']},
     {"模型名称": "LR",
      "模型参数": {"fit_intercept": "True"},
-     "备注": ['testA1', 'testA2', 'testA3']},
+     "备注": ['是否拟合截距']},
     {"模型名称": "SVR", "模型参数": {
         "kernel": "linear", "C": "1.0", "epsilon": "0.1"
     },
-     "备注": ['testB1', 'testB2', 'testB3']}
-
+     "备注": ['核函数', '惩罚系数', ' 损失函数中的松弛变量']}
 ]
 
 
@@ -407,40 +406,68 @@ with modelACV:
             tt1 = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
                 with tt1[i]:
-                    if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据类型', '字段', '上传时间']
-                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '备选特征':
-                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '模型':
+                    if st.session_state["leftTabs"][i] != '模型':
+                        if st.session_state["leftTabs"][i] == '原始数据':
+                            column = ['数据类型', '字段', '上传时间']
+                            st.data_editor(
+                                pages_utils.TempDataSet[0],
+                                height=220, width=800, )
+                        elif st.session_state["leftTabs"][i] == '预处理后数据集':
+                            column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
+                            st.data_editor(
+                                pages_utils.TempDataSet[1],
+                                height=220, width=800, )
+                        elif st.session_state["leftTabs"][i] == '备选特征':
+                            column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+                            st.data_editor(
+                                pages_utils.TempDataSet[2],
+                                height=220, width=800, )
+                        elif st.session_state["leftTabs"][i] == '优选特征':
+                            column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+                            st.data_editor(
+                                pages_utils.TempDataSet[3],
+                                height=220, width=800, )
+                        # column_order=column)
+                    else:
                         column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
-                    st.data_editor(
-                        pages_utils.TempDataSetField[i],
-                        height=220, width=800,
-                        column_order=column)
+                        st.data_editor(
+                            pages_utils.TempDataSetField[i],
+                            height=220, width=800,
+                            column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
             tt = st.tabs(st.session_state["leftTabs"])
             for i in range(len(st.session_state["leftTabs"])):
                 with tt[i]:
-                    if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据类型', '字段', '上传时间']
-                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '备选特征':
-                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-                    elif st.session_state["leftTabs"][i] == '模型':
-                        column = ["编号", "模型", '模型参数', "评价指标", "数据集划分比例", "时间"]
-                    st.data_editor(
-                        pages_utils.TempDataSetField[i],
-                        height=220, width=800,
-                        column_order=column)
+                    if st.session_state["leftTabs"][i] != '模型':
+                        if st.session_state["leftTabs"][i] == '原始数据':
+                            column = ['数据类型', '字段', '上传时间']
+                            st.data_editor(
+                                pages_utils.TempDataSet[0],
+                                height=220, width=800, )
+                        elif st.session_state["leftTabs"][i] == '预处理后数据集':
+                            column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
+                            st.data_editor(
+                                pages_utils.TempDataSet[1],
+                                height=220, width=800, )
+                        elif st.session_state["leftTabs"][i] == '备选特征':
+                            column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+                            st.data_editor(
+                                pages_utils.TempDataSet[2],
+                                height=220, width=800, )
+                        elif st.session_state["leftTabs"][i] == '优选特征':
+                            column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+                            st.data_editor(
+                                pages_utils.TempDataSet[3],
+                                height=220, width=800, )
+                        # column_order=column)
+                    else:
+                        column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
+                        st.data_editor(
+                            pages_utils.TempDataSetField[i],
+                            height=220, width=800,
+                            column_order=column)
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
     # if not pages_utils.TempDataSetField[3].empty:

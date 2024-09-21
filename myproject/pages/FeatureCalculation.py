@@ -114,6 +114,7 @@ def onRun():
             # 若为空则跳过该步骤
             if not idNumber:
                 pages_utils.TempDataSet[2] = pages_utils.TempDataSet[1]
+                st.session_state["leftTabs"].pop(0)
             afterHandleData = None
             newColumn = '错误'
             # ===============根据名称匹配调用并执行各个处理方法===============
@@ -147,8 +148,10 @@ def onRun():
                     afterHandleData, newColumn = FeatureCalculationMethod(
                         dataFrameTemp, reservedField).growthPeriodCalculation(
                         fields[indexT], methodParam[indexT])
-                elif tempMethod == '时空抽取':
-                    return '时空抽取'
+                elif tempMethod == '活动积温计算':
+                    afterHandleData, newColumn = FeatureCalculationMethod(
+                        dataFrameTemp, reservedField).activeAccumulatedTemperature(
+                        fields[indexT], methodParam[indexT])
 
                 # ===============合并处理后数据集===============
                 row_size = len(afterHandleData)
@@ -193,7 +196,10 @@ with featureCCV:
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
-            tempLefTabs = st.session_state["leftTabs"][1:]
+            if '预处理后数据集' not in st.session_state["leftTabs"]:
+                tempLefTabs = st.session_state["leftTabs"]
+            else:
+                tempLefTabs = st.session_state["leftTabs"]
             if not tempLefTabs:
                 tempLefTabs = ['待进行数据预处理']
                 column = ['空']
@@ -207,13 +213,16 @@ with featureCCV:
                     elif tempLefTabs[i] == '备选特征':
                         column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
                     st.data_editor(
-                        pages_utils.TempDataSetField[i + 1],
-                        height=220, width=800,
-                        column_order=column)
+                        pages_utils.TempDataSet[i + 1],
+                        height=220, width=800,)
+                        # column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
-            tempLefTabs = st.session_state["leftTabs"][1:]
+            if '预处理后数据集' not in st.session_state["leftTabs"]:
+                tempLefTabs = st.session_state["leftTabs"]
+            else:
+                tempLefTabs = st.session_state["leftTabs"]
             tt = st.tabs(tempLefTabs)
             for i in range(len(tempLefTabs)):
                 with tt[i]:
@@ -224,9 +233,9 @@ with featureCCV:
                     elif tempLefTabs[i] == '备选特征':
                         column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
                     st.data_editor(
-                        pages_utils.TempDataSetField[i + 1],
-                        height=220, width=800,
-                        column_order=column)
+                        pages_utils.TempDataSet[i + 1],
+                        height=220, width=800,)
+                        # column_order=column)
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
     # if not pages_utils.TempDataSetField[1].empty:
@@ -260,17 +269,21 @@ with (featureCCM):
         option16 = st.checkbox('降水累积量计算', key='checkbox2', on_change=clear_other, args=[2])
     with col2:
         option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3])
-        option14 = st.checkbox('活动积温计算(待发布)', key='checkbox0', on_change=clear_other, args=[0], disabled=True)
+        option14 = st.checkbox('活动积温计算', key='checkbox0', on_change=clear_other, args=[0])
 
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
-    # if option14:
-    #     option1 = st.selectbox(
-    #         '分辨率转换',
-    #         ('日值温度', '旬平均温度', '月平均温度'))
+    if option14:
+        d1 = st.date_input("开始时间(默认处理各年数据集)",
+                           value=datetime.date(2024, 7, 6),
+                           format='MM/DD/YYYY',
+                           )
+        d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 8, 9))
+        st.session_state["featureMethodName"]['param1'] = str(d1)
+        st.session_state["featureMethodName"]['param2'] = str(d2)
     if option15:
         d1 = st.date_input("开始时间(默认处理各年数据集)",
-                           value=datetime.date(1990, 7, 6),
+                           value=datetime.date(2024, 7, 6),
                            format='MM/DD/YYYY',
                            )
         d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 8, 9))
@@ -514,6 +527,9 @@ with (featureCCM):
                                         ha='center', fontsize=16)
                             st.pyplot(plt)
                             st.session_state.IMAGECOUNT += 1
+                        elif idFMethods[o] == '活动积温计算':
+                            st.info('该功能优化中', icon="ℹ️️")
+
             else:
                 st.info('跳过特征计算', icon="ℹ️️")
             interval_col34, interval_col33 = st.columns([5, 1])

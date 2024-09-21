@@ -46,6 +46,8 @@ class Model:
         # 训练模型
         # =======================获取数据集=======================
         df11 = self.dataFrame
+        print('----测试---')
+        print(type(self.featureVariable))
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
         # 对分类变量进行one-hot编码

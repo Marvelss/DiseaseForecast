@@ -260,6 +260,7 @@ def onRun():
             # 若为空则跳过该步骤
             if not idNumber:
                 pages_utils.TempDataSet[3] = pages_utils.TempDataSet[2]
+                st.session_state["leftTabs"].pop(0)
 
             newColumns = '错误'
             # ===============根据名称匹配调用并执行各个处理方法===============
@@ -332,7 +333,7 @@ with dataPCV:
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
-            tempLeftTabs = st.session_state["leftTabs"][2:]
+            tempLeftTabs = st.session_state["leftTabs"]
             if not tempLeftTabs:
                 tempLeftTabs = ['待进行特征计算']
                 column = ['空']
@@ -345,13 +346,14 @@ with dataPCV:
                     elif tempLeftTabs[i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     st.data_editor(
-                        pages_utils.TempDataSetField[i + 2],
-                        height=220, width=800,
-                        column_order=column)
+                        pages_utils.TempDataSet[i + 2],
+                        height=220, width=800,)
+                        # column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
-            tempLeftTabs = st.session_state["leftTabs"][2:]
+            tempLeftTabs = st.session_state["leftTabs"]
+
             # print(f'f=========测试{tempLeftTabs}================')
             tt = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
@@ -361,9 +363,9 @@ with dataPCV:
                     elif tempLeftTabs[i] == '优选特征':
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     st.data_editor(
-                        pages_utils.TempDataSetField[i + 2],
-                        height=220, width=800,
-                        column_order=column)
+                        pages_utils.TempDataSet[i + 2],
+                        height=220, width=800,)
+                        # column_order=column)
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
     # if not pages_utils.TempDataSetField[2].empty:

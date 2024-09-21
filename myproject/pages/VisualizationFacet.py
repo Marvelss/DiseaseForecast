@@ -70,7 +70,7 @@ def addLayer(mapTemp, filePath):
                          layer_name=fileNameT.split('.')[0])
 
 
-st.markdown('#### 面状数据集(预处理和特征计算环节)')
+st.markdown('#### 预处理和特征计算环节数据集')
 colFCF1, colFCF2, colFCF3 = st.columns([0.3, 0.7, 0.2])
 with colFCF1:
     st.markdown("##### 数据与特征选择")
@@ -88,7 +88,7 @@ with colFCF1:
 with colFCF2:
     # 初始化地图
     pe = st.empty()
-    visualMapLayer = []
+    visualMapLayer = ['1']
     with pe:
         m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
@@ -136,7 +136,7 @@ with colFCF3:
             file_name="面状数据下载.zip",
             mime="application/zip",
         )
-st.markdown('#### 点状数据集(特征优选环节)')
+st.markdown('#### 特征优选环节数据')
 
 st.dataframe(
     pages_utils.TempDataSetField[3],

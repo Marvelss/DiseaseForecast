@@ -400,17 +400,19 @@ st.markdown(
 def vote(titleName):
     if titleName == '降雨日数计算':
         # 上传数据集
-        # col1321, col1322 = st.columns([0.4, 0.6])
-        # with col1321:
-        st.info("说明:  \n"
-                "上传的数据集字段内容必须包含", icon="ℹ️️")
-        # with col1322:
-        uploaded_files = st.file_uploader(
-            "上传数据集",
-            accept_multiple_files=False,
-            label_visibility='collapsed',
-            type=['xlsx', 'csv', 'txt', 'xls', 'zip'],
-            help='help')
+        st.markdown('### 上传数据集')
+        col1321, col1322 = st.columns([0.5, 0.5])
+        with col1321:
+            st.info("说明:  \n"
+                    "上传的数据集字段内容必须包含", icon="ℹ️️")
+        with col1322:
+            uploaded_files = st.file_uploader(
+                "上传数据集",
+                accept_multiple_files=False,
+                label_visibility='collapsed',
+                type=['xlsx', 'csv', 'txt', 'xls', 'zip'],
+                help='help')
+        st.markdown('### 参数设置')
         d1 = st.date_input("开始时间(默认处理各年数据集)",
                            value=datetime.date(1990, 7, 6),
                            format='MM/DD/YYYY',
@@ -431,7 +433,8 @@ def vote(titleName):
                     data=file,
                     file_name="模型结构与训练结果.zip",
                     mime="application/zip",
-                    )
+                )
+
 
 
 def app(image, link, name, description, developer, repo_link):

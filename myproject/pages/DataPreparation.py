@@ -113,6 +113,7 @@ def onRun():
             # 若为空则跳过该步骤
             if idNumber.empty:
                 pages_utils.TempDataSet[1] = pages_utils.TempDataSet[0]
+                st.session_state["leftTabs"].pop(0)
 
             afterHandleData = None
             for indexT, (tempMethod, isHandled) in enumerate(zip(methodList, isHandledFlags)):
@@ -213,9 +214,9 @@ with dataPCV:
                     elif st.session_state["leftTabs"][i] == '预处理后数据集':
                         column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
                     st.data_editor(
-                        pages_utils.TempDataSetField[i],
-                        height=220, width=800,
-                        column_order=column)
+                        pages_utils.TempDataSet[i],
+                        height=220, width=800,)
+                        # column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
@@ -228,9 +229,9 @@ with dataPCV:
                         column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
                         # print('---{}---'.format(column))
                     st.data_editor(
-                        pages_utils.TempDataSetField[i],
-                        height=220, width=800,
-                        column_order=column)
+                        pages_utils.TempDataSet[i],
+                        height=220, width=800,)
+                        # column_order=column)
 
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
