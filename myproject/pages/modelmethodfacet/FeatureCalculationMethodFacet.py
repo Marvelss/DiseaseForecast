@@ -434,8 +434,7 @@ class FeatureCalculationMethodFacet:
             importr('landscapemetrics')
             # 读取本地数据
             # 绝对路径
-            path = os.path.join(r'/', 'resource',
-                                'uploadFileDir', inputFileName)
+            path = os.path.join(RESOURCE_TEMPDIR_PATH, inputFileName)
             path = path.replace("\\", "/")  # 确保路径格式正确
             script = f'landscape <- terra::rast("{path}")'
             # 运行脚本
