@@ -39,9 +39,6 @@ hide_pages(
         "数据下载中心",
     ]
 )
-if 'dPmap' not in st.session_state:
-    st.session_state.dPmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-
 # 显示地图图层,创建一个最大长度为5的队列
 if 'dPLeftMapLayer' not in st.session_state:
     st.session_state.dPLeftMapLayer = deque(maxlen=1)
@@ -148,21 +145,12 @@ with colDPF22:
     with colDPF21col3:
         st.markdown("##### 预处理后数据")
     with colDPF21col4:
-        onDP2 = st.toggle(label="自动显示对应图层-右侧", help='图层加载时间较长', value=True)
+        onDP2 = st.toggle(label="自动显示对应图层-右侧", help='图层加载时间较长')
     # 初始化地图
     placeHolderDPF2 = st.empty()
     with placeHolderDPF2:
-        # st.session_state.dPmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-        # with st.status('加载数据中...'):
-        #     for name in temp['checked']:
-        #         if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[1]['文件名称']:
-        #             path = os.path.join(RESOURCE_TEMPLATE_PATH, name)
-        #             print('=============')
-        #             print(path)
-        #             # m1.add_raster(path, layer_name=name.split('.')[0])
-        #             m2.add_shp(path, layer_name=name.split('.')[0])
-        #             st.header(f'{name}加载完成')
-        st.session_state.dPmap.to_streamlit()
+        m2 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        m2.to_streamlit()
 with colDPF3:
     st.markdown("##### 预处理方法")
     col12, col22 = st.columns(2)
@@ -299,14 +287,15 @@ with colDPF3:
             with placeHolderDPF2:
                 with st.status('加载数据中...'):
                     afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
-                    if onDP2:
+                    if not onDP2:
                         st.session_state.dPRightMapLayer.clear()
                     for layerPath in st.session_state.dPRightMapLayer:
                         addLayer(afterPreMap, layerPath)
                         st.header(f'{layerPath}加载完成')
                 afterPreMap.to_streamlit()
-            fileName = handledFile.split('.')[0]
-            fileFormat = handledFile.split('.')[1]
+            tempEntryT = os.path.basename(handledFile)
+            fileName = tempEntryT.split('.')[0]
+            fileFormat = tempEntryT.split('.')[1]
             new_entry = {
                 "编号": pages_utils.generateID(),
                 "数据类型": '气象数据',

@@ -171,7 +171,7 @@ class PretreatmentMethodFacet:
         beClipFile = methodParam[0]
         templateShapeFile = methodParam[1]
         outputFile = self.getHandledField(methodParam[2])
-        outputFile = os.path.join(RESOURCE_TEMPLATE_PATH, outputFile)
+        # outputFile = os.path.join(RESOURCE_TEMPLATE_PATH, outputFile)
         # 1. 读取行政区边界shapefile
         shapefile = templateShapeFile
 

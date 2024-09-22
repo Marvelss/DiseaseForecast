@@ -447,8 +447,8 @@ class FeatureCalculationMethodFacet:
                 elif landscapemetricsPattern == '斑块水平':
                     tempPattern = 'p'
                 funcName = get_lookup_value(f'{tempPattern}_{func}')
-                print(f'{tempPattern}_{func}')
-                print(funcName)
+                # print(f'{tempPattern}_{func}')
+                # print(funcName)
                 robjects.r(f'enn_results <- {funcName}(landscape)')
                 enn_results4 = robjects.r('enn_results')
                 # 启用pandas与rpy2之间的转换
@@ -471,7 +471,8 @@ class FeatureCalculationMethodFacet:
                     replacement_value = row['value']
                     raster_data[raster_data == class_value] = replacement_value
                 # Define the path for the output file
-                output_path = os.path.join(RESOURCE_TEMPDIR_PATH, funcName + '_2010_1.tif')
+                tempOutName = inputFileName.split('.')[0].split('_')
+                output_path = os.path.join(RESOURCE_TEMPDIR_PATH, f'{tempPattern}-{func}_{tempOutName[1]}_{tempOutName[2]}.tif')
                 # Write the modified raster data to a new TIFF file
                 with rasterio.open(output_path, 'w', **profile) as dst:
                     dst.write(raster_data, 1)

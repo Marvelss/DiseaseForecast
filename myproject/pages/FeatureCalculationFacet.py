@@ -52,7 +52,7 @@ if "nowFFacetMethodName" not in st.session_state:
 
 # 显示地图图层,创建一个最大长度为5的队列
 if 'fCMapLayer' not in st.session_state:
-    st.session_state.fCMapLayer = deque(maxlen=5)
+    st.session_state.fCMapLayer = deque(maxlen=2)
 
 
 # 根据特征名称查找所有对应文件
@@ -198,6 +198,9 @@ with colFCF3:
     unique_first_elements = set()
     tempList = leftBarsRawData['checked'] + leftBarsPreData['checked'] if len(leftBarsPreData) != 1 else \
         leftBarsRawData['checked']
+    # 筛选出包含 '.' 的元素
+    filtered_file_list = [item for item in tempList if '.' in item]
+
     for item in tempList:
         # 分割元素并获取第一个元素
         first_element = item.split('.')[0].split('_')[0]
@@ -208,7 +211,7 @@ with colFCF3:
     if option20:
         optionInputFile = st.selectbox(
             '输入文件',
-            tempList)
+            filtered_file_list)
         landscapemetricsPattern = st.selectbox(
             '景观水平类型',
             ('斑块类别水平', '斑块水平', '景观水平'))
@@ -217,7 +220,7 @@ with colFCF3:
             ('lpi', 'pd'))
         optionOutput1 = st.text_input(
             label='输出文件名称',
-            value='默认')
+            value='系统默认设置', disabled=True)
         st.session_state["featureMethodFacetName"]['param1'] = optionInputFile
         st.session_state["featureMethodFacetName"]['param2'] = landscapemetricsPattern
         st.session_state["featureMethodFacetName"]['param3'] = str(landscapemetricsFunction)
@@ -229,7 +232,7 @@ with colFCF3:
             ('NDVI', 'EVI'))
         optionInputFile = st.selectbox(
             '输入文件',
-            tempList)
+            filtered_file_list)
         optionRed = st.number_input(label='红波段对应的波段数', value=4)
         optionNir = st.number_input(label='近红波段对应的波段数', value=8)
         optionOutput = st.text_input(
@@ -333,7 +336,7 @@ with colFCF3:
         fcTool = FeatureCalculationMethodFacet()
         if tempMethod == '时空抽取':
             with emptyHead:
-                with st.spinner('正在计算时空抽取,预计耗时1分半'):
+                with st.spinner('正在进行时空抽取'):
                     # 转换处理传入的名称
                     # 获取温度文件
                     methodParam[0] = FeatureCalculationMethodFacet().featureNameToMultiFile([methodParam[0]], tempList)
@@ -347,19 +350,24 @@ with colFCF3:
                     # handledFile = ' '.join()
                     for tempH in resultFilePathList:
                         st.session_state.fCMapLayer.append(tempH)
-
+                st.toast("时空抽取完毕", icon="ℹ️️")
         elif tempMethod == '植被指数计算':
-            resultFilePathList = fcTool.onNDVI(methodParam)
-            handledFile = resultFilePathList
-            print(handledFile)
-            st.session_state.fCMapLayer.append(handledFile)
+            with emptyHead:
+                with st.spinner('正在进行植被指数计算'):
+                    resultFilePathList = fcTool.onNDVI(methodParam)
+                    handledFile = resultFilePathList
+                    # print(handledFile)
+                    st.session_state.fCMapLayer.append(handledFile)
+                st.toast("植被指数计算完毕", icon="ℹ️️")
 
         elif tempMethod == '景观指数计算':
-            print(methodParam)
-            resultFilePathList = fcTool.onLandscapeIndex(methodParam)
-            handledFile = resultFilePathList
-            for tempH in resultFilePathList:
-                st.session_state.fCMapLayer.append(tempH)
+            with emptyHead:
+                with st.spinner('正在进行景观指数计算'):
+                    resultFilePathList = fcTool.onLandscapeIndex(methodParam)
+                    handledFile = resultFilePathList
+                    for tempH in resultFilePathList:
+                        st.session_state.fCMapLayer.append(tempH)
+                st.toast("景观指数计算完毕", icon="ℹ️️")
 
         elif tempMethod == '空间点提取':
             with emptyHead:
@@ -376,7 +384,7 @@ with colFCF3:
 
                     print('----------------特征优选数据集----------------')
                     print(pages_utils.TempDataSetFacet[2])
-            st.toast("空间点提取执行完毕", icon="ℹ️️")
+                st.toast("空间点提取完毕", icon="ℹ️️")
 
         with pe:
             afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
