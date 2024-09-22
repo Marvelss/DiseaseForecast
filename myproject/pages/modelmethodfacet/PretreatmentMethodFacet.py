@@ -4,12 +4,16 @@
 @File : PretreatmentMethodFacet.py
 @Description : 面状数据预处理方法
 """
+import os.path
+
 import geopandas as gpd
 import rasterio
 import numpy as np
 from osgeo import gdal, ogr
 from pykrige.ok import OrdinaryKriging
 from rasterio.mask import mask
+
+from lib.share import RESOURCE_TEMPLATE_PATH
 
 
 class PretreatmentMethodFacet:
@@ -162,11 +166,12 @@ class PretreatmentMethodFacet:
             band.WriteArray(band_data)
         return out_path_resample
 
-    def onClipRaster(self, methodParam):  # 影像重采样
+    # 裁剪
+    def onClipRaster(self, methodParam):
         beClipFile = methodParam[0]
         templateShapeFile = methodParam[1]
         outputFile = self.getHandledField(methodParam[2])
-
+        outputFile = os.path.join(RESOURCE_TEMPLATE_PATH, outputFile)
         # 1. 读取行政区边界shapefile
         shapefile = templateShapeFile
 
@@ -201,6 +206,7 @@ class PretreatmentMethodFacet:
         with rasterio.open(outputFile, 'w', **out_meta) as dst:
             dst.write(out_image)
         return outputFile
+
 
 # 剔除异常值
 def outlierEliminator(self, methodParam):

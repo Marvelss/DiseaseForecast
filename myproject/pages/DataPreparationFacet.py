@@ -12,6 +12,7 @@ from st_pages import hide_pages
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 
+from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_TEMPDIR_PATH
 from pages import pages_utils
 from pages.modelmethodfacet.PretreatmentMethodFacet import PretreatmentMethodFacet
 
@@ -43,13 +44,12 @@ if 'dPmap' not in st.session_state:
 
 # 显示地图图层,创建一个最大长度为5的队列
 if 'dPLeftMapLayer' not in st.session_state:
-    st.session_state.dPLeftMapLayer = deque(maxlen=5)
+    st.session_state.dPLeftMapLayer = deque(maxlen=1)
 # 显示右侧预处理地图图层,创建一个最大长度为5的队列
 if 'dPRightMapLayer' not in st.session_state:
-    st.session_state.dPRightMapLayer = deque(maxlen=5)
+    st.session_state.dPRightMapLayer = deque(maxlen=1)
 # 资源路径
-tempRP = os.path.join(os.getcwd(),
-                      'resource', 'uploadFileDir')
+tempRP = RESOURCE_TEMPDIR_PATH
 
 
 # 添加图层
@@ -139,10 +139,7 @@ with colDPF21:
                 if not onDP1:
                     st.session_state.dPLeftMapLayer.clear()
                 for layer in st.session_state.dPLeftMapLayer:
-                    path = os.path.join(
-                        os.getcwd(),
-                        'resource',
-                        'uploadFileDir', layer)
+                    path = os.path.join(RESOURCE_TEMPDIR_PATH, layer)
                     addLayer(m1, path)
                     st.header(f'{layer}加载完成')
         m1.to_streamlit()
@@ -159,10 +156,7 @@ with colDPF22:
         # with st.status('加载数据中...'):
         #     for name in temp['checked']:
         #         if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[1]['文件名称']:
-        #             path = os.path.join(
-        #                 os.getcwd(),
-        #                 'resource',
-        #                 'uploadFileDir', name)
+        #             path = os.path.join(RESOURCE_TEMPLATE_PATH, name)
         #             print('=============')
         #             print(path)
         #             # m1.add_raster(path, layer_name=name.split('.')[0])
@@ -174,9 +168,10 @@ with colDPF3:
     col12, col22 = st.columns(2)
     with col12:
         agree11 = st.checkbox("重采样", key='checkbox0', on_change=clear_other, args=[0])
-        agree13 = st.checkbox("裁剪", key='checkbox2', on_change=clear_other, args=[2])
-    with col22:
         agree12 = st.checkbox("空间插值", key='checkbox1', on_change=clear_other, args=[1])
+    with col22:
+        agree13 = st.checkbox("裁剪", key='checkbox2', on_change=clear_other, args=[2])
+
     st.markdown('---')
 
     # ===============显示和处理右中各个处理方法设置参数===============
@@ -284,16 +279,23 @@ with colDPF3:
                         st.session_state.dPRightMapLayer.append(handledFile)
                     st.toast("空间插值完毕", icon="ℹ️️")
             elif tempMethod == '重采样':
-                handledFile = PretreatmentMethodFacet().onResample(methodParam)
-                # os.path.join(tempRP, handledFile)
+                with emptyHead:
+                    with st.spinner('数据处理中...'):
+                        handledFile = PretreatmentMethodFacet().onResample(methodParam)
+                        # os.path.join(tempRP, handledFile)
+                        st.session_state.dPRightMapLayer.append(handledFile)
+                    st.toast("重采样完毕", icon="ℹ️️")
                 print(handledFile)
-                st.session_state.dPRightMapLayer.append(handledFile)
-            elif tempMethod == '裁剪':
-                handledFile = PretreatmentMethodFacet().onClipRaster(methodParam)
-                # os.path.join(tempRP, handledFile)
-                print(handledFile)
-                st.session_state.dPRightMapLayer.append(handledFile)
 
+            elif tempMethod == '裁剪':
+                with emptyHead:
+                    with st.spinner('数据处理中...'):
+                        handledFile = PretreatmentMethodFacet().onClipRaster(methodParam)
+                        # os.path.join(tempRP, handledFile)
+                        st.session_state.dPRightMapLayer.append(handledFile)
+                    st.toast("裁剪完毕", icon="ℹ️️")
+                # os.path.join(tempRP, handledFile)
+                print(handledFile)
             with placeHolderDPF2:
                 with st.status('加载数据中...'):
                     afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
