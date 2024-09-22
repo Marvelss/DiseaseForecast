@@ -36,9 +36,9 @@ if 'count' not in st.session_state:
 if 'dSFmap' not in st.session_state:
     st.session_state.dSFmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
 
-# 显示地图图层,创建一个最大长度为5的队列
+# 显示地图图层,创建一个最大长度为2的队列
 if 'dSMapLayer' not in st.session_state:
-    st.session_state.dSMapLayer = deque(maxlen=5)
+    st.session_state.dSMapLayer = deque(maxlen=2)
 
 
 # 添加图层
@@ -149,6 +149,8 @@ with dataSCMap:
 
                 if not onDS:
                     st.session_state.dSMapLayer.clear()
+                # temp_last_two = [st.session_state.dSMapLayer[-i] for i in range(1, 3)]
+
                 for layer in st.session_state.dSMapLayer:
                     path = os.path.join(RESOURCE_TEMPDIR_PATH, layer)
                     addLayer(map1, path)
