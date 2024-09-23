@@ -249,8 +249,9 @@ with colFCF3:
         shp_files = [item for item in leftBarsRawData['checked'] if item.endswith('.shp') or item.endswith('.xlsx')]
         extractFileList = pages_utils.multiselect_all(
             st, '全选-待提取特征文件',
-            shp_files + tempList,
+            unique_first_elements_list,
             'tempModels', 'collapsed')
+
         # 获取年和day of year
         # numDate = st.date_input(label='日期')
         # 过滤以 .shp 结尾的元素
@@ -290,7 +291,7 @@ with colFCF3:
             st.session_state["featureMethodFacetName"]['param1'] = str(extractFileList)
             st.session_state["featureMethodFacetName"]['param2'] = str(standardFile)
             st.session_state["featureMethodFacetName"]['param3'] = str(extractMethod)
-            st.session_state["featureMethodFacetName"]['param4'] = 'spatialPointFile.xlsx'
+            st.session_state["featureMethodFacetName"]['param4'] = '空间点提取文件.xlsx'
     if option18:
         # 注意:温度文件名称按照实际day of year顺序排序从小到大即可
         weatherDataDir = st.selectbox(
@@ -356,7 +357,7 @@ with colFCF3:
                 with st.spinner('正在进行植被指数计算'):
                     resultFilePathList = fcTool.onNDVI(methodParam)
                     handledFile = resultFilePathList
-                    # print(handledFile)
+                    print(handledFile)
                     st.session_state.fCMapLayer.append(handledFile)
                 st.toast("植被指数计算完毕", icon="ℹ️️")
 
@@ -372,15 +373,25 @@ with colFCF3:
         elif tempMethod == '空间点提取':
             with emptyHead:
                 with st.spinner('正在进行空间点提取'):
+                    tempExceptList = eval(methodParam[0])
+                    for temp in tempExceptList:
+                        if '移栽期_2020_777.tif' in os.path.basename(temp):
+                            tempExceptList.append(temp)
+
+                    array_2d = FeatureCalculationMethodFacet().featureNameToMultiFile(tempExceptList, tempList)
+                    # 转换为一维数组
+                    methodParam[0] = [item for sublist in array_2d for item in sublist]
                     handledFile = FeatureCalculationMethodFacet().onSpatialPointExtract(
                         methodParam)
+                    print(handledFile)
                     # 根据参数内容存入表
                     # 待提取字段名称、年、DayOfYear、基准文件
                     # st.session_state.fCMapLayer.append(handledFile)
 
-                    # pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
-                    pages_utils.TempDataSetFacet[2] = pd.read_excel(
-                        r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\面-动-水稻纹枯病SEIR机理模型(病株率)\9省SEIR上传数据.xlsx')
+                    pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
+
+                    # pages_utils.TempDataSetFacet[2] = pd.read_excel(
+                    #     r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\面-动-水稻纹枯病SEIR机理模型(病株率)\9省SEIR上传数据.xlsx')
 
                     print('----------------特征优选数据集----------------')
                     print(pages_utils.TempDataSetFacet[2])

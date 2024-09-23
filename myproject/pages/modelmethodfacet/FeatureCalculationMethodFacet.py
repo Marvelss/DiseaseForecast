@@ -482,7 +482,7 @@ class FeatureCalculationMethodFacet:
     # 空间点提取
     def onSpatialPointExtract(self, methodParma):
 
-        inputFile = eval(methodParma[0])
+        inputFile = methodParma[0]
         standardFile = methodParma[1]
         methodName = methodParma[2]
         outputFile = methodParma[3]
@@ -503,7 +503,7 @@ class FeatureCalculationMethodFacet:
         for tempFile in inputFile:
             print('=----处理文件=----')
             print(tempFile)
-
+            tempFile = os.path.basename(tempFile)
             # 构建文件路径并提取特征名
             filePath = os.path.join(RESOURCE_TEMPDIR_PATH, tempFile)
             featureFiledName = tempFile.split('.')[0].split('_')[0]
@@ -606,7 +606,14 @@ class FeatureCalculationMethodFacet:
         # all_results_df = df_cleaned.drop(columns=['Unnamed: 0'])
         all_results_df.to_excel('抽取.xlsx')
         resultDF = pd.merge(df1, all_results_df, on=['经度', '纬度', '年', 'DayOfYear'], how='left')
+        # 筛选列的名称，保留非重复列以及 '_x' 后缀的列
+        columns_to_keep = ['经度', '纬度', '年', 'DayOfYear', '病株率'] + [col for col in resultDF.columns if '_x' in col]
 
+        # 生成新的 DataFrame，仅保留非重复列
+        resultDF = resultDF[columns_to_keep]
+
+        # 重命名列，去掉 '_x' 后缀
+        resultDF.columns = resultDF.columns.str.replace('_x', '')
         # Save the final result to Excel
         outputFileT = os.path.join(RESOURCE_TEMPDIR_PATH, outputFile)
         resultDF.to_excel(outputFileT, index=False)
