@@ -8,7 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from st_pages import hide_pages
 
-from lib.share import RESOURCE_MODELRESULT_PATH
+from lib.share import RESOURCE_MODELRESULT_PATH, IMAGECOUNT
 from pages import pages_utils
 from pages.modelandmethod.Model import Model
 
@@ -394,7 +394,7 @@ with modelACV:
     st.markdown("##### 特征与模型")
 
     # =======================显示左侧特征与模型=======================
-    tempLeftTabs = st.session_state["leftTabsFacet"][1:]
+    tempLeftTabs = st.session_state["leftTabsFacet"]
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
@@ -405,6 +405,10 @@ with modelACV:
                         # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                         st.data_editor(
                             pages_utils.TempDataSetFieldFacet[3],
+                            height=220, width=800)
+                    elif tempLeftTabs[i] == '备选特征':
+                        st.data_editor(
+                            pages_utils.TempDataSetFacet[3],
                             height=220, width=800)
                     elif tempLeftTabs[i] == '模型':
                         # column = ["编号", "模型", "评价指标", "数据集划分比例", "时间"]
@@ -647,8 +651,8 @@ with modelACM:
                         os.path.join(rootPath,
                                      models[i] + '_predictLabel.xlsx'))
                     # 假设第一列包含要绘制的数据
-                    actual_values = testLabelDF.iloc[:, 0]
-                    predicted_values = predictLabelDF.iloc[:, 0]
+                    actual_values = predictLabelDF['ActualLabel']
+                    predicted_values = predictLabelDF['PredictLabel']
                     try:
                         # 回归模型
                         if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[
@@ -660,10 +664,18 @@ with modelACM:
                             plt.plot([actual_values.min(), actual_values.max()],
                                      [actual_values.min(), actual_values.max()],
                                      'r--')
-                            ax.set_xlabel('实际峰值(%)')
-                            ax.set_ylabel('预测峰值(%)')
+                            ax.set_xlabel('实际病株率(%)')
+                            ax.set_ylabel('预测病株率(%)')
                             # plt.figure(figsize=(10, 6))
-                            plt.title('回归模型精度评价-散点图')
+                            plt.figtext(0.5, -0.03,
+                                        f'图{IMAGECOUNT} {models[i]}模型实际与预测病株率散点图',
+                                        ha='center', fontsize=16)
+                            IMAGECOUNT += 1
+                            # 精度结果直接显示在图中
+                            metrics_text = "\n".join(
+                                [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
+                            plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
+                                     verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
                             st.pyplot(fig)
 
                         # 分类模型

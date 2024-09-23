@@ -223,12 +223,12 @@ with hideBtnPre.container():
 with hideBtnFC.container():
     if len(pages_utils.TempDataSetFieldFacet[2]['特征计算方法']):
         category("🌍 特征计算")
-        fcInfo1 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['数据类型'])
+        fcInfo1 = '、'.join(list(set(pages_utils.TempDataSetFieldFacet[2]['数据类型'])))
         # fcInfo2 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['输入文件'])
         # fcInfo3 = '、'.join(list(set(pages_utils.TempDataSetFieldFacet[2]['备选特征'])))
         fcInfo2 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['特征计算方法'])
         fcInfo3 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['字段'])
-        st.markdown(f'##### &emsp;&emsp;本次特征计算基于<u>{fcInfo1}</u>数据，'
+        st.markdown(f'##### &emsp;&emsp;本次特征计算基于<u>{fcInfo1}</u>，'
                     f'通过<u>{fcInfo2}</u>方法，得到了特征包括：<u>{fcInfo3}</u>，'
                     f'具体内容如下：', unsafe_allow_html=True)
         # 命名: 界面名称缩写
@@ -293,8 +293,8 @@ with hideBtnMB.container():
             path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
             testLabelDF = pd.read_excel(os.path.join(path1, f'{temp}_testLabel.xlsx'))
             predictLabelDF = pd.read_excel(os.path.join(path1, f'{temp}_predictLabel.xlsx'))
-            actual_values = testLabelDF.iloc[:, 0]
-            predicted_values = predictLabelDF.iloc[:, 0]
+            actual_values = predictLabelDF['ActualLabel']
+            predicted_values = predictLabelDF['PredictLabel']
             # 绘制散点图
             fig, ax = plt.subplots()
 
@@ -305,8 +305,10 @@ with hideBtnMB.container():
             ax.set_xlabel('实际病株率(%)')
             ax.set_ylabel('预测病株率(%)')
             # plt.figure(figsize=(10, 6))
+
             plt.title(f'{temp}模型实际与预测病株率散点图')
             st.pyplot(fig)
+
         # cc1, colMBPart1, colMBPart2 = st.columns([0.7, 0.3, 0.3])
         # cc1.metric('特征集', 'class-AREA_MN、land-FRAC_MN、class-FRAC_MN、01-01_01-31降雨日数、07-19_08-23_降水累积量')
         # colMBPart1.metric('标签', '病害峰值')
