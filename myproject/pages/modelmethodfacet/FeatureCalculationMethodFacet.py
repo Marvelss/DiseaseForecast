@@ -472,7 +472,8 @@ class FeatureCalculationMethodFacet:
                     raster_data[raster_data == class_value] = replacement_value
                 # Define the path for the output file
                 tempOutName = inputFileName.split('.')[0].split('_')
-                output_path = os.path.join(RESOURCE_TEMPDIR_PATH, f'{tempPattern}-{func}_{tempOutName[1]}_{tempOutName[2]}.tif')
+                output_path = os.path.join(RESOURCE_TEMPDIR_PATH,
+                                           f'{tempPattern}-{func}_{tempOutName[1]}_{tempOutName[2]}.tif')
                 # Write the modified raster data to a new TIFF file
                 with rasterio.open(output_path, 'w', **profile) as dst:
                     dst.write(raster_data, 1)
@@ -547,7 +548,6 @@ class FeatureCalculationMethodFacet:
                 nearest_values = df.iloc[indices.flatten()][featureFiledName + 'temp'].values.reshape(indices.shape)
                 avg_values = np.mean(nearest_values, axis=1)
                 avg_values = np.where(np.isinf(avg_values), 0, np.round(avg_values, 2))
-
                 # 将结果存入临时 DataFrame
                 results_df = df1_filtered.copy()
                 results_df[featureFiledName] = avg_values
@@ -574,6 +574,8 @@ class FeatureCalculationMethodFacet:
                 nearest_values = df.iloc[indices.flatten()][featureFiledName + 'temp'].values.reshape(indices.shape)
                 avg_values = np.ceil(np.mean(nearest_values, axis=1))
                 avg_values = np.where(np.isinf(avg_values), 0, avg_values.astype(int))
+                if '峰值' == featureFiledName:
+                    avg_values = np.where(avg_values >= 100, 100, avg_values)
 
                 # 将结果存入临时 DataFrame
                 results_df = df1_filtered.copy()
@@ -604,16 +606,17 @@ class FeatureCalculationMethodFacet:
         all_results_df = all_results_df.groupby(group_cols, as_index=False).agg(agg_cols).reset_index(drop=True)
         # 删除 Unnamed: 0 列
         # all_results_df = df_cleaned.drop(columns=['Unnamed: 0'])
-        all_results_df.to_excel('抽取.xlsx')
+        # all_results_df.to_excel('抽取.xlsx')
         resultDF = pd.merge(df1, all_results_df, on=['经度', '纬度', '年', 'DayOfYear'], how='left')
-        # 筛选列的名称，保留非重复列以及 '_x' 后缀的列
-        columns_to_keep = ['经度', '纬度', '年', 'DayOfYear', '病株率'] + [col for col in resultDF.columns if '_x' in col]
-
-        # 生成新的 DataFrame，仅保留非重复列
-        resultDF = resultDF[columns_to_keep]
-
-        # 重命名列，去掉 '_x' 后缀
-        resultDF.columns = resultDF.columns.str.replace('_x', '')
+        # # 筛选列的名称，保留非重复列以及 '_x' 后缀的列
+        # columns_to_keep = ['经度', '纬度', '年', 'DayOfYear', '病株率'] + [col for col in resultDF.columns if
+        #                                                                    '_x' in col]
+        #
+        # # 生成新的 DataFrame，仅保留非重复列
+        # resultDF = resultDF[columns_to_keep]
+        #
+        # # 重命名列，去掉 '_x' 后缀
+        # resultDF.columns = resultDF.columns.str.replace('_x', '')
         # Save the final result to Excel
         outputFileT = os.path.join(RESOURCE_TEMPDIR_PATH, outputFile)
         resultDF.to_excel(outputFileT, index=False)
