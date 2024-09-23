@@ -4,8 +4,8 @@
 @File : Visualization.py
 @Description : 数据下载-面状
 """
-import os
 import zipfile
+from collections import deque
 
 import streamlit as st
 import os
@@ -39,6 +39,9 @@ hide_pages(
         "数据下载中心",
     ]
 )
+# 显示地图图层,创建一个最大长度为5的队列
+if 'VisualMapLayer' not in st.session_state:
+    st.session_state.VisualMapLayer = deque(maxlen=2)
 
 
 def findFeatureFile(featureList, fileList):
@@ -70,49 +73,52 @@ def addLayer(mapTemp, filePath):
                          layer_name=fileNameT.split('.')[0])
 
 
-st.markdown('#### 预处理和特征计算环节数据集')
-colFCF1, colFCF2, colFCF3 = st.columns([0.3, 0.7, 0.2])
-with colFCF1:
+st.markdown('#### 预处理和特征计算环节数据集下载')
+colFCFV1, colFCFV2, colFCFV3 = st.columns([0.3, 0.7, 0.2])
+with colFCFV1:
     st.markdown("##### 数据与特征选择")
     with st.container(height=750, border=False):
-        if len(pages_utils.RawDataSetFieldFacet['编号']) == 0:
-            leftBarsRawData = [{"label": "原始数据集", "value": "原始数据集"}]
-        else:
-            leftBarsRawData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.RawDataSetFieldFacet))
         if len(pages_utils.PreprocessedDataSetFieldFacet['编号']) == 0:
             leftBarsPreData = [{"label": "预处理后数据", "value": "预处理后数据"}]
         else:
             leftBarsPreData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
         leftBarsFCalData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.FeatureDataSetFieldFacet))
+with colFCFV2:
+    onVisual = st.toggle(label="选中文件时自动显示对应图层", help='图层加载时间较长')
 
-with colFCF2:
     # 初始化地图
     pe = st.empty()
-    visualMapLayer = ['1']
     with pe:
         m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
+            tempList = []
             if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
-                tempList = leftBarsRawData['checked'] + leftBarsPreData['checked'] if len(leftBarsPreData) != 1 else \
-                    leftBarsRawData['checked']
+                if len(leftBarsPreData) != 1:
+                    tempList = tempList + leftBarsPreData['checked']
+                if len(leftBarsFCalData) != 1:
+                    tempList = tempList + leftBarsFCalData['checked']
+                else:
+                    tempList = [{"label": "无数据", "value": "无数据"}]
+                # print(leftBarsFCalData['checked'])
+
                 for name in tempList:
                     if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
-                        visualMapLayer.append(name)
-                path = os.path.join(RESOURCE_TEMPDIR_PATH, visualMapLayer[-1])
-                addLayer(m, path)
-                st.header(f'文件加载完成')
+                        st.session_state.VisualMapLayer.append(name)
+                if not onVisual:
+                    st.session_state.VisualMapLayer.clear()
+                for tempLayer in st.session_state.VisualMapLayer:
+                    path = os.path.join(RESOURCE_TEMPDIR_PATH, tempLayer)
+                    addLayer(m, path)
+                    st.header(f'{tempLayer}文件加载完成')
         m.to_streamlit()
-with colFCF3:
+with colFCFV3:
     st.markdown("##### 数据下载")
     zipPath = os.path.join(
         RESOURCE_PROCESS_PATH, '面状数据下载.zip')
-    tempList = leftBarsRawData['checked'] + leftBarsPreData['checked'] if len(leftBarsPreData) != 1 else \
-        leftBarsRawData['checked']
     with zipfile.ZipFile(zipPath, 'w') as zipf:
         pass  # 不添加任何文件
     # 输入压缩包的文件路径
     zipFilesPath = []
-    print(tempList)
     for fileName in tempList:
         if '.' not in fileName:
             continue
@@ -136,12 +142,12 @@ with colFCF3:
             file_name="面状数据下载.zip",
             mime="application/zip",
         )
-st.markdown('#### 特征优选环节数据')
-
-st.dataframe(
-    pages_utils.TempDataSetField[3],
-    height=250, width=1500)
-
+# st.markdown('#### 特征优选环节数据')
+#
+# st.dataframe(
+#     pages_utils.TempDataSetField[3],
+#     height=250, width=1500)
+st.markdown('---')
 st.markdown('#### 模型结构与训练结果下载')
 result1 = pages_utils.multiselect_all(
     st, '全选',
