@@ -6,6 +6,7 @@
 """
 import math
 import numpy as np
+import pandas as pd
 from scipy.stats import norm
 
 
@@ -22,6 +23,7 @@ def fitness2_modify2(ka, kb, kc, q, r, OPT_PRI, w, beta0,
     precisionDiseaseResultList = []
     # 全部预测值和实际值
     allPredictList, allActualList = [], []
+    dataFList = []
     for (key, group) in grouped:
         # 打印分组键（'测报站点' 和 '年'）
         # print(f"Group key: {key}")
@@ -149,6 +151,9 @@ def fitness2_modify2(ka, kb, kc, q, r, OPT_PRI, w, beta0,
         DOYData = e['DayOfYear'].values
         transplantingData = e['移栽期'].values
         peakData = e['峰值'].values
+        longitudeList = e['经度'].values
+        latitudeList = e['纬度'].values
+
         predictDiseaseResult = []
         for doy, transplanting, peak in zip(DOYData, transplantingData, peakData):
             z = doy - transplanting
@@ -182,6 +187,7 @@ def fitness2_modify2(ka, kb, kc, q, r, OPT_PRI, w, beta0,
         nan_array = np.full(length_difference, np.nan)
 
         # 将 NaN 数组与 predictLabel 数组合并
+
         predictLabel_padded = np.concatenate((nan_array, tempPredictLabel))
 
         # 提取非空值
@@ -191,17 +197,24 @@ def fitness2_modify2(ka, kb, kc, q, r, OPT_PRI, w, beta0,
         # 提取 actualLabel 中的非空值
         actualLabel_non_nan = actualLabel[non_nan_indices]
 
+        DOYData_non_nan = DOYData[non_nan_indices]
+        transplantingData_non_nan = longitudeList[non_nan_indices]
+        peakData_non_nan = latitudeList[non_nan_indices]
         # 提取 predictLabel_padded 中对应下标的值
         predictLabel_corresponding = predictLabel_padded[non_nan_indices]
 
-        # # 创建一个 DataFrame 来保存这些值
-        # data = {
-        #     'ActualLabel': actualLabel_non_nan,
-        #     'PredictLabel': predictLabel_corresponding
-        # }
-        #
+        # 创建一个 DataFrame 来保存这些值
+        data = {
+            '经度': transplantingData_non_nan,  # '经度'
+            '纬度': peakData_non_nan,  # '纬度'
+            'DayOfYear': DOYData_non_nan,
+            'ActualLabel': actualLabel_non_nan,
+            'PredictLabel': predictLabel_corresponding
+        }
+        dataFList.append(data)
+        # count += 1
         # df1 = pd.DataFrame(data)
-        # df1.to_excel('提取后.xlsx')
+        # df1.to_excel(f'{count}combined_data.xlsx', index=False)
 
         tempMoleculeList = []
         for s in range(0, len(predictLabel_corresponding)):
@@ -212,6 +225,7 @@ def fitness2_modify2(ka, kb, kc, q, r, OPT_PRI, w, beta0,
             # 全部预测和实际值放在一个矩阵
             allPredictList.append(predictLabel_corresponding[s])
             allActualList.append(actualLabel_non_nan[s])
+
         molecule = sum(tempMoleculeList)
         rootMeanSquareError = (molecule / len(actualLabel)) ** 0.5
         precisionDiseaseResultList.append(rootMeanSquareError)
@@ -227,4 +241,4 @@ def fitness2_modify2(ka, kb, kc, q, r, OPT_PRI, w, beta0,
     # print('------------a-----------------')
     allPredictList = np.array(allPredictList).flatten()
     allActualList = np.array(allActualList).flatten()
-    return meanRMSE, R2, allPredictList, allActualList
+    return meanRMSE, R2, allPredictList, allActualList, dataFList

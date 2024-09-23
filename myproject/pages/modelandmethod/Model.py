@@ -482,7 +482,7 @@ class Model:
         pop2_r_decimal2 = binary2decimal(pop_r, min_coefficient_r, max_coefficient_r)
         pop2_OPT_PRI_decimal2 = binary2decimal(pop_OPT_PRI, min_coefficient_OPT_PRI, max_coefficient_OPT_PRI)
 
-        objvalue2, objvalueR2First, allPredictList, allActualResultList = cal_objvalue_run(
+        objvalue2, objvalueR2First, allPredictList, allActualResultList, allDataList = cal_objvalue_run(
             pop2_ka_decimal2, pop2_kb_decimal2,
             pop2_kc_decimal2, pop2_q_decimal2,
             pop2_r_decimal2, pop2_OPT_PRI_decimal2,
@@ -499,6 +499,7 @@ class Model:
         bestfit = fitvalue2[0]
         bestfitR2 = objvalueR2First[0]
         predictResult = allPredictList[0]
+        savedDataFrame = allDataList[0]
         # ActualResultList = allActualResultList
 
         for i in range(0, loopNum):  # 50
@@ -509,7 +510,7 @@ class Model:
             pop2_q_decimal = binary2decimal(pop_q, min_coefficient_q, max_coefficient_q)
             pop2_r_decimal = binary2decimal(pop_r, min_coefficient_r, max_coefficient_r)
             pop2_OPT_PRI_decimal = binary2decimal(pop_OPT_PRI, min_coefficient_OPT_PRI, max_coefficient_OPT_PRI)
-            objvalue1, objvalueR2, allPredictList2, _ = cal_objvalue_run(
+            objvalue1, objvalueR2, allPredictList2, _, allDataList2 = cal_objvalue_run(
                 pop2_ka_decimal, pop2_kb_decimal,
                 pop2_kc_decimal, pop2_q_decimal,
                 pop2_r_decimal, pop2_OPT_PRI_decimal,
@@ -530,6 +531,8 @@ class Model:
                     bestfit = fitvalue1[j]
                     bestfitR2 = fitvalueR2[j]
                     predictResult = allPredictList2[j]
+                    savedDataFrame = allDataList2[j]
+
                     # ActualResultList = allActualResultList
             # print('-------------当前精度-------------')
             # print(f'RMSE:{fitvalue1}')
@@ -619,16 +622,27 @@ class Model:
         actualAndPredictResult = 'SEIR机理模型_predictLabel.xlsx'
         savePath1 = os.path.join(self.modelsPredictPath, actualAndPredictResult)
         savePath2 = os.path.join(self.modelsPredictPath, 'SEIR机理模型_testLabel.xlsx')
-        pd.DataFrame(predictResult,
-                     columns=['predictLabel']).to_excel(
+        # pd.DataFrame(predictResult,
+        #              columns=['predictLabel']).to_excel(
+        #     savePath1, index=False)
+        # print('使用数据')
+        # print(self.dataFrame)
+        # dataPAData = pd.concat([self.dataFrame,
+        #                         pd.DataFrame(predictResult,
+        #                                      columns=['predictLabel'])], axis=1)
+        # dataPAData.to_excel(
+        #     '保存所有数据.xlsx', index=False)
+        df1 = pd.DataFrame(savedDataFrame[0])  # 你的基础 DataFrame
+        combined_df = df1.copy()  # 使用 df1 作为基础
+
+        # 循环合并每个 DataFrame
+        for tempSaved in savedDataFrame:
+            # 合并新的 DataFrame
+            combined_df = pd.concat([combined_df, pd.DataFrame(tempSaved)], ignore_index=True)
+            # 打印合并后的DataFrame
+        pd.DataFrame(combined_df).to_excel(
             savePath1, index=False)
-        print('使用数据')
-        print(self.dataFrame)
-        dataPAData = pd.concat([self.dataFrame,
-                                pd.DataFrame(predictResult,
-                                             columns=['predictLabel'])], axis=1)
-        dataPAData.to_excel(
-            '保存所有数据.xlsx', index=False)
+
         pd.DataFrame(allActualResultList,
                      columns=['病株率']).to_excel(
             savePath2, index=False)

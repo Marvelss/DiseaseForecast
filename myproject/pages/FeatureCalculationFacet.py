@@ -388,10 +388,10 @@ with colFCF3:
                     # 待提取字段名称、年、DayOfYear、基准文件
                     # st.session_state.fCMapLayer.append(handledFile)
 
-                    pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
+                    # pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
 
-                    # pages_utils.TempDataSetFacet[2] = pd.read_excel(
-                    #     r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\面-动-水稻纹枯病SEIR机理模型(病株率)\9省SEIR上传数据.xlsx')
+                    pages_utils.TempDataSetFacet[2] = pd.read_excel(
+                        r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\面-动-水稻纹枯病SEIR机理模型(病株率)\9省SEIR上传数据.xlsx')
 
                     print('----------------特征优选数据集----------------')
                     print(pages_utils.TempDataSetFacet[2])
