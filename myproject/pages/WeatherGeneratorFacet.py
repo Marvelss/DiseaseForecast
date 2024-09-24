@@ -4,6 +4,7 @@
 @File : WeatherGenerator.py
 @Description : 天气情景生成器
 """
+import base64
 import datetime
 import os.path
 import seaborn as sns
@@ -14,6 +15,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matlab.engine
+from PIL import Image
 from st_pages import hide_pages
 from streamlit_pills import pills
 
@@ -251,7 +253,7 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
                     model.iloc[0]['q'], model.iloc[0]['r'], model.iloc[0]['OPT_PRI']
                 # 使用加载的模型进行预测
                 # print(featureTemp)
-                _, _, allPredictList, allActualList = fitness2_modify2(
+                _, _, allPredictList, allActualList, _ = fitness2_modify2(
                     ka, kb, kc, q, r, OPT_PRI, 3, 0.46,
                     28, 3, 5, 0, inputModelData)
                 # predictDF.to_excel('最终输入模型数据.xlsx')
@@ -510,19 +512,79 @@ with interval_col2:
 # =======================预测评价结果及数据下载=======================
 st.markdown('---')
 st.markdown("##### 模型预测和评价指标结果可视化")
+st.markdown("###### 模型预测和结果可视化")
+
+
+def displayLocalGIF1(placeholder, localImagePath, caption):
+    imgFile = open(localImagePath, "rb")
+    contents = imgFile.read()
+    imgData = base64.b64encode(contents).decode("utf-8")
+    imgFile.close()
+
+    # Define CSS styles for the container and caption
+    container_style = (
+        "display: flex;"  # Use flexbox layout for side-by-side alignment
+        "justify-content: center;"  # Center the container content
+        "gap: 20px;"  # Add space between the GIFs
+    )
+
+    caption_style = (
+        "font-size: 20px;"  # Adjust the font size as needed
+        "color: #888888;"  # Dimmer color
+        "text-align: center;"  # Center the caption text
+    )
+
+    # Display the GIF and caption with positioning relative to the placeholder
+    placeholder.markdown(f"""<div style="{container_style}">
+                    <img src="data:image/gif;base64,{imgData}" width='610' height='610' >
+                    <p style="{caption_style}">{caption}</p>
+                    </div>""", unsafe_allow_html=True)
+
+
+# 转换成gif
+def getGif(imageDirPath, gifDirPath):
+    # 图片文件名列表
+    images = []
+    for data_path in os.listdir(imageDirPath):
+        if data_path.endswith('.png'):
+            # 打开图片
+            images.append(Image.open(os.path.join(imageDirPath, data_path)))
+
+            # 设置输出 GIF 文件名
+            output_gif = gifDirPath + '.gif'
+
+            # 将图片保存为 GIF
+            images[0].save(
+                output_gif,
+                save_all=True,
+                append_images=images[1:],
+                duration=1000,  # 设置每张图片的显示时间（毫秒）
+                loop=0,  # 设置循环次数，0 表示不循环
+            )
+
+
+# getPredictImg(
+#     os.path.join(RESOURCE_MODELRESULT_PATH, 'predict', 'SEIR机理模型_predictLabel.xlsx')
+#     , os.path.join(RESOURCE_MODELRESULT_PATH, 'predictimg'))
+# getGif(os.path.join(RESOURCE_MODELRESULT_PATH, 'predictimg'),
+#        os.path.join(RESOURCE_MODELRESULT_PATH, 'predictimg', 'predictGIF'))
+
+displayLocalGIF1(st.empty(), os.path.join(RESOURCE_MODELRESULT_PATH, 'predictimg', 'predictGIF.gif'), '')
+
 # ==============================准备下载数据==============================
-if btn:
-    zipPath = os.path.join(RESOURCE_TEMPDIR_PATH, '基于天气情景生成器的模拟数据.zip')
-    # 压缩生成的xlsx数据
-    pathEE = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
-    pages_utils.zip_folder(pathEE, zipPath)
-    with open(zipPath, "rb") as file:
-        st.download_button(
-            label="下载模拟生成的气象数据",
-            data=file,
-            file_name="基于天气情景生成器的模拟数据.zip",
-            mime="application/zip",
-        )
+# if btn:
+#     zipPath = os.path.join(RESOURCE_TEMPDIR_PATH, '基于天气情景生成器的模拟数据.zip')
+#     # 压缩生成的xlsx数据
+#     pathEE = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
+#     pages_utils.zip_folder(pathEE, zipPath)
+#     with open(zipPath, "rb") as file:
+#         st.download_button(
+#             label="下载模拟生成的气象数据",
+#             data=file,
+#             file_name="基于天气情景生成器的模拟数据.zip",
+#             mime="application/zip",
+#         )
+st.markdown("###### 模型评价指标结果可视化")
 
 colRes1, colRes2 = st.columns(2)
 with st.container(height=700):

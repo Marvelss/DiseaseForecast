@@ -18,6 +18,7 @@ from matplotlib.ticker import MaxNLocator
 from st_pages import hide_pages
 
 from lib.share import RESOURCE_IMAGES_PATH, RESOURCE_PROCESS_PATH, RESOURCE_MODELRESULT_PATH
+from lib.utils import filterUnique
 from pages import ui, pages_utils
 import matplotlib
 import pandas as pd
@@ -69,6 +70,15 @@ category_colors_cycle = itertools.cycle(
 def category(name, description=None):
     ui.colored_subHeader(name, next(category_colors_cycle), description)
     st.write("")
+
+
+# 遍历 '输入文件' 列并进行处理
+def replace_with_precipitation_and_temperature(file_array):
+    if any('降水' in file or '温度' in file for file in file_array):
+        filtered_files = [file for file in file_array if '降水' not in file and '温度' not in file]
+        return filtered_files + ['降水', '温度']
+    else:
+        return file_array
 
 
 def generateID():
@@ -137,7 +147,8 @@ with hideBtnBrief.container():
         pages_utils.TempDataSetFieldFacet[2]['特征计算方法']) else '(待进行处理)'
     aInfoGap4 = '、'.join(pages_utils.TempDataSetFieldFacet[3]['特征优选方法'].tolist()) if len(
         pages_utils.TempDataSetFieldFacet[3]['特征优选方法'].tolist()) else '(待进行处理)'
-    aInfoGap5 = '、'.join(pages_utils.TempDataSetFieldFacet[4]['特征'].tolist()[0]) if len(
+    aInfoGap5 = '、'.join(
+        filterUnique(pages_utils.TempDataSetFieldFacet[4]['特征'].tolist()[0], pages_utils.reservedField)) if len(
         pages_utils.TempDataSetFieldFacet[4]['特征'].tolist()) else '(待进行处理)'
     # pages_utils.TempDataSet[4] = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
 
@@ -145,8 +156,8 @@ with hideBtnBrief.container():
     aInfoGap6 = f'{rows}*{columns}'
     aInfoGap7 = '、'.join(pages_utils.TempDataSetFieldFacet[4]['模型'].tolist()) if len(
         pages_utils.TempDataSetFieldFacet[4]['特征'].tolist()) else '(待进行处理)'
-    print('---测试----')
-    print(pages_utils.TempDataSetFieldFacet[4]['评价指标'].tolist()[0])
+    # print('---测试----')
+    # print(pages_utils.TempDataSetFieldFacet[4]['评价指标'].tolist()[0])
     aInfoGap8 = ''
     # aInfoGap8 = '、'.join(
     #     [f'{key}={round(value, 3)}' for key, value in
@@ -179,7 +190,7 @@ with hideBtnBrief.container():
     aInfoGap12 = ['较高', '较好'] if 0.45 < 1 else ['较低', '较差']  # 模型评价和天气情景都好
     aInfoModelName = st.session_state.modelingName
     abstractInfo = f"""
-    ##### &emsp;&emsp;本次建模使用了<u>{aInfoGap1}</u>，通过<u>{aInfoGap2}</u>预处理步骤，结合<u>{aInfoGap3}</u>环节，并利用<u>{aInfoGap4}</u>筛选出优选特征集，包括<u>{aInfoGap5}</u>，数据维度为<u>{aInfoGap6}</u>，最后采用<u>{aInfoGap7}方法</u>，构建了<u>{aInfoModelName}</u>，模型精度为<u>{aInfoGap8}</u>。
+    ##### &emsp;&emsp;本次建模使用了<u>{aInfoGap1}</u>，通过<u>{aInfoGap2}</u>预处理步骤，结合<u>{aInfoGap3}</u>环节得到模型输入特征，包括<u>{aInfoGap5}</u>，数据维度为<u>{aInfoGap6}</u>，最后采用<u>{aInfoGap7}方法</u>，构建了<u>{aInfoModelName}</u>，模型精度为<u>{aInfoGap8}</u>。
     ##### &emsp;&emsp;此外，基于天气情景生成器模拟生成了<u>{aInfoGap9}</u>的气象情景，对<u>{aInfoGap13}</u>进行模型评估，结果显示动态偏差指标Dev_S，分别为<u>{aInfoGap10}</u>。模型预测值与实际观测结果在多次模拟中的趋势<u>{aInfoGap11}</u>。
     ##### &emsp;&emsp;综合上述结果，<u>{aInfoGap13}</u>模型表现出<u>{aInfoGap12[0]}</u>的可靠性和预测效果，参数设置合理，具有<u>{aInfoGap12[1]}</u>的鲁棒性。
     """
@@ -196,7 +207,7 @@ with hideBtnRaw.container():
     # pages_utils.TempDataSet[0] = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
 
     rawInfo1 = f"""
-##### &emsp;&emsp;本次上传的原始数据集包含<u>{aInfoGap1}</u>，具体字段为：<u>{rInfo1}</u>。
+##### &emsp;&emsp;本次上传的原始数据集包含<u>{aInfoGap1}</u>，具体文件涉及：<u>{rInfo1}</u>。
                 """
     st.markdown(rawInfo1, unsafe_allow_html=True)
     # if btnRaw:
@@ -204,14 +215,21 @@ with hideBtnRaw.container():
 with hideBtnPre.container():
     if len(pages_utils.TempDataSetFieldFacet[1]['预处理方法']):
         category("🌌 预处理")
-        preInfo1 = '、'.join(pages_utils.TempDataSetFieldFacet[1]['预处理方法'])
-        preInfo2 = '、'.join(list(set(pages_utils.TempDataSetFieldFacet[1]['输入字段'])))
+        # array_1d = [item for sublist in pages_utils.TempDataSetFieldFacet[1]['输入文件'] for item in sublist]
+        print('--测试报告预处理--')
+        # print(pages_utils.TempDataSetFieldFacet[1]['输入文件'])
+        # preInfo2 = '、'.join(list(set(array_1d)))
+        # preInfo1 = '、'.join(pages_utils.TempDataSetFieldFacet[1]['预处理方法'])
+        # preInfo2 = '、'.join(list(set(pages_utils.TempDataSetFieldFacet[1]['输入文件'])))
         # pages_utils.TempDataSet[1] = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
-        rowsP, columnsP = pages_utils.TempDataSet[1].shape
-        preInfo3 = f'{rowsP}'
-        st.markdown(f'##### &emsp;&emsp;本次预处理使用了<u>{preInfo1}</u>方法，'
-                    f'处理字段为：<u>{preInfo2}</u>，'
-                    f'处理后剩余数据为<u>{preInfo3}</u>条，具体内容如下', unsafe_allow_html=True)
+
+        st.markdown(
+            f'##### &emsp;&emsp;本次预处理共处理<u>{len(pd.DataFrame(pages_utils.TempDataSetFieldFacet[1]))}</u>次，'
+            f'具体内容如下：', unsafe_allow_html=True)
+        tempDF1 = pd.DataFrame(pages_utils.TempDataSetFieldFacet[1])[
+            ['编号', '输入文件', '预处理方法', '文件名称', '数据类型', '时间']]
+        tempDF1.rename(columns={'文件名称': '输出文件'}, inplace=True)
+        st.table(tempDF1)
         # img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '数据预处理-缺失值插补.png'))
         # st.image(img)
         # colPart1, colPart2, colPart3 = st.columns(3)
@@ -223,14 +241,18 @@ with hideBtnPre.container():
 with hideBtnFC.container():
     if len(pages_utils.TempDataSetFieldFacet[2]['特征计算方法']):
         category("🌍 特征计算")
-        fcInfo1 = '、'.join(list(set(pages_utils.TempDataSetFieldFacet[2]['数据类型'])))
-        # fcInfo2 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['输入文件'])
-        # fcInfo3 = '、'.join(list(set(pages_utils.TempDataSetFieldFacet[2]['备选特征'])))
-        fcInfo2 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['特征计算方法'])
-        fcInfo3 = '、'.join(pages_utils.TempDataSetFieldFacet[2]['字段'])
-        st.markdown(f'##### &emsp;&emsp;本次特征计算基于<u>{fcInfo1}</u>，'
-                    f'通过<u>{fcInfo2}</u>方法，得到了特征包括：<u>{fcInfo3}</u>，'
-                    f'具体内容如下：', unsafe_allow_html=True)
+
+        st.markdown(
+            f'##### &emsp;&emsp;本次特征计算共处理<u>{len(pd.DataFrame(pages_utils.TempDataSetFieldFacet[2]))}</u>次，'
+            f'具体内容如下：', unsafe_allow_html=True)
+
+        tempDF1 = pd.DataFrame(pages_utils.TempDataSetFieldFacet[2])[
+            ['编号', '输入文件', '特征计算方法', '文件名称', '数据类型', '时间']]
+        tempDF1.rename(columns={'文件名称': '输出文件'}, inplace=True)
+        tempDF1['数据类型'] = tempDF1['数据类型'].apply(lambda x: pd.Series(x).unique())
+
+        tempDF1['输入文件'] = tempDF1['输入文件'].apply(replace_with_precipitation_and_temperature)
+        st.table(tempDF1)
         # 命名: 界面名称缩写
 
         # colFC1, colFC2 = st.columns(2)
@@ -305,8 +327,9 @@ with hideBtnMB.container():
             ax.set_xlabel('实际病株率(%)')
             ax.set_ylabel('预测病株率(%)')
             # plt.figure(figsize=(10, 6))
-
-            plt.title(f'{temp}模型实际与预测病株率散点图')
+            plt.figtext(0.5, -0.03,
+                        f'{temp}模型实际与预测病株率散点图',
+                        ha='center', fontsize=16)
             st.pyplot(fig)
 
         # cc1, colMBPart1, colMBPart2 = st.columns([0.7, 0.3, 0.3])
@@ -404,31 +427,6 @@ with hideBtnWG.container():
 #             hideBtnWG.empty()
 
 
-def displayLocalGIF1(placeholder, localImagePath, caption):
-    imgFile = open(localImagePath, "rb")
-    contents = imgFile.read()
-    imgData = base64.b64encode(contents).decode("utf-8")
-    imgFile.close()
-
-    # Define CSS styles for the container and caption
-    container_style = (
-        "position: relative;"  # Enable relative positioning
-        "display: inline-block;"  # Display as inline-block to align with placeholder
-    )
-
-    caption_style = (
-        "font-size: 20px;"  # Adjust the font size as needed
-        "color: #888888;"  # Dimmer color
-        "text-align: center;"  # Center the caption text
-    )
-
-    # Display the GIF and caption with positioning relative to the placeholder
-    placeholder.markdown(f"""<div style="{container_style}">
-                    <img src="data:image/gif;base64,{imgData}" width='610' height='610'>
-                    <p style="{caption_style}">{caption}</p>
-                    </div>""", unsafe_allow_html=True)
-
-
 def displayLocalGIF2(placeholder, localImagePath1, localImagePath2, caption1, caption2):
     # Function to generate the base64 encoded image data
     def get_img_data(image_path):
@@ -472,6 +470,28 @@ def displayLocalGIF2(placeholder, localImagePath1, localImagePath2, caption1, ca
 category("🌑 模型应用与评估")
 
 if len(st.session_state.modelReportWeatherInfoFacet['模型']):
+    st.markdown(f'##### &emsp;&emsp;SEIR机理模型预测结果如下：',
+                unsafe_allow_html=True)
+    colFCPart1, colFCPart2, colFCPart3 = st.columns(3)
+
+    # 获取所有PNG文件
+    image_files = [f for f in os.listdir(os.path.join(RESOURCE_MODELRESULT_PATH, 'predictimg')) if f.endswith('.png')]
+
+    # 将文件按顺序放入三列
+    for index, data_path in enumerate(image_files):
+        img_path = os.path.join(RESOURCE_MODELRESULT_PATH, 'predictimg', data_path)
+        img = Image.open(img_path)
+
+        if index % 3 == 0:
+            with colFCPart1:
+                st.image(img)
+        elif index % 3 == 1:
+            with colFCPart2:
+                st.image(img)
+        else:
+            with colFCPart3:
+                st.image(img)
+
     st.markdown(f'##### &emsp;&emsp;针对经度:<u>{wgInfo1}</u>、纬度:<u>{wgInfo2}</u>地区，'
                 f'基于气象多情景仿真器输出的各情景应用结果如下：',
                 unsafe_allow_html=True)
@@ -507,6 +527,8 @@ if len(st.session_state.modelReportWeatherInfoFacet['模型']):
         f'基于动态预测模型评价方法计算可得<u>{endInfo3}</u>情景下各模型预测输出的偏差指标分别为<u>{endInfo4}</u>。  \n'
         f'##### &emsp;&emsp;根据上述计算结果进行综合评估，可认为上述模型可靠性<u>较高</u>，参数设置较为合理，具有良好的预测效果和鲁棒性。',
         unsafe_allow_html=True)
+
+
 # if btnResult:
 #     st.markdown("""
 #     <style>
@@ -516,14 +538,83 @@ if len(st.session_state.modelReportWeatherInfoFacet['模型']):
 # imagePath1 = os.path.join(RESOURCE_TEMPDIR_PATH, "s_output1.gif")
 # imagePath2 = os.path.join(RESOURCE_TEMPDIR_PATH, "e_output1.gif")
 # displayLocalGIF2(st.empty(), imagePath1, imagePath2, "模型预测结果图", "模型预测结果图2")
-colFCPart1, colFCPart2 = st.columns(2)
-with colFCPart1:
-    img = Image.open(r'E:\a_python\program\diseaseForecastStreamlit\demo\demo13\Figure_1.png')
-    st.image(img)
-    img1 = Image.open(r'E:\a_python\program\diseaseForecastStreamlit\demo\demo13\Figure_3.png')
-    st.image(img1)
-with colFCPart2:
-    img = Image.open(r'E:\a_python\program\diseaseForecastStreamlit\demo\demo13\Figure_2.png')
-    st.image(img)
-    img2 = Image.open(r'E:\a_python\program\diseaseForecastStreamlit\demo\demo13\Figure_4.png')
-    st.image(img2)
+def getPredictImg(pathT1, imgOutput):
+    df1 = pd.read_excel(pathT1)
+
+    # 根据 'DayOfYear' 列进行分组
+    grouped = df1.groupby('DayOfYear')
+
+    # 示例：对每个分组进行操作
+    count = 1
+    for day, group in grouped:
+        if not len(group) < 10:
+            # print(f"DayOfYear: {day}")
+            # print(group)
+            count += 1
+            # 去除重复的行
+            group_deduplicated = group.drop_duplicates(subset=['纬度', '经度', 'PredictLabel'])
+            # Pivot the data to create a matrix for heatmap
+            pivot_table = group_deduplicated.pivot(index='纬度', columns='经度', values='PredictLabel')
+            # Set up the heatmap color palette
+            cmap = sns.color_palette("RdYlGn_r", as_cmap=True)
+            pivot_table = pivot_table.fillna(0)
+            # Set over and under values to black
+            cmap.set_over('black')
+            cmap.set_under('black')
+
+            # Plot the heatmap with reduced spacing between cells
+            plt.figure(figsize=(8, 6))
+            sns.heatmap(pivot_table, cmap=cmap, linewidths=0, vmin=0, vmax=100, cbar_kws={'extend': 'both'})
+
+            plt.title(f'病株率-DayOfYear:{day}')
+            plt.xlabel('经度')
+            plt.ylabel('纬度')
+
+            # Display the plot
+            # plt.show()
+
+            plt.savefig(
+                os.path.join(
+                    imgOutput,
+                    f'DayOfYear-{day}.png'),
+                dpi=300, bbox_inches='tight')  # 保存为高分辨率 PNG 文件
+
+
+# 转换成gif
+def getGif(imageDirPath, gifDirPath):
+    # 图片文件名列表
+    images = []
+    for data_path in os.listdir(imageDirPath):
+        if data_path.endswith('.png'):
+            # 打开图片
+            images.append(Image.open(os.path.join(imageDirPath, data_path)))
+
+            # 设置输出 GIF 文件名
+            output_gif = gifDirPath + '.gif'
+
+            # 将图片保存为 GIF
+            images[0].save(
+                output_gif,
+                save_all=True,
+                append_images=images[1:],
+                duration=1000,  # 设置每张图片的显示时间（毫秒）
+                loop=0,  # 设置循环次数，0 表示不循环
+            )
+
+# getPredictImg(
+#     os.path.join(RESOURCE_MODELRESULT_PATH, 'predict', 'SEIR机理模型_predictLabel.xlsx')
+#     , os.path.join(RESOURCE_MODELRESULT_PATH, 'predictimg'))
+# getGif(os.path.join(RESOURCE_MODELRESULT_PATH, 'predictimg'),
+#        os.path.join(RESOURCE_MODELRESULT_PATH, 'predictimg', 'predictGIF'))
+
+
+# GIF展示方式1
+# file_ = open( os.path.join(RESOURCE_MODELRESULT_PATH, 'predictimg', 'predictGIF.gif'), "rb")
+# contents = file_.read()
+# data_url = base64.b64encode(contents).decode("utf-8")
+# file_.close()
+#
+# st.markdown(
+#     f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+#     unsafe_allow_html=True,
+# )

@@ -89,7 +89,7 @@ with colFCFV2:
     # 初始化地图
     pe = st.empty()
     with pe:
-        m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        mV1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
             tempList = []
             if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
@@ -100,17 +100,16 @@ with colFCFV2:
                 else:
                     tempList = [{"label": "无数据", "value": "无数据"}]
                 # print(leftBarsFCalData['checked'])
-
                 for name in tempList:
-                    if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
+                    if '.' in name:
                         st.session_state.VisualMapLayer.append(name)
                 if not onVisual:
                     st.session_state.VisualMapLayer.clear()
                 for tempLayer in st.session_state.VisualMapLayer:
                     path = os.path.join(RESOURCE_TEMPDIR_PATH, tempLayer)
-                    addLayer(m, path)
+                    addLayer(mV1, path)
                     st.header(f'{tempLayer}文件加载完成')
-        m.to_streamlit()
+        mV1.to_streamlit()
 with colFCFV3:
     st.markdown("##### 数据下载")
     zipPath = os.path.join(
@@ -151,12 +150,12 @@ st.markdown('---')
 st.markdown('#### 模型结构与训练结果下载')
 result1 = pages_utils.multiselect_all(
     st, '全选',
-    pages_utils.TempDataSetField[4]['模型'],
+    pages_utils.TempDataSetFieldFacet[4]['模型'],
     'temp111', 'collapsed')
-if not pages_utils.TempDataSetField[4].empty:
-    models = pages_utils.TempDataSetField[4]['模型'].tolist()
-    modelsStruct = pages_utils.TempDataSetField[4]['模型结构'].tolist()
-    modelResult = pages_utils.TempDataSetField[4]['模型训练结果'].tolist()
+if not pages_utils.TempDataSetFieldFacet[4].empty:
+    models = pages_utils.TempDataSetFieldFacet[4]['模型'].tolist()
+    modelsStruct = pages_utils.TempDataSetFieldFacet[4]['模型结构'].tolist()
+    modelResult = pages_utils.TempDataSetFieldFacet[4]['模型训练结果'].tolist()
 
     zipPath = os.path.join(
         RESOURCE_MODELRESULT_PATH, '模型结构与训练结果.zip')
@@ -166,7 +165,7 @@ if not pages_utils.TempDataSetField[4].empty:
     # 输入压缩包的文件路径
     zipFilesPath = []
     for model in result1:
-        row = pages_utils.TempDataSetField[4][pages_utils.TempDataSetField[4]['模型'] == model]
+        row = pages_utils.TempDataSetFieldFacet[4][pages_utils.TempDataSetFieldFacet[4]['模型'] == model]
         if not row.empty:
             model_structure = row['模型结构'].values[0]
             model_training_result = row['模型训练结果'].values[0]
@@ -197,3 +196,16 @@ if not pages_utils.TempDataSetField[4].empty:
             file_name="模型结构与训练结果.zip",
             mime="application/zip",
         )
+st.markdown('---')
+st.markdown('###### 模拟气象情景数据下载')
+zipPath = os.path.join(RESOURCE_TEMPDIR_PATH, '基于天气情景生成器的模拟数据.zip')
+# 压缩生成的xlsx数据
+pathEE = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
+pages_utils.zip_folder(pathEE, zipPath)
+with open(zipPath, "rb") as file:
+    st.download_button(
+        label="下载模拟生成的气象数据",
+        data=file,
+        file_name="基于天气情景生成器的模拟数据.zip",
+        mime="application/zip",
+    )

@@ -41,7 +41,7 @@ hide_pages(
 )
 # 显示地图图层,创建一个最大长度为5的队列
 if 'dPLeftMapLayer' not in st.session_state:
-    st.session_state.dPLeftMapLayer = deque(maxlen=1)
+    st.session_state.dPLeftMapLayer = deque(maxlen=2)
 # 显示右侧预处理地图图层,创建一个最大长度为5的队列
 if 'dPRightMapLayer' not in st.session_state:
     st.session_state.dPRightMapLayer = deque(maxlen=1)
@@ -85,6 +85,18 @@ def clear_other(key):
     return
 
 
+def find_subnodes(file_dict, file_name):
+    # 检查文件名称是否在字典中
+    if file_name in file_dict["文件名称"]:
+        # 获取对应的下标
+        index = file_dict["文件名称"].index(file_name)
+        # 返回对应的子节点
+        print(file_dict["子节点"][index])
+        return file_dict["子节点"][index]
+    else:
+        return None  # 如果文件名称不存在
+
+
 def find_parent_value(data, targetValue):
     for item in data:
         if 'children' in item:
@@ -94,7 +106,6 @@ def find_parent_value(data, targetValue):
             parentValue = find_parent_value(item['children'], targetValue)
             if parentValue:
                 return parentValue
-    return None
 
 
 if "preMethodFacetName" not in st.session_state:
@@ -129,8 +140,9 @@ with colDPF21:
         m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
         with st.status('加载数据中...'):
             if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
-                for name in leftBarsRawData['checked']:
-                    if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
+                for name in leftBarsRawData['checked'] + leftBarsPreData['checked']:
+                    if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称'] or \
+                            name.split('.')[0] in pages_utils.TempDataSetFieldFacet[1]['文件名称']:
                         st.session_state.dPLeftMapLayer.append(name)
                 print(st.session_state.dPLeftMapLayer)
                 if not onDP1:
@@ -164,9 +176,13 @@ with colDPF3:
 
     # ===============显示和处理右中各个处理方法设置参数===============
     if agree11:
+        onlyFile = []
+        for temp in leftBarsRawData['checked'] + leftBarsPreData['checked']:
+            if '.tif' in temp:
+                onlyFile.append(temp)
         optionResample = st.selectbox(
             '待重采样文件',
-            options=leftBarsRawData['checked'])
+            options=onlyFile)
         optionInterpolationMethod = st.selectbox(
             '重采样方法',
             options=('最近邻插值', '双线性插值', '立方卷积逼近',
@@ -175,9 +191,12 @@ with colDPF3:
             '模板文件',
             options=(leftBarsRawData['checked']),
             help='参考坐标系及投影数等')
+        tempName = '文件名称_年_DOY.tif'
+        if '_' in optionResample:
+            tempName = optionResample.split('_')
         optionOutputFile = st.text_input(
             label='输出文件名称',
-            value=optionResample)
+            value=f'{tempName[0]}-重采样_{tempName[1]}_{tempName[2]}')
 
         st.session_state["preMethodFacetName"]['param1'] = os.path.join(tempRP, optionResample)
         st.session_state["preMethodFacetName"]['param2'] = optionInterpolationMethod
@@ -214,16 +233,22 @@ with colDPF3:
             st.session_state["preMethodFacetName"]['param5'] = os.path.join(tempRP, textSN)
             st.session_state["preMethodFacetName"]['param6'] = os.path.join(tempRP, templateFile)
     if agree13:
+        temp13List = []
+        temp13 = leftBarsRawData['checked']
+        for tep in temp13:
+            if tep.endswith('tif'):
+                temp13List.append(tep)
         optionClip = st.selectbox(
             '待裁剪文件',
-            options=leftBarsRawData['checked'])
+            options=temp13List)
         optionTemplateFileClip = st.selectbox(
             '模板文件',
             options=(leftBarsRawData['checked']),
             help='参考坐标系及投影数等')
+        tempName1 = optionClip.split('_')
         optionOutputFileClip = st.text_input(
             label='输出文件名称',
-            value=optionClip)
+            value=f'{tempName1[0]}-裁剪_{tempName1[1]}_{tempName1[2]}')
 
         st.session_state["preMethodFacetName"]['param1'] = os.path.join(tempRP, optionClip)
         st.session_state["preMethodFacetName"]['param2'] = os.path.join(tempRP, optionTemplateFileClip)
@@ -296,15 +321,23 @@ with colDPF3:
             tempEntryT = os.path.basename(handledFile)
             fileName = tempEntryT.split('.')[0]
             fileFormat = tempEntryT.split('.')[1]
+            # 输入文件
+            # print('找父节点')
+            dataTypeList = []
+            inputFileList = [item for item in leftBarsRawData['checked'] if '.' in item]
+            for tempNameT in inputFileList:
+                tempName = tempNameT.split('.')[0]
+                a = find_subnodes(pages_utils.TempDataSetFieldFacet[0], tempName)
+                dataTypeList.append(a)
             new_entry = {
                 "编号": pages_utils.generateID(),
-                "数据类型": '气象数据',
+                "数据类型": dataTypeList,
                 "根节点": '预处理后数据集',
-                "子节点": '气象数据',
+                "子节点": '遥感数据',
                 "字段": fileName.split('_')[0] if '_' in fileName else "其他",
                 "文件名称": fileName,
                 "数据格式": fileFormat,
-                "输入文件": None,
+                "输入文件": inputFileList,
                 "预处理方法": tempMethod,
                 "方法参数": [value for key, value in st.session_state["preMethodFacetName"].items() if
                              key != 'checkBox'],

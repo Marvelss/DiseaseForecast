@@ -55,6 +55,8 @@ if "nowMethodNameFacet" not in st.session_state:
 if 'FOVisualInformationFacet' not in st.session_state:
     st.session_state["FOVisualInformationFacet"] = []
 
+# 显示可视化中文图例
+plt.rcParams['font.sans-serif'] = 'SimHei'
 emptyHeadFOP = st.empty()
 
 
@@ -339,7 +341,7 @@ with dataPCV:
             # 展示备选特征数据
             temp_df = pages_utils.TempDataSetFacet[2]
             # 排除指定列，获取其他列的名称
-            exclude_columns = ['经度', '纬度',  '年', 'DayOfYear']
+            exclude_columns = ['经度', '纬度', '年', 'DayOfYear']
             remaining_columns = [col for col in temp_df.columns if col not in exclude_columns]
 
             # 创建空的 DataFrame
@@ -363,8 +365,11 @@ with dataPCV:
             for i in range(len(st.session_state["leftTabsFacet"])):
                 with tt1[i]:
                     if st.session_state["leftTabsFacet"][i] == '备选特征':
+                        # st.data_editor(
+                        #     tempDataSetFacetReveal,
+                        #     height=220, width=800)
                         st.data_editor(
-                            tempDataSetFacetReveal,
+                            pages_utils.TempDataSetFacet[2],
                             height=220, width=800)
                     elif st.session_state["leftTabsFacet"][i] == '优选特征':
                         # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
@@ -398,9 +403,10 @@ with dataPCV:
     # 数组元素去重
     # weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
     #     set(agricultureNameT))
-    tempField = pages_utils.TempDataSetFacet[2].columns.tolist() if pages_utils.TempDataSetFacet[3].empty else pages_utils.TempDataSetFacet[3].columns.tolist()
+    tempField = pages_utils.TempDataSetFacet[2].columns.tolist() if pages_utils.TempDataSetFacet[3].empty else \
+    pages_utils.TempDataSetFacet[3].columns.tolist()
     result1 = pages_utils.multiselect_all(
-        st, '全选-特征', tempField,
+        st, '全选-特征', filterUnique(tempField, pages_utils.reservedField),
         'temp', 'collapsed')
     # result2 = pages_utils.multiselect_all(
     #     st, '全选-植保数据', plantName,

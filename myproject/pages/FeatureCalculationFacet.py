@@ -71,6 +71,18 @@ def findFeatureFile(featureList, fileList):
     return matched_files
 
 
+def find_subnodesFC(file_dict, file_name):
+    # 检查文件名称是否在字典中
+    if file_name in file_dict["文件名称"]:
+        # 获取对应的下标
+        index = file_dict["文件名称"].index(file_name)
+        # 返回对应的子节点
+        print(file_dict["子节点"][index])
+        return file_dict["子节点"][index]
+    else:
+        return None  # 如果文件名称不存在
+
+
 # 添加图层
 def addLayer(mapTemp, filePath):
     fileNameT = os.path.basename(filePath)
@@ -388,10 +400,9 @@ with colFCF3:
                     # 待提取字段名称、年、DayOfYear、基准文件
                     # st.session_state.fCMapLayer.append(handledFile)
 
-                    # pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
-
-                    pages_utils.TempDataSetFacet[2] = pd.read_excel(
-                        r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\面-动-水稻纹枯病SEIR机理模型(病株率)\9省SEIR上传数据.xlsx')
+                    pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
+                    # pages_utils.TempDataSetFacet[2] = pd.read_excel(
+                    #     r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\面-动-水稻纹枯病SEIR机理模型(病株率)\9省SEIR上传数据.xlsx')
 
                     print('----------------特征优选数据集----------------')
                     print(pages_utils.TempDataSetFacet[2])
@@ -402,7 +413,9 @@ with colFCF3:
             with st.status('加载数据中...'):
                 if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
                     for name in leftBarsFCalData['checked']:
-                        if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[0]['文件名称']:
+                        if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[2]['文件名称']:
+                            print('--测试加载名称---')
+                            print(name)
                             st.session_state.dPLeftMapLayer.append(name)
                     # print(st.session_state.fCMapLayer)
                 for layerPath in st.session_state.fCMapLayer:
@@ -413,17 +426,26 @@ with colFCF3:
         # 若返回值为数组
         if isinstance(handledFile, list):
             for tempEntry in handledFile:
+
+                # print('找父节点')
+                dataTypeList = []
+                inputFileList = [item for item in leftBarsRawData['checked'] if '.' in item]
+                for tempNameT in inputFileList:
+                    tempName = tempNameT.split('.')[0]
+                    a = find_subnodesFC(pages_utils.TempDataSetFieldFacet[0], tempName)
+                    dataTypeList.append(a)
+
                 tempEntryT = os.path.basename(tempEntry)
                 fileName = tempEntryT.split('.')[0]
                 new_entry = {
                     "编号": pages_utils.generateID(),
-                    "数据类型": '气象数据',
+                    "数据类型": dataTypeList,
                     "根节点": '备选特征集',
-                    "子节点": '气象数据',
+                    "子节点": '遥感数据',
                     "字段": fileName.split('_')[0] if '_' in fileName else "其他",
                     "文件名称": tempEntryT.split('.')[0],
                     "数据格式": tempEntryT.split('.')[1],
-                    "输入文件": None,
+                    "输入文件": inputFileList,
                     "特征计算方法": tempMethod,
                     "方法参数": [value for key, value in st.session_state["featureMethodFacetName"].items() if
                                  key != 'checkBox'],
@@ -436,18 +458,27 @@ with colFCF3:
                     pages_utils.TempDataSetFieldFacet[2][key].append(new_entry[key])
 
         else:
+
+            print('找父节点')
+            dataTypeList = []
+            inputFileList = [item for item in leftBarsRawData['checked'] if '.' in item]
+            for tempNameT in inputFileList:
+                tempName = tempNameT.split('.')[0]
+                a = find_subnodesFC(pages_utils.TempDataSetFieldFacet[0], tempName)
+                dataTypeList.append(a)
+
             tempEntryT = os.path.basename(handledFile)
             fileName = tempEntryT.split('.')[0]
             fileFormat = tempEntryT.split('.')[1]
             new_entry = {
                 "编号": pages_utils.generateID(),
-                "数据类型": '气象数据',
+                "数据类型": dataTypeList,
                 "根节点": '备选特征集',
-                "子节点": '气象数据',
+                "子节点": '遥感数据',
                 "字段": fileName.split('_')[0] if '_' in fileName else "其他",
                 "文件名称": fileName,
                 "数据格式": fileFormat,
-                "输入文件": None,
+                "输入文件": inputFileList,
                 "特征计算方法": tempMethod,
                 "方法参数": [value for key, value in st.session_state["featureMethodFacetName"].items() if
                              key != 'checkBox'],

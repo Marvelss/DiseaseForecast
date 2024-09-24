@@ -124,7 +124,7 @@ class PretreatmentMethodFacet:
         path_resample = methodParam[0]
         interpolationMethod = methodParam[1]
         path_refer = methodParam[2]
-        out_path_resample = self.getHandledField(methodParam[3])
+        out_path_resample = methodParam[3]
 
         # path_refer, path_resample, out_path_resample
         ds_refer = gdal.Open(path_refer, gdal.GA_ReadOnly)  # 打开数据集dataset
@@ -170,7 +170,7 @@ class PretreatmentMethodFacet:
     def onClipRaster(self, methodParam):
         beClipFile = methodParam[0]
         templateShapeFile = methodParam[1]
-        outputFile = self.getHandledField(methodParam[2])
+        outputFile = methodParam[2]
         # outputFile = os.path.join(RESOURCE_TEMPLATE_PATH, outputFile)
         # 1. 读取行政区边界shapefile
         shapefile = templateShapeFile
