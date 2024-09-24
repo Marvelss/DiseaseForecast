@@ -114,6 +114,8 @@ def onRun():
             # 若为空则跳过该步骤
             if not idNumber:
                 pages_utils.TempDataSet[2] = pages_utils.TempDataSet[1]
+                print('---测试跳转---')
+                print(st.session_state["leftTabs"])
                 st.session_state["leftTabs"].pop(0)
             afterHandleData = None
             newColumn = '错误'
@@ -214,28 +216,27 @@ with featureCCV:
                         column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
                     st.data_editor(
                         pages_utils.TempDataSet[i + 1],
-                        height=220, width=800,)
-                        # column_order=column)
+                        height=220, width=800, )
+                    # column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
-            if '预处理后数据集' not in st.session_state["leftTabs"]:
-                tempLefTabs = st.session_state["leftTabs"]
-            else:
-                tempLefTabs = st.session_state["leftTabs"]
-            tt = st.tabs(tempLefTabs)
-            for i in range(len(tempLefTabs)):
-                with tt[i]:
-                    if tempLefTabs[i] == '原始数据':
-                        column = ['数据类型', '字段', '上传时间']
-                    elif tempLefTabs[i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    elif tempLefTabs[i] == '备选特征':
-                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+            if pages_utils.TempDataSet[2].columns.tolist() == pages_utils.TempDataSet[1].columns.tolist():
+                tt = st.tabs(['备选特征'])
+                with tt[0]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i + 1],
-                        height=220, width=800,)
-                        # column_order=column)
+                        pages_utils.TempDataSet[2],
+                        height=220, width=800, )
+            else:
+                tt = st.tabs(['预处理后数据集', '备选特征'])
+                with tt[0]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[1],
+                        height=220, width=800, )
+                with tt[1]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[2],
+                        height=220, width=800, )
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
     # if not pages_utils.TempDataSetField[1].empty:
@@ -275,7 +276,7 @@ with (featureCCM):
     # ===============显示和处理右中各个处理方法设置参数===============
     if option14:
         d1 = st.date_input("开始时间(默认处理各年数据集)",
-                           value=datetime.date(2024, 7, 6),
+                           value=datetime.date(2024, 1, 1),
                            format='MM/DD/YYYY',
                            )
         d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 8, 9))
@@ -283,10 +284,10 @@ with (featureCCM):
         st.session_state["featureMethodName"]['param2'] = str(d2)
     if option15:
         d1 = st.date_input("开始时间(默认处理各年数据集)",
-                           value=datetime.date(2024, 7, 6),
+                           value=datetime.date(2024, 1, 1),
                            format='MM/DD/YYYY',
                            )
-        d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 8, 9))
+        d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 1, 1))
         option = st.selectbox(
             '计算阈值方式',
             ('单日降水量', '总降水量'))
@@ -310,8 +311,8 @@ with (featureCCM):
         st.session_state["featureMethodName"]['param1'] = option3
 
         if option3 == '指定日期':
-            sd1 = st.date_input("开始时间", value='today')
-            ed1 = st.date_input("结束时间", value='today')
+            sd1 = st.date_input("开始时间", value=datetime.date(2024, 7, 1))
+            ed1 = st.date_input("结束时间", value=datetime.date(2024, 8, 1))
             st.session_state["featureMethodName"]['param2'] = sd1.strftime('%m-%d')
             st.session_state["featureMethodName"]['param3'] = ed1.strftime('%m-%d')
 
@@ -337,25 +338,25 @@ with (featureCCM):
         st.session_state["featureMethodName"]['param2'] = growthPeriodStartDate.strftime('%m-%d')
         st.session_state["featureMethodName"]['param3'] = growthPeriodEndDate.strftime('%m-%d')
         st.session_state["featureMethodName"]['param4'] = str(growthPeriodNumber)
-    if option17:
-        option = st.selectbox(
-            '抽取因子',
-            ('降水', '温度'))
-        option4 = st.selectbox(
-            '计算方式',
-            ('平均值', '累积值'))
-        j3 = st.selectbox(
-            '起始日期',
-            ('基于活动积温的生育期计算', '指定日期'))
-        if j3 == '指定日期':
-            d3 = st.date_input("起始日期",
-                               value=None,
-                               label_visibility='collapsed')
-
-        if j3 == '基于活动积温的生育期计算':
-            pass
-        d4 = st.date_input("结束日期", value=None)
-        number1 = st.number_input("步长(天)", value=1, min_value=1)
+    # if option17:
+    #     option = st.selectbox(
+    #         '抽取因子',
+    #         ('降水', '温度'))
+    #     option4 = st.selectbox(
+    #         '计算方式',
+    #         ('平均值', '累积值'))
+    #     j3 = st.selectbox(
+    #         '起始日期',
+    #         ('基于活动积温的生育期计算', '指定日期'))
+    #     if j3 == '指定日期':
+    #         d3 = st.date_input("起始日期",
+    #                            value=None,
+    #                            label_visibility='collapsed')
+    #
+    #     if j3 == '基于活动积温的生育期计算':
+    #         pass
+    #     d4 = st.date_input("结束日期", value=None)
+    #     number1 = st.number_input("步长(天)", value=1, min_value=1)
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([5, 1])

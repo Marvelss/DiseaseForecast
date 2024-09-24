@@ -7,6 +7,7 @@ import pandas as pd
 import seaborn as sns
 import streamlit as st
 from PIL import Image
+from matplotlib.ticker import MaxNLocator
 from st_pages import hide_pages
 
 from lib.share import RESOURCE_IMAGES_PATH
@@ -206,32 +207,31 @@ with dataPCV:
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
-            tt1 = st.tabs(st.session_state["leftTabs"])
-            for i in range(len(st.session_state["leftTabs"])):
-                with tt1[i]:
-                    if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据类型', '字段', '上传时间']
-                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    st.data_editor(
-                        pages_utils.TempDataSet[i],
-                        height=220, width=800,)
-                        # column_order=column)
+            tt1 = st.tabs(['原始数据'])
+            with tt1[0]:
+                st.data_editor(
+                    pages_utils.TempDataSet[0],
+                    height=220, width=800, )
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
-            tt = st.tabs(st.session_state["leftTabs"])
-            for i in range(len(st.session_state["leftTabs"])):
-                with tt[i]:
-                    if st.session_state["leftTabs"][i] == '原始数据':
-                        column = ['数据类型', '字段', '上传时间']
-                    elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                        # print('---{}---'.format(column))
+            if pages_utils.TempDataSet[0].columns.tolist() == pages_utils.TempDataSet[1].columns.tolist():
+                tt = st.tabs(['预处理后数据集'])
+                with tt[0]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i],
-                        height=220, width=800,)
-                        # column_order=column)
+                        pages_utils.TempDataSet[0],
+                        height=220, width=800, )
+            else:
+                tt = st.tabs(['原始数据', '预处理后数据集'])
+                with tt[0]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[0],
+                        height=220, width=800, )
+                with tt[1]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[1],
+                        height=220, width=800, )
+                # column_order=column)
 
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
@@ -450,19 +450,21 @@ with dataPCM:
                             data_after = pd.DataFrame({inputFields[o][0]: data_after_temp})
                             # 查找缺失值的索引
                             missing_indices = data_before[data_before[inputFields[o][0]].isna()].index
+                            # print(f'缺失索引:{missing_indices}')
                             # 获取第一个缺失值的索引
-                            first_missing_index = missing_indices[0]
+                            # first_missing_index = missing_indices[0]
                             # 获取第一个缺失值的行号
+                            first_missing_index = 35
                             # print(f"第一个缺失值的行号: {first_missing_index}")
 
                             # 计算前5行和后5行的起始和结束索引
-                            start_index = max(first_missing_index - 5, 0)
-                            end_index = min(first_missing_index + 5 + 1, len(data_before))
+                            start_index = max(first_missing_index - 15, 0)
+                            end_index = min(first_missing_index + 15 + 1, len(data_before))
                             # 取第一个缺失值对应前15行和后15行预处理数据
                             data_before_surrounding_data = data_before.iloc[start_index:end_index]
                             data_after_surrounding_data = data_after.iloc[start_index:end_index]
                             # 绘制对比折线图
-                            plt.figure(figsize=(10, 6))
+                            fig, ax = plt.subplots(figsize=(10, 6))
                             # print(pages_utils.TempDataSet[1]['DayOfYear'])
                             # 取第一个缺失值对应前15行和后15行'经度', '纬度', '年'数据
                             missing_rows = \
@@ -487,6 +489,7 @@ with dataPCM:
                                      linestyle='--',
                                      marker='o', alpha=0.3)
                             plt.xlabel('行号')
+                            ax.xaxis.set_major_locator(MaxNLocator(integer=True))
                             plt.ylabel(inputFields[o][0])
                             plt.figtext(0.5, -0.01,
                                         f'图{st.session_state.IMAGECOUNT} {inputFields[o][0]}字段部分数据插补前后对比图',

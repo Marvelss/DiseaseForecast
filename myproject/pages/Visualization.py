@@ -66,13 +66,16 @@ def convert_df(df):
 
 
 st.markdown('###### 数据集')
-arr1 = st.session_state["leftTabs"]
-tt1 = st.tabs(st.session_state["leftTabs"])
-for i in range(len(st.session_state["leftTabs"])):
-    with tt1[i]:
-        st.dataframe(
-            pages_utils.TempDataSet[i],
-            height=250, width=1500)
+
+tt1 = st.tabs(['优选特征', '模型'])
+with tt1[0]:
+    st.dataframe(
+        pages_utils.TempDataSet[3],
+        height=250, width=1500)
+with tt1[1]:
+    st.dataframe(
+        pages_utils.TempDataSet[4],
+        height=250, width=1500)
 st.markdown('###### 各环节方法执行记录')
 tt2 = st.tabs(['原始数据', '预处理后数据', '备选特征', '优选特征', '模型'])
 for j in range(len(['原始数据', '预处理后数据', '备选特征', '优选特征', '模型'])):

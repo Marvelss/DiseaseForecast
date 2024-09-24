@@ -881,8 +881,6 @@ with st.container(height=700):
                     # Plotting
                     fig, ax = plt.subplots(figsize=(10, 6))
 
-                    # 绘制折线图
-                    plt.figure(figsize=(10, 6))
                     plt.plot(df['年'], df['峰值'], label='实际病害峰值', marker='o', color='blue')
                     plt.plot(df['年'], df['Predicted_value'], label='预测病害峰值', marker='x', color='red')
 
@@ -924,8 +922,6 @@ with st.container(height=700):
                     # Plotting
                     fig, ax = plt.subplots(figsize=(10, 6))
 
-                    # 绘制折线图
-                    plt.figure(figsize=(10, 6))
                     plt.plot(df['年'], df['峰值'], label='实际病害峰值', marker='o', color='blue')
                     plt.plot(df['年'], df['Predicted_value'], label='预测病害峰值', marker='x', color='red')
 

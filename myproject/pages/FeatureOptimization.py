@@ -347,25 +347,27 @@ with dataPCV:
                         column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
                     st.data_editor(
                         pages_utils.TempDataSet[i + 2],
-                        height=220, width=800,)
-                        # column_order=column)
+                        height=220, width=800, )
+                    # column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
-            tempLeftTabs = st.session_state["leftTabs"]
-
-            # print(f'f=========测试{tempLeftTabs}================')
-            tt = st.tabs(tempLeftTabs)
-            for i in range(len(tempLeftTabs)):
-                with tt[i]:
-                    if tempLeftTabs[i] == '备选特征':
-                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
-                    elif tempLeftTabs[i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+            if pages_utils.TempDataSet[3].columns.tolist() == pages_utils.TempDataSet[2].columns.tolist():
+                tt = st.tabs(['优选特征'])
+                with tt[0]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i + 2],
-                        height=220, width=800,)
-                        # column_order=column)
+                        pages_utils.TempDataSet[2],
+                        height=220, width=800, )
+            else:
+                tt = st.tabs(['备选特征', '优选特征'])
+                with tt[0]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[2],
+                        height=220, width=800, )
+                with tt[1]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[3],
+                        height=220, width=800, )
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
     # if not pages_utils.TempDataSetField[2].empty:

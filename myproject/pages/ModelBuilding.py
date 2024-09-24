@@ -437,37 +437,25 @@ with modelACV:
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
-            tt = st.tabs(st.session_state["leftTabs"])
-            for i in range(len(st.session_state["leftTabs"])):
-                with tt[i]:
-                    if st.session_state["leftTabs"][i] != '模型':
-                        if st.session_state["leftTabs"][i] == '原始数据':
-                            column = ['数据类型', '字段', '上传时间']
-                            st.data_editor(
-                                pages_utils.TempDataSet[0],
-                                height=220, width=800, )
-                        elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                            column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                            st.data_editor(
-                                pages_utils.TempDataSet[1],
-                                height=220, width=800, )
-                        elif st.session_state["leftTabs"][i] == '备选特征':
-                            column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
-                            st.data_editor(
-                                pages_utils.TempDataSet[2],
-                                height=220, width=800, )
-                        elif st.session_state["leftTabs"][i] == '优选特征':
-                            column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-                            st.data_editor(
-                                pages_utils.TempDataSet[3],
-                                height=220, width=800, )
-                        # column_order=column)
-                    else:
-                        column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
-                        st.data_editor(
-                            pages_utils.TempDataSetField[i],
-                            height=220, width=800,
-                            column_order=column)
+            if pages_utils.TempDataSet[4].columns.tolist() == pages_utils.TempDataSet[3].columns.tolist():
+                tt = st.tabs(['优选特征'])
+                with tt[0]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[3],
+                        height=220, width=800, )
+            else:
+                tt = st.tabs(['优选特征', '模型'])
+                with tt[0]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[3],
+                        height=220, width=800, )
+                with tt[1]:
+                    column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
+                    st.data_editor(
+                        pages_utils.TempDataSetField[4],
+                        height=220, width=800,
+                        column_order=column)
+
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
     # if not pages_utils.TempDataSetField[3].empty:
@@ -479,7 +467,7 @@ with modelACV:
     weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0 + weatherNameT3
     plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0 + plantNameT3
     agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT3
-    modelACVCol1, modelACVCol2 = st.columns(2)
+    modelACVCol1, modelACVCol2 = st.columns([0.7, 0.4])
     with modelACVCol1:
         # 按照数据类型显示左侧字段或特征
         result1 = pages_utils.multiselect_all(
