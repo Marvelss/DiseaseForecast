@@ -173,17 +173,22 @@ with hideBtnBrief.container():
     if len(st.session_state.modelReportWeatherInfoFacet['模型']):
         values_list = list(st.session_state.modelSituationIndexResult.values())
         # 创建结果列表
-        formatted_list = []
+        data = {}
+
         # 遍历并格式化为指定格式
         for value in values_list:
             # 提取文件路径中的模型名称
             file_path = value[0]
-            # 提取模型名称
-            model_name = os.path.basename(file_path).split('_applicationPredict.xlsx')[0]
-            # 格式化为 f'{model_name}_DEV={dev_value}'
-            formatted_string = f'{model_name}-Dev_D={value[1]}'
-            formatted_list.append(formatted_string)
-        aInfoGap10 = '、'.join(formatted_list)
+            # 提取模型名称和情景
+            model_info = os.path.basename(file_path).split('_applicationPredict.xlsx')[0].split('_')
+
+            if len(model_info) >= 2:
+                model_name, scenario = model_info[0], model_info[1]
+
+                # 将精度值存入字典
+                data.setdefault(model_name, {})[scenario] = float(value[1])
+
+        aInfoGap10 = data
     else:
         aInfoGap10 = '(待进行处理)'
     aInfoGap11 = '较一致' if 0.45 < 1 else '较不一致'  # 天气情景好
@@ -191,10 +196,16 @@ with hideBtnBrief.container():
     aInfoModelName = st.session_state.modelingName
     abstractInfo = f"""
     ##### &emsp;&emsp;本次建模使用了<u>{aInfoGap1}</u>，通过<u>{aInfoGap2}</u>预处理步骤，结合<u>{aInfoGap3}</u>环节得到模型输入特征，包括<u>{aInfoGap5}</u>，数据维度为<u>{aInfoGap6}</u>，最后采用<u>{aInfoGap7}方法</u>，构建了<u>{aInfoModelName}</u>，模型精度为<u>{aInfoGap8}</u>。
-    ##### &emsp;&emsp;此外，基于天气情景生成器模拟生成了<u>{aInfoGap9}</u>的气象情景，对<u>{aInfoGap13}</u>进行模型评估，结果显示动态偏差指标Dev_S，分别为<u>{aInfoGap10}</u>。模型预测值与实际观测结果在多次模拟中的趋势<u>{aInfoGap11}</u>。
+    ##### &emsp;&emsp;此外，基于天气情景生成器模拟生成了<u>{aInfoGap9}</u>的气象情景，对<u>{aInfoGap13}</u>进行模型评估，得到动态偏差指标Dev_S，结果分别如下：
+    """
+    abstractInfo1 = f"""
     ##### &emsp;&emsp;综合上述结果，<u>{aInfoGap13}</u>模型表现出<u>{aInfoGap12[0]}</u>的可靠性和预测效果，参数设置合理，具有<u>{aInfoGap12[1]}</u>的鲁棒性。
     """
     st.markdown(abstractInfo, unsafe_allow_html=True)
+    # 创建 DataFrame
+    df = pd.DataFrame(aInfoGap10).T.fillna('')  # 转置并填充空值
+    st.table(df)
+    st.markdown(abstractInfo1, unsafe_allow_html=True)
     colInfo1, colInfo2, colInfo3, colInfo4 = st.columns(4)
     # if btnBrief:
     #     st.session_state.hideBtnDict['brief'] = True
@@ -303,7 +314,7 @@ with hideBtnMB.container():
         # 处理多条评价指标，并将每个字典的键值对格式化为 "key=value"
         mbInfo4_list = []
         for item in pages_utils.TempDataSetFieldFacet[4]['评价指标']:
-            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in item.items()])
+            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in eval(item).items()])
             mbInfo4_list.append(formatted)
         mbInfo4 = '；'.join(mbInfo4_list)
 
@@ -521,13 +532,17 @@ if len(st.session_state.modelReportWeatherInfoFacet['模型']):
     endInfo2 = '病株率' if '病株率' in pages_utils.TempDataSetFieldFacet[4]['标签'].tolist()[0] else \
         pages_utils.TempDataSetFieldFacet[4]['标签'].tolist()[0]
     endInfo3 = '、'.join(st.session_state.modelReportWeatherInfoFacet['情景'])
-    endInfo4 = '、'.join(formatted_list)
+
     st.markdown(
         f'##### &emsp;&emsp;本次建模场景为<u>{endInfo1}</u>，模型输出为<u>{endInfo2}</u>。'
-        f'基于动态预测模型评价方法计算可得<u>{endInfo3}</u>情景下各模型预测输出的偏差指标分别为<u>{endInfo4}</u>。  \n'
+        f'基于动态预测模型评价方法计算可得<u>{endInfo3}</u>情景下各模型预测输出的偏差指标偏差指标分别如下：  \n',
+        unsafe_allow_html=True)
+    # 创建 DataFrame
+    df = pd.DataFrame(aInfoGap10).T.fillna('')  # 转置并填充空值
+    st.table(df)
+    st.markdown(
         f'##### &emsp;&emsp;根据上述计算结果进行综合评估，可认为上述模型可靠性<u>较高</u>，参数设置较为合理，具有良好的预测效果和鲁棒性。',
         unsafe_allow_html=True)
-
 
 # if btnResult:
 #     st.markdown("""
