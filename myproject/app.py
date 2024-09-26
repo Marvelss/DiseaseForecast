@@ -9,8 +9,9 @@ from streamlit import switch_page
 
 import itertools
 
-from lib.share import PROJECT_PATH, PAGES_PATH, RESOURCE_IMAGES_PATH, IMAGECOUNT
+from lib.share import PROJECT_PATH, PAGES_PATH, RESOURCE_IMAGES_PATH, IMAGECOUNT, RESOURCE_PROCESS_PATH
 from pages import ui, pages_utils
+from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 
 # add_page_title()
 
@@ -398,43 +399,52 @@ st.markdown(
 
 @st.experimental_dialog("接口调用", width='large')
 def vote(titleName):
+    afterHandleData = pd.DataFrame()
     if titleName == '降雨日数计算':
         # 上传数据集
         st.markdown('### 上传数据集')
-        col1321, col1322 = st.columns([0.5, 0.5])
-        with col1321:
-            st.info("说明:  \n"
-                    "上传的数据集字段内容必须包含", icon="ℹ️️")
-        with col1322:
-            uploaded_files = st.file_uploader(
-                "上传数据集",
-                accept_multiple_files=False,
-                label_visibility='collapsed',
-                type=['xlsx', 'csv', 'txt', 'xls', 'zip'],
-                help='help')
+        # col1321, col1322 = st.columns([0.5, 0.5])
+        # with col1321:
+        st.info("说明:  \n"
+                "上传的数据集必须包含字段:经度、纬度、DayOfYear、年、降水", icon="ℹ️️")
+        # with col1322:
+        uploaded_files = st.file_uploader(
+            "上传数据集",
+            accept_multiple_files=False,
+            label_visibility='collapsed',
+            type=['xlsx', 'csv', 'txt', 'xls', 'zip'],
+            help='help')
+
         st.markdown('### 参数设置')
         d1 = st.date_input("开始时间(默认处理各年数据集)",
                            value=datetime.date(1990, 7, 6),
                            format='MM/DD/YYYY',
                            )
         d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 8, 9))
-        option = st.selectbox(
+        st.selectbox(
             '计算阈值方式',
             ('单日降水量',))
-        if option == '单日降水量':
-            number2 = st.text_input("单日降水量数值(mm)", value=0.1)
+        number2 = st.text_input("单日降水量数值(mm)", value=0.1)
         number1 = st.number_input("连续降雨日数时长(天数)", value=1, min_value=1)
+        if uploaded_files:
+            bytes_data = uploaded_files.read()
+            data33 = pd.read_excel(bytes_data)
+            afterHandleData, _ = FeatureCalculationMethod(
+                data33, data33.columns.tolist()).rainfallDaysAccumulation(
+                ['降水'], [str(d1), str(d2), '单日降水量', str(number2), str(number1)])
         interval_col1, interval_col2 = st.columns([6, 1])
         btn = interval_col2.button('运行')
         if btn:
-            with open(r'低温多雨_温度.png', "rb") as file:
+            # 保存文件
+            afterDataPath = os.path.join(RESOURCE_PROCESS_PATH, f'{titleName}_api返回数据.xlsx')
+            afterHandleData.to_excel(afterDataPath)
+            with open(afterDataPath, "rb") as file:
                 interval_col2.download_button(
                     label="下载数据",
                     data=file,
-                    file_name="模型结构与训练结果.zip",
-                    mime="application/zip",
+                    file_name=f'{titleName}_api返回数据.xlsx',
+                    mime="application/octet-stream"
                 )
-
 
 
 def app(image, link, name, description, developer, repo_link):
