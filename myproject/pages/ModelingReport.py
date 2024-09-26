@@ -161,7 +161,7 @@ with hideBtnBrief.container():
     if len(pages_utils.TempDataSetField[4]['特征'].tolist()):
         mbInfo4_list = []
         for item in pages_utils.TempDataSetField[4]['评价指标']:
-            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in eval(item).items()])
+            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in item.items()])
             mbInfo4_list.append(formatted)
         aInfoGap8 = '；'.join(mbInfo4_list)
     else:
@@ -200,8 +200,10 @@ with hideBtnBrief.container():
 
     preInfo = f'通过<u>{aInfoGap2}</u>预处理步骤，' if len(
         pages_utils.TempDataSetField[1]['预处理方法'].tolist()) else ''
+    featureCINfo = f'结合<u>{aInfoGap3}</u>环节，' if len(
+        pages_utils.TempDataSetField[2]['特征计算方法'].tolist()) else ''
     abstractInfo = f"""
-    ##### &emsp;&emsp;本次建模使用了<u>{aInfoGap1}</u>，{preInfo}结合<u>{aInfoGap3}</u>环节，并利用<u>{aInfoGap4}</u>筛选出优选特征集，包括<u>{aInfoGap5}</u>，数据维度为<u>{aInfoGap6}</u>，最后采用<u>{aInfoGap7}方法</u>，构建了<u>{aInfoModelName}</u>，模型精度分别为<u>{aInfoGap8}</u>。
+    ##### &emsp;&emsp;本次建模使用了<u>{aInfoGap1}</u>，{preInfo}并利用<u>{aInfoGap4}</u>筛选出优选特征集，包括<u>{aInfoGap5}</u>，数据维度为<u>{aInfoGap6}</u>，最后采用<u>{aInfoGap7}方法</u>，构建了<u>{aInfoModelName}</u>，模型精度分别为<u>{aInfoGap8}</u>。
     ##### &emsp;&emsp;同时，基于天气情景生成器模拟生成了<u>{aInfoGap9}</u>的气象情景，对<u>{aInfoGap13}</u>进行模型评估，得到静态偏差指标Dev_S，结果分别如下：
     """
     abstractInfo1 = f"""
@@ -233,8 +235,12 @@ with hideBtnRaw.container():
 with hideBtnPre.container():
     if len(pages_utils.TempDataSetField[1]['预处理方法'].tolist()):
         category("🌌 预处理")
+        print('--测试预处理')
+        print(pages_utils.TempDataSetField[1]['输入字段'].tolist())
+        array_1dPre = [item for sublist in pages_utils.TempDataSetField[1]['输入字段'].tolist() for item in sublist]
+
         preInfo1 = '、'.join(pages_utils.TempDataSetField[1]['预处理方法'].tolist())
-        preInfo2 = '、'.join(list(set(pages_utils.TempDataSetField[1]['输入字段'].tolist())))
+        preInfo2 = '、'.join(list(set(array_1dPre)))
         # pages_utils.TempDataSet[1] = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
         rowsP, columnsP = pages_utils.TempDataSet[1].shape
         preInfo3 = f'{rowsP}'
@@ -532,6 +538,7 @@ with hideBtnMB.container():
                     f'模型精度分别为<u>{mbInfo4}</u>。',
                     unsafe_allow_html=True)
         if '峰值' in pages_utils.TempDataSetField[4]['标签'].tolist():
+            # print(pages_utils.TempDataSetField[4]['标签'].tolist())
             evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
             for indexT1, temp in enumerate(pages_utils.TempDataSetField[4]['模型'].tolist()):
                 path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
@@ -555,7 +562,7 @@ with hideBtnMB.container():
                             ha='center', fontsize=16)
                 # 精度结果直接显示在图中
                 metrics_text = "\n".join(
-                    [f"{key}={round(value, 3)}" for key, value in eval(evaluationIndex[indexT1]).items()])
+                    [f"{key}={round(value, 3)}" for key, value in evaluationIndex[indexT1].items()])
                 plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
                          verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
                 st.pyplot(fig)
@@ -566,7 +573,9 @@ with hideBtnMB.container():
                 predictLabelDF = pd.read_excel(os.path.join(path1, f'{temp}_predictLabel.xlsx'))
                 # 绘制混淆矩阵图
                 fig, ax = plt.subplots()
-                conf_matrix = confusion_matrix(testLabelDF, predictLabelDF)
+                actual_values = testLabelDF.iloc[:, 0]
+                predicted_values = predictLabelDF.iloc[:, 0]
+                conf_matrix = confusion_matrix(actual_values, predicted_values)
                 sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax)
                 ax.set_xlabel('实际病害发生程度')
                 ax.set_ylabel('预测病害发生程度')

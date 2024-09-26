@@ -781,9 +781,11 @@ with modelACM:
 
                         # 分类模型
                         elif models[i] == 'SVM' or models[i] == 'RF' or models[i] == 'FLDA' or models[i] == 'KNN':
+                            actual_values = testLabelDF.iloc[:, 0]
+                            predicted_values = predictLabelDF.iloc[:, 0]
                             # 绘制混淆矩阵图
                             fig, ax = plt.subplots()
-                            conf_matrix = confusion_matrix(testLabelDF, predictLabelDF)
+                            conf_matrix = confusion_matrix(actual_values, predicted_values)
                             sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax)
                             ax.set_xlabel('实际病害发生程度')
                             ax.set_ylabel('预测病害发生程度')

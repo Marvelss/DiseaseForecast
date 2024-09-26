@@ -86,6 +86,15 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
+
+        # 根据 X_test 的索引获取对应的经度、纬度和年列
+        # 假设经度、纬度和年列的列名为 '经度'、'纬度' 和 '年'
+        geo_data = df11.loc[X_test.index, ['经度', '纬度', '年']]
+
+        # 将预测结果与经纬度数据合并
+        combineResults = geo_data.copy()
+        combineResults['predictLabel'] = y_pred
+        combineResults = combineResults[['predictLabel', '经度', '纬度', '年']]
         # print('======================模型构建-精度指标======================')
         precision = {}
         actualAndPredictResult = y_pred.tolist()
@@ -120,10 +129,8 @@ class Model:
         actualAndPredictResult = 'SVM_predictLabel.xlsx'
         savePath1 = os.path.join(self.modelsPredictPath, actualAndPredictResult)
         savePath2 = os.path.join(self.modelsPredictPath, 'SVM_testLabel.xlsx')
-        print(type(X_test))
-        print(type(y_pred))
-        pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(
+
+        pd.DataFrame(combineResults).to_excel(
             savePath1, index=False)
         # pd.DataFrame(pd.concat([X_test, y_pred]),
         #              columns=['predictLabel']).to_excel(
@@ -182,6 +189,12 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
+        geo_data = df11.loc[X_test.index, ['经度', '纬度', '年']]
+
+        # 将预测结果与经纬度数据合并
+        combineResults = geo_data.copy()
+        combineResults['predictLabel'] = y_pred
+        combineResults = combineResults[['predictLabel', '经度', '纬度', '年']]
         # print('======================模型构建-精度指标======================')
         precision = {}
         actualAndPredictResult = y_pred.tolist()
@@ -217,8 +230,7 @@ class Model:
         actualAndPredictResult = 'KNN_predictLabel.xlsx'
         savePath1 = os.path.join(self.modelsPredictPath, actualAndPredictResult)
         savePath2 = os.path.join(self.modelsPredictPath, 'KNN_testLabel.xlsx')
-        pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(
+        pd.DataFrame(combineResults).to_excel(
             savePath1, index=False)
         y_test.to_excel(
             savePath2, index=False)
@@ -271,6 +283,12 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
+        geo_data = df11.loc[X_test.index, ['经度', '纬度', '年']]
+
+        # 将预测结果与经纬度数据合并
+        combineResults = geo_data.copy()
+        combineResults['predictLabel'] = y_pred
+        combineResults = combineResults[['predictLabel', '经度', '纬度', '年']]
         # print('======================模型构建-精度指标======================')
         precision = {}
         actualAndPredictResult = y_pred.tolist()
@@ -307,8 +325,7 @@ class Model:
         actualAndPredictResult = 'FLDA_predictLabel.xlsx'
         savePath1 = os.path.join(self.modelsPredictPath, actualAndPredictResult)
         savePath2 = os.path.join(self.modelsPredictPath, 'FLDA_testLabel.xlsx')
-        pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(
+        pd.DataFrame(combineResults).to_excel(
             savePath1, index=False)
         y_test.to_excel(
             savePath2, index=False)
@@ -362,6 +379,12 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
+        geo_data = df11.loc[X_test.index, ['经度', '纬度', '年']]
+
+        # 将预测结果与经纬度数据合并
+        combineResults = geo_data.copy()
+        combineResults['predictLabel'] = y_pred
+        combineResults = combineResults[['predictLabel', '经度', '纬度', '年']]
         # print('======================模型构建-精度指标======================')
         precision = {}
         actualAndPredictResult = y_pred.tolist()
@@ -397,8 +420,7 @@ class Model:
         actualAndPredictResult = 'RF_predictLabel.xlsx'
         savePath1 = os.path.join(self.modelsPredictPath, actualAndPredictResult)
         savePath2 = os.path.join(self.modelsPredictPath, 'RF_testLabel.xlsx')
-        pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(
+        pd.DataFrame(combineResults).to_excel(
             savePath1, index=False)
         y_test.to_excel(
             savePath2, index=False)
