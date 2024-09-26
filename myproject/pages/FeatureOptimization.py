@@ -225,7 +225,7 @@ def onPreviewResults():
 
     # 选择后变化
     if st.button("添加处理", on_click=clear_all):
-        print(st.session_state.expectedRetentionFeature)
+        # print(st.session_state.expectedRetentionFeature)
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
@@ -380,17 +380,18 @@ with dataPCV:
     # if not pages_utils.TempDataSetField[3].empty:
     weatherNameT3, plantNameT3, agricultureNameT3 = pages_utils.getDataFiled(3, pages_utils.TempDataSetField[3])
     weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0 + weatherNameT3
-    plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0 + plantNameT3
-    agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT3
-    print(weatherNameT1 + weatherNameT2 + weatherNameT0)
+    plantNameList = plantNameT1 + plantNameT2 + plantNameT0 + plantNameT3
+    agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT2 + agricultureNameT3
+    # print(weatherNameT1 + weatherNameT2 + weatherNameT0)
+    print('---测试优选特征--')
     print(weatherNameT3)
+    # print(agricultureNameT3)
     if weatherNameT3:
         for a, b in zip(weatherNameT1 + weatherNameT2 + weatherNameT0, weatherNameT3):
             if '-'.join(b.split('-')[:-1]) in a:
                 weatherNameList.append(b)
             else:
                 weatherNameList.append(a)
-
     # 按照数据类型显示左侧字段或特征
     result1 = pages_utils.multiselect_all(
         st, '全选-气象特征', filterUnique(weatherNameList, pages_utils.reservedField),

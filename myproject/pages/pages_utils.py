@@ -99,10 +99,19 @@ def getDataFiled(dataNum, tempDataSetField):
                 flagT = False
         expanded_rows = []
         if flagT:
+            expanded_rows1, expanded_rows2, expanded_rows3 = [], [], []
             for i, row in tempDF.iterrows():
-                print(row['优选特征'])
-                expanded_rows = expanded_rows + row['优选特征'].split(',')
-            weatherName, plantName, agricultureName = expanded_rows, expanded_rows, expanded_rows
+                features = row['优选特征'].split(',')
+                data_types = row['数据类型']
+                # 遍历数据类型和优选特征
+                for j in range(len(data_types)):
+                    if data_types[j] == '气象数据':
+                        expanded_rows1.append(features[j])
+                    elif data_types[j] == '植保数据':
+                        expanded_rows2.append(features[j])
+                    elif data_types[j] == '农学数据':
+                        expanded_rows3.append(features[j])
+            weatherName, plantName, agricultureName = expanded_rows1, expanded_rows2, expanded_rows3
     return weatherName, plantName, agricultureName
 
 
@@ -214,7 +223,6 @@ def updateLeftBars(raw_data_facet):
         left_bars.append(root_node)
 
     return left_bars
-
 
 
 # 其他字段值
