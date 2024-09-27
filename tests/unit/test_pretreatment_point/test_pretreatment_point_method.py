@@ -8,7 +8,9 @@ import os
 import sys
 
 import allure
+import pandas as pd
 import pytest
+from pandas._testing import assert_frame_equal
 
 # Add 'myproject' to sys.path based on the correct root directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
@@ -27,6 +29,10 @@ class PretreatmentPointMethod(unittest.TestCase):
     def setUp(self):
         self.objPM = PretreatmentMethod(
             None, None, None)
+        self.objPM1 = PretreatmentMethod(
+            pd.read_excel(os.path.join(os.path.dirname(__file__), '苹果斑点落叶病-气象数据-气象数据.xlsx')),
+            ['4月下旬温度'], ['4月下旬温度'])
+        self.verifyData = pd.read_excel(os.path.join(os.path.dirname(__file__), 'verifyData_MVIL.xlsx'))
 
     @allure.title("测试预处理前后字段名称变化-中文名称-首次处理")
     @allure.severity(allure.severity_level.MINOR)
@@ -55,24 +61,46 @@ class PretreatmentPointMethod(unittest.TestCase):
     # ===================测试预处理方法===================
     # 缺失值插补-自定义
     @allure.title("测试预处理方法-自定义输入")
-    @allure.severity(allure.severity_level.MINOR)
+    @allure.severity(allure.severity_level.CRITICAL)
     @allure.description('自定义输入完成插补')
     def test_MissingValueInterpolation_Custom(self):
         self.objPM.dataFrame = ''
-        self.assertEqual(
-            self.objPM.getHandledFieldPoint('温度-预处理3'),
-            '温度-预处理4')
+        methodParam = ['线性插值']
+
+        tempData, _, _, _ = self.objPM.linearInterpolation(methodParam)
 
     # 缺失值插补-线性插值
     @allure.title("测试预处理方法-自动线性插补")
-    @allure.severity(allure.severity_level.MINOR)
+    @allure.severity(allure.severity_level.CRITICAL)
     @allure.description('基于pandas的线性插补')
     def test_MissingValueInterpolation_LinearInterpolation(self):
-        self.assertEqual(
-            self.objPM.getHandledFieldPoint('温度-预处理3'),
-            '温度-预处理4')
+        methodParam = ['线性插值']
+        tempData, _, _, _ = self.objPM1.linearInterpolation(methodParam)
+        assert_frame_equal(
+            pd.DataFrame(tempData[self.objPM1.getHandledFieldPoint(self.objPM1.fieldName)]),
+            self.verifyData)
 
     # 异常值剔除
+    @allure.title("测试预处理方法-异常值剔除")
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.description('基于pandas的线性插补')
+    def test_OutlierEliminator(self):
+        self.assertEqual(
+            self.objPM.outlierEliminator('温度-预处理3'),
+            '温度-预处理4')
+
+    # 异常值检测
+    @allure.title("测试预处理方法-异常值检测")
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.description('基于四分位点')
+    def test_DetectOutliers(self):
+        pass
+        # assert_frame_equal(
+        #     dataFrame[[newColumn]].head(365),
+        #     self.verifyData.head(365))
+        # self.assertEqual(
+        #     self.objPM.detect_outliers_iqr('温度-预处理3'),
+        #     '温度-预处理4')
 
 
 if __name__ == '__main__':
