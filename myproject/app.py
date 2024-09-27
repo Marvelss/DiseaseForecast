@@ -199,7 +199,7 @@ colDPF21col1, colDPF21col2 = st.columns([8, 10])
 with colDPF21col1:
     pass
 with colDPF21col2:
-    if st.button('↩️初始化数据', on_click=emptyValue, type='primary'):
+    if st.button('↩️初始化各环节数据', on_click=emptyValue, type='primary'):
         st.toast("初始化完毕", icon="ℹ️️")
 
 
@@ -445,6 +445,96 @@ def vote(titleName):
                     file_name=f'{titleName}_api返回数据.xlsx',
                     mime="application/octet-stream"
                 )
+    elif titleName == '降水累积量计算':
+        # 上传数据集
+        st.markdown('### 上传数据集')
+        st.info("说明:  \n"
+                "上传的数据集必须包含字段:经度、纬度、DayOfYear、年、降水", icon="ℹ️️")
+        uploaded_files = st.file_uploader(
+            "上传数据集",
+            accept_multiple_files=False,
+            label_visibility='collapsed',
+            type=['xlsx', 'csv', 'txt', 'xls', 'zip'],
+            help='help')
+        st.markdown('### 参数设置')
+        option3 = st.selectbox(
+            '降水累积量计算',
+            ('指定日期', '月累积降水量'))
+        param1 = [option3]
+        if option3 == '指定日期':
+            sd1 = st.date_input("开始时间", value=datetime.date(2024, 7, 1))
+            ed1 = st.date_input("结束时间", value=datetime.date(2024, 8, 1))
+            param1 = [option3, sd1.strftime('%m-%d'), ed1.strftime('%m-%d')]
+        if uploaded_files:
+            bytes_data = uploaded_files.read()
+            data33 = pd.read_excel(bytes_data)
+            afterHandleData, _ = FeatureCalculationMethod(
+                data33, data33.columns.tolist()).precipitationAccumulation(
+                ['降水'], param1)
+        interval_col1, interval_col2 = st.columns([6, 1])
+        btn = interval_col2.button('运行')
+        if btn:
+            # 保存文件
+            afterDataPath = os.path.join(RESOURCE_PROCESS_PATH, f'{titleName}_api返回数据.xlsx')
+            afterHandleData.to_excel(afterDataPath)
+            with open(afterDataPath, "rb") as file:
+                interval_col2.download_button(
+                    label="下载数据",
+                    data=file,
+                    file_name=f'{titleName}_api返回数据.xlsx',
+                    mime="application/octet-stream"
+                )
+    elif titleName == '基于活动积温的生育期计算':
+        # 上传数据集
+        st.markdown('### 上传数据集')
+        st.info("说明:  \n"
+                "上传的数据集必须包含字段:经度、纬度、DayOfYear、年、温度", icon="ℹ️️")
+        uploaded_files = st.file_uploader(
+            "上传数据集",
+            accept_multiple_files=False,
+            label_visibility='collapsed',
+            type=['xlsx', 'csv', 'txt', 'xls', 'zip'],
+            help='help')
+        st.markdown('### 参数设置')
+        growthPeriod = st.selectbox(
+            '生育期',
+            ('抽穗期', '孕穗期', '移栽期'))
+        growthPeriodStartDate = st.date_input("开始时间", value='today')
+        growthPeriodEndDate = st.date_input("结束时间", value='today')
+        # 积温阈值默认为50
+        threshold = 50
+        if growthPeriod == '抽穗期':
+            threshold = 50
+        elif growthPeriod == '孕穗期':
+            threshold = 100
+        elif growthPeriod == '移栽期':
+            threshold = 150
+        growthPeriodNumber = st.number_input(
+            "积温阈值温度(50-300℃)", value=threshold, step=50,
+            min_value=50, max_value=300)
+        param1 = [growthPeriod,
+                  growthPeriodStartDate.strftime('%m-%d'),
+                  growthPeriodEndDate.strftime('%m-%d'),
+                  str(growthPeriodNumber)]
+        if uploaded_files:
+            bytes_data = uploaded_files.read()
+            data33 = pd.read_excel(bytes_data)
+            afterHandleData, _ = FeatureCalculationMethod(
+                data33, data33.columns.tolist()).growthPeriodCalculation(
+                ['温度'], param1)
+        interval_col1, interval_col2 = st.columns([6, 1])
+        btn = interval_col2.button('运行')
+        if btn:
+            # 保存文件
+            afterDataPath = os.path.join(RESOURCE_PROCESS_PATH, f'{titleName}_api返回数据.xlsx')
+            afterHandleData.to_excel(afterDataPath)
+            with open(afterDataPath, "rb") as file:
+                interval_col2.download_button(
+                    label="下载数据",
+                    data=file,
+                    file_name=f'{titleName}_api返回数据.xlsx',
+                    mime="application/octet-stream"
+                )
 
 
 def app(image, link, name, description, developer, repo_link):
@@ -493,7 +583,7 @@ with col3:
     app(os.path.join(RESOURCE_IMAGES_PATH, 'HugChat.png'),
         '#',
         "基于活动积温的生育期计算",
-        "基于每日累积温度达到特定积温阈值的时间即为相应生育期",
+        "累计每日温度达到特定积温阈值的时间即为相应生育期",
         "Vagrant",
         "https://github.com/Marvelss",
         )
@@ -502,7 +592,7 @@ with col21:
     app(os.path.join(RESOURCE_IMAGES_PATH, 'KnowledgeGPT.png'),
         '#',
         "时空抽取",
-        "待补充",
+        "差异化提取作物病害敏感时段下的遥感数据的ROI区域均值",
         "Vagrant",
         "https://github.com/Marvelss",
         )
@@ -511,7 +601,7 @@ with col22:
     app(os.path.join(RESOURCE_IMAGES_PATH, 'NYC.png'),
         '#',
         "植被指数计算",
-        "待补充",
+        "基于卫星可见光和近红外波段进行组合形成的指数",
         "Vagrant",
         "https://github.com/Marvelss",
         )
@@ -519,7 +609,7 @@ with col23:
     app(os.path.join(RESOURCE_IMAGES_PATH, 'Roadmap.png'),
         '#',
         "景观指数计算",
-        "待补充",
+        "反映景观结构的组成和空间配置某些方面特征的简单定量指标",
         "Landscapemetrics",
         "https://github.com/r-spatialecology/landscapemetrics",
         )
@@ -528,8 +618,8 @@ col31, col32, col33 = st.columns(3)
 with col31:
     app(os.path.join(RESOURCE_IMAGES_PATH, '11.png'),
         '#',
-        " 水稻SEIR机理模型",
-        "待补充",
+        " 水稻纹枯病SEIR机理模型",
+        "基于SEIR基本模型框架,耦合气温、降水和峰值模块",
         "团队",
         "https://github.com/Marvelss",
         )
