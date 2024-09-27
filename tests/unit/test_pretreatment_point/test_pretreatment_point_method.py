@@ -30,9 +30,11 @@ class PretreatmentPointMethod(unittest.TestCase):
         self.objPM = PretreatmentMethod(
             None, None, None)
         self.objPM1 = PretreatmentMethod(
-            pd.read_excel(os.path.join(os.path.dirname(__file__), '苹果斑点落叶病-气象数据-气象数据.xlsx')),
+            pd.read_excel(os.path.join(os.path.dirname(__file__), '苹果斑点落叶病-气象数据.xlsx')),
             ['4月下旬温度'], ['4月下旬温度'])
         self.verifyData = pd.read_excel(os.path.join(os.path.dirname(__file__), 'verifyData_MVIL.xlsx'))
+        self.verifyData1 = pd.read_excel(os.path.join(os.path.dirname(__file__), 'verifyData_OE.xlsx'))
+        self.verifyData2 = pd.read_excel(os.path.join(os.path.dirname(__file__), 'verifyData_MVIC.xlsx'))
 
     @allure.title("测试预处理前后字段名称变化-中文名称-首次处理")
     @allure.severity(allure.severity_level.MINOR)
@@ -64,15 +66,16 @@ class PretreatmentPointMethod(unittest.TestCase):
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.description('自定义输入完成插补')
     def test_MissingValueInterpolation_Custom(self):
-        self.objPM.dataFrame = ''
-        methodParam = ['线性插值']
-
-        tempData, _, _, _ = self.objPM.linearInterpolation(methodParam)
+        methodParam = ['自定义', 'nan', -99]
+        tempData, _, _, _ = self.objPM1.linearInterpolation(methodParam)
+        assert_frame_equal(
+            pd.DataFrame(tempData[self.objPM1.getHandledFieldPoint(self.objPM1.fieldName)]),
+            self.verifyData2)
 
     # 缺失值插补-线性插值
     @allure.title("测试预处理方法-自动线性插补")
     @allure.severity(allure.severity_level.CRITICAL)
-    @allure.description('基于pandas的线性插补')
+    @allure.description('基于pandas库的线性插补')
     def test_MissingValueInterpolation_LinearInterpolation(self):
         methodParam = ['线性插值']
         tempData, _, _, _ = self.objPM1.linearInterpolation(methodParam)
@@ -83,24 +86,25 @@ class PretreatmentPointMethod(unittest.TestCase):
     # 异常值剔除
     @allure.title("测试预处理方法-异常值剔除")
     @allure.severity(allure.severity_level.CRITICAL)
-    @allure.description('基于pandas的线性插补')
+    @allure.description('基于最大最小值判断剔除')
     def test_OutlierEliminator(self):
-        self.assertEqual(
-            self.objPM.outlierEliminator('温度-预处理3'),
-            '温度-预处理4')
+        methodParam = [100, 0]
+        tempData, _, _, _ = self.objPM1.outlierEliminator(methodParam)
+        self.assertEqual(len(
+            pd.DataFrame(
+                tempData[self.objPM1.getHandledFieldPoint(
+                    self.objPM1.fieldName)])),
+            len(self.verifyData1))
 
     # 异常值检测
     @allure.title("测试预处理方法-异常值检测")
     @allure.severity(allure.severity_level.NORMAL)
-    @allure.description('基于四分位点')
+    @allure.description('基于四分位点的异常值检测')
     def test_DetectOutliers(self):
-        pass
-        # assert_frame_equal(
-        #     dataFrame[[newColumn]].head(365),
-        #     self.verifyData.head(365))
-        # self.assertEqual(
-        #     self.objPM.detect_outliers_iqr('温度-预处理3'),
-        #     '温度-预处理4')
+        tempDataList, lower_bound_list, upper_bound_list, lower_outliers_list, upper_outliers_list = self.objPM1.detect_outliers_iqr(
+            self.verifyData1, [])
+        self.assertEqual(lower_bound_list,
+                         [6.812162689725773])
 
 
 if __name__ == '__main__':
