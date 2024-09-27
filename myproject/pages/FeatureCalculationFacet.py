@@ -179,6 +179,7 @@ with colFCF2:
     pe = st.empty()
     with pe:
         m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+
         with st.status('加载数据中...'):
             if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
                 tempList = leftBarsRawData['checked'] + leftBarsPreData['checked'] if len(leftBarsPreData) != 1 else \
@@ -228,7 +229,7 @@ with colFCF3:
             '景观水平类型',
             ('斑块类别水平', '斑块水平', '景观水平'))
         landscapemetricsFunction = st.multiselect(
-            '景观水平类型',
+            '景观指数',
             ('lpi', 'pd'))
         optionOutput1 = st.text_input(
             label='输出文件名称',

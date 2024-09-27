@@ -314,7 +314,7 @@ with hideBtnMB.container():
         # 处理多条评价指标，并将每个字典的键值对格式化为 "key=value"
         mbInfo4_list = []
         for item in pages_utils.TempDataSetFieldFacet[4]['评价指标']:
-            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in eval(item).items()])
+            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in item.items()])
             mbInfo4_list.append(formatted)
         mbInfo4 = '；'.join(mbInfo4_list)
 
