@@ -32,12 +32,6 @@ matplotlib.rcParams['axes.unicode_minus'] = False
 st.set_page_config(
     layout="wide"
 )
-# 取消链接跳转
-st.markdown("""
-    <style>
-    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
-    </style>
-    """, unsafe_allow_html=True)
 # 隐藏页面
 hide_pages(
     [
@@ -52,6 +46,13 @@ hide_pages(
         "数据下载中心",
     ]
 )
+# 取消链接跳转
+st.markdown("""
+    <style>
+    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
+
 
 category_colors_cycle = itertools.cycle(
     [

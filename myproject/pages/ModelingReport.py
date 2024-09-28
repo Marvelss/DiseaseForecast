@@ -31,12 +31,6 @@ matplotlib.rcParams['axes.unicode_minus'] = False
 st.set_page_config(
     layout="wide"
 )
-# 取消链接跳转
-st.markdown("""
-    <style>
-    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
-    </style>
-    """, unsafe_allow_html=True)
 if st.session_state.isPlanarInterface:
     hide_pages(
         [
@@ -64,6 +58,13 @@ else:
             "数据下载中心-面状",
         ]
     )
+# 取消链接跳转
+st.markdown("""
+    <style>
+    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
+
 
 category_colors_cycle = itertools.cycle(
     [

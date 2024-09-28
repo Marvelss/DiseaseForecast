@@ -19,19 +19,6 @@ from pages.modelmethodfacet.PretreatmentMethodFacet import PretreatmentMethodFac
 st.set_page_config(
     layout="wide"
 )
-# 取消链接跳转
-st.markdown("""
-    <style>
-    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
-    </style>
-    """, unsafe_allow_html=True)
-st.markdown(("""
-<style>
-div.stButton button {
-    border-radius: 0;
-}
-</style>
-"""), unsafe_allow_html=True)
 # 隐藏页面
 hide_pages(
     [
@@ -46,6 +33,20 @@ hide_pages(
         "数据下载中心",
     ]
 )
+# 取消链接跳转
+st.markdown("""
+    <style>
+    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
+st.markdown(("""
+<style>
+div.stButton button {
+    border-radius: 0;
+}
+</style>
+"""), unsafe_allow_html=True)
+
 # 显示地图图层,创建一个最大长度为5的队列
 if 'dPLeftMapLayer' not in st.session_state:
     st.session_state.dPLeftMapLayer = deque(maxlen=2)

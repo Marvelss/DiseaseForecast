@@ -18,6 +18,20 @@ from pages.modelandmethod.PretreatmentMethod import PretreatmentMethod
 st.set_page_config(
     layout="wide"
 )
+# 隐藏页面
+hide_pages(
+    [
+        "测试界面",
+        "原始数据-面状",
+        "数据预处理-面状",
+        "特征计算-面状",
+        "特征优选-面状",
+        "模型构建-面状",
+        "基于天气情景生成器的模型评价-面状",
+        "建模报告-面状",
+        "数据下载中心-面状",
+    ]
+)
 # 取消链接跳转
 st.markdown("""
     <style>
@@ -34,20 +48,7 @@ div.stButton button {
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
-# 隐藏页面
-hide_pages(
-    [
-        "测试界面",
-        "原始数据-面状",
-        "数据预处理-面状",
-        "特征计算-面状",
-        "特征优选-面状",
-        "模型构建-面状",
-        "基于天气情景生成器的模型评价-面状",
-        "建模报告-面状",
-        "数据下载中心-面状",
-    ]
-)
+
 # 处理方法内容记录(任务清单各项值)
 if "preMethodName" not in st.session_state:
     st.session_state["preMethodName"] = {

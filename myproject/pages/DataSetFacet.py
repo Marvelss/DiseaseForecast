@@ -22,6 +22,20 @@ simplefilter(action="ignore", category=FutureWarning)
 st.set_page_config(
     layout="wide"
 )
+# 隐藏页面
+hide_pages(
+    [
+        "测试界面",
+        "原始数据",
+        "数据预处理",
+        "特征计算",
+        "特征优选",
+        "模型构建",
+        "基于天气情景生成器的模型评价",
+        "建模报告",
+        "数据下载中心",
+    ]
+)
 # 取消链接跳转
 st.markdown("""
     <style>
@@ -79,20 +93,7 @@ def get_database_session():
 #         },
 #     ]
 
-# 隐藏页面
-hide_pages(
-    [
-        "测试界面",
-        "原始数据",
-        "数据预处理",
-        "特征计算",
-        "特征优选",
-        "模型构建",
-        "基于天气情景生成器的模型评价",
-        "建模报告",
-        "数据下载中心",
-    ]
-)
+
 
 
 # 保存文件到本地
