@@ -2,8 +2,10 @@ import os.path
 
 import joblib
 import streamlit as st
+
 import pandas as pd
 from st_pages import hide_pages
+
 from lib.share import RESOURCE_MODELRESULT_PATH
 from pages import pages_utils
 
@@ -14,18 +16,17 @@ st.set_page_config(
 hide_pages(
     [
         "测试界面",
-        "原始数据-面状",
-        "数据预处理-面状",
-        "特征计算-面状",
-        "特征优选-面状",
-        "模型构建-面状",
-        "基于天气情景生成器的模型评价-面状",
-        "建模报告-面状",
-        "模型应用-面状",
-        "数据下载中心-面状",
+        "原始数据",
+        "数据预处理",
+        "特征计算",
+        "特征优选",
+        "模型构建",
+        "基于天气情景生成器的模型评价",
+        "模型应用",
+        "建模报告",
+        "数据下载中心",
     ]
 )
-
 st.markdown('')
 st.markdown('')
 st.markdown('')
