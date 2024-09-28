@@ -26,6 +26,13 @@ st.markdown("""
     .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
     </style>
     """, unsafe_allow_html=True)
+st.markdown(("""
+<style>
+div.stButton button {
+    border-radius: 0;
+}
+</style>
+"""), unsafe_allow_html=True)
 hide_pages(
     [
         "测试界面",

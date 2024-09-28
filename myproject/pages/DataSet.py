@@ -21,6 +21,13 @@ st.markdown("""
     .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
     </style>
     """, unsafe_allow_html=True)
+st.markdown(("""
+<style>
+div.stButton button {
+    border-radius: 0;
+}
+</style>
+"""), unsafe_allow_html=True)
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
@@ -41,7 +48,7 @@ hide_pages(
 # 模板路径及注释信息
 path1 = os.path.join(RESOURCE_TEMPLATE_PATH, '气象数据-模板.xlsx')
 path2 = os.path.join(RESOURCE_TEMPLATE_PATH, '植保数据-模板.xlsx')
-path3 = os.path.join(RESOURCE_TEMPLATE_PATH, '农学数据-模板.xlsx')
+path3 = os.path.join(RESOURCE_TEMPLATE_PATH, '地理遥感数据-模板.xlsx')
 
 warningInfo = '''
 注意事项
@@ -56,7 +63,7 @@ dataSCM, dataSCR = st.columns([0.7, 0.4])
 with dataSCM:
     st.markdown("##### 上传数据集")
 
-    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '农学数据'], ["🌨️️", "🌾", "☣️"])
+    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '地理遥感数据'], ["🌨️️", "🌾", "🌎"])
 
     uploaded_files = st.file_uploader(
         "上传数据集",
@@ -95,14 +102,14 @@ with dataSCM:
                     file_name="植保数据-模板.xlsx",
                     mime="application/octet-stream"
                 )
-    if selectedTemplate == '农学数据':
+    if selectedTemplate == '地理遥感数据':
         with placeholder1.container():
             st.warning(warningInfo, icon="⚠️")
             with open(path3, "rb") as file:
                 st.download_button(
-                    label="下载农学数据模板",
+                    label="下载地理遥感数据模板",
                     data=file,
-                    file_name="农学数据-模板.xlsx",
+                    file_name="地理遥感数据-模板.xlsx",
                     mime="application/octet-stream"
                 )
     # ==============================控制文件上传逻辑==============================

@@ -82,8 +82,8 @@ def getDataFiled(dataNum, tempDataSetField):
             array_2dP = [array_2dP]
         # 合并二维数组为一维数组并去重
         plantName = list(set([item for sublist in array_2dP for item in sublist]))
-    if tempDF[tempDF['数据类型'] == '农学数据'][fieldName].any():
-        array_2dA = tempDF[tempDF['数据类型'] == '农学数据'][fieldName].tolist()
+    if tempDF[tempDF['数据类型'] == '地理遥感数据'][fieldName].any():
+        array_2dA = tempDF[tempDF['数据类型'] == '地理遥感数据'][fieldName].tolist()
         # 原始数据传入的是个数组, 而其他环节只传入上传后的单个字符串, 所以array_2d[0]
         if not isinstance(array_2dA[0], list):
             array_2dA = [array_2dA]
@@ -109,7 +109,7 @@ def getDataFiled(dataNum, tempDataSetField):
                         expanded_rows1.append(features[j])
                     elif data_types[j] == '植保数据':
                         expanded_rows2.append(features[j])
-                    elif data_types[j] == '农学数据':
+                    elif data_types[j] == '地理遥感数据':
                         expanded_rows3.append(features[j])
             weatherName, plantName, agricultureName = expanded_rows1, expanded_rows2, expanded_rows3
     return weatherName, plantName, agricultureName

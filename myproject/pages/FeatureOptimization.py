@@ -21,6 +21,13 @@ st.markdown("""
     .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
     </style>
     """, unsafe_allow_html=True)
+st.markdown(("""
+<style>
+div.stButton button {
+    border-radius: 0;
+}
+</style>
+"""), unsafe_allow_html=True)
 if 'page14' not in st.session_state:
     st.session_state.page14 = 0
 if 'page12' not in st.session_state:

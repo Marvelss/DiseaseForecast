@@ -28,6 +28,13 @@ st.markdown("""
     .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
     </style>
     """, unsafe_allow_html=True)
+st.markdown(("""
+<style>
+div.stButton button {
+    border-radius: 0;
+}
+</style>
+"""), unsafe_allow_html=True)
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 if 'count' not in st.session_state:

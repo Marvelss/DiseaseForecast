@@ -21,6 +21,13 @@ st.markdown("""
     .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
     </style>
     """, unsafe_allow_html=True)
+st.markdown(("""
+<style>
+div.stButton button {
+    border-radius: 0;
+}
+</style>
+"""), unsafe_allow_html=True)
 if 'page14Facet' not in st.session_state:
     st.session_state.page14Facet = 0
 if 'page12' not in st.session_state:
@@ -412,7 +419,7 @@ with dataPCV:
     #     st, '全选-植保数据', plantName,
     #     'temp', 'collapsed')
     # result3 = pages_utils.multiselect_all(
-    #     st, '全选-农学数据', agricultureName,
+    #     st, '全选-地理遥感数据', agricultureName,
     #     'temp', 'collapsed')
 # ===============显示右上处理方法选项===============
 with dataPCM:

@@ -24,6 +24,13 @@ st.markdown("""
     .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
     </style>
     """, unsafe_allow_html=True)
+st.markdown(("""
+<style>
+div.stButton button {
+    border-radius: 0;
+}
+</style>
+"""), unsafe_allow_html=True)
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
@@ -253,7 +260,7 @@ with dataPCV:
         st, '全选-植保数据', filterUnique(plantNameList, pages_utils.reservedField),
         'tempPlant', 'collapsed')
     result3 = pages_utils.multiselect_all(
-        st, '全选-农学数据', filterUnique(agricultureNameList, pages_utils.reservedField),
+        st, '全选-地理遥感数据', filterUnique(agricultureNameList, pages_utils.reservedField),
         'tempAgriculture', 'collapsed')
 
 # ===============显示右上预处理方法选项===============
@@ -371,7 +378,7 @@ with dataPCM:
             elif result2:
                 dataType = '植保数据'
             elif result3:
-                dataType = '农学数据'
+                dataType = '地理遥感数据'
             new_data = {
                 "编号": pages_utils.generateID(),
                 "数据类型": dataType,

@@ -41,7 +41,7 @@ nodes1 = [
         ],
     },
     {
-        "label": "农学数据",
+        "label": "地理遥感数据",
         "value": "folder_c",
         "children": [
             {"label": "晚稻移栽期", "value": "sub_d"},
@@ -78,7 +78,7 @@ nodes1 = [
 #             ],
 #         },
 #         {
-#             "label": "农学数据",
+#             "label": "地理遥感数据",
 #             "value": "folder_c",
 #             "children": [
 #                 {"label": "晚稻移栽期", "value": "sub_d"},
@@ -817,7 +817,7 @@ nodes2 = [
         ],
     },
     {
-        "label": "农学数据",
+        "label": "地理遥感数据",
         "value": "folder_c",
         "children": [
             {"label": "晚稻移栽期", "value": "sub_d"},

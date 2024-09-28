@@ -29,6 +29,13 @@ st.markdown("""
     .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
     </style>
     """, unsafe_allow_html=True)
+st.markdown(("""
+<style>
+div.stButton button {
+    border-radius: 0;
+}
+</style>
+"""), unsafe_allow_html=True)
 
 HORIZONTAL_BLUE = os.path.join(RESOURCE_IMAGES_PATH, 'icon.png')
 ICON_BLUE = os.path.join(RESOURCE_IMAGES_PATH, 'HDU_Logo.png')
@@ -199,7 +206,7 @@ colDPF21col1, colDPF21col2 = st.columns([8, 10])
 with colDPF21col1:
     pass
 with colDPF21col2:
-    if st.button('↩️初始化各环节数据', on_click=emptyValue, type='primary'):
+    if st.button('↩️初始化各环节数据', on_click=emptyValue):
         st.toast("初始化完毕", icon="ℹ️️")
 
 
@@ -238,7 +245,7 @@ with colAppImg1:
     st.image(os.path.join(RESOURCE_IMAGES_PATH, 'pointBtn.png'))
     _, colAppBtn2, = st.columns([0.4, 0.6])
     with colAppBtn2:
-        if st.button('点状数据建模', type='primary'):
+        if st.button('点状数据建模'):
             if not st.session_state.modelingName:
                 inputName('点状数据建模')
             else:
@@ -248,7 +255,7 @@ with colAppImg2:
     st.image(os.path.join(RESOURCE_IMAGES_PATH, 'facetBtn.png'))
     _, colAppBtn3, = st.columns([0.4, 0.6])
     with colAppBtn3:
-        if st.button('面状数据建模', type='primary'):
+        if st.button('面状数据建模'):
             if not st.session_state.modelingName:
                 inputName('面状数据建模')
             else:
