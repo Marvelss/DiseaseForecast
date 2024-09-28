@@ -7,12 +7,31 @@ import seaborn as sns
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import StandardScaler
+from st_pages import hide_pages
 from streamlit_pills import pills
 
 from pages import pages_utils
 from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 from pages.modelandmethod.FeatureOptimizationMethod import FeatureOptimizationMethod
 
+st.set_page_config(
+    layout="wide"
+)
+# 隐藏页面
+hide_pages(
+    [
+        "测试界面",
+        "原始数据-面状",
+        "数据预处理-面状",
+        "特征计算-面状",
+        "特征优选-面状",
+        "模型构建-面状",
+        "基于天气情景生成器的模型评价-面状",
+        "建模报告-面状",
+        "模型应用-面状",
+        "数据下载中心-面状",
+    ]
+)
 # 原始数据
 if "dataSet" not in st.session_state:
     st.session_state["dataSet"] = pd.DataFrame(columns=["经度", "纬度", "年", "DayOfYear"])
@@ -25,10 +44,6 @@ if "processedDataRecorder" not in st.session_state:
     st.session_state["processedDataRecorder"] = [
         pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     ]
-
-st.set_page_config(
-    layout="wide"
-)
 
 # 取消链接跳转
 st.markdown("""
@@ -43,6 +58,8 @@ div.stButton button {
 }
 </style>
 """), unsafe_allow_html=True)
+
+
 # 获取模型
 def getModel(modelName):
     modelPathRoot = os.path.join(r'/',
