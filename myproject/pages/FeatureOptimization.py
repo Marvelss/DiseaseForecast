@@ -392,8 +392,8 @@ with dataPCV:
     plantNameList = plantNameT1 + plantNameT2 + plantNameT0 + plantNameT3
     agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT2 + agricultureNameT3
     # print(weatherNameT1 + weatherNameT2 + weatherNameT0)
-    print('---测试优选特征--')
-    print(weatherNameT3)
+    # print('---测试优选特征--')
+    # print(weatherNameT3)
     # print(agricultureNameT3)
     if weatherNameT3:
         for a, b in zip(weatherNameT1 + weatherNameT2 + weatherNameT0, weatherNameT3):
@@ -409,7 +409,10 @@ with dataPCV:
         st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
         'tempPlant', 'collapsed')
     result3 = pages_utils.multiselect_all(
-        st, '全选-农学特征', filterUnique(agricultureNameList, pages_utils.reservedField),
+        st, '全选-地理遥感特征', filterUnique(agricultureNameList, pages_utils.reservedField),
+        'tempAgriculture', 'collapsed')
+    result4 = pages_utils.multiselect_all(
+        st, '全选-优选特征', plantNameT3 + weatherNameT3 + agricultureNameT3,
         'tempAgriculture', 'collapsed')
 # ===============显示右上处理方法选项===============
 with dataPCM:

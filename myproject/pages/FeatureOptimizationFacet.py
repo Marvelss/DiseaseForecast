@@ -412,11 +412,28 @@ with dataPCV:
     # 数组元素去重
     # weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
     #     set(agricultureNameT))
+    if pages_utils.TempDataSetFacet[3].columns.tolist():
+        columnArrayT = pages_utils.TempDataSetFacet[3].columns.tolist()
+    else:
+        columnArrayT = pages_utils.TempDataSetFacet[2].columns.tolist()
+
+    preferenceFeatureB, otherFeatureB = [], []
+    for tempTPF in columnArrayT:
+        if '-优选' in tempTPF:
+            preferenceFeatureB.append(tempTPF)
+        else:
+            otherFeatureB.append(tempTPF)
+    # 剔除在其他特征中重复的优选特征
+    otherFeatureB = [ofT for ofT in otherFeatureB if not any(ofT in prT for prT in preferenceFeatureB)]
+
     tempField = pages_utils.TempDataSetFacet[2].columns.tolist() if pages_utils.TempDataSetFacet[3].empty else \
-    pages_utils.TempDataSetFacet[3].columns.tolist()
+        pages_utils.TempDataSetFacet[3].columns.tolist()
     result1 = pages_utils.multiselect_all(
-        st, '全选-特征', filterUnique(tempField, pages_utils.reservedField),
+        st, '全选-特征', filterUnique(otherFeatureB, pages_utils.reservedField),
         'temp', 'collapsed')
+    result4 = pages_utils.multiselect_all(
+        st, '全选-优选特征', preferenceFeatureB,
+        'tempAgriculture', 'collapsed')
     # result2 = pages_utils.multiselect_all(
     #     st, '全选-植保数据', plantName,
     #     'temp', 'collapsed')
