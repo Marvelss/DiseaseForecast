@@ -588,8 +588,8 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
 
 # ==============================界面==============================
 st.markdown("##### 历史气象与标签数据上传")
-weatherGeneratorProvinceSelected = pages_utils.TempDataSet[4]['经度'].drop_duplicates().tolist()
-weatherGeneratorStationSelected = pages_utils.TempDataSet[4]['纬度'].drop_duplicates().tolist()
+weatherGeneratorProvinceSelected = pages_utils.TempDataSet[4]['经度'].drop_duplicates().tolist()[0]
+weatherGeneratorStationSelected = pages_utils.TempDataSet[4]['纬度'].drop_duplicates().tolist()[0]
 modelsList = pages_utils.TempDataSetField[4]['模型'].tolist()
 
 # weatherGeneratorInfo, weatherGeneratorInstruction = st.columns(2)
