@@ -312,31 +312,35 @@ def onRun(year, selectedWeatherScenesList, weatherSituationParams, trainedModels
 
 
 # ==============================界面==============================
-st.markdown("##### 指定地区及模型与数据上传")
+st.markdown("##### 历史气象与标签数据上传")
+weatherGeneratorProvinceSelected = pages_utils.TempDataSet[4]['经度'].drop_duplicates().tolist()
+weatherGeneratorStationSelected = pages_utils.TempDataSet[4]['纬度'].drop_duplicates().tolist()
+modelsList = pages_utils.TempDataSetField[4]['模型'].tolist()
 
-weatherGeneratorInfo, weatherGeneratorInstruction = st.columns(2)
-with weatherGeneratorInfo:
-    st.markdown("###### 选择地区")
-    weatherGeneratorProvinceSelected = st.selectbox(
-        label='province',
-        options=pages_utils.TempDataSetFacet[4]['经度'].drop_duplicates().tolist(),
-        label_visibility='collapsed')
 
-    weatherGeneratorStationSelected = st.selectbox(
-        label='station',
-        options=pages_utils.TempDataSetFacet[4]['纬度'].drop_duplicates().tolist(),
-        label_visibility='collapsed')
-    if not len(pages_utils.TempDataSetFacet[4]['经度'].drop_duplicates().tolist()):
-        st.toast('请先完成模型构建,再进行地区与模型选择', icon="⚠️")
-    st.session_state.modelReportWeatherInfoFacet['经度'] = weatherGeneratorProvinceSelected
-    st.session_state.modelReportWeatherInfoFacet['纬度'] = weatherGeneratorStationSelected
-with weatherGeneratorInstruction:
-    st.markdown("###### 选择待评价模型")
-    modelsList = pages_utils.multiselect_all(
-        st, '全选-模型',
-        pages_utils.TempDataSetFieldFacet[4]['模型'].tolist(),
-        'tempModels', 'collapsed')
-    st.session_state.modelReportWeatherInfoFacet['模型'] = modelsList
+# weatherGeneratorInfo, weatherGeneratorInstruction = st.columns(2)
+# with weatherGeneratorInfo:
+#     st.markdown("###### 选择地区")
+#     weatherGeneratorProvinceSelected = st.selectbox(
+#         label='province',
+#         options=pages_utils.TempDataSetFacet[4]['经度'].drop_duplicates().tolist(),
+#         label_visibility='collapsed')
+#
+#     weatherGeneratorStationSelected = st.selectbox(
+#         label='station',
+#         options=pages_utils.TempDataSetFacet[4]['纬度'].drop_duplicates().tolist(),
+#         label_visibility='collapsed')
+#     if not len(pages_utils.TempDataSetFacet[4]['经度'].drop_duplicates().tolist()):
+#         st.toast('请先完成模型构建,再进行地区与模型选择', icon="⚠️")
+#     st.session_state.modelReportWeatherInfoFacet['经度'] = weatherGeneratorProvinceSelected
+#     st.session_state.modelReportWeatherInfoFacet['纬度'] = weatherGeneratorStationSelected
+# with weatherGeneratorInstruction:
+#     st.markdown("###### 选择待评价模型")
+#     modelsList = pages_utils.multiselect_all(
+#         st, '全选-模型',
+#         pages_utils.TempDataSetFieldFacet[4]['模型'].tolist(),
+#         'tempModels', 'collapsed')
+#     st.session_state.modelReportWeatherInfoFacet['模型'] = modelsList
 
 col123, col223 = st.columns(2)
 with col123:
