@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from st_pages import hide_pages
 
 from lib.share import RESOURCE_MODELRESULT_PATH, IMAGECOUNT
+from lib.utils import filterUnique
 from pages import pages_utils
 from pages.modelandmethod.Model import Model
 
@@ -49,7 +50,6 @@ if 'page15' not in st.session_state:
     st.session_state.page15 = 0
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
-
 
 # 处理方法内容记录(任务清单各项值)
 if "modelName" not in st.session_state:
@@ -430,26 +430,45 @@ with modelACV:
                             height=220, width=800)
     # ===============显示左下字段或特征及获取===============
     # 获取所有column
-    columnArrayT = pages_utils.TempDataSetFacet[3].columns
 
     # 去除元素不包含特定子字符串的元素，例如 "_优选"
     # columnArray = [col for col in columnArrayT if "_优选" in col]
     # 数组元素去重
-    featureList = list(set(columnArrayT))  # 特征变量
-    # 过滤特定元素
-    filtered_columns = [col for col in featureList if col not in [
-        "经度", "纬度",
-        "年", "DayOfYear"]]
+    # featureList = list(set(columnArrayT))  # 特征变量
+    # # 过滤特定元素
+    # filtered_columns = [col for col in featureList if col not in [
+    #     "经度", "纬度",
+    #     "年", "DayOfYear"]]
+    #
+    # # 将过滤后的元素放入集合中
+    # targetList = set(filtered_columns)  # 目标变量
 
-    # 将过滤后的元素放入集合中
-    targetList = set(filtered_columns)  # 目标变量
-    result1 = pages_utils.multiselect_all(
-        st, '全选-特征变量',
-        featureList,
-        'temp', 'collapsed')
-    result2 = pages_utils.multiselect_all(
-        st, '全选-目标变量', targetList,
-        'temp', 'collapsed')
+    columnArrayT = pages_utils.TempDataSetFacet[3].columns.tolist()
+    preferenceFeature, otherFeature = [], []
+    for tempTPF in columnArrayT:
+        if '-优选' in tempTPF:
+            preferenceFeature.append(tempTPF)
+        else:
+            otherFeature.append(tempTPF)
+    # 剔除在其他特征中重复的优选特征
+    otherFeature = [ofT for ofT in otherFeature if not any(ofT in prT for prT in preferenceFeature)]
+
+    modelACVCol1, modelACVCol2 = st.columns([0.7, 0.4])
+    with modelACVCol1:
+        # 按照数据类型显示左侧字段或特征
+        result1 = pages_utils.multiselect_all(
+            st, '全选-优选特征', filterUnique(preferenceFeature, []),
+            'tempTemperature', 'collapsed')
+        result2 = pages_utils.multiselect_all(
+            st, '全选-其他特征', filterUnique(otherFeature, pages_utils.reservedField),
+            'tempPlant', 'collapsed')
+    with modelACVCol2:
+        st.markdown("")
+        st.markdown("###### 标签\n")
+        resultLabel = st.selectbox(
+            'predictLabel',
+            filterUnique(otherFeature, pages_utils.reservedField),
+            label_visibility='collapsed')
 
 # ===============显示右上模型选项===============
 with modelACM:
@@ -532,8 +551,8 @@ with modelACM:
                         "编号": pages_utils.generateID(),
                         "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
                         "模型参数": st.session_state["modelParamName"],
-                        "特征": result1,
-                        "标签": result2,
+                        "特征": result1 + result2,
+                        "标签": resultLabel,
                         "时间": datetime.datetime.now().time(),
                         "处理状态": False}
                     print('======================模型构建-添加模型======================')

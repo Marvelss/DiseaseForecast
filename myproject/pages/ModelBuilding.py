@@ -458,32 +458,39 @@ with modelACV:
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
     # if not pages_utils.TempDataSetField[3].empty:
-    weatherNameT0, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
-    weatherNameT1, plantNameT1, agricultureNameT1 = pages_utils.getDataFiled(1, pages_utils.TempDataSetField[1])
-    weatherNameT2, plantNameT2, agricultureNameT2 = pages_utils.getDataFiled(2, pages_utils.TempDataSetField[2])
-    weatherNameT3, plantNameT3, agricultureNameT3 = pages_utils.getDataFiled(3, pages_utils.TempDataSetField[3])
+    # weatherNameT0, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
+    # weatherNameT1, plantNameT1, agricultureNameT1 = pages_utils.getDataFiled(1, pages_utils.TempDataSetField[1])
+    # weatherNameT2, plantNameT2, agricultureNameT2 = pages_utils.getDataFiled(2, pages_utils.TempDataSetField[2])
+    # weatherNameT3, plantNameT3, agricultureNameT3 = pages_utils.getDataFiled(3, pages_utils.TempDataSetField[3])
+    #
+    # weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0 + weatherNameT3
+    # plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0 + plantNameT3
+    # agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT3
+    getTempPF = pages_utils.TempDataSet[3].columns.tolist()
+    preferenceFeature, otherFeature = [], []
+    for tempTPF in getTempPF:
+        if '-优选' in tempTPF:
+            preferenceFeature.append(tempTPF)
+        else:
+            otherFeature.append(tempTPF)
+    # 剔除在其他特征中重复的优选特征
+    otherFeature = [ofT for ofT in otherFeature if not any(ofT in prT for prT in preferenceFeature)]
 
-    weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0 + weatherNameT3
-    plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0 + plantNameT3
-    agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT3
     modelACVCol1, modelACVCol2 = st.columns([0.7, 0.4])
     with modelACVCol1:
         # 按照数据类型显示左侧字段或特征
         result1 = pages_utils.multiselect_all(
-            st, '全选-气象特征', filterUnique(weatherNameList, pages_utils.reservedField),
+            st, '全选-优选特征', filterUnique(preferenceFeature, []),
             'tempTemperature', 'collapsed')
         result2 = pages_utils.multiselect_all(
-            st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
+            st, '全选-其他特征', filterUnique(otherFeature, pages_utils.reservedField),
             'tempPlant', 'collapsed')
-        result3 = pages_utils.multiselect_all(
-            st, '全选-农学特征', filterUnique(agricultureNameList, pages_utils.reservedField),
-            'tempAgriculture', 'collapsed')
     with modelACVCol2:
         st.markdown("")
         st.markdown("###### 标签\n")
         resultLabel = st.selectbox(
             'predictLabel',
-            filterUnique(weatherNameList + plantNameList + agricultureNameList, pages_utils.reservedField),
+            filterUnique(otherFeature, pages_utils.reservedField),
             label_visibility='collapsed')
 
 # ===============显示右上模型选项===============
@@ -604,7 +611,7 @@ with modelACM:
                             "编号": pages_utils.generateID(),
                             "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
                             "模型参数": st.session_state["modelParamName"],
-                            "特征": result1 + result2 + result3,
+                            "特征": result1 + result2,
                             "标签": resultLabel,
                             "时间": datetime.datetime.now().time(),
                             "处理状态": False}
@@ -666,7 +673,7 @@ with modelACM:
                     break
             if 'DayOfYear' not in beforeDF.columns:
                 beforeDF['DayOfYear'] = 0
-            beforeDF = beforeDF[result1 + result2 + result3 + [resultLabel] + pages_utils.reservedField]
+            beforeDF = beforeDF[result1 + result2 + [resultLabel] + pages_utils.reservedField]
 
             # 若是SEIR机理模型则保留DayOfYear
             if 'SEIR机理模型' not in pages_utils.TempDataSetField[4]["模型"].tolist():
@@ -703,7 +710,7 @@ with modelACM:
                 pages_utils.TempDataSetField[4].loc[index, '数据集划分比例'] = option
 
             # 将列名列表赋值给 '特征' 列
-            pages_utils.TempDataSetField[4]['特征'] = [result1 + result2 + result3] * len(
+            pages_utils.TempDataSetField[4]['特征'] = [result1 + result2] * len(
                 pages_utils.TempDataSetField[4])
             interval_col1, interval_col2 = st.columns([5, 1])
             interval_col2.button("保存", on_click=firstPage)
