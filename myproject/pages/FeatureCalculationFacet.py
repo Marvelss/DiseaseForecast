@@ -188,6 +188,7 @@ with colFCF2:
     pe = st.empty()
     with pe:
         m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        m.add_basemap('SATELLITE')
 
         with st.status('加载数据中...'):
             if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
@@ -294,6 +295,8 @@ with colFCF3:
         #         st.session_state.fCMapLayer.append(tempPath)
         with pe:
             mapTemp1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+            mapTemp1.add_basemap('SATELLITE')
+
             with st.status('加载数据中...'):
                 for layerTemp in st.session_state.fCMapLayer:
                     addLayer(mapTemp1, layerTemp)
@@ -306,6 +309,8 @@ with colFCF3:
             # 读取含经纬度excel表格
             with pe:
                 mapTemp2 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                mapTemp2.add_basemap('SATELLITE')
+
                 with st.status('加载数据中...'):
                     for layerTemp in st.session_state.fCMapLayer:
                         addLayer(mapTemp2, layerTemp)
@@ -420,6 +425,8 @@ with colFCF3:
 
         with pe:
             afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+            afterPreMap.add_basemap('SATELLITE')
+
             with st.status('加载数据中...'):
                 if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
                     for name in leftBarsFCalData['checked']:

@@ -55,8 +55,8 @@ if 'page12' not in st.session_state:
 if 'count' not in st.session_state:
     st.session_state.count = 0
 # 地图
-if 'dSFmap' not in st.session_state:
-    st.session_state.dSFmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+# if 'dSFmap' not in st.session_state:
+#     st.session_state.dSFmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
 
 # 显示地图图层,创建一个最大长度为2的队列
 if 'dSMapLayer' not in st.session_state:
@@ -133,6 +133,7 @@ with dataSCMap:
 
     with placeHolderDSF:
         map1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        map1.add_basemap('SATELLITE')
 
         # 初始化地图
         # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)

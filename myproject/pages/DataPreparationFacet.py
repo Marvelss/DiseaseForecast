@@ -147,6 +147,7 @@ with colDPF21:
     placeHolderDPF = st.empty()
     with placeHolderDPF:
         m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        m1.add_basemap('SATELLITE')
         with st.status('加载数据中...'):
             if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
                 for name in leftBarsRawData['checked'] + leftBarsPreData['checked']:
@@ -171,6 +172,8 @@ with colDPF22:
     placeHolderDPF2 = st.empty()
     with placeHolderDPF2:
         m2 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        m2.add_basemap('SATELLITE')
+
         m2.to_streamlit()
 with colDPF3:
     st.markdown("##### 预处理方法")
@@ -321,6 +324,8 @@ with colDPF3:
             with placeHolderDPF2:
                 with st.status('加载数据中...'):
                     afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                    afterPreMap.add_basemap('SATELLITE')
+
                     if not onDP2:
                         st.session_state.dPRightMapLayer.clear()
                     for layerPath in st.session_state.dPRightMapLayer:
