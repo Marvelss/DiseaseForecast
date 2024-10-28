@@ -562,6 +562,8 @@ class FeatureCalculationMethodFacet:
                 tree = cKDTree(coords)
 
                 # 过滤 df1 中与当前文件匹配的年份和 DayOfYear 的数据
+                print(year)
+                print(df1['年'])
                 df1_filtered = df1[(df1['年'] == year)]
                 if df1_filtered.empty:
                     continue
@@ -591,6 +593,7 @@ class FeatureCalculationMethodFacet:
                 # 将每次计算的结果添加到 all_results 列表
                 all_results.append(results_df)
         # 将所有结果合并为一个 DataFrame
+
         all_results_df = pd.concat(all_results, ignore_index=True)
         # 在合并前删除 all_results_df 中的 '病株率' 列
         if '病株率' in all_results_df.columns:

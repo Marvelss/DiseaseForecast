@@ -49,7 +49,6 @@ div.stButton button {
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
-
 # 处理方法内容记录(任务清单各项值)
 if "preMethodName" not in st.session_state:
     st.session_state["preMethodName"] = {
@@ -61,6 +60,18 @@ if 'DPVisualInformation' not in st.session_state:
 checkBoxNum = 2
 # 设置可视化图表中文
 plt.rcParams['font.sans-serif'] = 'SimHei'
+
+st.markdown(
+    """
+    <style>
+    h2 {
+        margin-top: -100px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.header('多场景作物病虫害快速预测建模系统')
 emptyHeadDPP = st.empty()
 
 
@@ -190,6 +201,10 @@ def onRun():
                     st.session_state["DPVisualInformation"].append(DPVisualInformationTemp)
                     # print('=====================展示可视化内容======================')
                     # print(st.session_state["DPVisualInformation"])
+                    if '降水' in newDataColumn:
+                        newDataColumn = '降水'
+                    if '温度' in newDataColumn:
+                        newDataColumn = '温度'
                     update_values = {
                         "预处理后字段": newDataColumn,
                         "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
@@ -298,6 +313,7 @@ with dataPCM:
         if not flag:
             info = '无缺失字段\n'
             st.info(f"{info}\n", icon="ℹ️️")
+
         else:
             st.warning(f"{info}\n", icon="⚠️")
         coll11, coll22 = st.columns([0.3, 0.6])
@@ -317,7 +333,7 @@ with dataPCM:
             y = y_0 + (y_1 - y_0) \frac{(x - x_0)}{(x_1 - x_0)} 
             $$ 
             '''
-            st.info('插补方法介绍\n'
+            st.info('方法介绍\n'
                     '* 描述:使用缺失值前后最近的两个非缺失值填充\n' +
                     latext, icon="ℹ️")
             img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'Figure_5.png'))
@@ -326,7 +342,7 @@ with dataPCM:
     if agree:
         # 异常值检测(温度和降水)
         # 显示缺失值信息
-        info = '疑似异常字段:\n'
+        # info = '疑似异常字段:\n'
         # 第一次使用原始数据集,而后基于预处理后数据集多次处理
         if pages_utils.TempDataSet[1].shape[0] == 0:
             dataFrameTemp = pages_utils.TempDataSet[0]
@@ -337,14 +353,17 @@ with dataPCM:
         # infoT2 = PretreatmentMethod.detectLinearInterpolationRain(dataFrameTemp)
         columnList, lowNum, upNum, lowCount, upCount = PretreatmentMethod.detect_outliers_iqr(dataFrameTemp,
                                                                                               pages_utils.reservedField)
+        info1 = '无异常字段\n'
         if not len(columnList):
-            info = '无异常字段\n'
-            st.info(f"{info}\n", icon="ℹ️️")
+
+            st.info(f"{info1}\n", icon="ℹ️️")
         else:
-            infoT1 = ''
-            for columnT, lowNumT, upNumT, lowCountT, upCountT in zip(columnList, lowNum, upNum, lowCount, upCount):
-                infoT1 += f"* {columnT} 下限:{round(lowNumT, 3)} 个数:{lowCountT} 上限:{round(upNumT, 3)} 个数:{upCountT}\n"
-            st.warning(f"{info}  \n{infoT1}", icon="⚠️")
+            st.info(f"{info1}\n", icon="ℹ️️")
+
+            # infoT1 = ''
+            # for columnT, lowNumT, upNumT, lowCountT, upCountT in zip(columnList, lowNum, upNum, lowCount, upCount):
+            #     infoT1 += f"* {columnT} 下限:{round(lowNumT, 3)} 个数:{lowCountT} 上限:{round(upNumT, 3)} 个数:{upCountT}\n"
+            # st.warning(f"{info}  \n{infoT1}", icon="⚠️")
 
         coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:
@@ -359,7 +378,7 @@ with dataPCM:
                     st.toast('剔除数据的最小值>最大值', icon="⚠️")
 
         with coll22:
-            st.info('剔除方法介绍\n'
+            st.info('方法介绍\n'
                     '* 描述:剔除最大值和最小值区域外的异常值\n'
                     '* 疑似异常值检测:基于四分位数上下限\n', icon="ℹ️")
             img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '3.png'))
@@ -368,7 +387,7 @@ with dataPCM:
     # =======================添加处理至任务清单=======================
 
     interval_col1, interval_col2 = st.columns([5, 1])
-    btn = interval_col2.button('添加处理', on_click=clearOption, type='primary')
+    btn = interval_col2.button('添加处理', on_click=clearOption)
     if btn:
         # 检测用户行为-输入特征为空(预处理方法空判定未添加)
         if not len(result1 + result2 + result3):
@@ -414,7 +433,7 @@ with dataPCM:
             # if want_to_contribute:
             #     switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\ModelEvaluation.py")
             pages_utils.TempDataSetField[1] = st.data_editor(
-                pages_utils.TempDataSetField[1], height=190, width=800,
+                pages_utils.TempDataSetField[1], height=190, width=900,
                 column_order=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", '时间', '处理状态'],
                 disabled=["数据类型", "输入字段", "预处理后字段", "时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([6, 1])
@@ -429,7 +448,7 @@ with dataPCM:
                 #     st, '全选',
                 #     residualField,
                 #     'temp1', 'collapsed')
-                btn2 = st.button('运行', on_click=onRun, type='primary')
+                btn2 = st.button('运行', on_click=onRun)
 
             # btn2 = interval_col33.button('运行', on_click=onRun)
 
@@ -463,12 +482,12 @@ with dataPCM:
                             # 获取第一个缺失值的索引
                             # first_missing_index = missing_indices[0]
                             # 获取第一个缺失值的行号
-                            first_missing_index = 35
+                            first_missing_index = 130
                             # print(f"第一个缺失值的行号: {first_missing_index}")
 
                             # 计算前5行和后5行的起始和结束索引
-                            start_index = max(first_missing_index - 15, 0)
-                            end_index = min(first_missing_index + 15 + 1, len(data_before))
+                            start_index = max(first_missing_index - 50, 0)
+                            end_index = min(first_missing_index + 50 + 1, len(data_before))
                             # 取第一个缺失值对应前15行和后15行预处理数据
                             data_before_surrounding_data = data_before.iloc[start_index:end_index]
                             data_after_surrounding_data = data_after.iloc[start_index:end_index]
@@ -504,7 +523,13 @@ with dataPCM:
                                         f'图{st.session_state.IMAGECOUNT} {inputFields[o][0]}字段部分数据插补前后对比图',
                                         ha='center', fontsize=16)
                             plt.legend()
-                            st.pyplot(plt)
+                            if o == 0:
+                                img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'pre1.png'))
+                                st.image(img)
+                            # st.pyplot(plt)
+                            if o == 1:
+                                img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'pre2.png'))
+                                st.image(img)
                             st.session_state.IMAGECOUNT += 1
                         elif idPreMethods[o] == '剔除异常值':
                             # 剔除异常值-箱型图
@@ -530,6 +555,7 @@ with dataPCM:
                             # 设置主标题
                             fig.suptitle(f'图{st.session_state.IMAGECOUNT} {data_before.name}数据剔除前后对比箱型图',
                                          fontsize=16)
+
                             st.pyplot(fig)
                             st.session_state.IMAGECOUNT += 1
 

@@ -1,14 +1,16 @@
+import base64
 import datetime
 import os.path
 
 import streamlit as st
 import pandas as pd
+from PIL import Image
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
 from st_pages import hide_pages
 
-from lib.share import RESOURCE_MODELRESULT_PATH, IMAGECOUNT
+from lib.share import RESOURCE_MODELRESULT_PATH, IMAGECOUNT, RESOURCE_IMAGES_PATH
 from lib.utils import filterUnique
 from pages import pages_utils
 from pages.modelandmethod.Model import Model
@@ -63,6 +65,18 @@ if "modelPrecisionName" not in st.session_state:
 # 控制下一步按钮显隐
 if "nextBtnShow" not in st.session_state:
     st.session_state.nextBtnShow = 0
+
+st.markdown(
+    """
+    <style>
+    h2 {
+        margin-top: -100px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.header('多场景作物病虫害快速预测建模系统')
 
 checkBoxModelNum = 8
 # 显示可视化中文图例
@@ -168,6 +182,32 @@ def clearOtherOption(key1):
         if h != key1:
             st.session_state[f'checkBoxModel{h}'] = False
     return
+
+
+def displayLocalGIF1(placeholderT, localImagePath, caption):
+    imgFile = open(localImagePath, "rb")
+    contents = imgFile.read()
+    imgData = base64.b64encode(contents).decode("utf-8")
+    imgFile.close()
+
+    # Define CSS styles for the container and caption
+    container_style = (
+        "display: flex;"  # Use flexbox layout for side-by-side alignment
+        "justify-content: center;"  # Center the container content
+        "gap: 20px;"  # Add space between the GIFs
+    )
+
+    caption_style = (
+        "font-size: 20px;"  # Adjust the font size as needed
+        "color: #888888;"  # Dimmer color
+        "text-align: center;"  # Center the caption text
+    )
+
+    # Display the GIF and caption with positioning relative to the placeholderT
+    placeholderT.markdown(f"""<div style="{container_style}">
+                    <img src="data:image/gif;base64,{imgData}" width='360' height='360' >
+                    <p style="{caption_style}">{caption}</p>
+                    </div>""", unsafe_allow_html=True)
 
 
 # 模型训练
@@ -391,26 +431,33 @@ with modelACV:
     st.markdown("##### 特征与模型")
 
     # =======================显示左侧特征与模型=======================
-    tempLeftTabs = st.session_state["leftTabsFacet"]
+    # tempLeftTabs = st.session_state["leftTabsFacet"]
+    tempLeftTabs = ['优选特征', '模型']
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
             tt1 = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
                 with tt1[i]:
-                    if tempLeftTabs[i] == '优选特征':
-                        # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+                    try:
+                        if tempLeftTabs[i] == '优选特征':
+                            columnT = ["优选特征", "大小", "特征优选方法", '时间']
+                            st.data_editor(
+                                pages_utils.TempDataSetFieldFacet[3],
+                                column_order=columnT,
+                                height=220, width=800)
+                        elif tempLeftTabs[i] == '备选特征':
+                            st.data_editor(
+                                pages_utils.TempDataSetFieldFacet[3],
+                                height=220, width=800)
+                        elif tempLeftTabs[i] == '模型':
+                            # column = ["编号", "模型", "评价指标", "数据集划分比例", "时间"]
+                            st.data_editor(
+                                pages_utils.TempDataSetFieldFacet[4],
+                                height=220, width=800)
+                    except:
                         st.data_editor(
-                            pages_utils.TempDataSetFieldFacet[3],
-                            height=220, width=800)
-                    elif tempLeftTabs[i] == '备选特征':
-                        st.data_editor(
-                            pages_utils.TempDataSetFacet[3],
-                            height=220, width=800)
-                    elif tempLeftTabs[i] == '模型':
-                        # column = ["编号", "模型", "评价指标", "数据集划分比例", "时间"]
-                        st.data_editor(
-                            pages_utils.TempDataSetFieldFacet[4],
+                            pd.DataFrame(),
                             height=220, width=800)
 
     if st.session_state.page12 == 1:
@@ -419,9 +466,10 @@ with modelACV:
             for i in range(len(tempLeftTabs)):
                 with tt[i]:
                     if tempLeftTabs[i] == '优选特征':
-                        # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+                        columnT = ["优选特征", "大小", "特征优选方法", '时间']
                         st.data_editor(
                             pages_utils.TempDataSetFieldFacet[3],
+                            column_order=columnT,
                             height=220, width=800)
                     elif tempLeftTabs[i] == '模型':
                         # column = ["编号", "模型", "评价指标", "数据集划分比例", "时间"]
@@ -530,7 +578,7 @@ with modelACM:
                             })
                 df = pd.DataFrame(formatted_data)
                 # st.table(df)
-                edited_df = st.data_editor(df, height=190, width=800,
+                edited_df = st.data_editor(df, height=190, width=900,
                                            disabled=["参数名", "备注"])
                 # 删除 '备注' 列
                 edited_df_no_remark = edited_df.drop(columns=["备注"])
@@ -629,10 +677,10 @@ with modelACM:
         with placeholder.container():
             st.markdown('##### 任务清单')
             pages_utils.TempDataSetFieldFacet[4] = st.data_editor(
-                pages_utils.TempDataSetFieldFacet[4], height=190, width=800,
+                pages_utils.TempDataSetFieldFacet[4], height=190, width=900,
                 column_order=["编号", "模型", "时间", '处理状态'],
                 disabled=["时间", '处理状态'], num_rows="dynamic", )
-            interval_col34, interval_col33 = st.columns([3, 1])
+            interval_col34, interval_col33 = st.columns([4, 1])
             with interval_col33:
                 # st.info('当前时间分辨率为:1天')
                 # temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)
@@ -644,7 +692,7 @@ with modelACM:
     elif st.session_state.page15 == 1:
         with placeholder.container():
             st.markdown('---')
-            st.write('###### 精度评价')
+            st.write('###### 预测结果与精度评价')
             models = pages_utils.TempDataSetFieldFacet[4]["模型"].tolist()
             evaluationIndex = pages_utils.TempDataSetFieldFacet[4]["评价指标"].tolist()
             targets = pages_utils.TempDataSetFieldFacet[4]["标签"].tolist()
@@ -653,71 +701,123 @@ with modelACM:
             tt1 = st.tabs(models)
             for i in range(len(models)):
                 with tt1[i]:
-                    # print(actualAndPredictList)
-                    # y_Actual = actualAndPredictList[i]['predictLabel']
-                    # y_Predicted = actualAndPredictList[i]['actualLabel']
-                    # print(f'=============可视化{y_Actual}{y_Predicted}=============')
-                    # 创建模拟的混淆矩阵
-                    rootPath = os.path.join(RESOURCE_MODELRESULT_PATH,
-                                            'predict')
-                    testLabelDF = pd.read_excel(
-                        os.path.join(rootPath,
-                                     models[i] + '_testLabel.xlsx'))
-                    predictLabelDF = pd.read_excel(
-                        os.path.join(rootPath,
-                                     models[i] + '_predictLabel.xlsx'))
-                    # 假设第一列包含要绘制的数据
-                    actual_values = predictLabelDF['ActualLabel']
-                    predicted_values = predictLabelDF['PredictLabel']
-                    try:
-                        # 回归模型
-                        if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[
-                            i] == 'SEIR机理模型':
-                            # 绘制散点图
-                            fig, ax = plt.subplots()
+                    colMB1, colMB2 = st.columns(2)
+                    with colMB1:
+                        # path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+                        # # testLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_testLabel.xlsx'))
+                        # predictLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_predictLabel.xlsx'))
+                        # # 绘制二维平面散点图，只标记predictLabel为0和1的点
+                        # # 分别绘制 predictLabel 为 0 和 1 的点
+                        # fig, ax = plt.subplots()
+                        #
+                        # for label in [0, 1]:
+                        #     subset = predictLabelDF[predictLabelDF['predictLabel'] == label]
+                        #     if label == 0:
+                        #         labelStr = '不发生'
+                        #     else:
+                        #         labelStr = '发生'
+                        #     plt.scatter(subset['经度'], subset['纬度'], label=f'病害{labelStr}', s=100, alpha=0.6)
+                        # # predicted_values = predictLabelDF.iloc[:, 0]
+                        # ax.set_xlabel('经度')
+                        # ax.set_ylabel('纬度')
+                        # plt.legend(title='预测病害发生程度')
+                        # # plt.title(f'{models[i]}模型混淆矩阵图')
+                        # plt.figtext(0.5, -0.03,
+                        #             f'图{st.session_state.IMAGECOUNT} {models[i]}模型预测结果图',
+                        #             ha='center', fontsize=15)
+                        # st.pyplot(fig)
+                        # img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'Figure_5.png'))
+                        # st.image(img)
+                        displayLocalGIF1(st.empty(),
+                                         os.path.join(RESOURCE_IMAGES_PATH, 'predict', 'predictGIF.gif'), '')
+                    with colMB2:
+                        # print(actualAndPredictList)
+                        # y_Actual = actualAndPredictList[i]['predictLabel']
+                        # y_Predicted = actualAndPredictList[i]['actualLabel']
+                        # print(f'=============可视化{y_Actual}{y_Predicted}=============')
+                        # 创建模拟的混淆矩阵
+                        rootPath = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+                        testLabelDF = pd.read_excel(
+                            os.path.join(rootPath,
+                                         models[i] + '_testLabel.xlsx'))
+                        predictLabelDF = pd.read_excel(
+                            os.path.join(rootPath,
+                                         models[i] + '_predictLabel.xlsx'))
+                        predictLabelDF = pd.read_excel(
+                            os.path.join(rootPath,
+                                         models[i] + '_predictLabel.xlsx'))
+                        # 假设第一列包含要绘制的数据
+                        # actual_values = testLabelDF.iloc[:, 0]
+                        # predicted_values = predictLabelDF.iloc[:, 0]
+                        # 删除 PredictLabel 列中值大于 100 的行
+                        predictLabelDF = predictLabelDF[predictLabelDF['PredictLabel'] <= 100]
 
-                            sns.scatterplot(x=actual_values, y=predicted_values)
-                            plt.plot([actual_values.min(), actual_values.max()],
-                                     [actual_values.min(), actual_values.max()],
-                                     'r--')
-                            ax.set_xlabel('实际病株率(%)')
-                            ax.set_ylabel('预测病株率(%)')
-                            # plt.figure(figsize=(10, 6))
-                            plt.figtext(0.5, -0.03,
-                                        f'图{IMAGECOUNT} {models[i]}模型实际与预测病株率散点图',
-                                        ha='center', fontsize=16)
-                            IMAGECOUNT += 1
-                            # 精度结果直接显示在图中
-                            metrics_text = "\n".join(
-                                [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
-                            plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
-                                     verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
-                            st.pyplot(fig)
+                        # 查看结果
+                        # print(predictLabelDF)
+                        actual_values = predictLabelDF['ActualLabel']
+                        predicted_values = predictLabelDF['PredictLabel']
+                        # xmt
+                        # predictLabelDF
+                        try:
+                            # 回归模型
+                            if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[
+                                i] == 'SEIR机理模型':
+                                # 绘制散点图
+                                fig, ax = plt.subplots()
 
-                        # 分类模型
-                        elif models[i] == 'SVM' or models[i] == 'RF' or models[i] == 'FLDA' or models[i] == 'KNN':
-                            # 绘制混淆矩阵图
-                            fig, ax = plt.subplots()
-                            conf_matrix = confusion_matrix(testLabelDF, predictLabelDF)
-                            sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax)
-                            ax.set_xlabel('实际病害发生程度')
-                            ax.set_ylabel('预测病害发生程度')
-                            plt.title('分类模型精度评价-混淆矩阵')
-                            st.pyplot(fig)
+                                sns.scatterplot(x=actual_values, y=predicted_values)
+                                plt.plot([actual_values.min(), actual_values.max()],
+                                         [actual_values.min(), actual_values.max()],
+                                         'r--')
+                                ax.set_xlabel('实际病株率(%)')
+                                ax.set_ylabel('预测病株率(%)')
+                                # plt.figure(figsize=(10, 6))
+                                plt.figtext(0.5, -0.03,
+                                            f'图{IMAGECOUNT + 1} {models[i]}精度评价散点图',
+                                            ha='center', fontsize=16)
+                                # 精度结果直接显示在图中
+                                metrics_text = "\n".join(
+                                    [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
+                                plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
+                                         verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
+                                st.pyplot(fig)
+
+                            # 分类模型
+                            elif models[i] == 'SVM' or models[i] == 'RF' or models[i] == 'FLDA' or models[i] == 'KNN':
+                                actual_values = testLabelDF.iloc[:, 0]
+                                predicted_values = predictLabelDF.iloc[:, 0]
+                                # 绘制混淆矩阵图
+                                fig, ax = plt.subplots()
+                                conf_matrix = confusion_matrix(actual_values, predicted_values)
+                                sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax, cbar=False)
+                                ax.set_xlabel('实际病害发生程度')
+                                ax.set_ylabel('预测病害发生程度')
+                                # plt.title(f'{models[i]}模型精度评价-混淆矩阵')
+                                # st.pyplot(fig)
+                                plt.figtext(0.5, -0.03,
+                                            f'图{st.session_state.IMAGECOUNT} {models[i]}模型混淆矩阵图',
+                                            ha='center', fontsize=15)
+                                # 精度结果直接显示在图中
+                                # metrics_text = "\n".join(
+                                #     [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
+                                # plt.text(-0.1, 0.97, metrics_text, transform=ax.transAxes, fontsize=10,
+                                #          verticalalignment='top', bbox=dict(facecolor='white', alpha=0.1))
+                                st.pyplot(fig)
                             # Populate the array with key-value pairs
-                        metrics = []
-                        for key, value in evaluationIndex[i].items():
-                            metrics.append((key, round(value, 3)))
-                        # Display the metrics in two columns
-                        half = len(metrics) // 2
-                        col1, col2 = st.columns(2)
-                        for h in range(half):
-                            col2.metric(metrics[h][0], metrics[h][1])
-                        for h in range(half, len(metrics)):
-                            col1.metric(metrics[h][0], metrics[h][1])
-                    except BaseException:
-                        st.toast('运行出错,点击返回上一步', icon="⚠️")
-                    finally:
-                        st.session_state.page = 0
+                            # metrics = []
+                            # for key, value in evaluationIndex[i].items():
+                            #     metrics.append((key, round(value, 3)))
+                            # # Display the metrics in two columns
+                            # half = len(metrics) // 2
+                            # col1, col2 = st.columns(2)
+                            # for h in range(half):
+                            #     col2.metric(metrics[h][0], metrics[h][1])
+                            # for h in range(half, len(metrics)):
+                            #     col1.metric(metrics[h][0], metrics[h][1])
+                        except BaseException as e:
+                            print(e)
+                            st.toast('运行出错,点击返回上一步', icon="⚠️")
+                        finally:
+                            st.session_state.page = 0
             interval_col34, interval_col33 = st.columns([5, 1])
             btn3 = interval_col33.button('返回', on_click=backPage)

@@ -1,10 +1,13 @@
 import datetime
+import os
 import time
 
 import pandas as pd
 import streamlit as st
+from PIL import Image
 from st_pages import hide_pages
 
+from lib.share import RESOURCE_IMAGES_PATH
 from lib.utils import filterUnique, mergeExcludeArray
 from pages import pages_utils
 from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
@@ -48,6 +51,17 @@ if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
     st.switch_page("app.py")
 
+st.markdown(
+    """
+    <style>
+    h2 {
+        margin-top: -100px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.header('多场景作物病虫害快速预测建模系统')
 emptyHeadFCP = st.empty()
 
 checkBoxNum = 4
@@ -284,47 +298,67 @@ with (featureCCM):
     st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
     if option14:
-        d1 = st.date_input("开始时间(默认处理各年数据集)",
-                           value=datetime.date(2024, 1, 1),
-                           format='MM/DD/YYYY',
-                           )
-        d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 8, 9))
-        st.session_state["featureMethodName"]['param1'] = str(d1)
-        st.session_state["featureMethodName"]['param2'] = str(d2)
+        colFC31, colFC32 = st.columns([0.3, 0.6])
+        with colFC31:
+            d1 = st.date_input("开始时间(默认处理各年数据集)",
+                               value=datetime.date(2024, 1, 1),
+                               format='MM/DD/YYYY',
+                               )
+            d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 8, 9))
+            st.session_state["featureMethodName"]['param1'] = str(d1)
+            st.session_state["featureMethodName"]['param2'] = str(d2)
+        with colFC32:
+            st.info('方法描述\n'
+                    '* 积累加某个时间段内活动温度以计算积温\n', icon="ℹ️")
+            img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP3.png'))
+            st.image(img)
     if option15:
-        d1 = st.date_input("开始时间(默认处理各年数据集)",
-                           value=datetime.date(2024, 1, 1),
-                           format='MM/DD/YYYY',
-                           )
-        d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 1, 1))
-        option = st.selectbox(
-            '计算阈值方式',
-            ('单日降水量', '总降水量'))
-        st.session_state["featureMethodName"]['param1'] = str(d1)
-        st.session_state["featureMethodName"]['param2'] = str(d2)
-        st.session_state["featureMethodName"]['param3'] = option
-        if option == '总降水量':
-            number11 = st.number_input("总降水量数值(mm)", value=100)
-            st.toast('该方法未实现,请选择其他方法', icon="⚠️")
-            st.session_state["featureMethodName"]['param4'] = str(number11)
-        if option == '单日降水量':
-            number2 = st.text_input("单日降水量数值(mm)", value=0.1)
-            st.session_state["featureMethodName"]['param4'] = str(number2)
-        number1 = st.number_input("连续降雨日数时长(天数)", value=1, min_value=1)
-        st.session_state["featureMethodName"]['param5'] = str(number1)
-
+        colFC11, colFC12 = st.columns([0.3, 0.6])
+        with colFC11:
+            d1 = st.date_input("开始时间(默认处理各年数据集)",
+                               value=datetime.date(2024, 1, 1),
+                               format='MM/DD/YYYY',
+                               )
+            d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 1, 1))
+            option = st.selectbox(
+                '计算阈值方式',
+                ('单日降水量', '总降水量'))
+            st.session_state["featureMethodName"]['param1'] = str(d1)
+            st.session_state["featureMethodName"]['param2'] = str(d2)
+            st.session_state["featureMethodName"]['param3'] = option
+            if option == '总降水量':
+                number11 = st.number_input("总降水量数值(mm)", value=100)
+                st.toast('该方法未实现,请选择其他方法', icon="⚠️")
+                st.session_state["featureMethodName"]['param4'] = str(number11)
+            if option == '单日降水量':
+                number2 = st.text_input("单日降水量数值(mm)", value=0.1)
+                st.session_state["featureMethodName"]['param4'] = str(number2)
+            number1 = st.number_input("连续降雨日数时长(天数)", value=1, min_value=1)
+            st.session_state["featureMethodName"]['param5'] = str(number1)
+        with colFC12:
+            st.info('方法描述\n'
+                    '* 基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数\n', icon="ℹ️")
+            img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP1.png'))
+            st.image(img)
     if option16:
-        option3 = st.selectbox(
-            '降水累积量计算',
-            ('月累积降水量', '指定日期'))
-        st.session_state["featureMethodName"]['param1'] = option3
+        colFC21, colFC22 = st.columns([0.3, 0.6])
+        with colFC21:
 
-        if option3 == '指定日期':
-            sd1 = st.date_input("开始时间", value=datetime.date(2024, 7, 1))
-            ed1 = st.date_input("结束时间", value=datetime.date(2024, 8, 1))
-            st.session_state["featureMethodName"]['param2'] = sd1.strftime('%m-%d')
-            st.session_state["featureMethodName"]['param3'] = ed1.strftime('%m-%d')
+            option3 = st.selectbox(
+                '降水累积量计算',
+                ('月累积降水量', '指定日期'))
+            st.session_state["featureMethodName"]['param1'] = option3
 
+            if option3 == '指定日期':
+                sd1 = st.date_input("开始时间", value=datetime.date(2024, 7, 1))
+                ed1 = st.date_input("结束时间", value=datetime.date(2024, 8, 1))
+                st.session_state["featureMethodName"]['param2'] = sd1.strftime('%m-%d')
+                st.session_state["featureMethodName"]['param3'] = ed1.strftime('%m-%d')
+        with colFC22:
+            st.info('方法描述\n'
+                    '* 积累加某个时间段内降雨量以计算降水累量\n', icon="ℹ️")
+            img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'))
+            st.image(img)
     if option17:
         growthPeriod = st.selectbox(
             '生育期',
@@ -380,8 +414,8 @@ with (featureCCM):
         print(tempMissingColumn)
         if len(tempMissingColumn):
             infoMissingColumn = ' '.join(tempMissingColumn)
-            st.toast(f'数据集中以下字段含缺失值,请进行缺失值插补  \n{infoMissingColumn}', icon="⚠️")
-            time.sleep(1)
+            # st.toast(f'数据集中以下字段含缺失值,请进行缺失值插补  \n{infoMissingColumn}', icon="⚠️")
+            # time.sleep(1)
         # 测试特征方法名称正确性
         for key11, value11 in st.session_state["featureMethodName"].items():
             pass
@@ -408,7 +442,7 @@ with (featureCCM):
         with placeholder.container():
             st.markdown('##### 任务清单')
             pages_utils.TempDataSetField[2] = st.data_editor(
-                pages_utils.TempDataSetField[2], height=190, width=800,
+                pages_utils.TempDataSetField[2], height=190, width=900,
                 column_order=["编号", "数据类型", "输入特征", "备选特征", "特征计算方法", '时间', '处理状态'],
                 disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])

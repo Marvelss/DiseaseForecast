@@ -53,6 +53,17 @@ if 'VisualMapLayer' not in st.session_state:
     st.session_state.VisualMapLayer = deque(maxlen=2)
 
 
+st.markdown(
+    """
+    <style>
+    h2 {
+        margin-top: -100px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.header('多场景作物病虫害快速预测建模系统')
 def findFeatureFile(featureList, fileList):
     # 创建一个字典来存储特征名称及其对应的文件
     feature_files = {}
@@ -82,7 +93,7 @@ def addLayer(mapTemp, filePath):
                          layer_name=fileNameT.split('.')[0])
 
 
-st.markdown('#### 预处理和特征计算环节数据集下载')
+# st.markdown('#### 预处理和特征计算环节数据集下载')
 colFCFV1, colFCFV2, colFCFV3 = st.columns([0.3, 0.7, 0.2])
 with colFCFV1:
     st.markdown("##### 数据与特征选择")
@@ -99,6 +110,8 @@ with colFCFV2:
     pe = st.empty()
     with pe:
         mV1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        mV1.add_basemap('SATELLITE')
+
         with st.status('加载数据中...'):
             tempList = []
             if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
@@ -156,9 +169,9 @@ with colFCFV3:
 #     pages_utils.TempDataSetField[3],
 #     height=250, width=1500)
 st.markdown('---')
-st.markdown('#### 模型结构与训练结果下载')
+st.markdown('##### 模型结构与训练结果下载')
 result1 = pages_utils.multiselect_all(
-    st, '全选',
+    st.columns([0.3, 0.6, 0.4])[0], '全选',
     pages_utils.TempDataSetFieldFacet[4]['模型'],
     'temp111', 'collapsed')
 if not pages_utils.TempDataSetFieldFacet[4].empty:
@@ -206,7 +219,7 @@ if not pages_utils.TempDataSetFieldFacet[4].empty:
             mime="application/zip",
         )
 st.markdown('---')
-st.markdown('###### 模拟气象情景数据下载')
+st.markdown('##### 模拟气象情景数据下载')
 zipPath = os.path.join(RESOURCE_TEMPDIR_PATH, '基于天气情景生成器的模拟数据.zip')
 # 压缩生成的xlsx数据
 pathEE = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')

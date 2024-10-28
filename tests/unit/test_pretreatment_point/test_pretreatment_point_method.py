@@ -9,9 +9,9 @@ import sys
 
 import allure
 import pandas as pd
+
 import pytest
 from pandas._testing import assert_frame_equal
-
 # Add 'myproject' to sys.path based on the correct root directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from myproject.pages.modelandmethod.PretreatmentMethod import PretreatmentMethod

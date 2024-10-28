@@ -66,6 +66,18 @@ if 'FOVisualInformationFacet' not in st.session_state:
 
 # 显示可视化中文图例
 plt.rcParams['font.sans-serif'] = 'SimHei'
+
+st.markdown(
+    """
+    <style>
+    h2 {
+        margin-top: -100px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.header('多场景作物病虫害快速预测建模系统')
 emptyHeadFOP = st.empty()
 
 
@@ -135,7 +147,7 @@ def onPreviewResults():
         # 显示图表
         plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
         plt.tight_layout()  # 调整布局以防止标签重叠
-        st.pyplot(plt)
+        st.columns([0.1, 0.9, 0.1])[1].pyplot(plt)
         st.session_state.expectedRetentionFeatureFacet = st.multiselect(
             '预期保留特征:',
             options=optimalFeatureListT,
@@ -149,10 +161,10 @@ def onPreviewResults():
         # 使用Seaborn绘制热图
         plt.figure(figsize=(10, 8))
         sns.heatmap(tempResultP, annot=True, cmap='coolwarm', center=0)
-        plt.figtext(0.5, -0.13,
+        plt.figtext(0.5, 0.03,
                     f'图{st.session_state.IMAGECOUNT} Pearson互相关分析矩阵图',
                     ha='center', fontsize=16)
-        st.pyplot(plt)
+        st.columns([0.1, 0.9, 0.1])[1].pyplot(plt)
         st.session_state.expectedRetentionFeatureFacet = st.multiselect(
             '预期保留特征:',
             options=optimalFeatureList,
@@ -191,7 +203,7 @@ def onPreviewResults():
         # 显示图表
         plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
         plt.tight_layout()  # 调整布局以防止标签重叠
-        st.pyplot(plt)
+        st.columns([0.1, 0.9, 0.1])[1].pyplot(plt)
         st.session_state.expectedRetentionFeatureFacet = st.multiselect(
             '预期保留特征:',
             options=optimalFeatureListR,
@@ -344,46 +356,52 @@ with dataPCV:
     if st.session_state.page12 == 0:
         with placeholder1.container():
             # tempLeftTabs = pages_utils.TempDataSetFacet[2]
-            print(f'f=========测试面状特征{st.session_state["leftTabsFacet"]}================')
-            print(pages_utils.TempDataSetFacet[2])
+            # print(f'f=========测试面状特征{st.session_state["leftTabsFacet"]}================')
+            # print(pages_utils.TempDataSetFacet[2])
 
-            # 展示备选特征数据
-            temp_df = pages_utils.TempDataSetFacet[2]
-            # 排除指定列，获取其他列的名称
-            exclude_columns = ['经度', '纬度', '年', 'DayOfYear']
-            remaining_columns = [col for col in temp_df.columns if col not in exclude_columns]
-
-            # 创建空的 DataFrame
-            tempDataSetFacetReveal = pd.DataFrame(columns=["数据类型", "备选特征", "大小"])
-
-            # 计算每个剩余列的数据量大小并填充到新的 DataFrame 中
-            tempDataSetFacetReveal_list = []
-            for col in remaining_columns:
-                data_size = temp_df[col].memory_usage(index=False)
-                tempDataSetFacetReveal_list.append({
-                    "数据类型": "气象数据",
-                    "备选特征": col,
-                    "大小": data_size
-                })
-
-            # 使用 pd.concat 方法创建 DataFrame
-            tempDataSetFacetReveal = pd.concat([tempDataSetFacetReveal, pd.DataFrame(tempDataSetFacetReveal_list)],
-                                               ignore_index=True)
-            print(f'{tempDataSetFacetReveal}-----tempDataSetFacetReveal')
+            # # 展示备选特征数据
+            # temp_df = pages_utils.TempDataSetFacet[2]
+            # # 排除指定列，获取其他列的名称
+            # exclude_columns = ['经度', '纬度', '年', 'DayOfYear']
+            # remaining_columns = [col for col in temp_df.columns if col not in exclude_columns]
+            #
+            # # 创建空的 DataFrame
+            # tempDataSetFacetReveal = pd.DataFrame(columns=["数据类型", "备选特征", "大小"])
+            #
+            # # 计算每个剩余列的数据量大小并填充到新的 DataFrame 中
+            # tempDataSetFacetReveal_list = []
+            # for col in remaining_columns:
+            #     data_size = temp_df[col].memory_usage(index=False)
+            #     tempDataSetFacetReveal_list.append({
+            #         "数据类型": "气象数据",
+            #         "备选特征": col,
+            #         "大小": data_size
+            #     })
+            #
+            # # 使用 pd.concat 方法创建 DataFrame
+            # tempDataSetFacetReveal = pd.concat([tempDataSetFacetReveal, pd.DataFrame(tempDataSetFacetReveal_list)],
+            #                                    ignore_index=True)
+            # print(f'{tempDataSetFacetReveal}-----tempDataSetFacetReveal')
             tt1 = st.tabs(st.session_state["leftTabsFacet"])
             for i in range(len(st.session_state["leftTabsFacet"])):
                 with tt1[i]:
-                    if st.session_state["leftTabsFacet"][i] == '备选特征':
-                        # st.data_editor(
-                        #     tempDataSetFacetReveal,
-                        #     height=220, width=800)
+                    try:
+                        if st.session_state["leftTabsFacet"][i] == '备选特征':
+                            # st.data_editor(
+                            #     tempDataSetFacetReveal,
+                            #     height=220, width=800)
+                            st.data_editor(
+                                pages_utils.TempDataSetFieldFacet[2],
+                                height=220, width=800)
+                        elif st.session_state["leftTabsFacet"][i] == '优选特征':
+                            # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+                            st.data_editor(
+                                pages_utils.TempDataSetFieldFacet[3],
+                                height=220, width=800)
+                    except:
+                        # pass
                         st.data_editor(
-                            pages_utils.TempDataSetFacet[2],
-                            height=220, width=800)
-                    elif st.session_state["leftTabsFacet"][i] == '优选特征':
-                        # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-                        st.data_editor(
-                            pages_utils.TempDataSetFieldFacet[3],
+                            pd.read_excel('特征计算.xlsx').head(1000),
                             height=220, width=800)
 
     if st.session_state.page12 == 1:
@@ -393,14 +411,19 @@ with dataPCV:
             tt = st.tabs(tempLeftTabs)
             for i in range(len(tempLeftTabs)):
                 with tt[i]:
-                    if st.session_state["leftTabsFacet"][i] == '备选特征':
+                    try:
+                        if st.session_state["leftTabsFacet"][i] == '备选特征':
+                            st.data_editor(
+                                pages_utils.TempDataSetFieldFacet[2],
+                                height=220, width=800)
+                        elif tempLeftTabs[i] == '优选特征':
+                            # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+                            st.data_editor(
+                                pages_utils.TempDataSetFieldFacet[3],
+                                height=220, width=800)
+                    except:
                         st.data_editor(
-                            tempDataSetFacetReveal,
-                            height=220, width=800)
-                    elif tempLeftTabs[i] == '优选特征':
-                        # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-                        st.data_editor(
-                            pages_utils.TempDataSetFieldFacet[3],
+                            pd.read_excel('特征计算.xlsx').head(1000),
                             height=220, width=800)
     # ===============显示左下字段或特征及获取===============
     # a = st.selectbox(
@@ -412,7 +435,7 @@ with dataPCV:
     # 数组元素去重
     # weatherName, plantName, agricultureName = list(set(weatherNameT)), list(set(plantNameT)), list(
     #     set(agricultureNameT))
-    if pages_utils.TempDataSetFacet[3].columns.tolist():
+    if pages_utils.TempDataSetFacet[2].empty:
         columnArrayT = pages_utils.TempDataSetFacet[3].columns.tolist()
     else:
         columnArrayT = pages_utils.TempDataSetFacet[2].columns.tolist()
@@ -426,8 +449,8 @@ with dataPCV:
     # 剔除在其他特征中重复的优选特征
     otherFeatureB = [ofT for ofT in otherFeatureB if not any(ofT in prT for prT in preferenceFeatureB)]
 
-    tempField = pages_utils.TempDataSetFacet[2].columns.tolist() if pages_utils.TempDataSetFacet[3].empty else \
-        pages_utils.TempDataSetFacet[3].columns.tolist()
+    # tempField = pages_utils.TempDataSetFacet[2].columns.tolist() if pages_utils.TempDataSetFacet[3].empty else \
+    #     pages_utils.TempDataSetFacet[3].columns.tolist()
     result1 = pages_utils.multiselect_all(
         st, '全选-特征', filterUnique(otherFeatureB, pages_utils.reservedField),
         'temp', 'collapsed')
@@ -537,7 +560,7 @@ with dataPCM:
         with placeholder.container():
             st.markdown('##### 任务清单')
             pages_utils.TempDataSetFieldFacet[3] = st.data_editor(
-                pages_utils.TempDataSetFieldFacet[3], height=190, width=800,
+                pages_utils.TempDataSetFieldFacet[3], height=190, width=900,
                 column_order=["编号", "数据类型", "输入特征", "优选特征", "特征优选方法", '时间', '处理状态'],
                 disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
@@ -589,18 +612,18 @@ with dataPCM:
                                 # 显示图表
                                 plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
                                 plt.tight_layout()  # 调整布局以防止标签重叠
-                                st.pyplot(plt)
+                                st.columns([0.3, 0.8, 0.4])[1].pyplot(plt)
                             elif idFMethods[o] == 'Pearson相关性分析':
                                 # 可视化
                                 # 使用Seaborn绘制热图
                                 plt.figure(figsize=(10, 8))
                                 sns.heatmap(data_after, annot=True, cmap='coolwarm', center=0)
 
-                                plt.figtext(0.5, -0.13,
+                                plt.figtext(0.45, 0.02,
                                             f'图{st.session_state.IMAGECOUNT} Pearson互相关分析矩阵图',
                                             ha='center', fontsize=16)
                                 st.session_state.IMAGECOUNT += 1
-                                st.pyplot(plt)
+                                st.columns([0.3, 0.8, 0.4])[1].pyplot(plt)
 
                             elif idFMethods[o] == 'Relief-F互相关分析':
                                 # 可视化
@@ -619,7 +642,7 @@ with dataPCM:
                                 # 显示图表
                                 plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
                                 plt.tight_layout()  # 调整布局以防止标签重叠
-                                st.pyplot(plt)
+                                st.columns([0.3, 0.8, 0.4])[1].pyplot(plt)
             else:
                 st.info('跳过特征优选', icon="ℹ️️")
             interval_col34, interval_col33 = st.columns([5, 1])

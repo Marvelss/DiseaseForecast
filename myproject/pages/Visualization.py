@@ -35,7 +35,6 @@ hide_pages(
     ]
 )
 
-
 # 取消链接跳转
 st.markdown("""
     <style>
@@ -59,15 +58,33 @@ def convert_df(df):
 
 # col1, col2 = st.columns([0.7, 0.2])
 
-
+st.markdown(
+    """
+    <style>
+    h2 {
+        margin-top: -100px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.header('多场景作物病虫害快速预测建模系统')
 st.markdown('###### 数据集')
 
-tt1 = st.tabs(['优选特征', '模型'])
+tt1 = st.tabs(['预处理', '备选特征', '优选特征', '模型'])
 with tt1[0]:
+    st.dataframe(
+        pages_utils.TempDataSet[1],
+        height=250, width=1500)
+with tt1[1]:
+    st.dataframe(
+        pages_utils.TempDataSet[2],
+        height=250, width=1500)
+with tt1[2]:
     st.dataframe(
         pages_utils.TempDataSet[3],
         height=250, width=1500)
-with tt1[1]:
+with tt1[3]:
     st.dataframe(
         pages_utils.TempDataSet[4],
         height=250, width=1500)

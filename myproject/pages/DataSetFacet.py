@@ -62,6 +62,18 @@ if 'count' not in st.session_state:
 if 'dSMapLayer' not in st.session_state:
     st.session_state.dSMapLayer = deque(maxlen=2)
 
+st.markdown(
+    """
+    <style>
+    h2 {
+        margin-top: -100px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.header('多场景作物病虫害快速预测建模系统')
+
 
 # 添加图层
 def addLayer(mapTemp, filePath):
@@ -93,8 +105,6 @@ def get_database_session():
 #             ],
 #         },
 #     ]
-
-
 
 
 # 保存文件到本地
@@ -237,4 +247,5 @@ with dataSCR:
     # ==============================右侧数据模板下载及注意事项==============================
     st.markdown("##### 数据上传注意事项")
     placeholder1 = st.empty()
-    st.warning('shp文件名称不能以shp结尾', icon="⚠️")
+    st.warning('* 文件命名格式:特征名称_年份_DOY  \n'
+               '* shp文件名称不能以shp结尾  \n', icon="⚠️")

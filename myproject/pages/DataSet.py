@@ -58,6 +58,18 @@ warningInfo = '''
 2. 模版中表头行不可删除;
 3. 删除示例数据后,按需填充数据或删减和扩充字段.
 '''
+st.markdown(
+    """
+    <style>
+    h2 {
+        margin-top: -100px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.header('多场景作物病虫害快速预测建模系统')
+# st.markdown("<h1 style='text-align: left; color: red;'>Some title</h1>", unsafe_allow_html=True)
 
 emptyHeadDSP = st.empty()
 # ==============================文件上传显示==============================

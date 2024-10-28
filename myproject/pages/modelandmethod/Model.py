@@ -19,7 +19,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
 
-from lib.share import RESOURCE_MODELRESULT_PATH
+from lib.share import RESOURCE_MODELRESULT_PATH, RESOURCE_PROCESS_PATH
 from .seir_parameter_search.binary2decimal import binary2decimal
 from .seir_parameter_search.cal_objvalue import cal_objvalue_run
 from .seir_parameter_search.crossover import crossover
@@ -41,6 +41,10 @@ class Model:
         self.modelsStructurePath = os.path.join(RESOURCE_MODELRESULT_PATH, 'structure')
         self.modelsPredictPath = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
         self.modelsPrecisionPath = os.path.join(RESOURCE_MODELRESULT_PATH, 'precision')
+        # self.dataFrame = pd.read_excel(os.path.join(RESOURCE_PROCESS_PATH, 'modelPerdict.xlsx'))
+        # self.featureVariable = ['3月下旬湿度', '4月中旬湿度', '4月下旬湿度', '5月上旬湿度', '5月下旬湿度',
+        #                         '6月上旬湿度']
+        # self.targetVariable = ['病害发生程度']
 
     def onSVM(self):
         # 训练模型
@@ -50,6 +54,7 @@ class Model:
         print(type(self.featureVariable))
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
+
         # 对分类变量进行one-hot编码
         # if '上级单位' and '测报站点' in self.featureVariable:
         #     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
@@ -151,6 +156,8 @@ class Model:
         df11 = self.dataFrame
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
+        # df11.to_excel('KNN数据集.xlsx', index=False)
+
         # 对分类变量进行one-hot编码
         # if '上级单位' and '测报站点' in self.featureVariable:
         #     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
@@ -247,6 +254,8 @@ class Model:
         df11 = self.dataFrame
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
+        # df11.to_excel('FLDA数据集.xlsx', index=False)
+
         # 对分类变量进行one-hot编码
         # if '上级单位' and '测报站点' in self.featureVariable:
         #     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化

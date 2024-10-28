@@ -67,6 +67,18 @@ if "modelPrecisionName" not in st.session_state:
 if "nextBtnShow" not in st.session_state:
     st.session_state.nextBtnShow = 0
 
+st.markdown(
+    """
+    <style>
+    h2 {
+        margin-top: -100px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.header('多场景作物病虫害快速预测建模系统')
+
 emptyHeadMBP = st.empty()
 
 checkBoxModelNum = 8
@@ -555,7 +567,7 @@ with modelACM:
                             })
                 df = pd.DataFrame(formatted_data)
                 # st.table(df)
-                edited_df = st.data_editor(df, height=190, width=800,
+                edited_df = st.data_editor(df, height=190, width=900,
                                            disabled=["参数名", "备注"])
                 # 删除 '备注' 列
                 edited_df_no_remark = edited_df.drop(columns=["备注"])
@@ -681,12 +693,12 @@ with modelACM:
                 # 分组并提取每个分组的第一个非空值
                 result = beforeDF.groupby(['经度', '纬度', '年']).first().reset_index()
                 # ******删除DayOfYear列******
-                df_cleaned = result.drop('DayOfYear', axis=1)
-                pages_utils.TempDataSet[4] = df_cleaned
+                # df_cleaned = result.drop('DayOfYear', axis=1)
+                pages_utils.TempDataSet[4] = result
             else:
                 pages_utils.TempDataSet[4] = beforeDF
             st.markdown('###### 最终输入模型特征预览')
-            st.dataframe(pages_utils.TempDataSet[4], width=700, height=200)
+            st.dataframe(pages_utils.TempDataSet[4], width=900, height=200)
             # st.markdown('---')
             st.markdown("###### 训练与验证数据集划分")
             colOP1, colOP2 = st.columns(2)
@@ -723,7 +735,7 @@ with modelACM:
         with placeholder.container():
             st.markdown('##### 任务清单')
             pages_utils.TempDataSetField[4] = st.data_editor(
-                pages_utils.TempDataSetField[4], height=190, width=800,
+                pages_utils.TempDataSetField[4], height=190, width=900,
                 column_order=["编号", "模型", "时间", '处理状态'],
                 disabled=["时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([4, 1])
@@ -819,7 +831,8 @@ with modelACM:
                                 # 绘制混淆矩阵图
                                 fig, ax = plt.subplots()
                                 conf_matrix = confusion_matrix(actual_values, predicted_values)
-                                sns.heatmap(conf_matrix, annot=True, cmap='plasma', fmt='g', ax=ax, cbar=False)
+                                sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax, cbar=False)
+                                # sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues')
                                 ax.set_xlabel('实际病害发生程度')
                                 ax.set_ylabel('预测病害发生程度')
                                 # plt.title(f'{models[i]}模型精度评价-混淆矩阵')

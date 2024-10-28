@@ -8,11 +8,12 @@ import datetime
 import os
 from collections import deque
 import streamlit as st
+from PIL import Image
 from st_pages import hide_pages
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 
-from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_TEMPDIR_PATH
+from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_TEMPDIR_PATH, RESOURCE_IMAGES_PATH
 from pages import pages_utils
 from pages.modelmethodfacet.PretreatmentMethodFacet import PretreatmentMethodFacet
 
@@ -56,6 +57,17 @@ if 'dPRightMapLayer' not in st.session_state:
     st.session_state.dPRightMapLayer = deque(maxlen=1)
 # 资源路径
 tempRP = RESOURCE_TEMPDIR_PATH
+st.markdown(
+    """
+    <style>
+    h2 {
+        margin-top: -100px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.header('多场景作物病虫害快速预测建模系统')
 
 
 # 添加图层
@@ -126,7 +138,7 @@ if "nowPFacetMethodName" not in st.session_state:
     st.session_state.nowPFacetMethodName = ''
 
 emptyHead = st.empty()
-colDPF1, colDPF21, colDPF22, colDPF3 = st.columns([0.2, 0.7, 0.7, 0.3])
+colDPF1, colDPF21, colDPF22, colDPF3 = st.columns([0.2, 0.4, 0.4, 0.3])
 with colDPF1:
     st.markdown("##### 数据与特征")
     with st.container(height=750, border=False):
@@ -141,7 +153,7 @@ with colDPF21:
     with colDPF21col1:
         st.markdown("##### 原始数据")
     with colDPF21col2:
-        onDP1 = st.toggle(label="选中文件时自动显示对应图层-左侧", help='图层加载时间较长')
+        onDP1 = st.toggle(label="自动显示对应图层-左侧", help='图层加载时间较长')
 
     # 初始化地图
     placeHolderDPF = st.empty()
@@ -188,6 +200,11 @@ with colDPF3:
 
     # ===============显示和处理右中各个处理方法设置参数===============
     if agree11:
+        st.info('方法介绍\n'
+                '* 描述:调整栅格数据的分辨率\n', icon="ℹ️")
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'preR.png'))
+        st.image(img)
+
         onlyFile = []
         for temp in leftBarsRawData['checked'] + leftBarsPreData['checked']:
             if '.tif' in temp:
@@ -195,14 +212,17 @@ with colDPF3:
         optionResample = st.selectbox(
             '待重采样文件',
             options=onlyFile)
-        optionInterpolationMethod = st.selectbox(
-            '重采样方法',
-            options=('最近邻插值', '双线性插值', '立方卷积逼近',
-                     '三次样条线逼近', '均值', '众数'))
         optionTemplateFile = st.selectbox(
             '模板文件',
             options=(leftBarsRawData['checked']),
             help='参考坐标系及投影数等')
+        optionRatio = st.selectbox(
+            '目标分辨率',
+            options=('0.002*0.002', ''))
+        optionInterpolationMethod = st.selectbox(
+            '重采样方法',
+            options=('最近邻插值', '双线性插值', '立方卷积逼近',
+                     '三次样条线逼近', '均值', '众数'))
         tempName = '文件名称_年_DOY.tif'
         if '_' in optionResample:
             tempName = optionResample.split('_')
@@ -216,6 +236,12 @@ with colDPF3:
         st.session_state["preMethodFacetName"]['param4'] = os.path.join(tempRP, optionOutputFile)
 
     if agree12:
+        st.info('方法介绍\n'
+                '* 描述:基于已知点的值估算未知点的值，以生成栅格数据\n', icon="ℹ️")
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'preSI.png'))
+        st.image(img)
+        # collAgr1, collAgr2 = st.columns([0.3, 0.6])
+        # with collAgr1:
         optionPoint = st.selectbox(
             '点数据',
             options=(leftBarsRawData['checked']))
@@ -243,8 +269,15 @@ with colDPF3:
             st.session_state["preMethodFacetName"]['param3'] = optionIM
             st.session_state["preMethodFacetName"]['param4'] = textLL
             st.session_state["preMethodFacetName"]['param5'] = os.path.join(tempRP, textSN)
-            st.session_state["preMethodFacetName"]['param6'] = os.path.join(tempRP, templateFile)
+            # st.session_state["preMethodFacetName"]['param6'] = os.path.join(tempRP, templateFile)
+        # with collAgr2:
+
     if agree13:
+        st.info('方法介绍\n'
+                '* 描述:基于指定范围裁剪面状数据，以获取ROI数据\n', icon="ℹ️")
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'preC.png'))
+        st.image(img)
+
         temp13List = []
         temp13 = leftBarsRawData['checked']
         for tep in temp13:
@@ -268,7 +301,7 @@ with colDPF3:
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([1.5, 1])
-    btn = interval_col2.button('添加或跳过处理')
+    btn = interval_col2.button('执行处理')
 
     FTool = PretreatmentMethodFacet()
 
@@ -325,7 +358,6 @@ with colDPF3:
                 with st.status('加载数据中...'):
                     afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
                     afterPreMap.add_basemap('SATELLITE')
-
                     if not onDP2:
                         st.session_state.dPRightMapLayer.clear()
                     for layerPath in st.session_state.dPRightMapLayer:

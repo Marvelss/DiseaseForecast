@@ -10,11 +10,12 @@ from collections import deque
 
 import pandas as pd
 import streamlit as st
+from PIL import Image
 from st_pages import hide_pages
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
 
-from lib.share import RESOURCE_TEMPDIR_PATH
+from lib.share import RESOURCE_TEMPDIR_PATH, RESOURCE_IMAGES_PATH
 from pages import pages_utils
 from pages.modelmethodfacet.FeatureCalculationMethodFacet import FeatureCalculationMethodFacet
 
@@ -50,7 +51,6 @@ div.stButton button {
 </style>
 """), unsafe_allow_html=True)
 
-
 if "featureMethodFacetName" not in st.session_state:
     st.session_state["featureMethodFacetName"] = {
         'checkBox': None
@@ -62,6 +62,18 @@ if "nowFFacetMethodName" not in st.session_state:
 # 显示地图图层,创建一个最大长度为5的队列
 if 'fCMapLayer' not in st.session_state:
     st.session_state.fCMapLayer = deque(maxlen=2)
+
+st.markdown(
+    """
+    <style>
+    h2 {
+        margin-top: -100px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.header('多场景作物病虫害快速预测建模系统')
 
 
 # 根据特征名称查找所有对应文件
@@ -183,7 +195,7 @@ with colFCF1:
             leftBarsPreData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
         leftBarsFCalData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.FeatureDataSetFieldFacet))
 with colFCF2:
-    onFC = st.toggle(label="选中文件时自动显示对应图层", help='图层加载时间较长')
+    onFC = st.toggle(label="自动显示对应图层", help='图层加载时间较长')
     # 初始化地图
     pe = st.empty()
     with pe:
@@ -232,6 +244,10 @@ with colFCF3:
         # 转换集合为列表
     unique_first_elements_list = list(unique_first_elements)
     if option20:
+        st.info('方法介绍\n'
+                '* 描述:反映景观结构的组成和空间配置某些方面特征的简单定量指标\n', icon="ℹ️")
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'land-12-00496-g001-550.png'))
+        st.image(img)
         optionInputFile = st.selectbox(
             '输入文件',
             filtered_file_list)
@@ -240,7 +256,7 @@ with colFCF3:
             ('斑块类别水平', '斑块水平', '景观水平'))
         landscapemetricsFunction = st.multiselect(
             '景观指数',
-            ('lpi', 'pd'))
+            ('lpi', 'pd', 'fpac', 'shape', 'clumpy', 'area', 'ed'))
         optionOutput1 = st.text_input(
             label='输出文件名称',
             value='系统默认设置', disabled=True)
@@ -250,6 +266,10 @@ with colFCF3:
         st.session_state["featureMethodFacetName"]['param4'] = optionOutput1
 
     if option21:
+        st.info('方法介绍\n'
+                '* 描述:基于卫星可见光和近红外波段进行组合形成的指数\n', icon="ℹ️")
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'NDVI.jpg'))
+        st.image(img)
         optionVegetationIndex = st.selectbox(
             '植被指数',
             ('NDVI', 'EVI'))
@@ -257,7 +277,7 @@ with colFCF3:
             '输入文件',
             filtered_file_list)
         optionRed = st.number_input(label='红波段对应的波段数', value=4)
-        optionNir = st.number_input(label='近红波段对应的波段数', value=8)
+        optionNir = st.number_input(label='近红波段对应的波段数', value=7)
         optionOutput = st.text_input(
             label='输出文件名称',
             value='NDVI_2010_777.tif')
@@ -269,6 +289,11 @@ with colFCF3:
         st.session_state["featureMethodFacetName"]['param5'] = os.path.join(RESOURCE_TEMPDIR_PATH, optionOutput)
 
     if option22:
+        st.info('方法介绍\n'
+                '* 描述:基于作物病害调查点数据，提取各栅格特征中对应位置的像元值\n', icon="ℹ️")
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureSE1.png'))
+        st.image(img)
+
         shp_files = [item for item in leftBarsRawData['checked'] if item.endswith('.shp') or item.endswith('.xlsx')]
         extractFileList = pages_utils.multiselect_all(
             st, '全选-待提取特征文件',
@@ -320,6 +345,10 @@ with colFCF3:
             st.session_state["featureMethodFacetName"]['param3'] = str(extractMethod)
             st.session_state["featureMethodFacetName"]['param4'] = '空间点提取文件.xlsx'
     if option18:
+        st.info('方法介绍\n'
+                '* 描述:差异化提取作物病害敏感时段下的遥感数据的ROI区域均值\n', icon="ℹ️")
+        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureSE.png'))
+        st.image(img)
         # 注意:温度文件名称按照实际day of year顺序排序从小到大即可
         weatherDataDir = st.selectbox(
             '选择温度文件',
@@ -337,6 +366,8 @@ with colFCF3:
         computeMode = st.selectbox(
             '计算方式',
             ('平均值', '累计值'))
+        if not len(extractDataFile):
+            extractDataFile = ['空']
         savedFile = st.text_input(
             label='保存文件名称',
             help='每个特征计算结果文件名称格式为:特征+年份',
@@ -352,7 +383,7 @@ with colFCF3:
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([1.5, 1])
     # btn = interval_col2.button('添加处理', on_click=clear_all)
-    btn = interval_col2.button('预览并添加处理', on_click=clear_all)
+    btn = interval_col2.button('执行处理', on_click=clear_all)
     FTool = FeatureCalculationMethodFacet()
 
     if btn:
@@ -416,8 +447,11 @@ with colFCF3:
                     # st.session_state.fCMapLayer.append(handledFile)
 
                     pages_utils.TempDataSetFacet[2] = pd.read_excel(handledFile)
+                    # xmt
                     # pages_utils.TempDataSetFacet[2] = pd.read_excel(
-                    #     r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\面-动-水稻纹枯病SEIR机理模型(病株率)\9省SEIR上传数据.xlsx')
+                    #     r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\存档文件\第一版整理数据\面-动-水稻纹枯病SEIR机理模型-病株率\9省SEIR上传数据.xlsx')
+                    # pages_utils.TempDataSetFacet[2] = pd.read_excel(
+                    #     r'F:\A_postgraduate\病虫害多场景系统\1a_遥感大会系统DEMO\第二版数据\面-动-水稻纹枯病SEIR机理模型-病株率\9省SEIR上传数据2.xlsx')
 
                     print('----------------特征优选数据集----------------')
                     print(pages_utils.TempDataSetFacet[2])
@@ -427,17 +461,17 @@ with colFCF3:
             afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
             afterPreMap.add_basemap('SATELLITE')
 
-            with st.status('加载数据中...'):
-                if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
-                    for name in leftBarsFCalData['checked']:
-                        if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[2]['文件名称']:
-                            print('--测试加载名称---')
-                            print(name)
-                            st.session_state.dPLeftMapLayer.append(name)
-                    # print(st.session_state.fCMapLayer)
-                for layerPath in st.session_state.fCMapLayer:
-                    addLayer(afterPreMap, layerPath)
-                    st.header(f'{layerPath}加载完成')
+            # with st.status('加载数据中...'):
+            #     if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
+            #         for name in leftBarsFCalData['checked']:
+            #             if '.' in name and name.split('.')[0] in pages_utils.TempDataSetFieldFacet[2]['文件名称']:
+            #                 print('--测试加载名称---')
+            #                 print(name)
+            #                 st.session_state.dPLeftMapLayer.append(name)
+            #         # print(st.session_state.fCMapLayer)
+            #     for layerPath in st.session_state.fCMapLayer:
+            #         addLayer(afterPreMap, layerPath)
+            #         st.header(f'{layerPath}加载完成')
             afterPreMap.to_streamlit()
 
         # 若返回值为数组

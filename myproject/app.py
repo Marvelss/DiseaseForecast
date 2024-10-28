@@ -18,7 +18,7 @@ from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMeth
 
 # Adjust the width of the Streamlit page
 st.set_page_config(
-    page_title="病虫害预测系统",
+    page_title="多场景作物病虫害预测建模系统",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -39,6 +39,7 @@ div.stButton button {
 
 HORIZONTAL_BLUE = os.path.join(RESOURCE_IMAGES_PATH, 'icon.png')
 ICON_BLUE = os.path.join(RESOURCE_IMAGES_PATH, 'HDU_Logo.png')
+# HORIZONTAL_BLUE = os.path.join(RESOURCE_IMAGES_PATH, 'Header.png')
 
 sidebar_logo = ICON_BLUE
 main_body_logo = HORIZONTAL_BLUE
@@ -104,7 +105,7 @@ if "isPlanarInterface" not in st.session_state:
 if "IMAGECOUNT" not in st.session_state:
     st.session_state.IMAGECOUNT = IMAGECOUNT
 # 设置网页标题
-st.title('多场景作物病虫害预测系统')
+st.title('多场景作物病虫害快速预测建模系统')
 
 category_colors_cycle = itertools.cycle(
     [
@@ -201,13 +202,13 @@ def emptyValue():
     # st.session_state.page12 = 0
 
 
-category("🌈 初始化建模数据")
-colDPF21col1, colDPF21col2 = st.columns([8, 10])
-with colDPF21col1:
-    pass
-with colDPF21col2:
-    if st.button('↩️初始化各环节数据', on_click=emptyValue):
-        st.toast("初始化完毕", icon="ℹ️️")
+# category("🌈 初始化建模数据")
+# colDPF21col1, colDPF21col2 = st.columns([8, 10])
+# with colDPF21col1:
+#     pass
+# with colDPF21col2:
+#     if st.button('↩️初始化各环节数据', on_click=emptyValue):
+#         st.toast("初始化完毕", icon="ℹ️️")
 
 
 # st.markdown("""
@@ -224,7 +225,7 @@ with colDPF21col2:
 def inputName(dataType):
     name = st.text_input("输入",
                          placeholder='水稻纹枯病SEIR动态预测模型',
-                         autocomplete='水稻纹枯病SEIR动态预测模型',
+                         # autocomplete='水稻纹枯病SEIR动态预测模型',
                          label_visibility='collapsed')
     if st.button("提交并跳转界面"):
         st.session_state.modelingName = name
@@ -242,7 +243,7 @@ if "modelingName" not in st.session_state:
 category("🗣️ 点/面数据建模入口")
 colAppImg1, colAppImg2, = st.columns(2)
 with colAppImg1:
-    st.image(os.path.join(RESOURCE_IMAGES_PATH, 'pointBtn.png'))
+    st.image(os.path.join(RESOURCE_IMAGES_PATH, 'IndexPoint.png'))
     _, colAppBtn2, = st.columns([0.4, 0.6])
     with colAppBtn2:
         if st.button('点状数据建模'):
@@ -558,9 +559,9 @@ def app(image, link, name, description, developer, repo_link):
     st.caption(f"开发人员：[{developer}](%s)" % repo_link)
 
     # st.write("[调用接口](%s)" % repo_link)
-    if st.button(f"调用API:{name}"):
-        vote(name)
-        st.markdown(link)
+    # if st.button(f"调用API:{name}"):
+    #     vote(name)
+        # st.markdown(link)
     # st.text("[调用该接口](%s)" % repo_link)
 
     st.write("")
@@ -569,51 +570,50 @@ def app(image, link, name, description, developer, repo_link):
 category("📊️ 各项特征计算方法API")
 col1, col2, col3 = st.columns(3)
 with col1:
-    print()
-    app(os.path.join(RESOURCE_IMAGES_PATH, 'GPTLab.png'),
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'featureP1.png'),
         '#',
         "降雨日数计算",
         "基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数",
-        "Vagrant",
+        "杭电数字农业团队",
         "https://github.com/Marvelss",
         )
 
 with col2:
-    app(os.path.join(RESOURCE_IMAGES_PATH, 'AskMyPDF.png'),
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'),
         '#',
         "降水累积量计算",
-        "累加某个时间段内降雨量以计算降水累积量",
-        "Vagrant",
+        "积累加某个时间段内降雨量以计算降水累量",
+        "杭电数字农业团队",
         "https://github.com/Marvelss",
         )
 with col3:
-    app(os.path.join(RESOURCE_IMAGES_PATH, 'HugChat.png'),
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'featureP3.png'),
         '#',
-        "基于活动积温的生育期计算",
-        "累计每日温度达到特定积温阈值的时间即为相应生育期",
-        "Vagrant",
+        "活动积温计算",
+        "积累加某个时间段内活动温度以计算积温",
+        "杭电数字农业团队",
         "https://github.com/Marvelss",
         )
 col21, col22, col23 = st.columns(3)
 with col21:
-    app(os.path.join(RESOURCE_IMAGES_PATH, 'KnowledgeGPT.png'),
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'featureSE.png'),
         '#',
         "时空抽取",
         "差异化提取作物病害敏感时段下的遥感数据的ROI区域均值",
-        "Vagrant",
+        "杭电数字农业团队",
         "https://github.com/Marvelss",
         )
 
 with col22:
-    app(os.path.join(RESOURCE_IMAGES_PATH, 'NYC.png'),
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'NDVI.jpg'),
         '#',
         "植被指数计算",
         "基于卫星可见光和近红外波段进行组合形成的指数",
-        "Vagrant",
+        "杭电数字农业团队",
         "https://github.com/Marvelss",
         )
 with col23:
-    app(os.path.join(RESOURCE_IMAGES_PATH, 'Roadmap.png'),
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'land-12-00496-g001-550.png'),
         '#',
         "景观指数计算",
         "反映景观结构的组成和空间配置某些方面特征的简单定量指标",
@@ -623,14 +623,26 @@ with col23:
 category("🌾 各项建模方法API")
 col31, col32, col33 = st.columns(3)
 with col31:
-    app(os.path.join(RESOURCE_IMAGES_PATH, '11.png'),
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'modelSIER.png'),
         '#',
         " 水稻纹枯病SEIR机理模型",
-        "基于SEIR基本模型框架,耦合气温、降水和峰值模块",
-        "团队",
+        "基于SEIR基本模型框架,耦合气象和峰值数据,实现水稻纹枯病株率预测",
+        "杭电数字农业团队",
         "https://github.com/Marvelss",
         )
 with col32:
-    pass
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'modeRF.jpg'),
+        '#',
+        " 随机森林",
+        "一种机器学习方法，用于构建作物病虫害分类模型",
+        "scikit-learn",
+        "https://github.com/Marvelss",
+        )
 with col33:
-    pass
+    app(os.path.join(RESOURCE_IMAGES_PATH, 'modelPLSR.png'),
+        '#',
+        " 偏最小二乘回归",
+        "一种统计模型，可用于构建作物病虫害峰值模型",
+        "scikit-learn",
+        "https://github.com/Marvelss",
+        )

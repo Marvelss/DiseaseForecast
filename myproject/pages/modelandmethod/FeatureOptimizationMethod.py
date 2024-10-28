@@ -4,6 +4,7 @@
 @File : FeatureOptimizationMethod.py
 @Description : 特征优化方法
 """
+import pandas as pd
 from scipy.stats import stats
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -98,6 +99,7 @@ class FeatureOptimizationMethod:
         # 准备数据
         X = df_cleaned[comparedVariableList + [target]].drop(columns=[target])  # 假设我们已经从df中删除了目标列和不需要的列
         y = df_cleaned[target]
+
         # print('设置检查和处理缺失值')
         # print(X.index)
         # X = X.dropna()
