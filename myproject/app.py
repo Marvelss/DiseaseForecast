@@ -86,7 +86,6 @@ hide_pages(
      "模型构建-面状",
      "建模报告", "建模报告-面状",
      "数据下载中心", "数据下载中心-面状",
-     "测试界面"
      ]
 )
 
@@ -104,6 +103,10 @@ if "isPlanarInterface" not in st.session_state:
 
 if "IMAGECOUNT" not in st.session_state:
     st.session_state.IMAGECOUNT = IMAGECOUNT
+
+# 研究区经纬度中心
+if "areaCenter" not in st.session_state:
+    st.session_state.areaCenter = [30.314207, 120.343200]
 # 设置网页标题
 st.title('多场景作物病虫害快速预测建模系统')
 
@@ -202,13 +205,13 @@ def emptyValue():
     # st.session_state.page12 = 0
 
 
-# category("🌈 初始化建模数据")
-# colDPF21col1, colDPF21col2 = st.columns([8, 10])
-# with colDPF21col1:
-#     pass
-# with colDPF21col2:
-#     if st.button('↩️初始化各环节数据', on_click=emptyValue):
-#         st.toast("初始化完毕", icon="ℹ️️")
+category("🌈 初始化建模数据")
+colDPF21col1, colDPF21col2 = st.columns([8, 10])
+with colDPF21col1:
+    pass
+with colDPF21col2:
+    if st.button('↩️初始化各环节数据', on_click=emptyValue):
+        st.toast("初始化完毕", icon="ℹ️️")
 
 
 # st.markdown("""
@@ -227,6 +230,11 @@ def inputName(dataType):
                          placeholder='水稻纹枯病SEIR动态预测模型',
                          # autocomplete='水稻纹枯病SEIR动态预测模型',
                          label_visibility='collapsed')
+    if dataType == '面状数据建模':
+        st.markdown('##### 设置研究区')
+        colTT1, colTT2 = st.columns(2)
+        st.session_state.areaCenter[0] = colTT1.text_input('纬度')
+        st.session_state.areaCenter[1] = colTT2.text_input('经度')
     if st.button("提交并跳转界面"):
         st.session_state.modelingName = name
         if dataType == '点状数据建模':
@@ -561,7 +569,7 @@ def app(image, link, name, description, developer, repo_link):
     # st.write("[调用接口](%s)" % repo_link)
     # if st.button(f"调用API:{name}"):
     #     vote(name)
-        # st.markdown(link)
+    # st.markdown(link)
     # st.text("[调用该接口](%s)" % repo_link)
 
     st.write("")

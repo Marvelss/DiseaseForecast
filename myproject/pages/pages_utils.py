@@ -195,6 +195,21 @@ def getDataType(featureList):
     return dataTypeList
 
 
+def check_file_exists(tree, target_file):
+    """遍历树结构，检查目标文件是否存在"""
+    for node in tree:
+        # 检查当前节点的子节点是否包含目标文件
+        for child in node.get("children", []):
+            for field in child.get("children", []):
+                for file in field.get("children", []):
+                    if file["label"] == target_file:
+                        return True
+            # 递归检查子节点
+            if check_file_exists([child], target_file):
+                return True
+    return False
+
+
 # 更新左侧目标显示
 def updateLeftBars(raw_data_facet):
     # 初始化 leftBars 从 RawDataSetFieldFacet 获取数据

@@ -40,7 +40,7 @@ hide_pages(
 # 取消链接跳转
 st.markdown("""
     <style>
-    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
     </style>
     """, unsafe_allow_html=True)
 st.markdown(("""
@@ -56,7 +56,7 @@ if 'count' not in st.session_state:
     st.session_state.count = 0
 # 地图
 # if 'dSFmap' not in st.session_state:
-#     st.session_state.dSFmap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+#     st.session_state.dSFmap = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
 
 # 显示地图图层,创建一个最大长度为2的队列
 if 'dSMapLayer' not in st.session_state:
@@ -142,11 +142,11 @@ with dataSCMap:
     # st.markdown(temp['checked'])
 
     with placeHolderDSF:
-        map1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        map1 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
         map1.add_basemap('SATELLITE')
 
         # 初始化地图
-        # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        # m = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
 
         # 后续删除,为结果可视化而用
         # # 点

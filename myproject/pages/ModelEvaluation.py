@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from leafmap import leafmap
+import leafmap.foliumap as leafmap
+
 from streamlit import switch_page
 from streamlit_tree_select import tree_select
 import extra_streamlit_components as stx
@@ -12,22 +13,50 @@ from pages import ui
 # st.markdown('---')
 import streamlit.components.v1 as components
 
-m = leafmap.Map()
-m.add_basemap("HYBRID")
-html1 = m.to_html()
+if 'm2' not in st.session_state:
+    st.session_state.m2 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
+colDPF1, colDPF21, colDPF22, colDPF3 = st.columns([0.2, 0.4, 0.4, 0.3])
+with colDPF21:
+    colDPF21col1, colDPF21col2 = st.columns([3, 10])
+    with colDPF21col1:
+        st.markdown("##### 原始数据")
+    with colDPF21col2:
+        onDP1 = st.toggle(label="自动显示对应图层-左侧", help='图层加载时间较长')
 
-st.html(html1)
+    # 初始化地图
+    placeHolderDPF = st.empty()
+    with placeHolderDPF:
+        m1 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
+        m1.add_basemap('SATELLITE')
+        m1.to_streamlit()
 
-import streamlit as st
+
+# with colDPF22:
+#     colDPF21col3, colDPF21col4 = st.columns([4, 10])
+#     with colDPF21col3:
+#         st.markdown("##### 预处理后数据")
+#     with colDPF21col4:
+#         onDP2 = st.toggle(label="自动显示对应图层-右侧", help='图层加载时间较长')
+#     # 初始化地图
+#     placeHolderDPF2 = st.empty()
+@st.fragment
+def my_fragment():
+    # with placeHolderDPF2:
+    st.session_state.m2.to_streamlit()
 
 
-# Read file and keep in variable
-with open(r"E:\a_python\program\diseaseForecastStreamlit\mymap.html", "r") as f:
-    html_data = f.read()
+btn = st.button('添加图层')
+if btn:
+    st.session_state.m2.add_basemap('SATELLITE')
+    st.session_state.m2.to_streamlit()
+
+# # Read file and keep in variable
+# with open(r"E:\a_python\program\diseaseForecastStreamlit\mymap.html", "r") as f:
+#     html_data = f.read()
 
 ## Show in webpage
-st.header("Show an external HTML")
-st.components.v1.html(html_data, height=200)
+# st.header("Show an external HTML")
+# st.components.v1.html(html_data, height=200)
 
 nodes1 = [
     {"label": "气象数据", "value": "气象数据"},
@@ -96,9 +125,9 @@ nodes1 = [
 #     ]
 #     temp = tree_select(nodes1)
 # with col2:
-#     m = folium.Map(location=[30.314207, 120.343200], zoom_start=16)
+#     m = folium.Map(location=st.session_state.areaCenter, zoom_start=16)
 #     folium.Marker(
-#         [30.314207, 120.343200], popup="Liberty Bell", tooltip="Liberty Bell"
+#         st.session_state.areaCenter, popup="Liberty Bell", tooltip="Liberty Bell"
 #     ).add_to(m)
 #
 #     # call to render Folium map in Streamlit

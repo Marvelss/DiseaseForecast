@@ -199,7 +199,7 @@ with colFCF2:
     # 初始化地图
     pe = st.empty()
     with pe:
-        m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        m = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
         m.add_basemap('SATELLITE')
 
         with st.status('加载数据中...'):
@@ -319,7 +319,7 @@ with colFCF3:
         #         tempPath = os.path.join(RESOURCE_TEMPDIR_PATH, temp)
         #         st.session_state.fCMapLayer.append(tempPath)
         with pe:
-            mapTemp1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+            mapTemp1 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
             mapTemp1.add_basemap('SATELLITE')
 
             with st.status('加载数据中...'):
@@ -333,7 +333,7 @@ with colFCF3:
             # 可读取数据格式: excel, csv, shp, geojson
             # 读取含经纬度excel表格
             with pe:
-                mapTemp2 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                mapTemp2 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
                 mapTemp2.add_basemap('SATELLITE')
 
                 with st.status('加载数据中...'):
@@ -458,7 +458,7 @@ with colFCF3:
                 st.toast("空间点提取完毕", icon="ℹ️️")
 
         with pe:
-            afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+            afterPreMap = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
             afterPreMap.add_basemap('SATELLITE')
 
             # with st.status('加载数据中...'):

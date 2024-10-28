@@ -92,7 +92,7 @@ with colTemp2:
             label_visibility='collapsed')
     pl = st.empty()
     with pl:
-        map1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        map1 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
         map1.add_basemap('SATELLITE')
         map1.to_streamlit()
     if uploaded_dataSet:
@@ -102,7 +102,7 @@ with colTemp2:
         # predictDF['预测结果'] = predictions
         # st.table(predictDF)
         with pl:
-            map1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+            map1 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
             # map1 = leafmap.Map()
             map1.add_shp(
                 r'F:\A_postgraduate\病虫害多场景系统\a_系统测试\系统测试数据集\存档\面-静-茶树炭疽病面状(发生程度)-存档\病害分布清洗后问卷-总\清洗后All.shp',

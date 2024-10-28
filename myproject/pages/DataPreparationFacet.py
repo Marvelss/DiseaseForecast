@@ -9,6 +9,7 @@ import os
 from collections import deque
 import streamlit as st
 from PIL import Image
+from osgeo import gdal
 from st_pages import hide_pages
 from streamlit_tree_select import tree_select
 import leafmap.foliumap as leafmap
@@ -16,6 +17,7 @@ import leafmap.foliumap as leafmap
 from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_TEMPDIR_PATH, RESOURCE_IMAGES_PATH
 from pages import pages_utils
 from pages.modelmethodfacet.PretreatmentMethodFacet import PretreatmentMethodFacet
+
 
 st.set_page_config(
     layout="wide"
@@ -38,7 +40,7 @@ hide_pages(
 # 取消链接跳转
 st.markdown("""
     <style>
-    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
     </style>
     """, unsafe_allow_html=True)
 st.markdown(("""
@@ -158,7 +160,7 @@ with colDPF21:
     # 初始化地图
     placeHolderDPF = st.empty()
     with placeHolderDPF:
-        m1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        m1 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
         m1.add_basemap('SATELLITE')
         with st.status('加载数据中...'):
             if len(pages_utils.RawDataSetFieldFacet['编号']) != 0:
@@ -183,9 +185,8 @@ with colDPF22:
     # 初始化地图
     placeHolderDPF2 = st.empty()
     with placeHolderDPF2:
-        m2 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        m2 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
         m2.add_basemap('SATELLITE')
-
         m2.to_streamlit()
 with colDPF3:
     st.markdown("##### 预处理方法")
@@ -216,13 +217,20 @@ with colDPF3:
             '模板文件',
             options=(leftBarsRawData['checked']),
             help='参考坐标系及投影数等')
-        optionRatio = st.selectbox(
-            '目标分辨率',
-            options=('0.002*0.002', ''))
+        if optionResample:
+            ds = gdal.Open(os.path.join(RESOURCE_TEMPDIR_PATH, optionResample))
+            # 获取仿射地理变换参数
+            geo_transform = ds.GetGeoTransform()
+            # 像元大小为geo_transform的第一个和第五个值
+            pixel_width = geo_transform[1]  # 像元宽度
+            pixel_height = abs(geo_transform[5])  # 像元高度（注意：通常为负值）
+            optionRatio = st.selectbox(
+                '目标分辨率',
+                options=f'{round(pixel_width, 9)}*{round(pixel_height, 9)}')
         optionInterpolationMethod = st.selectbox(
             '重采样方法',
-            options=('最近邻插值', '双线性插值', '立方卷积逼近',
-                     '三次样条线逼近', '均值', '众数'))
+            options=('最近邻插值', '双线性插值', '三次卷积插值',
+                     '三次样条插值', 'Lanczos重采样', '平均法', '模式插值法'))
         tempName = '文件名称_年_DOY.tif'
         if '_' in optionResample:
             tempName = optionResample.split('_')
@@ -313,12 +321,17 @@ with colDPF3:
         # print(f'=====预处理界面-测试跳过处理=====\n{pages_utils.PreprocessedDataSetFieldFacet}')
 
         # 若为空则跳过该步骤
+        st.toast(f'{st.session_state["preMethodFacetName"][-1]}')
+
         if tempMethod is None:
             pass
+        # 若文件名称重复则跳过
+        elif pages_utils.check_file_exists(leftBarsPreData, st.session_state["preMethodFacetName"][-1]) is None:
+            st.toast('存在')
         else:
             methodParam = [value for key, value in st.session_state["preMethodFacetName"].items() if
                            key != 'checkBox']
-            print(f'=====测试===={methodParam}')
+            # print(f'=====测试===={methodParam}')
             handledFile = None
             if tempMethod == '空间插值':
                 with emptyHead:
@@ -343,7 +356,7 @@ with colDPF3:
                         # os.path.join(tempRP, handledFile)
                         st.session_state.dPRightMapLayer.append(handledFile)
                     st.toast("重采样完毕", icon="ℹ️️")
-                print(handledFile)
+                # print(handledFile)
 
             elif tempMethod == '裁剪':
                 with emptyHead:
@@ -356,7 +369,7 @@ with colDPF3:
                 print(handledFile)
             with placeHolderDPF2:
                 with st.status('加载数据中...'):
-                    afterPreMap = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+                    afterPreMap = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
                     afterPreMap.add_basemap('SATELLITE')
                     if not onDP2:
                         st.session_state.dPRightMapLayer.clear()

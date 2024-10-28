@@ -109,7 +109,7 @@ with colFCFV2:
     # 初始化地图
     pe = st.empty()
     with pe:
-        mV1 = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+        mV1 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
         mV1.add_basemap('SATELLITE')
 
         with st.status('加载数据中...'):
