@@ -98,7 +98,7 @@ class PretreatmentMethod:
         newDataFrame = self.dataFrame.copy()
         # 复制原处理字段,并在名称后添加_预处理后
         newDataColumn = self.getHandledFieldPoint(self.fieldName)
-        print(f'线性插补:{self.fieldName}-{newDataColumn}')
+        # print(f'线性插补:{self.fieldName}-{newDataColumn}')
         # 线性插值
         if methodParam[0] == '线性插值':
             newDataFrame[newDataColumn] = newDataFrame[self.fieldName]

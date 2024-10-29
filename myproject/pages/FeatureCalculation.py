@@ -35,7 +35,7 @@ hide_pages(
 # 取消链接跳转
 st.markdown("""
     <style>
-    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
     </style>
     """, unsafe_allow_html=True)
 st.markdown(("""
@@ -346,7 +346,7 @@ with (featureCCM):
 
             option3 = st.selectbox(
                 '降水累积量计算',
-                ('月累积降水量', '指定日期'))
+                ('指定日期', ''))
             st.session_state["featureMethodName"]['param1'] = option3
 
             if option3 == '指定日期':
@@ -356,7 +356,7 @@ with (featureCCM):
                 st.session_state["featureMethodName"]['param3'] = ed1.strftime('%m-%d')
         with colFC22:
             st.info('方法描述\n'
-                    '* 积累加某个时间段内降雨量以计算降水累量\n', icon="ℹ️")
+                    '* 积累某个时间段内降雨量以计算降水累量\n', icon="ℹ️")
             img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'))
             st.image(img)
     if option17:

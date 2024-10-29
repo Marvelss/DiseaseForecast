@@ -40,7 +40,7 @@ hide_pages(
 # 取消链接跳转
 st.markdown("""
     <style>
-    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
     </style>
     """, unsafe_allow_html=True)
 st.markdown(("""
@@ -413,7 +413,7 @@ with colFCF3:
         elif tempMethod == '植被指数计算':
             with emptyHead:
                 with st.spinner('正在进行植被指数计算'):
-                    resultFilePathList = fcTool.onNDVI(methodParam)
+                    resultFilePathList = fcTool.onVegetationIndex(methodParam)
                     handledFile = resultFilePathList
                     print(handledFile)
                     st.session_state.fCMapLayer.append(handledFile)

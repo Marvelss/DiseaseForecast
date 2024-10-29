@@ -353,8 +353,7 @@ class FeatureCalculationMethodFacet:
         return self.dataFrame, growthPeriod
 
     # NDVI植被指数计算
-    def onNDVI(self, methodParam):
-        print(methodParam)
+    def onVegetationIndex(self, methodParam):
         (vegetationIndex, input_path, red,
          nir, output_path) = (methodParam[0], methodParam[1],
                               methodParam[2], methodParam[3],
@@ -366,7 +365,7 @@ class FeatureCalculationMethodFacet:
         :param nir: 近红波段对应的波段数
         :return: 输出tif格式的NDVI计算结果图
         """
-        print(input_path)
+        # print(input_path)
         ds = gdal.Open(input_path)  # 打开数据集dataset
         ds_width = ds.RasterXSize  # 获取数据宽度
         ds_height = ds.RasterYSize  # 获取数据高度
@@ -417,7 +416,6 @@ class FeatureCalculationMethodFacet:
                 return "No matching entry found."
 
         # 函数对应表
-
         # 输入文件名称
         # 景观水平类型
         # 函数名称

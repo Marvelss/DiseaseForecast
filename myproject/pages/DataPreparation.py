@@ -36,7 +36,7 @@ hide_pages(
 # 取消链接跳转
 st.markdown("""
     <style>
-    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
     </style>
     """, unsafe_allow_html=True)
 st.markdown(("""
@@ -290,7 +290,6 @@ with dataPCM:
         agree = st.checkbox('剔除异常值', key='checkbox0', on_change=clear_other, args=[0])
     with col2:
         agree10 = st.checkbox("缺失值插补", key='checkbox1', on_change=clear_other, args=[1])
-    st.markdown('---')
 
     # ===============显示和处理右中各个处理方法设置参数===============
     if agree10:
@@ -316,6 +315,8 @@ with dataPCM:
 
         else:
             st.warning(f"{info}\n", icon="⚠️")
+        st.markdown('---')
+
         coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:
             option = st.selectbox(
@@ -364,6 +365,7 @@ with dataPCM:
             # for columnT, lowNumT, upNumT, lowCountT, upCountT in zip(columnList, lowNum, upNum, lowCount, upCount):
             #     infoT1 += f"* {columnT} 下限:{round(lowNumT, 3)} 个数:{lowCountT} 上限:{round(upNumT, 3)} 个数:{upCountT}\n"
             # st.warning(f"{info}  \n{infoT1}", icon="⚠️")
+        st.markdown('---')
 
         coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:

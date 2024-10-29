@@ -26,7 +26,7 @@ st.set_page_config(
 # 取消链接跳转
 st.markdown("""
     <style>
-    .st-emotion-cache-gi0tri.e1nzilvr1 {display: none;}
+    .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
     </style>
     """, unsafe_allow_html=True)
 st.markdown(("""
