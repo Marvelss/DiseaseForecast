@@ -97,7 +97,7 @@ class PretreatmentMethod:
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
         # 复制原处理字段,并在名称后添加_预处理后
-        newDataColumn = self.getHandledFieldPoint(self.fieldName)
+        newDataColumn = self.fieldName
         # print(f'线性插补:{self.fieldName}-{newDataColumn}')
         # 线性插值
         if methodParam[0] == '线性插值':
@@ -131,9 +131,9 @@ class PretreatmentMethod:
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
 
-        newDataColumn = self.getHandledFieldPoint(self.fieldName)
+        newDataColumn = self.fieldName
 
-        print(f'剔除异常值:{self.fieldName}-{newDataColumn}')
+        # print(f'剔除异常值:{self.fieldName}-{newDataColumn}')
         newDataFrame[newDataColumn] = newDataFrame[self.fieldName]
 
         # 获取原始记录数
@@ -145,4 +145,4 @@ class PretreatmentMethod:
         lengthAfter = len(newDataFrame)
         # 检查是否还有缺失值
         tempData = newDataFrame
-        return tempData, str(lengthBefore - lengthAfter), lengthAfter, newDataColumn
+        return tempData, lengthBefore, lengthAfter, newDataColumn

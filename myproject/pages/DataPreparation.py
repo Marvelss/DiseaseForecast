@@ -165,12 +165,12 @@ def onRun():
                                  '\n' +
                                  f'剩余缺失值:{missingValueAfter}', icon='✅')
                     elif tempMethod == '剔除异常值':
-                        (afterHandleData, outlierNum, lengthAfter,
+                        (afterHandleData, lengthBefore, lengthAfter,
                          newDataColumn) = PretreatmentMethod(
                             dataFrameTemp,
                             fields[indexT], reservedField).outlierEliminator(methodParam[indexT])
                         # 显示填补信息
-                        st.toast(f'剔除异常值个数:{outlierNum}' +
+                        st.toast(f'剔除异常值个数:{str(lengthBefore - lengthAfter)}' +
                                  '\n' +
                                  f'剩余条数:{lengthAfter}', icon='✅')
 
@@ -201,10 +201,6 @@ def onRun():
                     st.session_state["DPVisualInformation"].append(DPVisualInformationTemp)
                     # print('=====================展示可视化内容======================')
                     # print(st.session_state["DPVisualInformation"])
-                    if '降水' in newDataColumn:
-                        newDataColumn = '降水'
-                    if '温度' in newDataColumn:
-                        newDataColumn = '温度'
                     update_values = {
                         "预处理后字段": newDataColumn,
                         "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
@@ -243,7 +239,7 @@ with dataPCV:
                 tt = st.tabs(['预处理后数据集'])
                 with tt[0]:
                     st.data_editor(
-                        pages_utils.TempDataSet[0],
+                        pages_utils.TempDataSet[1],
                         height=220, width=800, )
             else:
                 tt = st.tabs(['原始数据', '预处理后数据集'])
@@ -535,29 +531,28 @@ with dataPCM:
                             st.session_state.IMAGECOUNT += 1
                         elif idPreMethods[o] == '剔除异常值':
                             # 剔除异常值-箱型图
-                            data_before = st.session_state["DPVisualInformation"][o]['before']
-                            data_after = st.session_state["DPVisualInformation"][o]['after']
-                            # 创建两个子图
-                            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-                            # 绘制处理前的箱线图
-                            sns.boxplot(y=data_before, ax=axes[0])
-                            axes[0].set_ylabel(data_before.name)
-                            axes[0].set_title('预处理后')
-                            # axes[0].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
-                            # axes[0].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
-                            # axes[0].legend(loc='upper left')
+                            # 准备数据
+                            data_before = st.session_state["DPVisualInformation"][o]['before'].reset_index(drop=True)
+                            data_after = st.session_state["DPVisualInformation"][o]['after'].reset_index(drop=True)
 
-                            # 绘制处理后的箱线图
-                            sns.boxplot(y=data_after, ax=axes[1])
-                            axes[1].set_ylabel(data_after.name)
-                            axes[1].set_title('预处理后')
-                            # axes[1].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
-                            # axes[1].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
-                            # axes[1].legend(loc='upper left')
-                            # 设置主标题
-                            fig.suptitle(f'图{st.session_state.IMAGECOUNT} {data_before.name}数据剔除前后对比箱型图',
-                                         fontsize=16)
+                            # 创建一个DataFrame，包含处理前和处理后的数据，增加状态列用于分类
+                            df = pd.DataFrame({
+                                '数值': pd.concat([data_before, data_after], ignore_index=True),
+                                '处理状态': ['预处理前'] * len(data_before) + ['预处理后'] * len(data_after)
+                            })
 
+                            # 绘制一个箱型图
+                            fig, ax = plt.subplots(figsize=(8, 6))
+                            sns.boxplot(x='处理状态', y='数值', data=df, ax=ax)
+
+                            # 设置标题和标签
+                            ax.set_ylabel(data_before.name)
+                            plt.figtext(0.5, -0.01,
+                                        f'图{st.session_state.IMAGECOUNT} {inputFields[o][0]}字段数据剔除前后对比图',
+                                        ha='center', fontsize=16)
+                            # fig.suptitle(f'图{st.session_state.IMAGECOUNT} {data_before.name}数据剔除前后对比箱型图',
+                            #              fontsize=16)
+                            ax.set_xlabel('')
                             st.pyplot(fig)
                             st.session_state.IMAGECOUNT += 1
 
