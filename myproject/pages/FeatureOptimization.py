@@ -132,20 +132,30 @@ def onPreviewResults():
 
         # 可视化
         keys = list(tempResult.keys())
-        values = list(tempResult.values())
-        # 创建柱状图
-        plt.figure(figsize=(10, 6))
-        plt.bar(keys, values, color='blue')
-        # 添加标题和标签
-        plt.title('敏感性结果可视化')
-        plt.xlabel('特征')
-        plt.ylabel('p-value')
-        # 基准线
-        plt.axhline(y=float(methodParam[2]), color='red', linestyle='--', linewidth=1, label='基准线 (p=0.01)')
-        # 显示图表
-        plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
-        plt.tight_layout()  # 调整布局以防止标签重叠
-        st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+        values = [list(np.atleast_1d(v)) for v in tempResult.values()]  # 保证每个元素都是列表
+        # 格式化 values
+        formatted_values = []
+        for row in values:
+            formatted_row = []
+            for value in row:
+                if value < 0.001:
+                    formatted_row.append("***")
+                elif value < 0.01:
+                    formatted_row.append("**")
+                elif value < 0.05:
+                    formatted_row.append("*")
+                else:
+                    formatted_row.append("")
+            formatted_values.append(formatted_row)
+        # print('-----测试t检验可视化-----')
+        # print(keys)
+        # print(values)
+        # 将 keys 作为列名，values 转置为 DataFrame
+        dfTT = pd.DataFrame(formatted_values, index=keys).T
+        st.columns(3)[1].markdown('###### 各特征t检验敏感性分析结果')
+
+        st.table(dfTT)
+        st.caption('注：*表示p值<0.05，**表示p值<0.01，***表示p值<0.001')
         st.session_state.expectedRetentionFeature = st.multiselect(
             '预期保留特征:',
             options=optimalFeatureListT,
@@ -212,7 +222,7 @@ def onPreviewResults():
             'after': tempResult,
             'name': tempMethod,
             'column': list(tempResult.keys()),
-            'value': list(tempResult.values()),
+            'value': values,
             'standard': float(methodParam[2])}
     elif tempMethod == 'Pearson相关性分析':
         FOVisualInformationTemp = {
@@ -461,7 +471,7 @@ with dataPCM:
             mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
         option1122 = pages_utils.multiselect_all(
             st, '全选-被比较变量', mergeExcludeArray(
-                result1, result2, result3, pages_utils.reservedField),
+                result1, result2, result3, [option112]),
             'tempFiled', 'collapsed')
         number112 = st.number_input("提取敏感性阈值(p-value)",
                                     value=0.01,
@@ -560,22 +570,30 @@ with dataPCM:
                                 # top_years = data_after['年'].value_counts().nlargest(3).index
                                 # df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
 
-                                # 创建柱状图
-                                plt.figure(figsize=(10, 6))
-                                plt.bar(st.session_state["FOVisualInformation"][o]['column'],
-                                        st.session_state["FOVisualInformation"][o]['value'], color='blue')
-                                # 添加标题和标签
-                                plt.title('敏感性结果可视化')
-                                plt.xlabel('特征')
-                                plt.ylabel('p-value')
-                                # 基准线
-                                plt.axhline(y=st.session_state["FOVisualInformation"][o]['standard'], color='red',
-                                            linestyle='--', linewidth=1,
-                                            label='基准线 (p=0.01)')
-                                # 显示图表
-                                plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
-                                plt.tight_layout()  # 调整布局以防止标签重叠
-                                st.pyplot(plt)
+                                tempResult = st.session_state["FOVisualInformation"][o]['after']
+                                # 可视化
+                                keysT1 = list(tempResult.keys())
+                                valuesT = [list(np.atleast_1d(v)) for v in tempResult.values()]  # 保证每个元素都是列表
+                                # 格式化 values
+                                formatted_values = []
+                                for row in valuesT:
+                                    formatted_row = []
+                                    for value in row:
+                                        if value < 0.001:
+                                            formatted_row.append("***")
+                                        elif value < 0.01:
+                                            formatted_row.append("**")
+                                        elif value < 0.05:
+                                            formatted_row.append("*")
+                                        else:
+                                            formatted_row.append("")
+                                    formatted_values.append(formatted_row)
+                                # print('-----测试t检验可视化-----')
+                                # 将 keys 作为列名，values 转置为 DataFrame
+                                dfTTT = pd.DataFrame(formatted_values, index=keysT1).T
+                                st.columns(3)[1].markdown('###### 各特征t检验敏感性分析结果')
+                                st.table(dfTTT)
+                                st.caption('注：*表示p值<0.05，**表示p值<0.01，***表示p值<0.001')
                             elif idFMethods[o] == 'Pearson相关性分析':
                                 # 可视化
                                 # 使用Seaborn绘制热图
