@@ -193,7 +193,7 @@ with colDPF3:
     col12, col22 = st.columns(2)
     with col12:
         agree11 = st.checkbox("重采样", key='checkbox0', on_change=clear_other, args=[0])
-        agree12 = st.checkbox("空间插值", key='checkbox1', on_change=clear_other, args=[1])
+        # agree12 = st.checkbox("空间插值", key='checkbox1', on_change=clear_other, args=[1])
     with col22:
         agree13 = st.checkbox("裁剪", key='checkbox2', on_change=clear_other, args=[2])
 
@@ -243,42 +243,42 @@ with colDPF3:
         st.session_state["preMethodFacetName"]['param3'] = os.path.join(tempRP, optionTemplateFile)
         st.session_state["preMethodFacetName"]['param4'] = os.path.join(tempRP, optionOutputFile)
 
-    if agree12:
-        st.info('方法介绍\n'
-                '* 描述:基于已知点的值估算未知点的值，以生成栅格数据\n', icon="ℹ️")
-        img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'preSI.png'))
-        st.image(img)
-        # collAgr1, collAgr2 = st.columns([0.3, 0.6])
-        # with collAgr1:
-        optionPoint = st.selectbox(
-            '点数据',
-            options=(leftBarsRawData['checked']))
-        textAN = st.text_input(
-            label='点属性字段名称',
-            placeholder='value',
-            help='可在arcgis中查看属性表获取')
-        optionIM = st.selectbox(
-            '插值方法',
-            options=('反距离权重法', '克里金插值'))
-        if optionIM == '克里金插值':
-            templateFile = st.selectbox(
-                '模板文件(.tif)',
-                options=(leftBarsRawData['checked']))
-        textLL = st.text_input(
-            label='经纬度范围',
-            placeholder='118.053 31.086 121.953 27.286',  # 可在原始数据时规定范围,在这默认输入
-            help='经纬度按左边 底部 右边 顶部顺序且空格分隔填入')
-        textSN = st.text_input(
-            label='保存输出文件名称',
-            value='02_05_预处理.tif')
-        if textSN:
-            st.session_state["preMethodFacetName"]['param1'] = os.path.join(tempRP, optionPoint)
-            st.session_state["preMethodFacetName"]['param2'] = textAN
-            st.session_state["preMethodFacetName"]['param3'] = optionIM
-            st.session_state["preMethodFacetName"]['param4'] = textLL
-            st.session_state["preMethodFacetName"]['param5'] = os.path.join(tempRP, textSN)
-            # st.session_state["preMethodFacetName"]['param6'] = os.path.join(tempRP, templateFile)
-        # with collAgr2:
+    # if agree12:
+    #     st.info('方法介绍\n'
+    #             '* 描述:基于已知点的值估算未知点的值，以生成栅格数据\n', icon="ℹ️")
+    #     img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'preSI.png'))
+    #     st.image(img)
+    #     # collAgr1, collAgr2 = st.columns([0.3, 0.6])
+    #     # with collAgr1:
+    #     optionPoint = st.selectbox(
+    #         '点数据',
+    #         options=(leftBarsRawData['checked']))
+    #     textAN = st.text_input(
+    #         label='点属性字段名称',
+    #         placeholder='value',
+    #         help='可在arcgis中查看属性表获取')
+    #     optionIM = st.selectbox(
+    #         '插值方法',
+    #         options=('反距离权重法', '克里金插值'))
+    #     if optionIM == '克里金插值':
+    #         templateFile = st.selectbox(
+    #             '模板文件(.tif)',
+    #             options=(leftBarsRawData['checked']))
+    #     textLL = st.text_input(
+    #         label='经纬度范围',
+    #         placeholder='118.053 31.086 121.953 27.286',  # 可在原始数据时规定范围,在这默认输入
+    #         help='经纬度按左边 底部 右边 顶部顺序且空格分隔填入')
+    #     textSN = st.text_input(
+    #         label='保存输出文件名称',
+    #         value='02_05_预处理.tif')
+    #     if textSN:
+    #         st.session_state["preMethodFacetName"]['param1'] = os.path.join(tempRP, optionPoint)
+    #         st.session_state["preMethodFacetName"]['param2'] = textAN
+    #         st.session_state["preMethodFacetName"]['param3'] = optionIM
+    #         st.session_state["preMethodFacetName"]['param4'] = textLL
+    #         st.session_state["preMethodFacetName"]['param5'] = os.path.join(tempRP, textSN)
+    #         # st.session_state["preMethodFacetName"]['param6'] = os.path.join(tempRP, templateFile)
+    #     # with collAgr2:
 
     if agree13:
         st.info('方法介绍\n'
