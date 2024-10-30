@@ -256,7 +256,7 @@ with colFCF3:
             ('斑块类别水平', '斑块水平', '景观水平'))
         landscapemetricsFunction = st.multiselect(
             '景观指数',
-            ('lpi', 'pd', 'fpac', 'shape', 'clumpy', 'area', 'ed'))
+            ('lpi', 'pd', 'ed'))
         optionOutput1 = st.text_input(
             label='输出文件名称',
             value='系统默认设置', disabled=True)

@@ -400,11 +400,10 @@ class FeatureCalculationMethodFacet:
             "c_lpi": "lsm_c_lpi",
             "c_pd": "lsm_c_pd",
             "c_ed": "lsm_c_ed",
-            "c_pssd": "lsm_c_pssd",
             "l_lpi": "lsm_l_lpi",
             "l_pd": "lsm_l_pd",
             "l_ed": "lsm_l_ed",
-            "l_pssd": "lsm_l_pssd",
+            "c_clumpy": "lsm_c_clumpy"
         }
 
         def get_lookup_value(input_str):
@@ -445,8 +444,8 @@ class FeatureCalculationMethodFacet:
                 elif landscapemetricsPattern == '斑块水平':
                     tempPattern = 'p'
                 funcName = get_lookup_value(f'{tempPattern}_{func}')
-                # print(f'{tempPattern}_{func}')
-                # print(funcName)
+                print(f'{tempPattern}_{func}')
+                print(funcName)
                 robjects.r(f'enn_results <- {funcName}(landscape)')
                 enn_results4 = robjects.r('enn_results')
                 # 启用pandas与rpy2之间的转换
