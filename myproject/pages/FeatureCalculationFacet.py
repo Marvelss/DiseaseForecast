@@ -278,6 +278,7 @@ with colFCF3:
             filtered_file_list)
         optionRed = st.number_input(label='红波段对应的波段数', value=4)
         optionNir = st.number_input(label='近红波段对应的波段数', value=7)
+        optionBlue = st.number_input(label='蓝波段对应的波段数', value=6)
         optionOutput = st.text_input(
             label='输出文件名称',
             value='NDVI_2010_777.tif')
@@ -286,7 +287,8 @@ with colFCF3:
         st.session_state["featureMethodFacetName"]['param2'] = os.path.join(RESOURCE_TEMPDIR_PATH, optionInputFile)
         st.session_state["featureMethodFacetName"]['param3'] = optionRed
         st.session_state["featureMethodFacetName"]['param4'] = optionNir
-        st.session_state["featureMethodFacetName"]['param5'] = os.path.join(RESOURCE_TEMPDIR_PATH, optionOutput)
+        st.session_state["featureMethodFacetName"]['param5'] = optionBlue
+        st.session_state["featureMethodFacetName"]['param6'] = os.path.join(RESOURCE_TEMPDIR_PATH, optionOutput)
 
     if option22:
         st.info('方法介绍\n'

@@ -355,9 +355,9 @@ class FeatureCalculationMethodFacet:
     # NDVI植被指数计算
     def onVegetationIndex(self, methodParam):
         (vegetationIndex, input_path, red,
-         nir, output_path) = (methodParam[0], methodParam[1],
-                              methodParam[2], methodParam[3],
-                              methodParam[4])
+         nir, blue, output_path) = (methodParam[0], methodParam[1],
+                                    methodParam[2], methodParam[3],
+                                    methodParam[4], methodParam[5])
         """
         :param input_path: 输入的栅格数据路径
         :param output_path: 输出的文件路径
@@ -375,11 +375,27 @@ class FeatureCalculationMethodFacet:
         array_red = ds.GetRasterBand(int(red)).ReadAsArray(0, 0, ds_width, ds_height).astype(np.float64)
         # nir是近红波段对应的波段数
         array_nir = ds.GetRasterBand(int(nir)).ReadAsArray(0, 0, ds_width, ds_height).astype(np.float64)
+        array_blue = ds.GetRasterBand(int(blue)).ReadAsArray(0, 0, ds_width, ds_height).astype(np.float64)
         # print("======归一化植被指数NDVI计算======")
         if vegetationIndex == 'NDVI':
             # 以数组的形式读取红波段和近红外波段
             b1 = array_nir - array_red
             b2 = array_nir + array_red
+            # 计算NDVI
+            NDVI_data = np.divide(b1, b2, out=np.zeros_like(b1), where=b2 != 0)
+            # print("======生成输出文件======")
+            driver = gdal.GetDriverByName('GTiff')  # 载入数据驱动，用于存储内存中的数组
+            # 创建一个数组，宽高为原始尺寸
+            ds_result = driver.Create(output_path, ds_width, ds_height, bands=1, eType=gdal.GDT_Float32)
+            ds_result.SetGeoTransform(ds_geo)  # 导入仿射地理变换参数
+            ds_result.SetProjection(ds_prj)  # 导入投影信息
+            ds_result.GetRasterBand(1).SetNoDataValue(-9999)  # 将无效值设为9999
+            ds_result.GetRasterBand(1).WriteArray(NDVI_data)  # 将NDVI的计算结果写入数组
+            del ds_result  # 删除内存中的结果，否则结果不会写入图像中
+        elif vegetationIndex == 'EVI':
+            # 以数组的形式读取红波段和近红外波段
+            b1 = 2.5 * (array_nir - array_red)
+            b2 = (array_nir + 6 * array_red - 7.5 * array_blue) + 1
             # 计算NDVI
             NDVI_data = np.divide(b1, b2, out=np.zeros_like(b1), where=b2 != 0)
             # print("======生成输出文件======")
