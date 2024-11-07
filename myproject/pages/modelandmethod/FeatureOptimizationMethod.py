@@ -4,7 +4,6 @@
 @File : FeatureOptimizationMethod.py
 @Description : 特征优化方法
 """
-import pandas as pd
 from scipy.stats import stats
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -12,17 +11,17 @@ from skrebate import ReliefF
 
 
 class FeatureOptimizationMethod:
-    def __init__(self, dataFrame, reservedField):
+    def __init__(self, dataFrame):
         self.dataFrame = dataFrame.copy()
-        self.reservedField = reservedField
+        # self.reservedField = reservedField
 
-    def getHandledFieldPoint(self, fieldName):
-        # 若字段为原始数据
-        if fieldName[-1].isdigit() and fieldName[-2] != '后':
-            return fieldName[:-1] + str(int(fieldName[-1]) + 1)
-        # 若字段已处理,则末尾数字+1
-        else:
-            return f"{fieldName}-优选特征0"
+    # def getHandledFieldPoint(self, fieldName):
+    #     # 若字段为原始数据
+    #     if fieldName[-1].isdigit() and fieldName[-2] != '后':
+    #         return fieldName[:-1] + str(int(fieldName[-1]) + 1)
+    #     # 若字段已处理,则末尾数字+1
+    #     else:
+    #         return f"{fieldName}-优选特征0"
 
     # 检测连续数据判断是否回归模型
     @staticmethod
@@ -61,17 +60,16 @@ class FeatureOptimizationMethod:
         filtered_data = {key: value for key, value in tempResult.items() if value <= float(condition)}
         # 获取优选特征集
         optimalFeatureList = list(filtered_data.keys())
-        newColumnsList = []
-        for feature in optimalFeatureList:
-            new_column_name = self.getHandledFieldPoint(feature)
-            self.dataFrame[new_column_name] = self.dataFrame[feature]
-            newColumnsList.append(new_column_name)
-
-        print('aaaaaaaaaaaaaaaaaaaaaaa')
         print(tempResult)
-        print(newColumnsList)
+        # print(optimalFeatureList)
+        # optimalFeatureList.remove(targetVariable)
+        # newColumnsList = []
+        # for feature in optimalFeatureList:
+        #     new_column_name = self.getHandledFieldPoint(feature)
+        #     # self.dataFrame[new_column_name] = self.dataFrame[feature]
+        #     newColumnsList.append(new_column_name)
 
-        return self.dataFrame, tempResult, newColumnsList
+        return tempResult, optimalFeatureList
 
     # RF互相关分析
     def ReliefF(self, methodParam):
@@ -174,20 +172,21 @@ class FeatureOptimizationMethod:
             # 使用选定的特征来转换数据集
         # print(selected_features_indices)
         selected_features = X.columns[selected_features_indices]
-        newColumnsList = []
-        for feature in selected_features:
-            new_column_name = self.getHandledFieldPoint(feature)
-            self.dataFrame[new_column_name] = self.dataFrame[feature]
-            newColumnsList.append(new_column_name)
-        return self.dataFrame, sorted_feature_importance_dict, newColumnsList
+        selected_features.remove(target)
+        # newColumnsList = []
+        # for feature in selected_features:
+        #     new_column_name = self.getHandledFieldPoint(feature)
+        #     self.dataFrame[new_column_name] = self.dataFrame[feature]
+        #     newColumnsList.append(new_column_name)
+        return sorted_feature_importance_dict, selected_features
 
     # Pearson相关分析
     def Pearson(self, methodParam):
         # param:['年 DayOfYear 经度 纬度', '0.9']
         # param1:所有变量
         # param2:提取条件
-        print('============测试============')
-        print(methodParam)
+        # print('============测试============')
+        # print(methodParam)
         labelField = methodParam[0]
         fieldList = methodParam[1].split(' ') + [labelField]
         condition = methodParam[2]
@@ -235,12 +234,13 @@ class FeatureOptimizationMethod:
                 if feature2 in selected_features:
                     selected_features.remove(feature2)
         # 获取优选特征集
-        newColumnsList = []
         selected_features_list = list(selected_features)
-        for feature in selected_features_list:
-            if feature == labelField:
-                continue
-            new_column_name = self.getHandledFieldPoint(feature)
-            self.dataFrame[new_column_name] = self.dataFrame[feature]
-            newColumnsList.append(new_column_name)
-        return self.dataFrame, correlation_matrix, newColumnsList
+        # 移除标签
+        selected_features_list.remove(labelField)
+        # for feature in selected_features_list:
+        #     if feature == labelField:
+        #         continue
+        #     new_column_name = self.getHandledFieldPoint(feature)
+        #     self.dataFrame[new_column_name] = self.dataFrame[feature]
+        #     newColumnsList.append(new_column_name)
+        return correlation_matrix, selected_features_list

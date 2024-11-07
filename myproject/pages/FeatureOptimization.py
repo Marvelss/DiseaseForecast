@@ -56,6 +56,10 @@ if "OptimizationMethodName" not in st.session_state:
     st.session_state["OptimizationMethodName"] = {
         'checkBox': None
     }
+# 优选特征集
+if "preferenceFeature" not in st.session_state:
+    st.session_state.preferenceFeature = []
+
 if "inputFeatureList" not in st.session_state:
     st.session_state.inputFeatureList = []
 # 获取当前选中的方法名称
@@ -126,8 +130,8 @@ def onPreviewResults():
     else:
         dataFrameTempT = pages_utils.TempDataSet[3]
     if tempMethod == 't检验':
-        afterHandleData, tempResult, optimalFeatureListT = FeatureOptimizationMethod(
-            dataFrameTempT.copy(), None).tTest(
+        tempResult, optimalFeatureListT = FeatureOptimizationMethod(
+            dataFrameTempT.copy()).tTest(
             methodParam)
 
         # 可视化
@@ -161,8 +165,8 @@ def onPreviewResults():
             options=optimalFeatureListT,
             default=optimalFeatureListT)
     elif tempMethod == 'Pearson相关性分析':
-        afterHandleData, tempResultP, optimalFeatureList = FeatureOptimizationMethod(
-            dataFrameTempT.copy(), None).Pearson(
+        tempResultP, optimalFeatureList = FeatureOptimizationMethod(
+            dataFrameTempT.copy()).Pearson(
             methodParam)
 
         # 可视化
@@ -172,15 +176,17 @@ def onPreviewResults():
         plt.figtext(0.5, -0.13,
                     f'图{st.session_state.IMAGECOUNT} Pearson互相关分析矩阵图',
                     ha='center', fontsize=16)
-        st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+        # st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+        st.pyplot(plt)
+
         st.session_state.expectedRetentionFeature = st.multiselect(
             '预期保留特征:',
             options=optimalFeatureList,
             default=optimalFeatureList)
 
     elif tempMethod == 'Relief-F互相关分析':
-        afterHandleData, tempResultR, optimalFeatureListR = FeatureOptimizationMethod(
-            dataFrameTempT.copy(), None).ReliefF(
+        tempResultR, optimalFeatureListR = FeatureOptimizationMethod(
+            dataFrameTempT.copy()).ReliefF(
             methodParam)
         # 可视化
         keys = list(tempResultR.keys())
@@ -211,7 +217,9 @@ def onPreviewResults():
         # 显示图表
         plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
         plt.tight_layout()  # 调整布局以防止标签重叠
-        st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+        # st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+        st.pyplot(plt)
+
         st.session_state.expectedRetentionFeature = st.multiselect(
             '预期保留特征:',
             options=optimalFeatureListR,
@@ -255,11 +263,13 @@ def onPreviewResults():
     st.session_state["FOVisualInformation"].append(FOVisualInformationTemp)
 
     # 选择后变化
-    if st.button("添加处理", on_click=clear_all):
+    if st.button("保留优选特征", on_click=clear_all):
+        st.session_state.preferenceFeature += st.session_state.expectedRetentionFeature
+
         # print(st.session_state.expectedRetentionFeature)
         new_data = {
             "编号": pages_utils.generateID(),
-            "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
+            # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
             "输入特征": st.session_state.inputFeatureList,
             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
             "方法参数":
@@ -267,7 +277,7 @@ def onPreviewResults():
                  key != 'checkBox'],
             "优选特征": ','.join(st.session_state.expectedRetentionFeature),
             "时间": datetime.datetime.now().time(),
-            "处理状态": False}
+            "处理状态": True}
         print('======================特征优选-添加任务清单记录======================')
         print(new_data)
         pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
@@ -275,8 +285,8 @@ def onPreviewResults():
 
 
 def onRun():
-    if '优选特征' not in st.session_state["leftTabs"]:
-        st.session_state["leftTabs"].append('优选特征')
+    # if '优选特征' not in st.session_state["leftTabs"]:
+    #     st.session_state["leftTabs"].append('优选特征')
     st.session_state.page14 += 1
 
     # ===============获取任务清单内容===============
@@ -291,7 +301,7 @@ def onRun():
             # 若为空则跳过该步骤
             if not idNumber:
                 pages_utils.TempDataSet[3] = pages_utils.TempDataSet[2]
-                st.session_state["leftTabs"].pop(0)
+                # st.session_state["leftTabs"].pop(0)
 
             newColumns = '错误'
             # ===============根据名称匹配调用并执行各个处理方法===============
@@ -301,46 +311,41 @@ def onRun():
                 if isHandled:
                     continue
                 # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
-                if pages_utils.TempDataSet[3].shape[0] == 0:
-                    dataFrameTempT1 = pages_utils.TempDataSet[2]
-                else:
-                    dataFrameTempT1 = pages_utils.TempDataSet[3]
-                reservedField = pages_utils.TempDataSet[2].columns.tolist()
-                afterHandleData = None
+                dataFrameTempT1 = pages_utils.TempDataSet[2]
                 # print(tempMethod)
                 if tempMethod == 't检验':
-                    afterHandleData, _, newColumns = FeatureOptimizationMethod(
-                        dataFrameTempT1, reservedField).tTest(
+                    _, newColumns = FeatureOptimizationMethod(
+                        dataFrameTempT1).tTest(
                         methodParam[indexT])
                 elif tempMethod == 'Pearson相关性分析':
                     # print('-------Pearson相关性分析-测试-------')
                     # print(methodParam[indexT])
-                    afterHandleData, _, newColumns = FeatureOptimizationMethod(
-                        dataFrameTempT1, reservedField).Pearson(
+                    _, newColumns = FeatureOptimizationMethod(
+                        dataFrameTempT1).Pearson(
                         methodParam[indexT])
                 elif tempMethod == 'Relief-F互相关分析':
                     # print('-------Pearson相关性分析-测试-------')
                     # print(fields[0])
                     # print(methodParam[indexT])
-                    afterHandleData, _, newColumns = FeatureOptimizationMethod(
-                        dataFrameTempT1, reservedField).ReliefF(methodParam[indexT])
+                    _, newColumns = FeatureOptimizationMethod(
+                        dataFrameTempT1).ReliefF(methodParam[indexT])
                 # print('=============返回数据=============')
                 # print(afterHandleData)
                 # ===============合并处理后数据集===============
-                row_size = len(afterHandleData)
+                # row_size = len(afterHandleData)
                 # print('-------优选特征-------')
-                intersection_cols = pages_utils.getIntersectionCols(
-                    pages_utils.TempDataSet[3], afterHandleData
-                )
-                pages_utils.TempDataSet[3] = pd.merge(
-                    afterHandleData, pages_utils.TempDataSet[3],
-                    on=intersection_cols, how="left")
+                # intersection_cols = pages_utils.getIntersectionCols(
+                #     pages_utils.TempDataSet[3], afterHandleData
+                # )
+                # pages_utils.TempDataSet[3] = pd.merge(
+                #     afterHandleData, pages_utils.TempDataSet[3],
+                #     on=intersection_cols, how="left")
 
                 # print(newColumns)
                 # ===============更新左侧显示内容===============
                 update_values = {
                     # "数据类型": "气象数据", "输入特征": fields[0],
-                    "大小": '1*' + str(row_size),
+                    # "大小": '1*' + str(row_size),
                     # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
                     "时间": datetime.datetime.now().time(),
                     "处理状态": True}
@@ -350,8 +355,8 @@ def onRun():
                         for key, value in update_values.items():
                             pages_utils.TempDataSetField[3].loc[index, key] = value
 
-            print('======================优选特征集======================')
-            print(pages_utils.TempDataSet[3])
+            # print('======================优选特征集======================')
+            # print(pages_utils.TempDataSet[3])
 
 
 # ==============================界面==============================
@@ -362,43 +367,43 @@ with dataPCV:
     st.markdown("##### 数据与特征")
     # ===============显示左侧数据与特征表格===============
     placeholder1 = st.empty()
-    if st.session_state.page12 == 0:
-        with placeholder1.container():
-            tempLeftTabs = st.session_state["leftTabs"]
-            if not tempLeftTabs:
-                tempLeftTabs = ['待进行特征计算']
-                column = ['空']
-            # print(f'f=========测试{tempLeftTabs}================')
-            tt1 = st.tabs(tempLeftTabs)
-            for i in range(len(tempLeftTabs)):
-                with tt1[i]:
-                    if tempLeftTabs[i] == '备选特征':
-                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
-                    elif tempLeftTabs[i] == '优选特征':
-                        column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-                    st.data_editor(
-                        pages_utils.TempDataSet[i + 2],
-                        height=220, width=800, )
-                    # column_order=column)
+    # if st.session_state.page12 == 0:
+    with placeholder1.container():
+        # tempLeftTabs = st.session_state["leftTabs"]
+        # if not tempLeftTabs:
+        #     tempLeftTabs = ['待进行特征计算']
+        #     column = ['空']
+        # print(f'f=========测试{tempLeftTabs}================')
+        tt1 = st.tabs(['备选特征'])
+        # for i in range(len(tempLeftTabs)):
+        with tt1[0]:
+            # if tempLeftTabs[i] == '备选特征':
+            #     column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+            # elif tempLeftTabs[i] == '优选特征':
+            #     column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+            st.data_editor(
+                pages_utils.TempDataSet[2],
+                height=220, width=800, )
+            # column_order=column)
 
-    if st.session_state.page12 == 1:
-        with placeholder1.container():
-            if pages_utils.TempDataSet[3].columns.tolist() == pages_utils.TempDataSet[2].columns.tolist():
-                tt = st.tabs(['优选特征'])
-                with tt[0]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[2],
-                        height=220, width=800, )
-            else:
-                tt = st.tabs(['备选特征', '优选特征'])
-                with tt[0]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[2],
-                        height=220, width=800, )
-                with tt[1]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[3],
-                        height=220, width=800, )
+    # if st.session_state.page12 == 1:
+    #     with placeholder1.container():
+    #         if pages_utils.TempDataSet[3].columns.tolist() == pages_utils.TempDataSet[2].columns.tolist():
+    #             tt = st.tabs(['优选特征'])
+    #             with tt[0]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[2],
+    #                     height=220, width=800, )
+    #         else:
+    #             tt = st.tabs(['备选特征', '优选特征'])
+    #             with tt[0]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[2],
+    #                     height=220, width=800, )
+    #             with tt[1]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[3],
+    #                     height=220, width=800, )
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
     # if not pages_utils.TempDataSetField[2].empty:
@@ -409,20 +414,20 @@ with dataPCV:
     # plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0
     # agricultureNameList = agricultureNameT1 + agricultureNameT0
     # if not pages_utils.TempDataSetField[3].empty:
-    weatherNameT3, plantNameT3, agricultureNameT3 = pages_utils.getDataFiled(3, pages_utils.TempDataSetField[3])
-    weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0 + weatherNameT3
-    plantNameList = plantNameT1 + plantNameT2 + plantNameT0 + plantNameT3
-    agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT2 + agricultureNameT3
+    # weatherNameT3, plantNameT3, agricultureNameT3 = pages_utils.getDataFiled(3, pages_utils.TempDataSetField[3])
+    weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0
+    plantNameList = plantNameT1 + plantNameT2 + plantNameT0
+    agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT2
     # print(weatherNameT1 + weatherNameT2 + weatherNameT0)
     # print('---测试优选特征--')
     # print(weatherNameT3)
     # print(agricultureNameT3)
-    if weatherNameT3:
-        for a, b in zip(weatherNameT1 + weatherNameT2 + weatherNameT0, weatherNameT3):
-            if '-'.join(b.split('-')[:-1]) in a:
-                weatherNameList.append(b)
-            else:
-                weatherNameList.append(a)
+    # if weatherNameT3:
+    #     for a, b in zip(weatherNameT1 + weatherNameT2 + weatherNameT0, weatherNameT3):
+    #         if '-'.join(b.split('-')[:-1]) in a:
+    #             weatherNameList.append(b)
+    #         else:
+    #             weatherNameList.append(a)
     # 按照数据类型显示左侧字段或特征
     result1 = pages_utils.multiselect_all(
         st, '全选-气象特征', filterUnique(weatherNameList, pages_utils.reservedField),
@@ -434,7 +439,7 @@ with dataPCV:
         st, '全选-地理遥感特征', filterUnique(agricultureNameList, pages_utils.reservedField),
         'tempAgriculture', 'collapsed')
     result4 = pages_utils.multiselect_all(
-        st, '全选-优选特征', plantNameT3 + weatherNameT3 + agricultureNameT3,
+        st, '全选-优选特征', set(st.session_state.preferenceFeature),
         'tempOptimal', 'collapsed')
 # ===============显示右上处理方法选项===============
 with dataPCM:
@@ -531,14 +536,14 @@ with dataPCM:
     if st.session_state.page14 == 0:
         # =======================显示右下任务清单表格=======================
         with placeholder.container():
-            st.markdown('##### 任务清单')
+            st.markdown('##### 优选记录')
             pages_utils.TempDataSetField[3] = st.data_editor(
-                pages_utils.TempDataSetField[3], height=190, width=900,
-                column_order=["编号", "数据类型", "输入特征", "优选特征", "特征优选方法", '时间', '处理状态'],
+                pages_utils.TempDataSetField[3], height=190, width=1200,
+                column_order=["编号", "输入特征", "优选特征", "特征优选方法", '时间', '处理状态'],
                 disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
-            interval_col34, interval_col33 = st.columns([5, 1])
-            with interval_col33:
-                btn = st.button('运行', on_click=onRun)
+            # interval_col34, interval_col33 = st.columns([5, 1])
+            # with interval_col33:
+            #     btn = st.button('运行', on_click=onRun)
     elif st.session_state.page14 == 1:
         # =======================显示右下可视化图表=======================
         with placeholder.container():
