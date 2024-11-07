@@ -414,37 +414,42 @@ with modelACV:
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
-            tt1 = st.tabs(st.session_state["leftTabs"])
-            for i in range(len(st.session_state["leftTabs"])):
-                with tt1[i]:
-                    if st.session_state["leftTabs"][i] != '模型':
-                        if st.session_state["leftTabs"][i] == '原始数据':
-                            column = ['数据类型', '字段', '上传时间']
-                            st.data_editor(
-                                pages_utils.TempDataSet[0],
-                                height=220, width=800, )
-                        elif st.session_state["leftTabs"][i] == '预处理后数据集':
-                            column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                            st.data_editor(
-                                pages_utils.TempDataSet[1],
-                                height=220, width=800, )
-                        elif st.session_state["leftTabs"][i] == '备选特征':
-                            column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
-                            st.data_editor(
-                                pages_utils.TempDataSet[2],
-                                height=220, width=800, )
-                        elif st.session_state["leftTabs"][i] == '优选特征':
-                            column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-                            st.data_editor(
-                                pages_utils.TempDataSet[3],
-                                height=220, width=800, )
-                        # column_order=column)
-                    else:
-                        column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
-                        st.data_editor(
-                            pages_utils.TempDataSetField[i],
-                            height=220, width=800,
-                            column_order=column)
+            tt1 = st.tabs(['优选特征'])
+            with tt1[0]:
+                st.data_editor(
+                    pages_utils.TempDataSet[2],
+                    height=220, width=800, )
+            # tt1 = st.tabs(st.session_state["leftTabs"])
+            # for i in range(len(st.session_state["leftTabs"])):
+            #     with tt1[i]:
+            #         if st.session_state["leftTabs"][i] != '模型':
+            #             if st.session_state["leftTabs"][i] == '原始数据':
+            #                 column = ['数据类型', '字段', '上传时间']
+            #                 st.data_editor(
+            #                     pages_utils.TempDataSet[0],
+            #                     height=220, width=800, )
+            #             elif st.session_state["leftTabs"][i] == '预处理后数据集':
+            #                 column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
+            #                 st.data_editor(
+            #                     pages_utils.TempDataSet[1],
+            #                     height=220, width=800, )
+            #             elif st.session_state["leftTabs"][i] == '备选特征':
+            #                 column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+            #                 st.data_editor(
+            #                     pages_utils.TempDataSet[2],
+            #                     height=220, width=800, )
+            #             elif st.session_state["leftTabs"][i] == '优选特征':
+            #                 column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+            #                 st.data_editor(
+            #                     pages_utils.TempDataSet[3],
+            #                     height=220, width=800, )
+            #             # column_order=column)
+            #         else:
+            #             column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
+            #             st.data_editor(
+            #                 pages_utils.TempDataSetField[i],
+            #                 height=220, width=800,
+            #                 column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
@@ -452,13 +457,13 @@ with modelACV:
                 tt = st.tabs(['优选特征'])
                 with tt[0]:
                     st.data_editor(
-                        pages_utils.TempDataSet[3],
+                        pages_utils.TempDataSet[2],
                         height=220, width=800, )
             else:
                 tt = st.tabs(['优选特征', '模型'])
                 with tt[0]:
                     st.data_editor(
-                        pages_utils.TempDataSet[3],
+                        pages_utils.TempDataSet[2],
                         height=220, width=800, )
                 with tt[1]:
                     column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
@@ -478,31 +483,32 @@ with modelACV:
     # weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0 + weatherNameT3
     # plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0 + plantNameT3
     # agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT3
-    getTempPF = pages_utils.TempDataSet[3].columns.tolist()
-    preferenceFeature, otherFeature = [], []
-    for tempTPF in getTempPF:
-        if '-优选' in tempTPF:
-            preferenceFeature.append(tempTPF)
-        else:
-            otherFeature.append(tempTPF)
-    # 剔除在其他特征中重复的优选特征
-    otherFeature = [ofT for ofT in otherFeature if not any(ofT in prT for prT in preferenceFeature)]
+    # getTempPF = pages_utils.TempDataSet[3].columns.tolist()
+    # preferenceFeature, otherFeature = [], []
+    # for tempTPF in getTempPF:
+    #     if '-优选' in tempTPF:
+    #         preferenceFeature.append(tempTPF)
+    #     else:
+    #         otherFeature.append(tempTPF)
+    # # 剔除在其他特征中重复的优选特征
+    # otherFeature = [ofT for ofT in otherFeature if not any(ofT in prT for prT in preferenceFeature)]
 
     modelACVCol1, modelACVCol2 = st.columns([0.7, 0.4])
     with modelACVCol1:
         # 按照数据类型显示左侧字段或特征
         result1 = pages_utils.multiselect_all(
-            st, '全选-优选特征', filterUnique(preferenceFeature, []),
+            st, '全选-优选特征', filterUnique(st.session_state.preferenceFeature, []),
             'tempTemperature', 'collapsed')
         result2 = pages_utils.multiselect_all(
-            st, '全选-其他特征', filterUnique(otherFeature, pages_utils.reservedField),
+            st, '全选-其他特征', filterUnique(pages_utils.TempDataSet[2].columns.tolist(),
+                                              st.session_state.preferenceFeature + pages_utils.reservedField),
             'tempPlant', 'collapsed')
     with modelACVCol2:
         st.markdown("")
         st.markdown("###### 标签\n")
         resultLabel = st.selectbox(
             'predictLabel',
-            filterUnique(otherFeature, pages_utils.reservedField),
+            filterUnique(pages_utils.TempDataSet[2].columns.tolist(), pages_utils.reservedField),
             label_visibility='collapsed')
 
 # ===============显示右上模型选项===============
@@ -584,7 +590,7 @@ with modelACM:
                 if btn:
                     # 检测目标连续/回归变量对应分类/回归模型
                     # 根据唯一值数据占比判断
-                    dfT = pages_utils.TempDataSet[3]
+                    dfT = pages_utils.TempDataSet[2]
                     dataRation = dfT[resultLabel].nunique() / len(dfT[resultLabel])
                     addModelFlag = True
                     # 占比<0.005
@@ -735,8 +741,8 @@ with modelACM:
         with placeholder.container():
             st.markdown('##### 任务清单')
             pages_utils.TempDataSetField[4] = st.data_editor(
-                pages_utils.TempDataSetField[4], height=190, width=900,
-                column_order=["编号", "模型", "时间", '处理状态'],
+                pages_utils.TempDataSetField[4], height=190, width=1200,
+                column_order=["编号", "模型", "模型参数", "评价指标", "时间", '处理状态'],
                 disabled=["时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([4, 1])
             with interval_col33:
