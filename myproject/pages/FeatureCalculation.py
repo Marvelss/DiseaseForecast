@@ -314,7 +314,7 @@ with featureCCV:
     # print(weatherNameT2)
     weatherNameT2H = []
     for weatherNameT22 in weatherNameT2:
-        print(weatherNameT22)
+        # print(weatherNameT22)
         if isinstance(weatherNameT22, str):
             weatherNameT2H += weatherNameT22.split(',')
     weatherNameList = weatherNameT1 + weatherNameT2H + weatherNameT0

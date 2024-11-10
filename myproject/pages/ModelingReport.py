@@ -88,11 +88,14 @@ def generateID():
 colHead1, colHead2 = st.columns([0.7, 0.2])
 with colHead1:
     st.title('多场景作物病虫害快速预测建模报告')
-    st.markdown(f'#### &emsp;&emsp;点状静态建模场景:{st.session_state.modelingName}预测模型')
+    # st.markdown(f'#### &emsp;&emsp;点状静态建模场景:{st.session_state.modelingName}预测模型')
+    st.markdown(f'#### &emsp;&emsp;场景名称:{st.session_state.modelingName}预测模型')
 
 with colHead2:
     st.markdown(' ')
-    st.markdown(f'#### 编号:0P2C123O3M123W9')
+    # st.markdown(f'#### 编号:0P2C123O3M123W9')
+    st.markdown(f'#### 编号:{generateID()[:15]}')
+
     current_date = datetime.now().strftime('%Y年%m月%d日')
     st.markdown(f'#### 日期: {current_date}')
 
@@ -149,7 +152,7 @@ with hideBtnBrief.container():
     if len(pages_utils.TempDataSetField[4]['特征'].tolist()):
         mbInfo4_list = []
         for item in pages_utils.TempDataSetField[4]['评价指标']:
-            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in item.items()])
+            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in eval(item).items()])
             mbInfo4_list.append(formatted)
         aInfoGap8 = '；'.join(mbInfo4_list)
     else:
@@ -190,11 +193,11 @@ with hideBtnBrief.container():
         pages_utils.TempDataSetField[1]['预处理方法'].tolist()) else ''
     featureCINfo = f'结合<u>{aInfoGap3}环节，' if len(
         pages_utils.TempDataSetField[2]['特征计算方法'].tolist()) else ''
+    # 场景名称：{st.session_state.modelingName}预测模型
     abstractInfo = f"""
-    ##### 场景名称：{st.session_state.modelingName}预测模型  \n
     ##### 数据类型：{aInfoGap1}  \n
-    ##### 优选算法：Relief-F互相关分析  \n
-    ##### 优选特征：07-19_08-09_降水累积量、1-1_1-31_降雨日数、历史病害均值、class_FRAC_MN、class_AI、class_SHAPE_MN、class_CLUMPY、class_AREA_MN  \n
+    ##### 优选算法：{aInfoGap4} \n
+    ##### 优选特征：{aInfoGap5}  \n
     ##### 建模方法：{aInfoGap7}  \n
     ##### 模型精度：{aInfoGap8}  \n
     """
@@ -212,894 +215,894 @@ with hideBtnBrief.container():
     # if btnBrief:
     #     st.session_state.hideBtnDict['brief'] = True
 
-with hideBtnRaw.container():
-    category("📊️ 原始数据")
-    array_1d = [item for sublist in pages_utils.TempDataSetField[0]['字段'] for item in sublist]
-
-    rInfo1 = '、'.join(list(set(array_1d)))
-    # pages_utils.TempDataSet[0] = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
-    rowsR, columnsR = pages_utils.TempDataSet[0].shape
-    rInfo2 = f'{rowsR}*{columnsR}'
-    rawInfo0 = f"""
-    ##### 数据类型：{aInfoGap1}
-    ##### 上传字段：{rInfo1}
-    ##### 数据维度：{rInfo2}
-                """
-    rawInfo1 = f"""
-    ##### 数据类型：气象数据、植保数据、地理遥感数据
-    ##### 上传字段：温度、降水  \n
-    ##### &emsp;&emsp;&emsp;&emsp;&emsp;历史病害均值、病害发生程度  \n
-    ##### &emsp;&emsp;&emsp;&emsp;&emsp;class_FRAC_MN、land_FRAC_MN、class_AI  \n
-    ##### &emsp;&emsp;&emsp;&emsp;&emsp;class_SHAPE_MN、class_CLUMPY、class_AREA_MN
-                """
-    st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;原始数据集情况如下:  \n')
-    st.columns([0.3, 0.6, 0.4])[1].markdown(rawInfo1, unsafe_allow_html=True)
-
-    # st.markdown(rawInfo1, unsafe_allow_html=True)
-    # if btnRaw:
-    #     st.session_state.hideBtnDict['raw'] = True
-with hideBtnPre.container():
-    if len(pages_utils.TempDataSetField[1]['预处理方法'].tolist()):
-        category("🌌 预处理")
-        print('--测试预处理')
-        print(pages_utils.TempDataSetField[1]['输入字段'].tolist())
-        array_1dPre = [item for sublist in pages_utils.TempDataSetField[1]['输入字段'].tolist() for item in sublist]
-
-        preInfo1 = '、'.join(pages_utils.TempDataSetField[1]['预处理方法'].tolist())
-        preInfo2 = '、'.join(list(set(array_1dPre)))
-        # pages_utils.TempDataSet[1] = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
-        rowsP, columnsP = pages_utils.TempDataSet[1].shape
-        preInfo3 = f'{rowsP}'
-        # st.markdown(f'##### &emsp;&emsp;本次预处理使用了<u>{preInfo1}方法，'
-        #             f'处理字段为：<u>{preInfo2}，'
-        #             f'处理后剩余数据为<u>{preInfo3}条，具体内容如下', unsafe_allow_html=True)
-        preInfoAll = f"""
-        ##### 预处理对象：温度、降水
-        ##### 预处理方法：缺失值插补  \n
-              """
-        st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;预处理情况如下:  \n')
-        st.columns([0.3, 0.6, 0.4])[1].markdown(preInfoAll, unsafe_allow_html=True)
-
-        for indexT, tempPreM in enumerate(pages_utils.TempDataSetField[1]['预处理方法'].tolist()):
-            inputFields = pages_utils.TempDataSetField[1]["输入字段"].tolist()
-
-            if tempPreM == '缺失值插补':
-                data_before_temp = st.session_state["DPVisualInformation"][indexT]['before']
-                data_after_temp = st.session_state["DPVisualInformation"][indexT]['after']
-                # print(inputFields[o][0])
-                data_before = pd.DataFrame({inputFields[indexT][0]: data_before_temp})
-                data_after = pd.DataFrame({inputFields[indexT][0]: data_after_temp})
-                # 查找缺失值的索引
-                missing_indices = data_before[data_before[inputFields[indexT][0]].isna()].index
-                # print(f'缺失索引:{missing_indices}')
-                # 获取第一个缺失值的索引
-                # first_missing_index = missing_indices[0]
-                # 获取第一个缺失值的行号
-                first_missing_index = 130
-                # print(f"第一个缺失值的行号: {first_missing_index}")
-
-                # 计算前5行和后5行的起始和结束索引
-                start_index = max(first_missing_index - 50, 0)
-                end_index = min(first_missing_index + 50 + 1, len(data_before))
-                # 取第一个缺失值对应前15行和后15行预处理数据
-                data_before_surrounding_data = data_before.iloc[start_index:end_index]
-                data_after_surrounding_data = data_after.iloc[start_index:end_index]
-                # 绘制对比折线图
-                fig, ax = plt.subplots(figsize=(10, 6))
-                # print(pages_utils.TempDataSet[1]['DayOfYear'])
-                # 取第一个缺失值对应前15行和后15行'经度', '纬度', '年'数据
-                missing_rows = \
-                    pages_utils.TempDataSet[1].loc[
-                        missing_indices, ['经度', '纬度', '年', 'DayOfYear']].to_dict(
-                        'records')[0]
-                province, station, year = missing_rows['经度'], missing_rows['纬度'], missing_rows[
-                    '年']
-                # print(missing_rows['DayOfYear'])
-                # 整理前后15天dayOfYear为x轴
-                # 提取数据列，获取从 start_index 到 end_index 范围内的行数
-                # 生成从 start_index 到 end_index 的数字序列
-                figure_x = pd.DataFrame({'row': list(range(start_index, end_index))})
-                # 绘制插补前的折线图
-                plt.plot(figure_x, data_before_surrounding_data[inputFields[indexT][0]],
-                         label='原始数据',
-                         color='black',
-                         linestyle='-', marker='o')
-                # 绘制插补后的折线图
-                plt.plot(figure_x, data_after_surrounding_data[inputFields[indexT][0]],
-                         label='插补后数据', color='blue',
-                         linestyle='--',
-                         marker='o', alpha=0.3)
-                plt.xlabel('行号')
-                ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-                plt.ylabel(inputFields[indexT][0])
-                plt.figtext(0.5, -0.01,
-                            f'{inputFields[indexT][0]}字段部分数据插补前后对比图',
-                            ha='center', fontsize=15)
-                plt.legend()
-                # st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
-                if indexT == 0:
-                    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'pre1.png'))
-                    st.columns([0.3, 0.6, 0.4])[1].image(img)
-                # st.pyplot(plt)
-                if indexT == 1:
-                    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'pre2.png'))
-                    st.columns([0.3, 0.6, 0.4])[1].image(img)
-                # st.session_state.IMAGECOUNT += 1
-            elif tempPreM == '剔除异常值':
-                # 剔除异常值-箱型图
-                data_before = st.session_state["DPVisualInformation"][indexT]['before']
-                data_after = st.session_state["DPVisualInformation"][indexT]['after']
-                # 创建两个子图
-                fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-                # 绘制处理前的箱线图
-                sns.boxplot(y=data_before, ax=axes[0])
-                axes[0].set_ylabel(data_before.name)
-                axes[0].set_title('预处理后')
-                # axes[0].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
-                # axes[0].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
-                # axes[0].legend(loc='upper left')
-
-                # 绘制处理后的箱线图
-                sns.boxplot(y=data_after, ax=axes[1])
-                axes[1].set_ylabel(data_after.name)
-                axes[1].set_title('预处理后')
-                # axes[1].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
-                # axes[1].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
-                # axes[1].legend(loc='upper left')
-                # 设置主标题
-                fig.suptitle(f'{data_before.name}数据剔除前后对比箱型图',
-                             fontsize=15)
-                st.pyplot(fig)
-                # st.session_state.IMAGECOUNT += 1
-
-        # colPart1, colPart2, colPart3 = st.columns(3)
-        # colPart1.metric('预处理字段', '温度')
-        # colPart2.metric('预处理方法', '缺失值插补')
-        # colPart3.metric('预处理数据条数', '3')  # 根据输入和输出字段对应的数据对比
-        # if btnPre:
-        #     st.session_state.hideBtnDict['pre'] = True
-with hideBtnFC.container():
-    if len(pages_utils.TempDataSetField[2]['特征计算方法'].tolist()):
-        category("🌍 特征计算")
-
-        fcInfo2 = '、'.join(pages_utils.TempDataSetField[2]['特征计算方法'].tolist())
-        fcInfo1 = '、'.join(
-            list(set([item for sublist in pages_utils.TempDataSetField[2]['输入特征'].tolist() for item in sublist])))
-        fcInfo3 = '、'.join(list(set(pages_utils.TempDataSetField[2]['备选特征'].tolist())))
-        # st.markdown(f'##### &emsp;&emsp;本次特征计算基于<u>{fcInfo1}数据，'
-        #             f'通过<u>{fcInfo2}方法，得到了特征包括：<u>{fcInfo3}，'
-        #             f'具体内容如下：', unsafe_allow_html=True)
-        st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;特征计算情况如下：',
-                                  unsafe_allow_html=True)
-        fcInfoAll = f"""
-        ##### 特征计算对象：降水、温度  \n
-        ##### 特征计算方法：降水累积量计算、降雨日数计算  \n
-        ##### 特征计算结果：07-19_08-09_降水累积量、1-1_1-31_降雨日数  \n
-        """
-        # abstractInfo1 = f"""
-        # ##### &emsp;&emsp;综合上述结果，<u>{aInfoGap13}模型表现出<u>{aInfoGap12[0]}的可靠性和预测效果，参数设置合理，具有<u>{aInfoGap12[1]}的鲁棒性。
-        # """
-        st.columns([0.3, 0.6, 0.4])[1].markdown(fcInfoAll, unsafe_allow_html=True)
-
-        for indexT, tempFCM in enumerate(pages_utils.TempDataSetField[2]['特征计算方法'].tolist()):
-            # 创建DataFrame
-            data_after = pages_utils.TempDataSet[2]
-            # 特征名称
-            dataColumn = pages_utils.TempDataSetField[2]['备选特征'].tolist()[indexT]
-            data_after = data_after[pages_utils.reservedField + [dataColumn]]
-            # 删除含有缺失值的行
-            data_after = data_after.dropna()
-            # 去除重复值
-            data_after = data_after.drop_duplicates()
-
-            if tempFCM == '基于活动积温的生育期计算':
-                # 选择最多8个纬度
-                top_stations = data_after['纬度'].value_counts().nlargest(8).index
-                df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
-
-                # 选择最多3个年份
-                top_years = data_after['年'].value_counts().nlargest(3).index
-                df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-
-                # 绘制折线图
-                plt.figure(figsize=(10, 6))
-                sns.lineplot(
-                    data=df_filtered,
-                    x="纬度",
-                    y=dataColumn,
-                    hue="年",
-                    marker="o"
-                )
-                # 设置标签和标题
-                plt.xlabel("地区")
-                plt.ylabel(f'{dataColumn}(Day Of Year)')
-                plt.figtext(0.5, -0.01,
-                            f'部分地区各年份{dataColumn}图',
-                            ha='center', fontsize=15)
-                st.pyplot(plt)
-            elif tempFCM == '降水累积量计算':
-                # 时期范围名称修剪
-                integratedDataColumnT = dataColumn.split('_')
-                integratedDataColumn = integratedDataColumnT[0] + '至' + integratedDataColumnT[1] + \
-                                       integratedDataColumnT[2]
-                # 选择最多8个纬度
-                top_stations = data_after['纬度'].value_counts().nlargest(8).index
-                df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
-                # 选择最多5个年份
-                top_years = data_after['年'].value_counts().nlargest(5).index
-                df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                # print(df_filtered)
-                # 绘制柱状图
-                plt.figure(figsize=(10, 6))
-                sns.barplot(
-                    data=df_filtered,
-                    x="纬度",
-                    y=dataColumn,
-                    hue="年",
-                    dodge=True,
-                    saturation=1
-                )
-                # 设置标签和标题
-                plt.xlabel("地区")
-                plt.ylabel("降水累积量(mm)")
-                plt.figtext(0.5, -0.01,
-                            f'部分地区各年份{integratedDataColumn}图',
-                            ha='center', fontsize=15)
-                st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
-                # st.session_state.IMAGECOUNT += 1
-            elif tempFCM == '降雨日数计算':
-                # 时期范围名称修剪
-                integratedDataColumnRT = dataColumn.split('_')
-                integratedDataColumnR = integratedDataColumnRT[0] + '至' + integratedDataColumnRT[1] + \
-                                        integratedDataColumnRT[2]
-                # 选择最多8个纬度
-                top_stations = data_after['纬度'].value_counts().nlargest(8).index
-                df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
-
-                # 选择最多3个年份
-                top_years = data_after['年'].value_counts().nlargest(3).index
-                df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                # 绘制折线图
-                plt.figure(figsize=(10, 6))
-                sns.lineplot(
-                    data=df_filtered,
-                    x="纬度",
-                    y=dataColumn,
-                    hue="年",
-                    marker="o"
-                )
-                # 设置标签和标题
-                plt.xlabel("地区")
-                plt.ylabel("降雨日数(天)")
-                plt.figtext(0.5, -0.01,
-                            f'部分地区各年份{integratedDataColumnR}图',
-                            ha='center', fontsize=15)
-                st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
-
-        # 命名: 界面名称缩写
-        # colFC1, colFC2 = st.columns(2)
-        # with colFC1:
-        # img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征计算-降水累积量.png'))
-        # st.image(img)
-        # colFCPart1, colFCPart2 = st.columns(2)
-        # colFCPart1.metric('输入字段', '降水')
-        # colFCPart2.metric('特征计算方法', '降水累积量计算')
-        # colFCPart3, colFCPart4 = st.columns(2)
-        # colFCPart3.metric('输出特征', '07-19_08-23_降水累积量')
-        # colFCPart4.metric('特征条数', '1271')
-        # if btnFC:
-        #     st.session_state.hideBtnDict['fc'] = True
-
-with hideBtnFO.container():
-    if len(pages_utils.TempDataSetField[3]['特征优选方法'].tolist()):
-        category("🌎 特征优选")
-        foInfo1 = '、'.join(list(set(pages_utils.TempDataSetField[3]['特征优选方法'].tolist())))
-        # pages_utils.TempDataSetField[3]["优选特征"] = ["特征A", "特征B", "特征C"]
-        # print('--测试特征因子---')
-        featureListT = pages_utils.TempDataSetField[3]['优选特征'].tolist()[0].split(',')
-        # print(featureListT)
-        foInfo2 = '、'.join(pages_utils.TempDataSetField[3]['优选特征'].tolist())
-
-        # st.markdown(f'##### &emsp;&emsp;本次特征优选基于<u>{foInfo1}进行筛选，'
-        #             f'最终选取了<u>{len(featureListT)}个特征因子，'
-        #             f'形成最终优选特征集，包括<u>{foInfo2}，具体内容如下：',
-        #             unsafe_allow_html=True)
-        st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;特征优选情况如下：',
-                                  unsafe_allow_html=True)
-        foInfoAll = f"""
-                ##### 特征优选对象：class_FRAC_MN、class_AI、land_FRAC_MN、class_SHAPE_MN、class_CLUMPY、class_AREA_MN、历史病害均值  \n
-                ##### 特征优选方法：Relief-F互相关分析  \n
-                ##### 特征优选结果：class_FRAC_MN、class_AI、class_SHAPE_MN、class_CLUMPY、class_AREA_MN、历史病害均值  \n
-                """
-        # abstractInfo1 = f"""
-        # ##### &emsp;&emsp;综合上述结果，<u>{aInfoGap13}模型表现出<u>{aInfoGap12[0]}的可靠性和预测效果，参数设置合理，具有<u>{aInfoGap12[1]}的鲁棒性。
-        # """
-        st.columns([0.3, 0.6, 0.4])[1].markdown(foInfoAll, unsafe_allow_html=True)
-
-        for indexT, tempFOM in enumerate(pages_utils.TempDataSetField[3]['特征优选方法'].tolist()):
-            # # 特征名称
-            # dataColumn = pages_utils.TempDataSetField[3]['输入特征'].tolist()[indexT]
-            # print(dataColumn)
-            # # 创建DataFrame
-            # data_after = pages_utils.TempDataSet[3][dataColumn]
-            data_after = st.session_state["FOVisualInformation"][indexT]['after']
-            # 特征名称
-            dataColumn = st.session_state["FOVisualInformation"][indexT]['column']
-            # 特征名称
-            if tempFOM == 'Pearson相关性分析':
-                # 可视化
-                # 使用Seaborn绘制热图
-                plt.figure(figsize=(10, 8))
-                sns.heatmap(data_after, annot=True, cmap='coolwarm', center=0)
-
-                plt.figtext(0.45, -0.13,
-                            f'Pearson互相关分析矩阵图',
-                            ha='center', fontsize=15)
-                # st.session_state.IMAGECOUNT += 1
-                st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
-
-            elif tempFOM == 'Relief-F互相关分析':
-                # 可视化
-                # 创建柱状图
-                plt.figure(figsize=(10, 6))
-                plt.bar(st.session_state["FOVisualInformation"][indexT]['column'],
-                        st.session_state["FOVisualInformation"][indexT]['value'], color='blue')
-                # 添加标题和标签
-                # plt.title('基于Relief-F特征因子权值排序图')
-                plt.figtext(0.5, -0.01,
-                            f'基于Relief-F特征因子权值排序图',
-                            ha='center', fontsize=15)
-                plt.xlabel('特征')
-                plt.ylabel('特征权值')
-
-                # 基准线
-                plt.axhline(y=st.session_state["FOVisualInformation"][indexT]['standard'], color='red',
-                            linestyle='--', linewidth=1, label='基准线')
-                # 显示图表
-                plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
-                plt.tight_layout()  # 调整布局以防止标签重叠
-                st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
-    # colFCPart1, colFCPart2 = st.columns([0.7, 0.3])
-    # colFCPart1.metric('输入特征', '降水、温度')
-    # colFCPart2.metric('特征优选方法', 'Pearson相关性分析')
-    # colFCPart3, colFCPart4 = st.columns([0.7, 0.3])
-    # colFCPart3.metric('优选特征集', '温度')
-    # colFCPart4.metric('筛选条件', '相关系数(R)<0.8')
-    # if btnFO:
-    #     st.session_state.hideBtnDict['fo'] = True
-
-with hideBtnMB.container():
-    if len(pages_utils.TempDataSetField[4]['模型'].tolist()):
-        category("🌏 模型构建")
-        # pages_utils.TempDataSetField[4]['数据集划分比例'] = ['7：3']
-        # pages_utils.TempDataSetField[4]['模型'] = ['PLSR']
-        mbInfo1 = '、'.join(pages_utils.TempDataSetField[4]['模型'].tolist())
-        mbInfo2 = st.session_state.modelingName
-        mbInfo3 = pages_utils.TempDataSetField[4]['数据集划分比例'].tolist()[0]
-        # print(pages_utils.TempDataSetField[4]['评价指标'].tolist())
-        # 处理多条评价指标，并将每个字典的键值对格式化为 "key=value"
-        mbInfo4 = '；'.join(mbInfo4_list)
-
-        st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;模型构建情况如下:  \n')
-        st.columns([0.3, 0.6, 0.4])[1].markdown(
-            f'##### 建模方法：{mbInfo1}  \n'
-            f'##### 训练集与验证集比例：{mbInfo3}  \n'
-            f'##### 模型精度：{mbInfo4}  \n',
-            unsafe_allow_html=True)
-        # st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;预测结果可视化如下:  \n')
-
-        models = pages_utils.TempDataSetField[4]["模型"].tolist()
-        # actualAndPredictList = pages_utils.TempDataSetField[4]["模型训练结果"].tolist()
-        # print(print(actualAndPredictList))
-        colMB1, colMB2 = st.columns(2)
-        for i in range(len(models)):
-            if i % 2 == 0:
-                with colMB1:
-                    path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
-                    # testLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_testLabel.xlsx'))
-                    predictLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_predictLabel.xlsx'))
-                    # 绘制二维平面散点图，只标记predictLabel为0和1的点
-                    # 分别绘制 predictLabel 为 0 和 1 的点
-                    fig, ax = plt.subplots()
-
-                    for label in [0, 1]:
-                        subset = predictLabelDF[predictLabelDF['predictLabel'] == label]
-                        if label == 0:
-                            labelStr = '不发生'
-                        else:
-                            labelStr = '发生'
-                        plt.scatter(subset['经度'], subset['纬度'], label=f'病害{labelStr}', s=100, alpha=0.6)
-                    # predicted_values = predictLabelDF.iloc[:, 0]
-                    ax.set_xlabel('经度')
-                    ax.set_ylabel('纬度')
-                    plt.legend(title='预测病害发生程度')
-                    # plt.title(f'{models[i]}模型混淆矩阵图')
-                    plt.figtext(0.5, -0.03,
-                                f'{models[i]}模型部分预测结果图',
-                                ha='center', fontsize=15)
-
-                    st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
-        else:
-            with colMB2:
-                path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
-                # testLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_testLabel.xlsx'))
-                predictLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_predictLabel.xlsx'))
-                # 绘制二维平面散点图，只标记predictLabel为0和1的点
-                # 分别绘制 predictLabel 为 0 和 1 的点
-                fig, ax = plt.subplots()
-
-                for label in [0, 1]:
-                    subset = predictLabelDF[predictLabelDF['predictLabel'] == label]
-                    if label == 0:
-                        labelStr = '不发生'
-                    else:
-                        labelStr = '发生'
-                    plt.scatter(subset['经度'], subset['纬度'], label=f'病害{labelStr}', s=100, alpha=0.6)
-                # predicted_values = predictLabelDF.iloc[:, 0]
-                ax.set_xlabel('经度')
-                ax.set_ylabel('纬度')
-                plt.legend(title='预测病害发生程度')
-                # plt.title(f'{models[i]}模型混淆矩阵图')
-                plt.figtext(0.5, -0.03,
-                            f'{models[i]}模型部分预测结果图',
-                            ha='center', fontsize=15)
-                st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
-
-        # st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;精度结果可视化如下:  \n')
-
-        colMB11, colMB21 = st.columns(2)
-        tempMT = pages_utils.TempDataSetField[4]['模型'].tolist()
-        for indexT1, temp in enumerate(tempMT):
-            path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
-            testLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_testLabel.xlsx'))
-            predictLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_predictLabel.xlsx'))
-            # 假设第一列包含要绘制的数据
-            actual_values = testLabelDF.iloc[:, 0]
-            predicted_values = predictLabelDF.iloc[:, 0]
-            if indexT1 % 2 == 0:
-                with colMB11:
-                    if '峰值' in pages_utils.TempDataSetField[4]['标签'].tolist():
-                        # print(pages_utils.TempDataSetField[4]['标签'].tolist())
-                        # evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
-                        # for indexT1, temp in enumerate(pages_utils.TempDataSetField[4]['模型'].tolist()):
-
-                        # 绘制散点图
-                        fig, ax = plt.subplots()
-
-                        sns.scatterplot(x=actual_values, y=predicted_values)
-                        plt.plot([actual_values.min(), actual_values.max()],
-                                 [actual_values.min(), actual_values.max()],
-                                 'r--')
-                        ax.set_xlabel('实际峰值(%)')
-                        ax.set_ylabel('预测峰值(%)')
-                        # plt.figure(figsize=(10, 6))
-                        plt.figtext(0.45, -0.03,
-                                    f'图{st.session_state.IMAGECOUNT} {tempMT[indexT1]}模型精度评价散点图',
-                                    ha='center', fontsize=15)
-                        # 精度结果直接显示在图中
-                        metrics_text = "\n".join(
-                            [f"{key}={round(value, 3)}" for key, value in evaluationIndex[indexT1].items()])
-                        plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
-                                 verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
-                        st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
-                    else:
-                        # for temp in pages_utils.TempDataSetField[4]['模型'].tolist():
-                        path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
-                        testLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_testLabel.xlsx'))
-                        predictLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_predictLabel.xlsx'))
-                        # 绘制混淆矩阵图
-                        fig, ax = plt.subplots()
-                        actual_values = testLabelDF.iloc[:, 0]
-                        predicted_values = predictLabelDF.iloc[:, 0]
-                        conf_matrix = confusion_matrix(actual_values, predicted_values)
-                        sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
-                        ax.set_xlabel('实际病害发生程度')
-                        ax.set_ylabel('预测病害发生程度')
-                        plt.figtext(0.45, -0.03,
-                                    f'{temp}模型混淆矩阵图',
-                                    ha='center', fontsize=15)
-                        st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
-            else:
-                with colMB21:
-                    if '峰值' in pages_utils.TempDataSetField[4]['标签'].tolist():
-                        # print(pages_utils.TempDataSetField[4]['标签'].tolist())
-                        evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
-                        # for indexT1, temp in enumerate(pages_utils.TempDataSetField[4]['模型'].tolist()):
-                        path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
-                        testLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_testLabel.xlsx'))
-                        predictLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_predictLabel.xlsx'))
-                        # 假设第一列包含要绘制的数据
-                        actual_values = testLabelDF.iloc[:, 0]
-                        predicted_values = predictLabelDF.iloc[:, 0]
-                        # 绘制散点图
-                        fig, ax = plt.subplots()
-
-                        sns.scatterplot(x=actual_values, y=predicted_values)
-                        plt.plot([actual_values.min(), actual_values.max()],
-                                 [actual_values.min(), actual_values.max()],
-                                 'r--')
-                        ax.set_xlabel('实际峰值(%)')
-                        ax.set_ylabel('预测峰值(%)')
-                        # plt.figure(figsize=(10, 6))
-                        plt.figtext(0.45, -0.03,
-                                    f'图{st.session_state.IMAGECOUNT} {tempMT[indexT1]}模型精度评价散点图',
-                                    ha='center', fontsize=15)
-                        # 精度结果直接显示在图中
-                        metrics_text = "\n".join(
-                            [f"{key}={round(value, 3)}" for key, value in evaluationIndex[indexT1].items()])
-                        plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
-                                 verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
-                        st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
-                    else:
-                        # for temp in pages_utils.TempDataSetField[4]['模型'].tolist():
-                        path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
-                        testLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_testLabel.xlsx'))
-                        predictLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_predictLabel.xlsx'))
-                        # 绘制混淆矩阵图
-                        fig, ax = plt.subplots()
-                        actual_values = testLabelDF.iloc[:, 0]
-                        predicted_values = predictLabelDF.iloc[:, 0]
-                        conf_matrix = confusion_matrix(actual_values, predicted_values)
-                        sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
-                        ax.set_xlabel('实际病害发生程度')
-                        ax.set_ylabel('预测病害发生程度')
-                        # plt.title(f'{temp}模型混淆矩阵图')
-                        plt.figtext(0.45, -0.03,
-                                    f'{temp}模型混淆矩阵图',
-                                    ha='center', fontsize=15)
-                        st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
-# cc1, colMBPart1, colMBPart2 = st.columns([0.7, 0.3, 0.3])
-# cc1.metric('特征集', 'class-AREA_MN、land-FRAC_MN、class-FRAC_MN、01-01_01-31降雨日数、07-19_08-23_降水累积量')
-# colMBPart1.metric('标签', '病害峰值')
-# colMBPart2.metric('特征大小', '5*90')
+# with hideBtnRaw.container():
+#     category("📊️ 原始数据")
+#     array_1d = [item for sublist in pages_utils.TempDataSetField[0]['字段'] for item in sublist]
 #
-# cc2, colMBPart3, colMBPart4 = st.columns([0.7, 0.3, 0.3])
-# cc2.metric('模型', 'PLSR')
-# colMBPart3.metric('评价指标', 'MSE、R方')
-# colMBPart4.metric('数据集分配比例', '5:6')
-# if btnMB:
-#     st.session_state.hideBtnDict['mb'] = True
-
-with hideBtnWG.container():
-    if len(st.session_state.modelReportWeatherInfo['模型']):
-        category("🌐 天气情景生成器")
-        wgInfo1 = st.session_state.modelReportWeatherInfo['经度']
-        wgInfo2 = st.session_state.modelReportWeatherInfo['纬度']
-        wgInfo3 = st.session_state.modelReportWeatherInfo['年限']
-        wgInfo4 = '、'.join(st.session_state.modelReportWeatherInfo['情景'])
-        wgInfo5 = '、'.join(st.session_state.modelReportWeatherInfo['模型'])
-        st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;天气情景生成器情况如下:  \n')
-        st.columns([0.3, 0.6, 0.4])[1].markdown(
-            f'##### 地区：{wgInfo1}  {wgInfo2}  \n'
-            f'##### 生成气象情景：{wgInfo4}  \n'
-            f'##### 生成数据长度：{wgInfo3}年  \n', unsafe_allow_html=True)
-        st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;模拟生成的气象数据可视化如下:  \n')
-
-        colWG1, colWG2, colWG3 = st.columns(3)  # 创建三个列
-        path1 = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
-
-        # 定义两个图片列表，分别存储温度图和降水图
-        temperature_images = []
-        rainfall_images = []
-
-        for root, dirs, files in os.walk(path1):
-            current_folder = os.path.basename(root)
-            for j, file in enumerate(files):
-                if file == '第1年.xlsx':
-                    df = pd.read_excel(os.path.join(root, file))
-
-                    # 创建温度图
-                    fig_temp, ax_temp = plt.subplots(figsize=(6, 4))
-                    sns.lineplot(data=df, x="DayOfYear", y="最高温度", label="最高温度", ax=ax_temp)
-                    sns.lineplot(data=df, x="DayOfYear", y="最低温度", label="最低温度", ax=ax_temp)
-                    ax_temp.set_xlabel('日期 (Day of Year)')
-                    ax_temp.set_ylabel('温度 (℃)')
-                    ax_temp.set_title(f'({current_folder}) 每日最高温度和最低温度')
-                    ax_temp.legend()
-                    temperature_images.append(fig_temp)
-
-                    # 创建降水图
-                    fig_rain, ax_rain = plt.subplots(figsize=(6, 4))
-                    sns.barplot(data=df, x="DayOfYear", y="降水", ax=ax_rain)
-                    ax_rain.set_xlabel('日期 (Day of Year)')
-                    ax_rain.set_ylabel('降水量 (mm)')
-                    ax_rain.set_title(f'({current_folder}) 每日降水量')
-                    ax_rain.set_xticks(range(1, 365, 30))
-                    ax_rain.legend()
-                    rainfall_images.append(fig_rain)
-
-        # 先显示所有温度图
-        for i in range(0, len(temperature_images), 3):
-            cols = st.columns(3)
-            for col, img in zip(cols, temperature_images[i:i + 3]):
-                with col:
-                    st.pyplot(img)
-
-        # 再显示所有降水图
-        for i in range(0, len(rainfall_images), 3):
-            cols = st.columns(3)
-            for col, img in zip(cols, rainfall_images[i:i + 3]):
-                with col:
-                    st.pyplot(img)
-
-        # colWG1, colWG2 = st.columns(2)
-        # with colWG1:
-        #     st.metric('地区', '湖南省湘阴县')
-        #     st.metric('模型', 'RF、SVM')
-        # with colWG2:
-        #     st.metric('天气情景', '高温少雨、低温多雨')
-        #     st.metric('年限长度', '3年')
-        # if btnWG:
-        #     st.session_state.hideBtnDict['wg'] = True
-
-
-# # 控制隐藏
-# for key, btn in st.session_state.hideBtnDict.items():
-#     if st.session_state.hideBtnDict.get(key, False):
-#         if key == 'brief':
-#             hideBtnBrief.empty()
-#         elif key == 'raw':
-#             hideBtnRaw.empty()
-#         elif key == 'pre':
-#             hideBtnPre.empty()
-#         elif key == 'fc':
-#             hideBtnFC.empty()
-#         elif key == 'fo':
-#             hideBtnFO.empty()
-#         elif key == 'mb':
-#             hideBtnMB.empty()
-#         elif key == 'wg':
-#             hideBtnWG.empty()
-
-
-def displayLocalGIF1(placeholder, localImagePath, caption):
-    imgFile = open(localImagePath, "rb")
-    contents = imgFile.read()
-    imgData = base64.b64encode(contents).decode("utf-8")
-    imgFile.close()
-
-    # Define CSS styles for the container and caption
-    container_style = (
-        "position: relative;"  # Enable relative positioning
-        "display: inline-block;"  # Display as inline-block to align with placeholder
-    )
-
-    caption_style = (
-        "font-size: 20px;"  # Adjust the font size as needed
-        "color: #888888;"  # Dimmer color
-        "text-align: center;"  # Center the caption text
-    )
-
-    # Display the GIF and caption with positioning relative to the placeholder
-    placeholder.markdown(f"""<div style="{container_style}">
-                    <img src="data:image/gif;base64,{imgData}" width='610' height='610'>
-                    <p style="{caption_style}">{caption}</p>
-                    </div>""", unsafe_allow_html=True)
-
-
-def displayLocalGIF2(placeholder, localImagePath1, localImagePath2, caption1, caption2):
-    # Function to generate the base64 encoded image data
-    def get_img_data(image_path):
-        with open(image_path, "rb") as img_file:
-            contents = img_file.read()
-            return base64.b64encode(contents).decode("utf-8")
-
-    imgData1 = get_img_data(localImagePath1)
-    imgData2 = get_img_data(localImagePath2)
-
-    # Define CSS styles for the container and images
-    container_style = (
-        "display: flex;"  # Use flexbox layout for side-by-side alignment
-        "justify-content: center;"  # Center the container content
-        "gap: 20px;"  # Add space between the GIFs
-    )
-
-    img_style = "width: 610px; height: 610px;"  # Set image size
-
-    caption_style = (
-        "font-size: 20px;"  # Adjust the font size as needed
-        "color: #888888;"  # Dimmer color
-        "text-align: center;"  # Center the caption text
-    )
-
-    # Display the GIFs and captions side by side
-    placeholder.markdown(f"""
-        <div style="{container_style}">
-            <div>
-                <img src="data:image/gif;base64,{imgData1}" style="{img_style}">
-                <p style="{caption_style}">{caption1}</p>
-            </div>
-            <div>
-                <img src="data:image/gif;base64,{imgData2}" style="{img_style}">
-                <p style="{caption_style}">{caption2}</p>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-
-
-category("🌑 模型应用与评估")
-
-if len(st.session_state.modelReportWeatherInfo['模型']):
-
-    # st.columns([0.3, 0.6, 0.4])[1].markdown(
-    #     f'##### 地区：{wgInfo1}  {wgInfo2}  \n'
-    #     f'##### 气象情景：{wgInfo4}  \n'
-    #     f'##### 数据长度：{wgInfo3}年  \n', unsafe_allow_html=True)
-    st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;模型应用结果如下:  \n')
-    colIndex1, colIndex2, colIndex3 = st.columns(3)
-
-    items = list(st.session_state.modelSituationIndexResult.items())
-    for i, (metric_name, metric_value) in enumerate(items):
-        path = os.path.join(
-            RESOURCE_MODELRESULT_PATH,
-            'modelsSimulateWeatherIndexResult',
-            metric_name +
-            '_applicationPredict' +
-            '.xlsx')
-        modelNameT = metric_name.split('_')[0]
-        weatherNameT = metric_name.split('_')[1]
-        if i % 3 == 0:
-            with colIndex1:
-                df = pd.read_excel(path)
-                if '病害发生程度' in df.columns.tolist():
-                    # Plotting
-                    fig, ax = plt.subplots(figsize=(10, 6))
-
-                    # 绘制 0 和 1 两类的散点图
-                    for label in [0, 1]:
-                        subset = df[df['Predicted_value'] == label]  # 筛选数据
-                        if label == 0:
-                            labelStr = '不发生'
-                            color = 'b'  # 蓝色表示 "不发生"
-                        else:
-                            labelStr = '发生'
-                            color = 'r'  # 红色表示 "发生"
-
-                        # 绘制散点图
-                        ax.scatter(subset['年'], subset['Predicted_value'], label=f'病害{labelStr}', s=100, alpha=0.6,
-                                   color=color)
-
-                    # 添加标题和标签
-                    plt.title(f'基于{modelNameT}建模方法{weatherNameT}情景下预测病害发生情况')
-                    plt.xlabel('年')
-                    plt.ylabel('病害发生情况')
-                    # Set x-ticks to be integers
-                    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-                    # 添加图例
-                    plt.legend()
-                    st.pyplot(plt)
-                    # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
-                else:
-                    # Plotting
-                    fig, ax = plt.subplots(figsize=(10, 6))
-
-                    plt.plot(df['年'], df['峰值'], label='实际病害峰值', marker='o', color='blue')
-                    plt.plot(df['年'], df['Predicted_value'], label='预测病害峰值', marker='x', color='red')
-
-                    # 添加标题和标签
-                    plt.title(f'{weatherNameT}情景下实际与预测病害峰值对比图')
-                    plt.xlabel('年')
-                    plt.ylabel('病害峰值')
-                    # 设置 X 轴刻度为整数
-                    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-                    # 添加图例
-                    plt.legend()
-                    st.pyplot(plt)
-                    # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
-        elif i % 3 == 1:
-            with colIndex2:
-                df = pd.read_excel(path)
-                if '病害发生程度' in df.columns.tolist():
-                    # Plotting
-                    fig, ax = plt.subplots(figsize=(10, 6))
-
-                    # 绘制 0 和 1 两类的散点图
-                    for label in [0, 1]:
-                        subset = df[df['Predicted_value'] == label]  # 筛选数据
-                        if label == 0:
-                            labelStr = '不发生'
-                            color = 'b'  # 蓝色表示 "不发生"
-                        else:
-                            labelStr = '发生'
-                            color = 'r'  # 红色表示 "发生"
-
-                        # 绘制散点图
-                        ax.scatter(subset['年'], subset['Predicted_value'], label=f'病害{labelStr}', s=100, alpha=0.6,
-                                   color=color)
-
-                    # 添加标题和标签
-                    plt.title(f'基于{modelNameT}建模方法{weatherNameT}情景下预测病害发生情况')
-                    plt.xlabel('年')
-                    plt.ylabel('病害发生情况')
-                    # Set x-ticks to be integers
-                    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-                    # 添加图例
-                    plt.legend()
-                    st.pyplot(plt)
-                    # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
-                else:
-                    # Plotting
-                    fig, ax = plt.subplots(figsize=(10, 6))
-
-                    plt.plot(df['年'], df['峰值'], label='实际病害峰值', marker='o', color='blue')
-                    plt.plot(df['年'], df['Predicted_value'], label='预测病害峰值', marker='x', color='red')
-
-                    # 添加标题和标签
-                    plt.title(f'{weatherNameT}情景下实际与预测病害峰值对比图')
-                    plt.xlabel('年')
-                    plt.ylabel('病害峰值')
-                    # 设置 X 轴刻度为整数
-                    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-                    # 添加图例
-                    plt.legend()
-                    st.pyplot(plt)
-                    # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
-        else:
-            with colIndex3:
-                df = pd.read_excel(path)
-                if '病害发生程度' in df.columns.tolist():
-                    # Plotting
-                    fig, ax = plt.subplots(figsize=(10, 6))
-
-                    # 绘制 0 和 1 两类的散点图
-                    for label in [0, 1]:
-                        subset = df[df['Predicted_value'] == label]  # 筛选数据
-                        if label == 0:
-                            labelStr = '不发生'
-                            color = 'b'  # 蓝色表示 "不发生"
-                        else:
-                            labelStr = '发生'
-                            color = 'r'  # 红色表示 "发生"
-
-                        # 绘制散点图
-                        ax.scatter(subset['年'], subset['Predicted_value'], label=f'病害{labelStr}', s=100, alpha=0.6,
-                                   color=color)
-
-                    # 添加标题和标签
-                    plt.title(f'基于{modelNameT}建模方法{weatherNameT}情景下预测病害发生情况')
-                    plt.xlabel('年')
-                    plt.ylabel('病害发生情况')
-                    # Set x-ticks to be integers
-                    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-                    # 添加图例
-                    plt.legend()
-                    st.pyplot(plt)
-                    # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
-                else:
-                    # Plotting
-                    fig, ax = plt.subplots(figsize=(10, 6))
-
-                    plt.plot(df['年'], df['峰值'], label='实际病害峰值', marker='o', color='blue')
-                    plt.plot(df['年'], df['Predicted_value'], label='预测病害峰值', marker='x', color='red')
-
-                    # 添加标题和标签
-                    plt.title(f'{weatherNameT}情景下实际与预测病害峰值对比图')
-                    plt.xlabel('年')
-                    plt.ylabel('病害峰值')
-                    # 设置 X 轴刻度为整数
-                    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-                    # 添加图例
-                    plt.legend()
-                    st.pyplot(plt)
-                    # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
-
-    endInfo1 = st.session_state.modelingName
-    # pages_utils.TempDataSetFacet[4] = pd.DataFrame({'标签': ['病害峰值', 2, 3]})
-    endInfo2 = pages_utils.TempDataSetField[4]['标签'].tolist()[0]
-    endInfo3 = '、'.join(st.session_state.modelReportWeatherInfo['情景'])
-    st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;模型静态偏差指标评估结果如下:  \n')
-    # st.markdown(
-    #     f'##### &emsp;&emsp;本次建模场景为{endInfo1}，模型输出为{endInfo2}。'
-    #     f'基于静态预测模型评价方法计算可得{endInfo3}情景下各模型预测输出的偏差指标分别如下：  \n',
-    #     unsafe_allow_html=True)
-    # 创建 DataFrame
-
-    # df = pd.DataFrame(aInfoGap10).T.fillna('')  # 转置并填充空值
-    df = pd.read_excel(os.path.join(RESOURCE_PROCESS_PATH, '评估指标.xlsx'))
-    st.table(df)
-    # st.markdown(
-    #     f'##### &emsp;&emsp;根据上述计算结果进行综合评估，可认为上述模型可靠性较高，参数设置较为合理，具有良好的预测效果和鲁棒性。',
-    #     unsafe_allow_html=True)
+#     rInfo1 = '、'.join(list(set(array_1d)))
+#     # pages_utils.TempDataSet[0] = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+#     rowsR, columnsR = pages_utils.TempDataSet[0].shape
+#     rInfo2 = f'{rowsR}*{columnsR}'
+#     rawInfo0 = f"""
+#     ##### 数据类型：{aInfoGap1}
+#     ##### 上传字段：{rInfo1}
+#     ##### 数据维度：{rInfo2}
+#                 """
+#     rawInfo1 = f"""
+#     ##### 数据类型：气象数据、植保数据、地理遥感数据
+#     ##### 上传字段：温度、降水  \n
+#     ##### &emsp;&emsp;&emsp;&emsp;&emsp;历史病害均值、病害发生程度  \n
+#     ##### &emsp;&emsp;&emsp;&emsp;&emsp;class_FRAC_MN、land_FRAC_MN、class_AI  \n
+#     ##### &emsp;&emsp;&emsp;&emsp;&emsp;class_SHAPE_MN、class_CLUMPY、class_AREA_MN
+#                 """
+#     st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;原始数据集情况如下:  \n')
+#     st.columns([0.3, 0.6, 0.4])[1].markdown(rawInfo1, unsafe_allow_html=True)
+#
+#     # st.markdown(rawInfo1, unsafe_allow_html=True)
+#     # if btnRaw:
+#     #     st.session_state.hideBtnDict['raw'] = True
+# with hideBtnPre.container():
+#     if len(pages_utils.TempDataSetField[1]['预处理方法'].tolist()):
+#         category("🌌 预处理")
+#         print('--测试预处理')
+#         print(pages_utils.TempDataSetField[1]['输入字段'].tolist())
+#         array_1dPre = [item for sublist in pages_utils.TempDataSetField[1]['输入字段'].tolist() for item in sublist]
+#
+#         preInfo1 = '、'.join(pages_utils.TempDataSetField[1]['预处理方法'].tolist())
+#         preInfo2 = '、'.join(list(set(array_1dPre)))
+#         # pages_utils.TempDataSet[1] = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+#         rowsP, columnsP = pages_utils.TempDataSet[1].shape
+#         preInfo3 = f'{rowsP}'
+#         # st.markdown(f'##### &emsp;&emsp;本次预处理使用了<u>{preInfo1}方法，'
+#         #             f'处理字段为：<u>{preInfo2}，'
+#         #             f'处理后剩余数据为<u>{preInfo3}条，具体内容如下', unsafe_allow_html=True)
+#         preInfoAll = f"""
+#         ##### 预处理对象：温度、降水
+#         ##### 预处理方法：缺失值插补  \n
+#               """
+#         st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;预处理情况如下:  \n')
+#         st.columns([0.3, 0.6, 0.4])[1].markdown(preInfoAll, unsafe_allow_html=True)
+#
+#         for indexT, tempPreM in enumerate(pages_utils.TempDataSetField[1]['预处理方法'].tolist()):
+#             inputFields = pages_utils.TempDataSetField[1]["输入字段"].tolist()
+#
+#             if tempPreM == '缺失值插补':
+#                 data_before_temp = st.session_state["DPVisualInformation"][indexT]['before']
+#                 data_after_temp = st.session_state["DPVisualInformation"][indexT]['after']
+#                 # print(inputFields[o][0])
+#                 data_before = pd.DataFrame({inputFields[indexT][0]: data_before_temp})
+#                 data_after = pd.DataFrame({inputFields[indexT][0]: data_after_temp})
+#                 # 查找缺失值的索引
+#                 missing_indices = data_before[data_before[inputFields[indexT][0]].isna()].index
+#                 # print(f'缺失索引:{missing_indices}')
+#                 # 获取第一个缺失值的索引
+#                 # first_missing_index = missing_indices[0]
+#                 # 获取第一个缺失值的行号
+#                 first_missing_index = 130
+#                 # print(f"第一个缺失值的行号: {first_missing_index}")
+#
+#                 # 计算前5行和后5行的起始和结束索引
+#                 start_index = max(first_missing_index - 50, 0)
+#                 end_index = min(first_missing_index + 50 + 1, len(data_before))
+#                 # 取第一个缺失值对应前15行和后15行预处理数据
+#                 data_before_surrounding_data = data_before.iloc[start_index:end_index]
+#                 data_after_surrounding_data = data_after.iloc[start_index:end_index]
+#                 # 绘制对比折线图
+#                 fig, ax = plt.subplots(figsize=(10, 6))
+#                 # print(pages_utils.TempDataSet[1]['DayOfYear'])
+#                 # 取第一个缺失值对应前15行和后15行'经度', '纬度', '年'数据
+#                 missing_rows = \
+#                     pages_utils.TempDataSet[1].loc[
+#                         missing_indices, ['经度', '纬度', '年', 'DayOfYear']].to_dict(
+#                         'records')[0]
+#                 province, station, year = missing_rows['经度'], missing_rows['纬度'], missing_rows[
+#                     '年']
+#                 # print(missing_rows['DayOfYear'])
+#                 # 整理前后15天dayOfYear为x轴
+#                 # 提取数据列，获取从 start_index 到 end_index 范围内的行数
+#                 # 生成从 start_index 到 end_index 的数字序列
+#                 figure_x = pd.DataFrame({'row': list(range(start_index, end_index))})
+#                 # 绘制插补前的折线图
+#                 plt.plot(figure_x, data_before_surrounding_data[inputFields[indexT][0]],
+#                          label='原始数据',
+#                          color='black',
+#                          linestyle='-', marker='o')
+#                 # 绘制插补后的折线图
+#                 plt.plot(figure_x, data_after_surrounding_data[inputFields[indexT][0]],
+#                          label='插补后数据', color='blue',
+#                          linestyle='--',
+#                          marker='o', alpha=0.3)
+#                 plt.xlabel('行号')
+#                 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+#                 plt.ylabel(inputFields[indexT][0])
+#                 plt.figtext(0.5, -0.01,
+#                             f'{inputFields[indexT][0]}字段部分数据插补前后对比图',
+#                             ha='center', fontsize=15)
+#                 plt.legend()
+#                 # st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+#                 if indexT == 0:
+#                     img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'pre1.png'))
+#                     st.columns([0.3, 0.6, 0.4])[1].image(img)
+#                 # st.pyplot(plt)
+#                 if indexT == 1:
+#                     img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'pre2.png'))
+#                     st.columns([0.3, 0.6, 0.4])[1].image(img)
+#                 # st.session_state.IMAGECOUNT += 1
+#             elif tempPreM == '剔除异常值':
+#                 # 剔除异常值-箱型图
+#                 data_before = st.session_state["DPVisualInformation"][indexT]['before']
+#                 data_after = st.session_state["DPVisualInformation"][indexT]['after']
+#                 # 创建两个子图
+#                 fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+#                 # 绘制处理前的箱线图
+#                 sns.boxplot(y=data_before, ax=axes[0])
+#                 axes[0].set_ylabel(data_before.name)
+#                 axes[0].set_title('预处理后')
+#                 # axes[0].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
+#                 # axes[0].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
+#                 # axes[0].legend(loc='upper left')
+#
+#                 # 绘制处理后的箱线图
+#                 sns.boxplot(y=data_after, ax=axes[1])
+#                 axes[1].set_ylabel(data_after.name)
+#                 axes[1].set_title('预处理后')
+#                 # axes[1].axhline(max_value, color='r', linestyle='--', linewidth=1, label=f'Max Value: {max_value}')
+#                 # axes[1].axhline(min_value, color='b', linestyle='--', linewidth=1, label=f'Min Value: {min_value}')
+#                 # axes[1].legend(loc='upper left')
+#                 # 设置主标题
+#                 fig.suptitle(f'{data_before.name}数据剔除前后对比箱型图',
+#                              fontsize=15)
+#                 st.pyplot(fig)
+#                 # st.session_state.IMAGECOUNT += 1
+#
+#         # colPart1, colPart2, colPart3 = st.columns(3)
+#         # colPart1.metric('预处理字段', '温度')
+#         # colPart2.metric('预处理方法', '缺失值插补')
+#         # colPart3.metric('预处理数据条数', '3')  # 根据输入和输出字段对应的数据对比
+#         # if btnPre:
+#         #     st.session_state.hideBtnDict['pre'] = True
+# with hideBtnFC.container():
+#     if len(pages_utils.TempDataSetField[2]['特征计算方法'].tolist()):
+#         category("🌍 特征计算")
+#
+#         fcInfo2 = '、'.join(pages_utils.TempDataSetField[2]['特征计算方法'].tolist())
+#         fcInfo1 = '、'.join(
+#             list(set([item for sublist in pages_utils.TempDataSetField[2]['输入特征'].tolist() for item in sublist])))
+#         fcInfo3 = '、'.join(list(set(pages_utils.TempDataSetField[2]['备选特征'].tolist())))
+#         # st.markdown(f'##### &emsp;&emsp;本次特征计算基于<u>{fcInfo1}数据，'
+#         #             f'通过<u>{fcInfo2}方法，得到了特征包括：<u>{fcInfo3}，'
+#         #             f'具体内容如下：', unsafe_allow_html=True)
+#         st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;特征计算情况如下：',
+#                                   unsafe_allow_html=True)
+#         fcInfoAll = f"""
+#         ##### 特征计算对象：降水、温度  \n
+#         ##### 特征计算方法：降水累积量计算、降雨日数计算  \n
+#         ##### 特征计算结果：07-19_08-09_降水累积量、1-1_1-31_降雨日数  \n
+#         """
+#         # abstractInfo1 = f"""
+#         # ##### &emsp;&emsp;综合上述结果，<u>{aInfoGap13}模型表现出<u>{aInfoGap12[0]}的可靠性和预测效果，参数设置合理，具有<u>{aInfoGap12[1]}的鲁棒性。
+#         # """
+#         st.columns([0.3, 0.6, 0.4])[1].markdown(fcInfoAll, unsafe_allow_html=True)
+#
+#         for indexT, tempFCM in enumerate(pages_utils.TempDataSetField[2]['特征计算方法'].tolist()):
+#             # 创建DataFrame
+#             data_after = pages_utils.TempDataSet[2]
+#             # 特征名称
+#             dataColumn = pages_utils.TempDataSetField[2]['备选特征'].tolist()[indexT]
+#             data_after = data_after[pages_utils.reservedField + [dataColumn]]
+#             # 删除含有缺失值的行
+#             data_after = data_after.dropna()
+#             # 去除重复值
+#             data_after = data_after.drop_duplicates()
+#
+#             if tempFCM == '基于活动积温的生育期计算':
+#                 # 选择最多8个纬度
+#                 top_stations = data_after['纬度'].value_counts().nlargest(8).index
+#                 df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
+#
+#                 # 选择最多3个年份
+#                 top_years = data_after['年'].value_counts().nlargest(3).index
+#                 df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+#
+#                 # 绘制折线图
+#                 plt.figure(figsize=(10, 6))
+#                 sns.lineplot(
+#                     data=df_filtered,
+#                     x="纬度",
+#                     y=dataColumn,
+#                     hue="年",
+#                     marker="o"
+#                 )
+#                 # 设置标签和标题
+#                 plt.xlabel("地区")
+#                 plt.ylabel(f'{dataColumn}(Day Of Year)')
+#                 plt.figtext(0.5, -0.01,
+#                             f'部分地区各年份{dataColumn}图',
+#                             ha='center', fontsize=15)
+#                 st.pyplot(plt)
+#             elif tempFCM == '降水累积量计算':
+#                 # 时期范围名称修剪
+#                 integratedDataColumnT = dataColumn.split('_')
+#                 integratedDataColumn = integratedDataColumnT[0] + '至' + integratedDataColumnT[1] + \
+#                                        integratedDataColumnT[2]
+#                 # 选择最多8个纬度
+#                 top_stations = data_after['纬度'].value_counts().nlargest(8).index
+#                 df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
+#                 # 选择最多5个年份
+#                 top_years = data_after['年'].value_counts().nlargest(5).index
+#                 df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+#                 # print(df_filtered)
+#                 # 绘制柱状图
+#                 plt.figure(figsize=(10, 6))
+#                 sns.barplot(
+#                     data=df_filtered,
+#                     x="纬度",
+#                     y=dataColumn,
+#                     hue="年",
+#                     dodge=True,
+#                     saturation=1
+#                 )
+#                 # 设置标签和标题
+#                 plt.xlabel("地区")
+#                 plt.ylabel("降水累积量(mm)")
+#                 plt.figtext(0.5, -0.01,
+#                             f'部分地区各年份{integratedDataColumn}图',
+#                             ha='center', fontsize=15)
+#                 st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+#                 # st.session_state.IMAGECOUNT += 1
+#             elif tempFCM == '降雨日数计算':
+#                 # 时期范围名称修剪
+#                 integratedDataColumnRT = dataColumn.split('_')
+#                 integratedDataColumnR = integratedDataColumnRT[0] + '至' + integratedDataColumnRT[1] + \
+#                                         integratedDataColumnRT[2]
+#                 # 选择最多8个纬度
+#                 top_stations = data_after['纬度'].value_counts().nlargest(8).index
+#                 df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
+#
+#                 # 选择最多3个年份
+#                 top_years = data_after['年'].value_counts().nlargest(3).index
+#                 df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+#                 # 绘制折线图
+#                 plt.figure(figsize=(10, 6))
+#                 sns.lineplot(
+#                     data=df_filtered,
+#                     x="纬度",
+#                     y=dataColumn,
+#                     hue="年",
+#                     marker="o"
+#                 )
+#                 # 设置标签和标题
+#                 plt.xlabel("地区")
+#                 plt.ylabel("降雨日数(天)")
+#                 plt.figtext(0.5, -0.01,
+#                             f'部分地区各年份{integratedDataColumnR}图',
+#                             ha='center', fontsize=15)
+#                 st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+#
+#         # 命名: 界面名称缩写
+#         # colFC1, colFC2 = st.columns(2)
+#         # with colFC1:
+#         # img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, '特征计算-降水累积量.png'))
+#         # st.image(img)
+#         # colFCPart1, colFCPart2 = st.columns(2)
+#         # colFCPart1.metric('输入字段', '降水')
+#         # colFCPart2.metric('特征计算方法', '降水累积量计算')
+#         # colFCPart3, colFCPart4 = st.columns(2)
+#         # colFCPart3.metric('输出特征', '07-19_08-23_降水累积量')
+#         # colFCPart4.metric('特征条数', '1271')
+#         # if btnFC:
+#         #     st.session_state.hideBtnDict['fc'] = True
+#
+# with hideBtnFO.container():
+#     if len(pages_utils.TempDataSetField[3]['特征优选方法'].tolist()):
+#         category("🌎 特征优选")
+#         foInfo1 = '、'.join(list(set(pages_utils.TempDataSetField[3]['特征优选方法'].tolist())))
+#         # pages_utils.TempDataSetField[3]["优选特征"] = ["特征A", "特征B", "特征C"]
+#         # print('--测试特征因子---')
+#         featureListT = pages_utils.TempDataSetField[3]['优选特征'].tolist()[0].split(',')
+#         # print(featureListT)
+#         foInfo2 = '、'.join(pages_utils.TempDataSetField[3]['优选特征'].tolist())
+#
+#         # st.markdown(f'##### &emsp;&emsp;本次特征优选基于<u>{foInfo1}进行筛选，'
+#         #             f'最终选取了<u>{len(featureListT)}个特征因子，'
+#         #             f'形成最终优选特征集，包括<u>{foInfo2}，具体内容如下：',
+#         #             unsafe_allow_html=True)
+#         st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;特征优选情况如下：',
+#                                   unsafe_allow_html=True)
+#         foInfoAll = f"""
+#                 ##### 特征优选对象：class_FRAC_MN、class_AI、land_FRAC_MN、class_SHAPE_MN、class_CLUMPY、class_AREA_MN、历史病害均值  \n
+#                 ##### 特征优选方法：Relief-F互相关分析  \n
+#                 ##### 特征优选结果：class_FRAC_MN、class_AI、class_SHAPE_MN、class_CLUMPY、class_AREA_MN、历史病害均值  \n
+#                 """
+#         # abstractInfo1 = f"""
+#         # ##### &emsp;&emsp;综合上述结果，<u>{aInfoGap13}模型表现出<u>{aInfoGap12[0]}的可靠性和预测效果，参数设置合理，具有<u>{aInfoGap12[1]}的鲁棒性。
+#         # """
+#         st.columns([0.3, 0.6, 0.4])[1].markdown(foInfoAll, unsafe_allow_html=True)
+#
+#         for indexT, tempFOM in enumerate(pages_utils.TempDataSetField[3]['特征优选方法'].tolist()):
+#             # # 特征名称
+#             # dataColumn = pages_utils.TempDataSetField[3]['输入特征'].tolist()[indexT]
+#             # print(dataColumn)
+#             # # 创建DataFrame
+#             # data_after = pages_utils.TempDataSet[3][dataColumn]
+#             data_after = st.session_state["FOVisualInformation"][indexT]['after']
+#             # 特征名称
+#             dataColumn = st.session_state["FOVisualInformation"][indexT]['column']
+#             # 特征名称
+#             if tempFOM == 'Pearson相关性分析':
+#                 # 可视化
+#                 # 使用Seaborn绘制热图
+#                 plt.figure(figsize=(10, 8))
+#                 sns.heatmap(data_after, annot=True, cmap='coolwarm', center=0)
+#
+#                 plt.figtext(0.45, -0.13,
+#                             f'Pearson互相关分析矩阵图',
+#                             ha='center', fontsize=15)
+#                 # st.session_state.IMAGECOUNT += 1
+#                 st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+#
+#             elif tempFOM == 'Relief-F互相关分析':
+#                 # 可视化
+#                 # 创建柱状图
+#                 plt.figure(figsize=(10, 6))
+#                 plt.bar(st.session_state["FOVisualInformation"][indexT]['column'],
+#                         st.session_state["FOVisualInformation"][indexT]['value'], color='blue')
+#                 # 添加标题和标签
+#                 # plt.title('基于Relief-F特征因子权值排序图')
+#                 plt.figtext(0.5, -0.01,
+#                             f'基于Relief-F特征因子权值排序图',
+#                             ha='center', fontsize=15)
+#                 plt.xlabel('特征')
+#                 plt.ylabel('特征权值')
+#
+#                 # 基准线
+#                 plt.axhline(y=st.session_state["FOVisualInformation"][indexT]['standard'], color='red',
+#                             linestyle='--', linewidth=1, label='基准线')
+#                 # 显示图表
+#                 plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
+#                 plt.tight_layout()  # 调整布局以防止标签重叠
+#                 st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+#     # colFCPart1, colFCPart2 = st.columns([0.7, 0.3])
+#     # colFCPart1.metric('输入特征', '降水、温度')
+#     # colFCPart2.metric('特征优选方法', 'Pearson相关性分析')
+#     # colFCPart3, colFCPart4 = st.columns([0.7, 0.3])
+#     # colFCPart3.metric('优选特征集', '温度')
+#     # colFCPart4.metric('筛选条件', '相关系数(R)<0.8')
+#     # if btnFO:
+#     #     st.session_state.hideBtnDict['fo'] = True
+#
+# with hideBtnMB.container():
+#     if len(pages_utils.TempDataSetField[4]['模型'].tolist()):
+#         category("🌏 模型构建")
+#         # pages_utils.TempDataSetField[4]['数据集划分比例'] = ['7：3']
+#         # pages_utils.TempDataSetField[4]['模型'] = ['PLSR']
+#         mbInfo1 = '、'.join(pages_utils.TempDataSetField[4]['模型'].tolist())
+#         mbInfo2 = st.session_state.modelingName
+#         mbInfo3 = pages_utils.TempDataSetField[4]['数据集划分比例'].tolist()[0]
+#         # print(pages_utils.TempDataSetField[4]['评价指标'].tolist())
+#         # 处理多条评价指标，并将每个字典的键值对格式化为 "key=value"
+#         mbInfo4 = '；'.join(mbInfo4_list)
+#
+#         st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;模型构建情况如下:  \n')
+#         st.columns([0.3, 0.6, 0.4])[1].markdown(
+#             f'##### 建模方法：{mbInfo1}  \n'
+#             f'##### 训练集与验证集比例：{mbInfo3}  \n'
+#             f'##### 模型精度：{mbInfo4}  \n',
+#             unsafe_allow_html=True)
+#         # st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;预测结果可视化如下:  \n')
+#
+#         models = pages_utils.TempDataSetField[4]["模型"].tolist()
+#         # actualAndPredictList = pages_utils.TempDataSetField[4]["模型训练结果"].tolist()
+#         # print(print(actualAndPredictList))
+#         colMB1, colMB2 = st.columns(2)
+#         for i in range(len(models)):
+#             if i % 2 == 0:
+#                 with colMB1:
+#                     path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+#                     # testLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_testLabel.xlsx'))
+#                     predictLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_predictLabel.xlsx'))
+#                     # 绘制二维平面散点图，只标记predictLabel为0和1的点
+#                     # 分别绘制 predictLabel 为 0 和 1 的点
+#                     fig, ax = plt.subplots()
+#
+#                     for label in [0, 1]:
+#                         subset = predictLabelDF[predictLabelDF['predictLabel'] == label]
+#                         if label == 0:
+#                             labelStr = '不发生'
+#                         else:
+#                             labelStr = '发生'
+#                         plt.scatter(subset['经度'], subset['纬度'], label=f'病害{labelStr}', s=100, alpha=0.6)
+#                     # predicted_values = predictLabelDF.iloc[:, 0]
+#                     ax.set_xlabel('经度')
+#                     ax.set_ylabel('纬度')
+#                     plt.legend(title='预测病害发生程度')
+#                     # plt.title(f'{models[i]}模型混淆矩阵图')
+#                     plt.figtext(0.5, -0.03,
+#                                 f'{models[i]}模型部分预测结果图',
+#                                 ha='center', fontsize=15)
+#
+#                     st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
+#         else:
+#             with colMB2:
+#                 path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+#                 # testLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_testLabel.xlsx'))
+#                 predictLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_predictLabel.xlsx'))
+#                 # 绘制二维平面散点图，只标记predictLabel为0和1的点
+#                 # 分别绘制 predictLabel 为 0 和 1 的点
+#                 fig, ax = plt.subplots()
+#
+#                 for label in [0, 1]:
+#                     subset = predictLabelDF[predictLabelDF['predictLabel'] == label]
+#                     if label == 0:
+#                         labelStr = '不发生'
+#                     else:
+#                         labelStr = '发生'
+#                     plt.scatter(subset['经度'], subset['纬度'], label=f'病害{labelStr}', s=100, alpha=0.6)
+#                 # predicted_values = predictLabelDF.iloc[:, 0]
+#                 ax.set_xlabel('经度')
+#                 ax.set_ylabel('纬度')
+#                 plt.legend(title='预测病害发生程度')
+#                 # plt.title(f'{models[i]}模型混淆矩阵图')
+#                 plt.figtext(0.5, -0.03,
+#                             f'{models[i]}模型部分预测结果图',
+#                             ha='center', fontsize=15)
+#                 st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
+#
+#         # st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;精度结果可视化如下:  \n')
+#
+#         colMB11, colMB21 = st.columns(2)
+#         tempMT = pages_utils.TempDataSetField[4]['模型'].tolist()
+#         for indexT1, temp in enumerate(tempMT):
+#             path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+#             testLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_testLabel.xlsx'))
+#             predictLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_predictLabel.xlsx'))
+#             # 假设第一列包含要绘制的数据
+#             actual_values = testLabelDF.iloc[:, 0]
+#             predicted_values = predictLabelDF.iloc[:, 0]
+#             if indexT1 % 2 == 0:
+#                 with colMB11:
+#                     if '峰值' in pages_utils.TempDataSetField[4]['标签'].tolist():
+#                         # print(pages_utils.TempDataSetField[4]['标签'].tolist())
+#                         # evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
+#                         # for indexT1, temp in enumerate(pages_utils.TempDataSetField[4]['模型'].tolist()):
+#
+#                         # 绘制散点图
+#                         fig, ax = plt.subplots()
+#
+#                         sns.scatterplot(x=actual_values, y=predicted_values)
+#                         plt.plot([actual_values.min(), actual_values.max()],
+#                                  [actual_values.min(), actual_values.max()],
+#                                  'r--')
+#                         ax.set_xlabel('实际峰值(%)')
+#                         ax.set_ylabel('预测峰值(%)')
+#                         # plt.figure(figsize=(10, 6))
+#                         plt.figtext(0.45, -0.03,
+#                                     f'图{st.session_state.IMAGECOUNT} {tempMT[indexT1]}模型精度评价散点图',
+#                                     ha='center', fontsize=15)
+#                         # 精度结果直接显示在图中
+#                         metrics_text = "\n".join(
+#                             [f"{key}={round(value, 3)}" for key, value in evaluationIndex[indexT1].items()])
+#                         plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
+#                                  verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
+#                         st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
+#                     else:
+#                         # for temp in pages_utils.TempDataSetField[4]['模型'].tolist():
+#                         path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+#                         testLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_testLabel.xlsx'))
+#                         predictLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_predictLabel.xlsx'))
+#                         # 绘制混淆矩阵图
+#                         fig, ax = plt.subplots()
+#                         actual_values = testLabelDF.iloc[:, 0]
+#                         predicted_values = predictLabelDF.iloc[:, 0]
+#                         conf_matrix = confusion_matrix(actual_values, predicted_values)
+#                         sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
+#                         ax.set_xlabel('实际病害发生程度')
+#                         ax.set_ylabel('预测病害发生程度')
+#                         plt.figtext(0.45, -0.03,
+#                                     f'{temp}模型混淆矩阵图',
+#                                     ha='center', fontsize=15)
+#                         st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
+#             else:
+#                 with colMB21:
+#                     if '峰值' in pages_utils.TempDataSetField[4]['标签'].tolist():
+#                         # print(pages_utils.TempDataSetField[4]['标签'].tolist())
+#                         evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
+#                         # for indexT1, temp in enumerate(pages_utils.TempDataSetField[4]['模型'].tolist()):
+#                         path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+#                         testLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_testLabel.xlsx'))
+#                         predictLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_predictLabel.xlsx'))
+#                         # 假设第一列包含要绘制的数据
+#                         actual_values = testLabelDF.iloc[:, 0]
+#                         predicted_values = predictLabelDF.iloc[:, 0]
+#                         # 绘制散点图
+#                         fig, ax = plt.subplots()
+#
+#                         sns.scatterplot(x=actual_values, y=predicted_values)
+#                         plt.plot([actual_values.min(), actual_values.max()],
+#                                  [actual_values.min(), actual_values.max()],
+#                                  'r--')
+#                         ax.set_xlabel('实际峰值(%)')
+#                         ax.set_ylabel('预测峰值(%)')
+#                         # plt.figure(figsize=(10, 6))
+#                         plt.figtext(0.45, -0.03,
+#                                     f'图{st.session_state.IMAGECOUNT} {tempMT[indexT1]}模型精度评价散点图',
+#                                     ha='center', fontsize=15)
+#                         # 精度结果直接显示在图中
+#                         metrics_text = "\n".join(
+#                             [f"{key}={round(value, 3)}" for key, value in evaluationIndex[indexT1].items()])
+#                         plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
+#                                  verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
+#                         st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
+#                     else:
+#                         # for temp in pages_utils.TempDataSetField[4]['模型'].tolist():
+#                         path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+#                         testLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_testLabel.xlsx'))
+#                         predictLabelDF = pd.read_excel(os.path.join(path1, f'{tempMT[indexT1]}_predictLabel.xlsx'))
+#                         # 绘制混淆矩阵图
+#                         fig, ax = plt.subplots()
+#                         actual_values = testLabelDF.iloc[:, 0]
+#                         predicted_values = predictLabelDF.iloc[:, 0]
+#                         conf_matrix = confusion_matrix(actual_values, predicted_values)
+#                         sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax)
+#                         ax.set_xlabel('实际病害发生程度')
+#                         ax.set_ylabel('预测病害发生程度')
+#                         # plt.title(f'{temp}模型混淆矩阵图')
+#                         plt.figtext(0.45, -0.03,
+#                                     f'{temp}模型混淆矩阵图',
+#                                     ha='center', fontsize=15)
+#                         st.columns([0.3, 0.6, 0.4])[1].pyplot(fig)
+# # cc1, colMBPart1, colMBPart2 = st.columns([0.7, 0.3, 0.3])
+# # cc1.metric('特征集', 'class-AREA_MN、land-FRAC_MN、class-FRAC_MN、01-01_01-31降雨日数、07-19_08-23_降水累积量')
+# # colMBPart1.metric('标签', '病害峰值')
+# # colMBPart2.metric('特征大小', '5*90')
+# #
+# # cc2, colMBPart3, colMBPart4 = st.columns([0.7, 0.3, 0.3])
+# # cc2.metric('模型', 'PLSR')
+# # colMBPart3.metric('评价指标', 'MSE、R方')
+# # colMBPart4.metric('数据集分配比例', '5:6')
+# # if btnMB:
+# #     st.session_state.hideBtnDict['mb'] = True
+#
+# with hideBtnWG.container():
+#     if len(st.session_state.modelReportWeatherInfo['模型']):
+#         category("🌐 天气情景生成器")
+#         wgInfo1 = st.session_state.modelReportWeatherInfo['经度']
+#         wgInfo2 = st.session_state.modelReportWeatherInfo['纬度']
+#         wgInfo3 = st.session_state.modelReportWeatherInfo['年限']
+#         wgInfo4 = '、'.join(st.session_state.modelReportWeatherInfo['情景'])
+#         wgInfo5 = '、'.join(st.session_state.modelReportWeatherInfo['模型'])
+#         st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;天气情景生成器情况如下:  \n')
+#         st.columns([0.3, 0.6, 0.4])[1].markdown(
+#             f'##### 地区：{wgInfo1}  {wgInfo2}  \n'
+#             f'##### 生成气象情景：{wgInfo4}  \n'
+#             f'##### 生成数据长度：{wgInfo3}年  \n', unsafe_allow_html=True)
+#         st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;模拟生成的气象数据可视化如下:  \n')
+#
+#         colWG1, colWG2, colWG3 = st.columns(3)  # 创建三个列
+#         path1 = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
+#
+#         # 定义两个图片列表，分别存储温度图和降水图
+#         temperature_images = []
+#         rainfall_images = []
+#
+#         for root, dirs, files in os.walk(path1):
+#             current_folder = os.path.basename(root)
+#             for j, file in enumerate(files):
+#                 if file == '第1年.xlsx':
+#                     df = pd.read_excel(os.path.join(root, file))
+#
+#                     # 创建温度图
+#                     fig_temp, ax_temp = plt.subplots(figsize=(6, 4))
+#                     sns.lineplot(data=df, x="DayOfYear", y="最高温度", label="最高温度", ax=ax_temp)
+#                     sns.lineplot(data=df, x="DayOfYear", y="最低温度", label="最低温度", ax=ax_temp)
+#                     ax_temp.set_xlabel('日期 (Day of Year)')
+#                     ax_temp.set_ylabel('温度 (℃)')
+#                     ax_temp.set_title(f'({current_folder}) 每日最高温度和最低温度')
+#                     ax_temp.legend()
+#                     temperature_images.append(fig_temp)
+#
+#                     # 创建降水图
+#                     fig_rain, ax_rain = plt.subplots(figsize=(6, 4))
+#                     sns.barplot(data=df, x="DayOfYear", y="降水", ax=ax_rain)
+#                     ax_rain.set_xlabel('日期 (Day of Year)')
+#                     ax_rain.set_ylabel('降水量 (mm)')
+#                     ax_rain.set_title(f'({current_folder}) 每日降水量')
+#                     ax_rain.set_xticks(range(1, 365, 30))
+#                     ax_rain.legend()
+#                     rainfall_images.append(fig_rain)
+#
+#         # 先显示所有温度图
+#         for i in range(0, len(temperature_images), 3):
+#             cols = st.columns(3)
+#             for col, img in zip(cols, temperature_images[i:i + 3]):
+#                 with col:
+#                     st.pyplot(img)
+#
+#         # 再显示所有降水图
+#         for i in range(0, len(rainfall_images), 3):
+#             cols = st.columns(3)
+#             for col, img in zip(cols, rainfall_images[i:i + 3]):
+#                 with col:
+#                     st.pyplot(img)
+#
+#         # colWG1, colWG2 = st.columns(2)
+#         # with colWG1:
+#         #     st.metric('地区', '湖南省湘阴县')
+#         #     st.metric('模型', 'RF、SVM')
+#         # with colWG2:
+#         #     st.metric('天气情景', '高温少雨、低温多雨')
+#         #     st.metric('年限长度', '3年')
+#         # if btnWG:
+#         #     st.session_state.hideBtnDict['wg'] = True
+#
+#
+# # # 控制隐藏
+# # for key, btn in st.session_state.hideBtnDict.items():
+# #     if st.session_state.hideBtnDict.get(key, False):
+# #         if key == 'brief':
+# #             hideBtnBrief.empty()
+# #         elif key == 'raw':
+# #             hideBtnRaw.empty()
+# #         elif key == 'pre':
+# #             hideBtnPre.empty()
+# #         elif key == 'fc':
+# #             hideBtnFC.empty()
+# #         elif key == 'fo':
+# #             hideBtnFO.empty()
+# #         elif key == 'mb':
+# #             hideBtnMB.empty()
+# #         elif key == 'wg':
+# #             hideBtnWG.empty()
+#
+#
+# def displayLocalGIF1(placeholder, localImagePath, caption):
+#     imgFile = open(localImagePath, "rb")
+#     contents = imgFile.read()
+#     imgData = base64.b64encode(contents).decode("utf-8")
+#     imgFile.close()
+#
+#     # Define CSS styles for the container and caption
+#     container_style = (
+#         "position: relative;"  # Enable relative positioning
+#         "display: inline-block;"  # Display as inline-block to align with placeholder
+#     )
+#
+#     caption_style = (
+#         "font-size: 20px;"  # Adjust the font size as needed
+#         "color: #888888;"  # Dimmer color
+#         "text-align: center;"  # Center the caption text
+#     )
+#
+#     # Display the GIF and caption with positioning relative to the placeholder
+#     placeholder.markdown(f"""<div style="{container_style}">
+#                     <img src="data:image/gif;base64,{imgData}" width='610' height='610'>
+#                     <p style="{caption_style}">{caption}</p>
+#                     </div>""", unsafe_allow_html=True)
+#
+#
+# def displayLocalGIF2(placeholder, localImagePath1, localImagePath2, caption1, caption2):
+#     # Function to generate the base64 encoded image data
+#     def get_img_data(image_path):
+#         with open(image_path, "rb") as img_file:
+#             contents = img_file.read()
+#             return base64.b64encode(contents).decode("utf-8")
+#
+#     imgData1 = get_img_data(localImagePath1)
+#     imgData2 = get_img_data(localImagePath2)
+#
+#     # Define CSS styles for the container and images
+#     container_style = (
+#         "display: flex;"  # Use flexbox layout for side-by-side alignment
+#         "justify-content: center;"  # Center the container content
+#         "gap: 20px;"  # Add space between the GIFs
+#     )
+#
+#     img_style = "width: 610px; height: 610px;"  # Set image size
+#
+#     caption_style = (
+#         "font-size: 20px;"  # Adjust the font size as needed
+#         "color: #888888;"  # Dimmer color
+#         "text-align: center;"  # Center the caption text
+#     )
+#
+#     # Display the GIFs and captions side by side
+#     placeholder.markdown(f"""
+#         <div style="{container_style}">
+#             <div>
+#                 <img src="data:image/gif;base64,{imgData1}" style="{img_style}">
+#                 <p style="{caption_style}">{caption1}</p>
+#             </div>
+#             <div>
+#                 <img src="data:image/gif;base64,{imgData2}" style="{img_style}">
+#                 <p style="{caption_style}">{caption2}</p>
+#             </div>
+#         </div>
+#     """, unsafe_allow_html=True)
+#
+#
+# category("🌑 模型应用与评估")
+#
+# if len(st.session_state.modelReportWeatherInfo['模型']):
+#
+#     # st.columns([0.3, 0.6, 0.4])[1].markdown(
+#     #     f'##### 地区：{wgInfo1}  {wgInfo2}  \n'
+#     #     f'##### 气象情景：{wgInfo4}  \n'
+#     #     f'##### 数据长度：{wgInfo3}年  \n', unsafe_allow_html=True)
+#     st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;模型应用结果如下:  \n')
+#     colIndex1, colIndex2, colIndex3 = st.columns(3)
+#
+#     items = list(st.session_state.modelSituationIndexResult.items())
+#     for i, (metric_name, metric_value) in enumerate(items):
+#         path = os.path.join(
+#             RESOURCE_MODELRESULT_PATH,
+#             'modelsSimulateWeatherIndexResult',
+#             metric_name +
+#             '_applicationPredict' +
+#             '.xlsx')
+#         modelNameT = metric_name.split('_')[0]
+#         weatherNameT = metric_name.split('_')[1]
+#         if i % 3 == 0:
+#             with colIndex1:
+#                 df = pd.read_excel(path)
+#                 if '病害发生程度' in df.columns.tolist():
+#                     # Plotting
+#                     fig, ax = plt.subplots(figsize=(10, 6))
+#
+#                     # 绘制 0 和 1 两类的散点图
+#                     for label in [0, 1]:
+#                         subset = df[df['Predicted_value'] == label]  # 筛选数据
+#                         if label == 0:
+#                             labelStr = '不发生'
+#                             color = 'b'  # 蓝色表示 "不发生"
+#                         else:
+#                             labelStr = '发生'
+#                             color = 'r'  # 红色表示 "发生"
+#
+#                         # 绘制散点图
+#                         ax.scatter(subset['年'], subset['Predicted_value'], label=f'病害{labelStr}', s=100, alpha=0.6,
+#                                    color=color)
+#
+#                     # 添加标题和标签
+#                     plt.title(f'基于{modelNameT}建模方法{weatherNameT}情景下预测病害发生情况')
+#                     plt.xlabel('年')
+#                     plt.ylabel('病害发生情况')
+#                     # Set x-ticks to be integers
+#                     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+#                     # 添加图例
+#                     plt.legend()
+#                     st.pyplot(plt)
+#                     # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
+#                 else:
+#                     # Plotting
+#                     fig, ax = plt.subplots(figsize=(10, 6))
+#
+#                     plt.plot(df['年'], df['峰值'], label='实际病害峰值', marker='o', color='blue')
+#                     plt.plot(df['年'], df['Predicted_value'], label='预测病害峰值', marker='x', color='red')
+#
+#                     # 添加标题和标签
+#                     plt.title(f'{weatherNameT}情景下实际与预测病害峰值对比图')
+#                     plt.xlabel('年')
+#                     plt.ylabel('病害峰值')
+#                     # 设置 X 轴刻度为整数
+#                     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+#                     # 添加图例
+#                     plt.legend()
+#                     st.pyplot(plt)
+#                     # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
+#         elif i % 3 == 1:
+#             with colIndex2:
+#                 df = pd.read_excel(path)
+#                 if '病害发生程度' in df.columns.tolist():
+#                     # Plotting
+#                     fig, ax = plt.subplots(figsize=(10, 6))
+#
+#                     # 绘制 0 和 1 两类的散点图
+#                     for label in [0, 1]:
+#                         subset = df[df['Predicted_value'] == label]  # 筛选数据
+#                         if label == 0:
+#                             labelStr = '不发生'
+#                             color = 'b'  # 蓝色表示 "不发生"
+#                         else:
+#                             labelStr = '发生'
+#                             color = 'r'  # 红色表示 "发生"
+#
+#                         # 绘制散点图
+#                         ax.scatter(subset['年'], subset['Predicted_value'], label=f'病害{labelStr}', s=100, alpha=0.6,
+#                                    color=color)
+#
+#                     # 添加标题和标签
+#                     plt.title(f'基于{modelNameT}建模方法{weatherNameT}情景下预测病害发生情况')
+#                     plt.xlabel('年')
+#                     plt.ylabel('病害发生情况')
+#                     # Set x-ticks to be integers
+#                     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+#                     # 添加图例
+#                     plt.legend()
+#                     st.pyplot(plt)
+#                     # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
+#                 else:
+#                     # Plotting
+#                     fig, ax = plt.subplots(figsize=(10, 6))
+#
+#                     plt.plot(df['年'], df['峰值'], label='实际病害峰值', marker='o', color='blue')
+#                     plt.plot(df['年'], df['Predicted_value'], label='预测病害峰值', marker='x', color='red')
+#
+#                     # 添加标题和标签
+#                     plt.title(f'{weatherNameT}情景下实际与预测病害峰值对比图')
+#                     plt.xlabel('年')
+#                     plt.ylabel('病害峰值')
+#                     # 设置 X 轴刻度为整数
+#                     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+#                     # 添加图例
+#                     plt.legend()
+#                     st.pyplot(plt)
+#                     # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
+#         else:
+#             with colIndex3:
+#                 df = pd.read_excel(path)
+#                 if '病害发生程度' in df.columns.tolist():
+#                     # Plotting
+#                     fig, ax = plt.subplots(figsize=(10, 6))
+#
+#                     # 绘制 0 和 1 两类的散点图
+#                     for label in [0, 1]:
+#                         subset = df[df['Predicted_value'] == label]  # 筛选数据
+#                         if label == 0:
+#                             labelStr = '不发生'
+#                             color = 'b'  # 蓝色表示 "不发生"
+#                         else:
+#                             labelStr = '发生'
+#                             color = 'r'  # 红色表示 "发生"
+#
+#                         # 绘制散点图
+#                         ax.scatter(subset['年'], subset['Predicted_value'], label=f'病害{labelStr}', s=100, alpha=0.6,
+#                                    color=color)
+#
+#                     # 添加标题和标签
+#                     plt.title(f'基于{modelNameT}建模方法{weatherNameT}情景下预测病害发生情况')
+#                     plt.xlabel('年')
+#                     plt.ylabel('病害发生情况')
+#                     # Set x-ticks to be integers
+#                     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+#                     # 添加图例
+#                     plt.legend()
+#                     st.pyplot(plt)
+#                     # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
+#                 else:
+#                     # Plotting
+#                     fig, ax = plt.subplots(figsize=(10, 6))
+#
+#                     plt.plot(df['年'], df['峰值'], label='实际病害峰值', marker='o', color='blue')
+#                     plt.plot(df['年'], df['Predicted_value'], label='预测病害峰值', marker='x', color='red')
+#
+#                     # 添加标题和标签
+#                     plt.title(f'{weatherNameT}情景下实际与预测病害峰值对比图')
+#                     plt.xlabel('年')
+#                     plt.ylabel('病害峰值')
+#                     # 设置 X 轴刻度为整数
+#                     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+#                     # 添加图例
+#                     plt.legend()
+#                     st.pyplot(plt)
+#                     # st.metric(f'{metric_name}-Dev_S:', metric_value[1])
+#
+#     endInfo1 = st.session_state.modelingName
+#     # pages_utils.TempDataSetFacet[4] = pd.DataFrame({'标签': ['病害峰值', 2, 3]})
+#     endInfo2 = pages_utils.TempDataSetField[4]['标签'].tolist()[0]
+#     endInfo3 = '、'.join(st.session_state.modelReportWeatherInfo['情景'])
+#     st.columns(3)[0].markdown('##### &emsp;&emsp;&emsp;&emsp;模型静态偏差指标评估结果如下:  \n')
+#     # st.markdown(
+#     #     f'##### &emsp;&emsp;本次建模场景为{endInfo1}，模型输出为{endInfo2}。'
+#     #     f'基于静态预测模型评价方法计算可得{endInfo3}情景下各模型预测输出的偏差指标分别如下：  \n',
+#     #     unsafe_allow_html=True)
+#     # 创建 DataFrame
+#
+#     # df = pd.DataFrame(aInfoGap10).T.fillna('')  # 转置并填充空值
+#     df = pd.read_excel(os.path.join(RESOURCE_PROCESS_PATH, '评估指标.xlsx'))
+#     st.table(df)
+#     # st.markdown(
+#     #     f'##### &emsp;&emsp;根据上述计算结果进行综合评估，可认为上述模型可靠性较高，参数设置较为合理，具有良好的预测效果和鲁棒性。',
+#     #     unsafe_allow_html=True)
 # if btnResult:
 #     st.markdown("""
 #     <style>

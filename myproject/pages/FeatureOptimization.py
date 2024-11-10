@@ -417,7 +417,7 @@ with dataPCV:
     # weatherNameT3, plantNameT3, agricultureNameT3 = pages_utils.getDataFiled(3, pages_utils.TempDataSetField[3])
     weatherNameT2H = []
     for weatherNameT22 in weatherNameT2:
-        print(weatherNameT22)
+        # print(weatherNameT22)
         if isinstance(weatherNameT22, str):
             weatherNameT2H += weatherNameT22.split(',')
     weatherNameList = weatherNameT1 + weatherNameT2H + weatherNameT0
