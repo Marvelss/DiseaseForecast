@@ -5,15 +5,18 @@
 @Description : 特征计算方法
 """
 from datetime import datetime
+from typing import Union
 
 import numpy as np
 import pandas as pd
 
 
 class FeatureCalculationMethod:
+
     def __init__(self, dataFrame, reservedField):
         self.dataFrame = dataFrame.copy()
         self.reservedField = reservedField
+        self.newColumn = []
 
     # 旬值获取
     @staticmethod
@@ -28,7 +31,7 @@ class FeatureCalculationMethod:
     # 降水累积量计算
     def precipitationAccumulation(self, inputFields, timeRation):
         temp = None
-        newColumn = '降水累积量'
+        # newColumn = '降水累积量'
         inputField = inputFields[0]
         flag = timeRation[0]
         if flag == '月累积降水量':
@@ -38,19 +41,23 @@ class FeatureCalculationMethod:
             self.dataFrame['月'] = self.dataFrame['日期'].dt.month
 
             # 计算每月降水量总和
-            monthly_precipitation_sum = self.dataFrame.groupby(['年', '月'])[inputField].sum().reset_index(
-                name='降水累积量')
+            monthly_precipitation_sum = self.dataFrame.groupby(['经度', '纬度', '年', '月'])[
+                inputField].sum().reset_index(
+                name='月_降水累积量')
             # 将月降水量总和合并回原始DataFrame
-            temp = pd.merge(self.dataFrame, monthly_precipitation_sum, on=['年', '月'], how='left')
+            temp = pd.merge(self.dataFrame, monthly_precipitation_sum, on=['经度', '纬度', '年', '月'], how='left')
 
             # 根据数据集提取月份列并去除重复值和排序
             unique_months = sorted(temp['月'].drop_duplicates().to_numpy().tolist())
-
+            # print(unique_months)
+            # print(temp.columns)
             # 将每月降水量总和作为新列
+            # temp = temp.loc[:, ~temp.columns.str.endswith('_x')]
             for month in unique_months:
                 col_name = f'{month}月_累积降水量'
-                temp[col_name] = temp['降水累积量'].where(temp['月'] == month, None)
-
+                temp[col_name] = temp['月_降水累积量'].where(temp['月'] == month, None)
+                print(col_name)
+                self.newColumn.append(col_name)
             # 删除'月','旬' '日期'字段
             # temp = temp.drop(['月', '日期'], axis=1)
         elif flag == '旬累积降水量':
@@ -66,13 +73,27 @@ class FeatureCalculationMethod:
             self.dataFrame['旬'] = self.dataFrame['日期'].dt.day.apply(FeatureCalculationMethod.get_decade)
 
             # 计算每旬的累积降水量
-            decade_precipitation_sum = self.dataFrame.groupby(['年', '月', '旬'])[inputField].sum().reset_index(
-                name='降水累积量')
-
+            decade_precipitation_sum = self.dataFrame.groupby(['经度', '纬度', '年', '月', '旬'])[
+                inputField].sum().reset_index(
+                name='旬_降水累积量')
+            # 根据数据集提取月份列并去除重复值和排序
+            unique_months = sorted(self.dataFrame['月'].drop_duplicates().to_numpy().tolist())
             # 将旬累积降水量合并回原始DataFrame
-            temp = pd.merge(self.dataFrame, decade_precipitation_sum, on=['年', '月', '旬'], how='left')
+            temp = pd.merge(self.dataFrame, decade_precipitation_sum, on=['经度', '纬度', '年', '月', '旬'], how='left')
+            # print(decade_precipitation_sum)
+            # 将每旬降水量总和作为新列
+            decade_names = {1: "上旬", 2: "中旬", 3: "下旬"}
+
+            for month in unique_months:
+                for decade in range(1, 4):  # 假设每个月有3个旬
+                    col_name = f'{month}月{decade_names[decade]}_降水累积量'
+                    temp[col_name] = temp['旬_降水累积量'].where((temp['月'] == month) & (temp['旬'] == decade), None)
+                    self.newColumn.append(col_name)
+
+            # 删除不再需要的字段
+            # temp = temp.drop(['月', '旬', '日期'], axis=1)
             # 删除'月','旬' '日期'字段
-            temp = temp.drop(['旬', '日期'], axis=1)
+            # temp = temp.drop(['旬', '日期'], axis=1)
         elif flag == '指定日期':
             startDate = timeRation[1]
             endDate = timeRation[2]
@@ -102,19 +123,20 @@ class FeatureCalculationMethod:
                         self.dataFrame['纬度'] == index[1]) & (
                                           self.dataFrame['年'] == index[2]) & date_filter
                 self.dataFrame.loc[match_condition, newColumn] = total_precip
+            self.newColumn.append(newColumn)
             temp = self.dataFrame
         # 删除还没生成的字段
         # tempReservedField = [field for field in self.reservedField if field in temp.columns]
         # print(f'==============降水累积量-筛选特征{tempReservedField}================')
         # tempData = temp[list(set(tempReservedField + ['降水累积量']))]
-        return temp, newColumn
+        return temp, ','.join(self.newColumn)
 
     # 计算降雨日数
     def rainfallDaysAccumulation(self, inputFields, param):
         # 复制新的变量
-        print('===========接收参数===========')
-        print(param)
-        print(inputFields)
+        # print('===========接收参数===========')
+        # print(param)
+        # print(inputFields)
         startMD = param[0]
         tempS = startMD.split('-')
         startM, startD = int(tempS[1]), int(tempS[2])
@@ -223,7 +245,7 @@ class FeatureCalculationMethod:
         self.dataFrame['年内日期'] = self.dataFrame['日期'].dt.strftime('%m-%d')
         # 过滤数据，只保留在指定日期范围内的记录
         date_filter = (self.dataFrame['年内日期'] >= datetime.strptime(startMD, '%Y-%m-%d').strftime('%m-%d')) & (
-                    self.dataFrame['年内日期'] <= datetime.strptime(endMD, '%Y-%m-%d').strftime('%m-%d'))
+                self.dataFrame['年内日期'] <= datetime.strptime(endMD, '%Y-%m-%d').strftime('%m-%d'))
         filtered_df = self.dataFrame.loc[date_filter]
 
         grouped = filtered_df.groupby(['经度', '纬度', '年'])

@@ -50,6 +50,20 @@ if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
     st.switch_page("app.py")
 
+
+@st.dialog("气象特征提取")
+def timeResolutionUnification():
+    st.info('为了确保后续数据处理', icon="ℹ️️")
+    time = st.selectbox('选择时间分辨率', options=('每5天', '旬值', '月值'))
+    if st.button("确认"):
+        st.session_state.timeResolution = time
+        st.rerun()
+
+
+# 时间分辨率统一
+if 'timeResolution' not in st.session_state:
+    timeResolutionUnification()
+
 st.markdown(
     """
     <style>
@@ -130,6 +144,9 @@ def onRun():
     # outFields = pages_utils.TempDataSetField[2]["备选特征"].tolist()
     methodParam = pages_utils.TempDataSetField[2]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
+    print('运行 后')
+    print(methodList)
+
     isHandledFlags = pages_utils.TempDataSetField[2]["处理状态"].tolist()
     # print('===============获取任务清单内容===============')
     with emptyHeadFCP:
@@ -137,9 +154,9 @@ def onRun():
             # 若为空则跳过该步骤
             if not idNumber:
                 pages_utils.TempDataSet[2] = pages_utils.TempDataSet[1]
-                print('---测试跳转---')
-                print(st.session_state["leftTabs"])
-                st.session_state["leftTabs"].pop(0)
+                # print('---测试跳转---')
+                # print(st.session_state["leftTabs"])
+                # st.session_state["leftTabs"].pop(0)
             afterHandleData = None
             newColumn = '错误'
             # ===============根据名称匹配调用并执行各个处理方法===============
@@ -180,6 +197,7 @@ def onRun():
 
                 # ===============合并处理后数据集===============
                 row_size = len(afterHandleData)
+                print(afterHandleData)
                 intersection_cols = pages_utils.getIntersectionCols(
                     pages_utils.TempDataSet[2], afterHandleData
                 )
@@ -190,11 +208,15 @@ def onRun():
                 # print('======================备选特征======================')
                 # print(pages_utils.TempDataSet[2])
                 # ===============更新左侧显示内容===============
+                # 区分计算如旬多个特征值或单个特征值
+                # if len(newColumn) == 1:
+                # 若计算多个特征值只显示第一个
+                newColumnTR1 = newColumn.split(',')
                 FCVisualInformationTemp = {
                     'before': None,
                     'name': tempMethod,
-                    'column': newColumn,
-                    'after': afterHandleData[[newColumn, '经度', '纬度', '年']]}
+                    'column': newColumnTR1[0],
+                    'after': afterHandleData[[newColumnTR1[0], '经度', '纬度', '年']]}
                 # 可视化信息添加
                 st.session_state["FCVisualInformation"].append(FCVisualInformationTemp)
                 # print(st.session_state["FCVisualInformation"])
@@ -208,7 +230,31 @@ def onRun():
                     if row["编号"] == idNumber[indexT]:
                         for key, value in update_values.items():
                             pages_utils.TempDataSetField[2].loc[index, key] = value
-
+                # else:
+                #     for indexTTT1, tempNewColumn in enumerate(newColumn):
+                #         # 只展示第一个旬、月特征值
+                #         FCVisualInformationTemp = {
+                #             'before': None,
+                #             'name': tempMethod,
+                #             'column': tempNewColumn,
+                #             'after': afterHandleData[[tempNewColumn, '经度', '纬度', '年']]}
+                #         # 可视化信息添加
+                #         st.session_state["FCVisualInformation"].append(FCVisualInformationTemp)
+                #         # print(st.session_state["FCVisualInformation"])
+                #         update_values = {
+                #             "大小": '1*' + str(row_size),
+                #             "备选特征": tempNewColumn,
+                #             "时间": datetime.datetime.now().time(),
+                #             "处理状态": True}
+                #         # print('更新内容')
+                #         # print(update_values)
+                #         # 根据字段名和索引来更新字段值
+                #         for index, row in pages_utils.TempDataSetField[2].iterrows():
+                #             print(row["编号"])
+                #             print(idNumber[indexTTT1])
+                #             if row["编号"] == idNumber[indexTTT1]:
+                #                 for key, value in update_values.items():
+                #                     pages_utils.TempDataSetField[2].loc[index, key] = value
             print('===================特征计算数据集===================')
             print(pages_utils.TempDataSet[2])
 
@@ -264,7 +310,14 @@ with featureCCV:
     # agricultureNameList = agricultureNameT1 + agricultureNameT1
     # if not pages_utils.TempDataSetField[2].empty:
     weatherNameT2, plantNameT2, agricultureNameT2 = pages_utils.getDataFiled(2, pages_utils.TempDataSetField[2])
-    weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0
+    # print('获取多个特征')
+    # print(weatherNameT2)
+    weatherNameT2H = []
+    for weatherNameT22 in weatherNameT2:
+        print(weatherNameT22)
+        if isinstance(weatherNameT22, str):
+            weatherNameT2H += weatherNameT22.split(',')
+    weatherNameList = weatherNameT1 + weatherNameT2H + weatherNameT0
     plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0
     agricultureNameList = agricultureNameT1 + agricultureNameT0
     # 按照数据类型显示左侧字段或特征
@@ -340,7 +393,7 @@ with (featureCCM):
 
             option3 = st.selectbox(
                 '降水累积量计算',
-                ('指定日期', ''))
+                ('指定日期', '月累积降水量', '旬累积降水量'))
             st.session_state["featureMethodName"]['param1'] = option3
 
             if option3 == '指定日期':
@@ -395,18 +448,50 @@ with (featureCCM):
             pass
             # print('============测试方法参数正确性============')
             # print(f"Key: {key11}, Value: {value11}")
+        modelP = [value for key, value in st.session_state["featureMethodName"].items() if key != 'checkBox']
+        # print(modelP)
+        # if '月' in modelP[0]:
+        #     print('月下载')
+        #     for _ in range(12):
+        #         new_data = {
+        #             "编号": pages_utils.generateID(),
+        #             "数据类型": '气象数据',
+        #             "输入特征": mergeExcludeArray(result1, result2, result3, pages_utils.reservedField),
+        #             "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]['checkBox']),
+        #             "方法参数": modelP,
+        #             "时间": datetime.datetime.now().time(),
+        #             "处理状态": False}
+        #         print('======================特征计算-添加任务清单记录======================')
+        #         print(new_data)
+        #         pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_data
+        # elif '旬' in modelP[0]:
+        #     for _ in range(36):
+        #         new_data = {
+        #             "编号": pages_utils.generateID(),
+        #             "数据类型": '气象数据',
+        #             "输入特征": mergeExcludeArray(result1, result2, result3, pages_utils.reservedField),
+        #             "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]['checkBox']),
+        #             "方法参数": modelP,
+        #             "时间": datetime.datetime.now().time(),
+        #             "处理状态": False}
+        #         print('======================特征计算-添加任务清单记录======================')
+        #         print(new_data)
+        #         pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_data
+        # else:
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
             "输入特征": mergeExcludeArray(result1, result2, result3, pages_utils.reservedField),
             "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]['checkBox']),
-            "方法参数": [value for key, value in st.session_state["featureMethodName"].items() if key != 'checkBox'],
+            "方法参数": modelP,
             "时间": datetime.datetime.now().time(),
             "处理状态": False}
         print('======================特征计算-添加任务清单记录======================')
         print(new_data)
         pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_data
+
         st.rerun()
+
     st.markdown('---')
 
     # =======================显示右下内容=======================
@@ -438,6 +523,9 @@ with (featureCCM):
                 tt1 = st.tabs(new_ids)
                 for o in range(len(idFMethods)):
                     with tt1[o]:
+                        if not st.session_state["FCVisualInformation"]:
+                            st.warning('计算错误出错', icon="⚠️")
+                            continue
                         # 创建DataFrame
                         data_after = st.session_state["FCVisualInformation"][o]['after']
                         # 特征名称
@@ -478,10 +566,15 @@ with (featureCCM):
                                         ha='center', fontsize=16)
                             st.pyplot(plt)
                         elif idFMethods[o] == '降水累积量计算':
+
                             # 时期范围名称修剪
-                            integratedDataColumnT = dataColumn.split('_')
-                            integratedDataColumn = integratedDataColumnT[0] + '至' + integratedDataColumnT[1] + \
-                                                   integratedDataColumnT[2]
+                            if '-' in dataColumn:
+                                integratedDataColumnT = dataColumn.split('_')
+                                integratedDataColumn = integratedDataColumnT[0] + '至' + integratedDataColumnT[1] + \
+                                                       integratedDataColumnT[2]
+                            else:
+                                integratedDataColumnT = dataColumn.split('_')
+                                integratedDataColumn = integratedDataColumnT[0] + integratedDataColumnT[1]
                             # 选择最多8个纬度
                             top_stations = data_after['纬度'].value_counts().nlargest(8).index
                             df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]

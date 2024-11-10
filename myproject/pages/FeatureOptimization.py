@@ -415,7 +415,12 @@ with dataPCV:
     # agricultureNameList = agricultureNameT1 + agricultureNameT0
     # if not pages_utils.TempDataSetField[3].empty:
     # weatherNameT3, plantNameT3, agricultureNameT3 = pages_utils.getDataFiled(3, pages_utils.TempDataSetField[3])
-    weatherNameList = weatherNameT1 + weatherNameT2 + weatherNameT0
+    weatherNameT2H = []
+    for weatherNameT22 in weatherNameT2:
+        print(weatherNameT22)
+        if isinstance(weatherNameT22, str):
+            weatherNameT2H += weatherNameT22.split(',')
+    weatherNameList = weatherNameT1 + weatherNameT2H + weatherNameT0
     plantNameList = plantNameT1 + plantNameT2 + plantNameT0
     agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT2
     # print(weatherNameT1 + weatherNameT2 + weatherNameT0)
