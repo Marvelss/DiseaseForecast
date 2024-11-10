@@ -46,6 +46,7 @@ class FeatureOptimizationMethod:
         condition = methodParam[2]
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
+
         tempResult = {}
         # t检验并获取每个变量p-value结果
         for feature in comparedVariableList:
@@ -60,7 +61,7 @@ class FeatureOptimizationMethod:
         filtered_data = {key: value for key, value in tempResult.items() if value <= float(condition)}
         # 获取优选特征集
         optimalFeatureList = list(filtered_data.keys())
-        print(tempResult)
+        # print(tempResult)
         # print(optimalFeatureList)
         # optimalFeatureList.remove(targetVariable)
         # newColumnsList = []
@@ -78,22 +79,22 @@ class FeatureOptimizationMethod:
         # param2:被比较变量
         # param3:提取方法
         # param4:提取方法参数
-
         target = methodParam[0]
+        # print(target)
         comparedVariableList = methodParam[1].split(' ')
         name = methodParam[2]
         proportion = methodParam[3]
         # print(methodParam)
         # =========================提取有效值=========================
         # 使用groupby分组并提取每个分组的第一个非空值
-        ultimateFeatures = self.dataFrame.groupby(['经度', '纬度', '年']).first().reset_index()
-        # ******删除包含缺失值的行******
-        # 若DayOfYear列都为空表明已经以年为单位
-        if ultimateFeatures['DayOfYear'].isna().all():
-            df_cleaned = ultimateFeatures
-        else:
-            df_cleaned = ultimateFeatures.dropna()
-
+        # ultimateFeatures = self.dataFrame.groupby(['经度', '纬度', '年']).first().reset_index()
+        # # ******删除包含缺失值的行******
+        # # 若DayOfYear列都为空表明已经以年为单位
+        # if ultimateFeatures['DayOfYear'].isna().all():
+        #     df_cleaned = ultimateFeatures
+        # else:
+        #     df_cleaned = ultimateFeatures.dropna()
+        df_cleaned = self.dataFrame
         # 准备数据
         X = df_cleaned[comparedVariableList + [target]].drop(columns=[target])  # 假设我们已经从df中删除了目标列和不需要的列
         y = df_cleaned[target]
@@ -172,7 +173,9 @@ class FeatureOptimizationMethod:
             # 使用选定的特征来转换数据集
         # print(selected_features_indices)
         selected_features = X.columns[selected_features_indices]
-        selected_features.remove(target)
+        selected_features = selected_features.tolist()
+        print(selected_features)
+        # selected_features.remove(target)
         # newColumnsList = []
         # for feature in selected_features:
         #     new_column_name = self.getHandledFieldPoint(feature)
@@ -196,10 +199,10 @@ class FeatureOptimizationMethod:
         # 遍历输入变量进行pearson分析
         tempResultP = {}
         # 选择需要计算相关性的列
-        result = newDataFrame.groupby(['经度', '纬度', '年']).first().reset_index()
+        # result = newDataFrame.groupby(['经度', '纬度', '年']).first().reset_index()
         # ******删除包含缺失值的行******
         # df_cleaned = result.dropna()
-        df_cleaned = result
+        df_cleaned = newDataFrame
         data = df_cleaned[fieldList]
         # print(data)
         # result = data.groupby(['经度', '纬度', '年']).first().reset_index()

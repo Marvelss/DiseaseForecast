@@ -45,6 +45,16 @@ div.stButton button {
 """), unsafe_allow_html=True)
 if 'page14' not in st.session_state:
     st.session_state.page14 = 0
+
+    # 数据集统一分辨率
+    if st.session_state.timeResolution == '':
+        print(st.session_state.timeResolution)
+    result = pages_utils.TempDataSet[2].groupby(['经度', '纬度', '年']).first().reset_index()
+    # ******删除DayOfYear列******
+    # df_cleaned = result.drop('DayOfYear', axis=1)
+    pages_utils.TempDataSet[2] = result
+
+
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
