@@ -35,10 +35,10 @@ class FeatureCalculationMethod:
         inputField = inputFields[0]
         flag = timeRation[0]
         if flag == '月累积降水量':
-            self.dataFrame['日期'] = pd.to_datetime(
-                self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
-            # 提取月份
-            self.dataFrame['月'] = self.dataFrame['日期'].dt.month
+            # self.dataFrame['日期'] = pd.to_datetime(
+            #     self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
+            # # 提取月份
+            # self.dataFrame['月'] = self.dataFrame['日期'].dt.month
 
             # 计算每月降水量总和
             monthly_precipitation_sum = self.dataFrame.groupby(['经度', '纬度', '年', '月'])[
@@ -56,21 +56,21 @@ class FeatureCalculationMethod:
             for month in unique_months:
                 col_name = f'{month}月_累积降水量'
                 temp[col_name] = temp['月_降水累积量'].where(temp['月'] == month, None)
-                print(col_name)
+                # print(col_name)
                 self.newColumn.append(col_name)
             # 删除'月','旬' '日期'字段
             # temp = temp.drop(['月', '日期'], axis=1)
         elif flag == '旬累积降水量':
-            # 转换DayOfYear为日期，以便提取月份
-            self.dataFrame['日期'] = pd.to_datetime(
-                self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
-
-            # 提取月份
-            self.dataFrame['月'] = self.dataFrame['日期'].dt.month
-
-            # 计算每天所在的旬，假设1-10日为第一旬，11-20日为第二旬，21日至月末为第三旬
-
-            self.dataFrame['旬'] = self.dataFrame['日期'].dt.day.apply(FeatureCalculationMethod.get_decade)
+            # # 转换DayOfYear为日期，以便提取月份
+            # self.dataFrame['日期'] = pd.to_datetime(
+            #     self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
+            #
+            # # 提取月份
+            # self.dataFrame['月'] = self.dataFrame['日期'].dt.month
+            #
+            # # 计算每天所在的旬，假设1-10日为第一旬，11-20日为第二旬，21日至月末为第三旬
+            #
+            # self.dataFrame['旬'] = self.dataFrame['日期'].dt.day.apply(FeatureCalculationMethod.get_decade)
 
             # 计算每旬的累积降水量
             decade_precipitation_sum = self.dataFrame.groupby(['经度', '纬度', '年', '月', '旬'])[
@@ -100,11 +100,11 @@ class FeatureCalculationMethod:
             # 指定日期范围（每年相同的日期）
             start_day = startDate
             end_day = endDate
-            self.dataFrame['日期'] = pd.to_datetime(
-                self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
-
-            # 转换日期到年内的日期格式，忽略年份
-            self.dataFrame['年内日期'] = self.dataFrame['日期'].dt.strftime('%m-%d')
+            # self.dataFrame['日期'] = pd.to_datetime(
+            #     self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
+            #
+            # # 转换日期到年内的日期格式，忽略年份
+            # self.dataFrame['年内日期'] = self.dataFrame['日期'].dt.strftime('%m-%d')
 
             # 过滤数据，只保留在指定日期范围内的记录
             date_filter = (self.dataFrame['年内日期'] >= start_day) & (self.dataFrame['年内日期'] <= end_day)
@@ -150,9 +150,9 @@ class FeatureCalculationMethod:
         # print(self.fieldName)
         if rule == '单日降水量':
             # 转换DayOfYear为日期
-            self.dataFrame['日期'] = pd.to_datetime(
-                self.dataFrame['年'].astype(str) +
-                self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
+            # self.dataFrame['日期'] = pd.to_datetime(
+            #     self.dataFrame['年'].astype(str) +
+            #     self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
             # 根据"经度", "纬度"、年分类
             grouped = self.dataFrame.groupby(['经度', '纬度', '年'])
             for (key, group) in grouped:
@@ -181,25 +181,27 @@ class FeatureCalculationMethod:
             # print(f'==============降雨日数-筛选特征{tempReservedField}================')
             # tempData = self.dataFrame[list(set(tempReservedField + ['降雨日数']))]
             # 删除'月','旬' '日期'字段
-            self.dataFrame = self.dataFrame.drop(['日期'], axis=1)
-            return self.dataFrame, newColumn
+            # self.dataFrame = self.dataFrame.drop(['日期'], axis=1)
+            self.newColumn.append(newColumn)
+            return self.dataFrame, ','.join(self.newColumn)
 
     # 基于活动积温的生育期计算
     def growthPeriodCalculation(self, inputFields, param):
         # 复制新的变量
-        print('===========接收参数===========')
-        print(param)
-        print(inputFields)
+        # print('===========接收参数===========')
+        # print(param)
+        # print(inputFields)
         growthPeriod = param[0]
+
         start_day = param[1]
         end_day = param[2]
         threshold = int(param[3])
-        # 根据"经度", "纬度"、年分类
-        self.dataFrame['日期'] = pd.to_datetime(
-            self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
-
-        # 转换日期到年内的日期格式，忽略年份
-        self.dataFrame['年内日期'] = self.dataFrame['日期'].dt.strftime('%m-%d')
+        # # 根据"经度", "纬度"、年分类
+        # self.dataFrame['日期'] = pd.to_datetime(
+        #     self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
+        #
+        # # 转换日期到年内的日期格式，忽略年份
+        # self.dataFrame['年内日期'] = self.dataFrame['日期'].dt.strftime('%m-%d')
 
         # 过滤数据，只保留在指定日期范围内的记录
         date_filter = (self.dataFrame['年内日期'] >= start_day) & (self.dataFrame['年内日期'] <= end_day)
@@ -207,7 +209,6 @@ class FeatureCalculationMethod:
 
         grouped = filtered_df.groupby(['经度', '纬度', '年'])
         for (key, group) in grouped:
-
             # Calculate the cumulative temperature for each day in the range
             group['累计温度'] = np.cumsum(group['温度'])
             mask = group['累计温度'] >= threshold
@@ -220,9 +221,14 @@ class FeatureCalculationMethod:
                 self.dataFrame.loc[(self.dataFrame['经度'] == key[0]) &
                                    (self.dataFrame['纬度'] == key[1]) &
                                    (self.dataFrame['年'] == key[2]), growthPeriod] = doy
-        self.dataFrame = self.dataFrame.drop(['日期'], axis=1)
+        # self.dataFrame = self.dataFrame.drop(['日期'], axis=1)
+        # 若设定积温未到达,则返回错误
+        if growthPeriod not in self.dataFrame.columns.tolist():
+            self.newColumn.append('错误')
+        else:
+            self.newColumn.append(growthPeriod)
 
-        return self.dataFrame, growthPeriod
+        return self.dataFrame, ','.join(self.newColumn)
 
     # 活动积温计算
     def activeAccumulatedTemperature(self, inputFields, param):
@@ -238,11 +244,11 @@ class FeatureCalculationMethod:
         endM, endD = int(tempE[1]), int(tempE[2])
         newColumn = str(startM) + '-' + str(startD) + '_' + str(endM) + '-' + str(endD) + '_' + '活动积温'
 
-        # 根据"经度", "纬度"、年分类
-        self.dataFrame['日期'] = pd.to_datetime(
-            self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
-        # 转换日期到年内的日期格式，忽略年份
-        self.dataFrame['年内日期'] = self.dataFrame['日期'].dt.strftime('%m-%d')
+        # # 根据"经度", "纬度"、年分类
+        # self.dataFrame['日期'] = pd.to_datetime(
+        #     self.dataFrame['年'].astype(str) + self.dataFrame['DayOfYear'].astype(str), format='%Y%j')
+        # # 转换日期到年内的日期格式，忽略年份
+        # self.dataFrame['年内日期'] = self.dataFrame['日期'].dt.strftime('%m-%d')
         # 过滤数据，只保留在指定日期范围内的记录
         date_filter = (self.dataFrame['年内日期'] >= datetime.strptime(startMD, '%Y-%m-%d').strftime('%m-%d')) & (
                 self.dataFrame['年内日期'] <= datetime.strptime(endMD, '%Y-%m-%d').strftime('%m-%d'))
@@ -258,4 +264,5 @@ class FeatureCalculationMethod:
 
             # 更新原始 DataFrame 中对应的行
             self.dataFrame.loc[group.index, newColumn] = tempAAT
-        return self.dataFrame, newColumn
+        self.newColumn.append(newColumn)
+        return self.dataFrame, ','.join(self.newColumn)

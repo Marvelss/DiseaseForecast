@@ -54,8 +54,43 @@ if 'page12' not in st.session_state:
 @st.dialog("气象特征提取")
 def timeResolutionUnification():
     st.info('为了确保后续数据处理', icon="ℹ️️")
-    time = st.selectbox('选择时间分辨率', options=('每5天', '旬值', '月值'))
+    # 计算旬、月、年内日期和日期字段
+    tempDataSet1 = pages_utils.TempDataSet[1]
+    tempDataSet1['日期'] = pd.to_datetime(
+        tempDataSet1['年'].astype(str) + tempDataSet1['DayOfYear'].astype(str), format='%Y%j')
+    tempDataSet1['年内日期'] = tempDataSet1['日期'].dt.strftime('%m-%d')
+    # 提取月份
+    tempDataSet1['月'] = tempDataSet1['日期'].dt.month
+    # 计算每天所在的旬，假设1-10日为第一旬，11-20日为第二旬，21日至月末为第三旬
+    tempDataSet1['旬'] = tempDataSet1['日期'].dt.day.apply(FeatureCalculationMethod.get_decade)
+    # pages_utils.TempDataSet[1] = tempDataSet1
+    # pages_utils.TempDataSet[1].to_excel('计算预处理.xlsx')
+    # 分辨率统一
+    time = st.selectbox('选择时间分辨率', options=('日值', '每5天', '旬值', '月值'))
     if st.button("确认"):
+        if time == '日值':
+            pass
+        elif time == '每5天':
+            # 1. 每5天的降水累积量
+            # 添加一个5天分组列
+            tempDataSet1['5天组'] = (tempDataSet1['DayOfYear'] - 1) // 5 + 1
+            # 删除闰年 2 月 29 日的行
+            tempDataSet1 = tempDataSet1[~((tempDataSet1['年'] % 4 == 0) & (tempDataSet1['年'] % 100 != 0) | (
+                    tempDataSet1['年'] % 400 == 0) & (tempDataSet1['DayOfYear'] == 60))]
+            # tempDataSet1['5天组'] = (tempDataSet1['DayOfYear'] - 1) // 5 + 1  # 创建一个按5天分组的标识
+            pages_utils.TempDataSet[1] = tempDataSet1.groupby(['经度', '纬度', '年', '5天组']).mean(
+                numeric_only=True).reset_index()
+        elif time == '旬值':
+            # 2. 每旬的降水累积量
+            pages_utils.TempDataSet[1] = tempDataSet1.groupby(['经度', '纬度', '年', '月', '旬']).mean(
+                numeric_only=True).reset_index()
+        elif time == '月值':
+            # 3. 每月的降水累积量
+            pages_utils.TempDataSet[1] = tempDataSet1.groupby(['经度', '纬度', '年', '月']).mean(
+                numeric_only=True).reset_index()
+
+        # pages_utils.TempDataSet[1]
+        # 输出结果
         st.session_state.timeResolution = time
         st.rerun()
 
@@ -144,8 +179,6 @@ def onRun():
     # outFields = pages_utils.TempDataSetField[2]["备选特征"].tolist()
     methodParam = pages_utils.TempDataSetField[2]["方法参数"].tolist()
     methodList = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
-    print('运行 后')
-    print(methodList)
 
     isHandledFlags = pages_utils.TempDataSetField[2]["处理状态"].tolist()
     # print('===============获取任务清单内容===============')
@@ -212,6 +245,10 @@ def onRun():
                 # if len(newColumn) == 1:
                 # 若计算多个特征值只显示第一个
                 newColumnTR1 = newColumn.split(',')
+                if '错误' in newColumnTR1:
+                    st.toast('基于活动积温计算的生育期出错，请重新设定积温阈值', icon="⚠️")
+                    st.session_state["FCVisualInformation"].append({})
+                    continue
                 FCVisualInformationTemp = {
                     'before': None,
                     'name': tempMethod,
@@ -521,9 +558,10 @@ with (featureCCM):
                 new_ids = [f'记录编号_{h}' for h in new_ids]
 
                 tt1 = st.tabs(new_ids)
+                print(st.session_state["FCVisualInformation"])
                 for o in range(len(idFMethods)):
                     with tt1[o]:
-                        if not st.session_state["FCVisualInformation"]:
+                        if not st.session_state["FCVisualInformation"][o]:
                             st.warning('计算错误出错', icon="⚠️")
                             continue
                         # 创建DataFrame
