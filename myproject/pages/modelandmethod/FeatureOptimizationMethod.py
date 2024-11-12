@@ -231,15 +231,21 @@ class FeatureOptimizationMethod:
         selected_features = set(features)
 
         # 遍历相关系数字典，移除相关系数大于(0.8)的特征
+        # print(tempResultP)
         for (feature1, feature2), correlation in tempResultP.items():
+            # print(feature1, feature2)
             if abs(correlation) > float(condition):
                 # 默认移除后一个特征
-                if feature2 in selected_features:
-                    selected_features.remove(feature2)
+                if feature2 in selected_features and feature2 != labelField:
+                    selected_features.discard(feature2)
+                elif feature1 in selected_features and feature1 != labelField:
+                    selected_features.discard(feature1)
         # 获取优选特征集
         selected_features_list = list(selected_features)
-        # 移除标签
-        selected_features_list.remove(labelField)
+
+        # 确保标签字段存在并移除标签字段
+        if labelField in selected_features_list:
+            selected_features_list.remove(labelField)
         # for feature in selected_features_list:
         #     if feature == labelField:
         #         continue
