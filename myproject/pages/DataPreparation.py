@@ -60,6 +60,7 @@ if 'DPVisualInformation' not in st.session_state:
 checkBoxNum = 2
 # 设置可视化图表中文
 plt.rcParams['font.sans-serif'] = 'SimHei'
+plt.rc("font", family='Microsoft YaHei')
 
 st.markdown(
     """
@@ -454,7 +455,6 @@ with dataPCM:
     elif st.session_state.page12 == 1:
         with placeholder.container():
             st.markdown('##### 可视化')
-            plt.rc("font", family='Microsoft YaHei')
             idPreMethods = pages_utils.TempDataSetField[1]["预处理方法"].tolist()
             inputFields = pages_utils.TempDataSetField[1]["输入字段"].tolist()
             # 若无方法处理,则直接跳过该环节
@@ -478,14 +478,13 @@ with dataPCM:
                             missing_indices = data_before[data_before[inputFields[o][0]].isna()].index
                             # print(f'缺失索引:{missing_indices}')
                             # 获取第一个缺失值的索引
-                            # first_missing_index = missing_indices[0]
+                            first_missing_index = missing_indices[0]
                             # 获取第一个缺失值的行号
-                            first_missing_index = 130
+                            # first_missing_index = 130
                             # print(f"第一个缺失值的行号: {first_missing_index}")
-
                             # 计算前5行和后5行的起始和结束索引
-                            start_index = max(first_missing_index - 50, 0)
-                            end_index = min(first_missing_index + 50 + 1, len(data_before))
+                            start_index = max(first_missing_index - 80, 0)
+                            end_index = min(first_missing_index + 80 + 1, len(data_before))
                             # 取第一个缺失值对应前15行和后15行预处理数据
                             data_before_surrounding_data = data_before.iloc[start_index:end_index]
                             data_after_surrounding_data = data_after.iloc[start_index:end_index]
@@ -521,13 +520,7 @@ with dataPCM:
                                         f'图{st.session_state.IMAGECOUNT} {inputFields[o][0]}字段部分数据插补前后对比图',
                                         ha='center', fontsize=16)
                             plt.legend()
-                            if o == 0:
-                                img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'pre1.png'))
-                                st.image(img)
-                            # st.pyplot(plt)
-                            if o == 1:
-                                img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'pre2.png'))
-                                st.image(img)
+                            st.pyplot(fig)
                             st.session_state.IMAGECOUNT += 1
                         elif idPreMethods[o] == '剔除异常值':
                             # 剔除异常值-箱型图
