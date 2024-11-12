@@ -688,7 +688,8 @@ class Model:
         Y = df11[self.targetVariable]
         # 对分类变量进行one-hot编码
         # if '上级单位' and '测报站点' in self.featureVariable:
-        #     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
+        #     X = pd.get_dummies(X, columns=['上级单位', '测报站点'])
+        # 数据标准化
         # scaler = StandardScaler()
         X_scaled = X
 
@@ -723,6 +724,12 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
+        geo_data = df11.loc[X_test.index, ['经度', '纬度', '年']]
+
+        # 将预测结果与经纬度数据合并
+        combineResults = geo_data.copy()
+        combineResults['predictLabel'] = y_pred
+        combineResults = combineResults[['predictLabel', '经度', '纬度', '年']]
         # print('======================模型构建-精度指标======================')
         precision = {}
         # actualAndPredictResult = y_pred.tolist()
@@ -756,8 +763,7 @@ class Model:
         actualAndPredictResult = 'PLSR_predictLabel.xlsx'
         savePath1 = os.path.join(self.modelsPredictPath, actualAndPredictResult)
         savePath2 = os.path.join(self.modelsPredictPath, 'PLSR_testLabel.xlsx')
-        pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(
+        pd.DataFrame(combineResults).to_excel(
             savePath1, index=False)
         y_test.to_excel(
             savePath2, index=False)
@@ -774,11 +780,10 @@ class Model:
         df11 = self.dataFrame
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
-        # 对分类变量进行one-hot编码
-        if '上级单位' and '测报站点' in self.featureVariable:
-            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        # 数据标准化
+        # scaler = StandardScaler()
+        # X_scaled = scaler.fit_transform(X)
+        X_scaled = X
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
@@ -810,6 +815,12 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
+        geo_data = df11.loc[X_test.index, ['经度', '纬度', '年']]
+
+        # 将预测结果与经纬度数据合并
+        combineResults = geo_data.copy()
+        combineResults['predictLabel'] = y_pred
+        combineResults = combineResults[['predictLabel', '经度', '纬度', '年']]
         # print('======================模型构建-精度指标======================')
         precision = {}
         # actualAndPredictResult = y_pred.tolist()
@@ -850,8 +861,7 @@ class Model:
         # 合并 X_test 和 y_pred
         # result = pd.concat([X_test, y_pred], axis=1)
         # 将合并后的 DataFrame 保存为 Excel 文件
-        pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(savePath1, index=False)
+        pd.DataFrame(combineResults).to_excel(savePath1, index=False)
         y_test.to_excel(
             savePath2, index=False)
         # 保存评价指标
@@ -867,11 +877,9 @@ class Model:
         df11 = self.dataFrame
         X = df11[self.featureVariable]
         Y = df11[self.targetVariable]
-        # 对分类变量进行one-hot编码
-        if '上级单位' and '测报站点' in self.featureVariable:
-            X = pd.get_dummies(X, columns=['上级单位', '测报站点'])  # 数据标准化
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        # scaler = StandardScaler()
+        # X_scaled = scaler.fit_transform(X)
+        X_scaled = X
 
         # =======================划分训练集和测试集=======================
         partition = 0.2
@@ -904,6 +912,12 @@ class Model:
         model1.fit(X_train, y_train)
         # 进行预测
         y_pred = model1.predict(X_test)
+        geo_data = df11.loc[X_test.index, ['经度', '纬度', '年']]
+
+        # 将预测结果与经纬度数据合并
+        combineResults = geo_data.copy()
+        combineResults['predictLabel'] = y_pred
+        combineResults = combineResults[['predictLabel', '经度', '纬度', '年']]
         # print('======================模型构建-精度指标======================')
         precision = {}
         actualAndPredictResult = y_pred.tolist()
@@ -939,8 +953,7 @@ class Model:
         actualAndPredictResult = 'SVR_predictLabel.xlsx'
         savePath1 = os.path.join(self.modelsPredictPath, actualAndPredictResult)
         savePath2 = os.path.join(self.modelsPredictPath, 'SVR_testLabel.xlsx')
-        pd.DataFrame(y_pred,
-                     columns=['predictLabel']).to_excel(
+        pd.DataFrame(combineResults).to_excel(
             savePath1, index=False)
         y_test.to_excel(
             savePath2, index=False)
