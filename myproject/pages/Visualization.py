@@ -97,10 +97,11 @@ for j in range(len(['原始数据', '预处理后数据', '备选特征', '优�
             height=250, width=1500)
 
 st.markdown('###### 模型结构与训练结果下载')
-result1 = pages_utils.multiselect_all(
-    st, '全选',
-    pages_utils.TempDataSetField[4]['模型'],
-    'temp111', 'collapsed')
+# result1 = pages_utils.multiselect_all(
+#     st, '全选',
+#     pages_utils.TempDataSetField[4]['模型'],
+#     'temp111', 'collapsed')
+result1 = st.columns(3)[0].multiselect('模型下载', pages_utils.TempDataSetField[4]['模型'], label_visibility='collapsed')
 if not pages_utils.TempDataSetField[4].empty:
     models = pages_utils.TempDataSetField[4]['模型'].tolist()
     modelsStruct = pages_utils.TempDataSetField[4]['模型结构'].tolist()
@@ -146,16 +147,16 @@ if not pages_utils.TempDataSetField[4].empty:
             mime="application/zip",
         )
 
-st.markdown('###### 模拟气象情景数据下载')
-
-zipPath = os.path.join(RESOURCE_TEMPDIR_PATH, '基于天气情景生成器的模拟数据.zip')
-# 压缩生成的xlsx数据
-pathEE = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
-pages_utils.zip_folder(pathEE, zipPath)
-with open(zipPath, "rb") as file:
-    st.download_button(
-        label="下载模拟生成的气象数据",
-        data=file,
-        file_name="基于天气情景生成器的模拟数据.zip",
-        mime="application/zip",
-    )
+# st.markdown('###### 模拟气象情景数据下载')
+#
+# zipPath = os.path.join(RESOURCE_TEMPDIR_PATH, '基于天气情景生成器的模拟数据.zip')
+# # 压缩生成的xlsx数据
+# pathEE = os.path.join(RESOURCE_PROCESS_PATH, 'weatherGeneratorOutput')
+# pages_utils.zip_folder(pathEE, zipPath)
+# with open(zipPath, "rb") as file:
+#     st.download_button(
+#         label="下载模拟生成的气象数据",
+#         data=file,
+#         file_name="基于天气情景生成器的模拟数据.zip",
+#         mime="application/zip",
+#     )
