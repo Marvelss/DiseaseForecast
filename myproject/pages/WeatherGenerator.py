@@ -291,45 +291,50 @@ def onGetWeatherData(year, selectedWeatherScenesList, weatherSituationParams, tr
 
 
 def onRun():
-    for tempModel, featureListTT1 in zip(modelsList, featureListT1):
-        model = joblib.load(
-            os.path.join(RESOURCE_MODELRESULT_PATH, 'structure',
-                         f'{tempModel}_structure.pkl'))
-        # 假设在训练模型时保存了特征名称，可以将它们存储在一个列表中并加载
-        predictions = model.predict(predictDF1[featureListTT1])
-        print("基于模型气象数据的应用结果:", predictions)
-        predictDF1["模型应用结果"] = predictions
-        st.session_state.predictDFResult = predictDF1
+    # 获取精度最优模型
+    max_r_index = max(enumerate(pages_utils.TempDataSetField[4]['评价指标'].tolist()), key=lambda x: x[1]['R方'])[0]
+    # print(modelsList[max_r_index])
 
-        # filtered_df = st.session_state.historicalWeatherDataPoint[
-        #     (st.session_state.historicalWeatherDataPoint['经度'] == weatherGeneratorProvinceSelected) &
-        #     (st.session_state.historicalWeatherDataPoint['纬度'] == weatherGeneratorStationSelected)]
-        # resultTempPath = os.path.join(
-        #     RESOURCE_MODELRESULT_PATH,
-        #     'modelsSimulateWeatherIndexResult',
-        #     str(tempModel) + '_' + weatherScenes +
-        #     '_applicationPredict' +
-        #     '.xlsx')
-        # filtered_df.to_excel(resultTempPath, index=False)
+    # for tempModel, featureListTT1 in zip(modelsList, featureListT1):
+    model = joblib.load(
+        os.path.join(RESOURCE_MODELRESULT_PATH, 'structure',
+                     f'{modelsList[max_r_index]}_structure.pkl'))
+    # 假设在训练模型时保存了特征名称，可以将它们存储在一个列表中并加载
 
-        # =========================计算静态偏差指标=========================
-        st.toast(f'{tempModel}模型评测完毕', icon='✅')
-        # 计算指标
-        # data_B = st.session_state.historicalWeatherDataPoint['实际标签']  # 实际
-        # data_A = dataPAData['Predicted_value']  # 预测
-        # # 计算两组数据相减的均值之和除以长度
-        # mean_diff = ((data_A - data_B).sum()) / len(data_A)
-        #
-        # # 计算数据 A 的标准差之和除以长度
-        # std_dev_B = data_B.std() / len(data_B)
-        #
-        # # print(f"预测值与实际发生程度之差的均值: {mean_diff}")
-        # # print(f"实际发生程度的标准差: {std_dev_B}")
-        # # print(f'Dev_s:{round(mean_diff / std_dev_B, 3)}')
-        # st.session_state.modelSituationIndexResult[str(tempModel) + '_' + weatherScenes] = [
-        #     resultTempPath, round(mean_diff / std_dev_B, 3)]
-        # st.toast(f'{weatherScenes}---{tempModel}模型评测完毕\n'
-        #          f'Dev_s:{round(mean_diff / std_dev_B, 3)}', icon='✅')
+    predictions = model.predict(predictDF1[featureListT1[max_r_index]])
+    print("基于模型气象数据的应用结果:", predictions)
+    predictDF1["模型应用结果"] = predictions
+    st.session_state.predictDFResult = predictDF1
+
+    # filtered_df = st.session_state.historicalWeatherDataPoint[
+    #     (st.session_state.historicalWeatherDataPoint['经度'] == weatherGeneratorProvinceSelected) &
+    #     (st.session_state.historicalWeatherDataPoint['纬度'] == weatherGeneratorStationSelected)]
+    # resultTempPath = os.path.join(
+    #     RESOURCE_MODELRESULT_PATH,
+    #     'modelsSimulateWeatherIndexResult',
+    #     str(tempModel) + '_' + weatherScenes +
+    #     '_applicationPredict' +
+    #     '.xlsx')
+    # filtered_df.to_excel(resultTempPath, index=False)
+
+    # =========================计算静态偏差指标=========================
+    st.toast(f'{modelsList[max_r_index]}模型评测完毕', icon='✅')
+    # 计算指标
+    # data_B = st.session_state.historicalWeatherDataPoint['实际标签']  # 实际
+    # data_A = dataPAData['Predicted_value']  # 预测
+    # # 计算两组数据相减的均值之和除以长度
+    # mean_diff = ((data_A - data_B).sum()) / len(data_A)
+    #
+    # # 计算数据 A 的标准差之和除以长度
+    # std_dev_B = data_B.std() / len(data_B)
+    #
+    # # print(f"预测值与实际发生程度之差的均值: {mean_diff}")
+    # # print(f"实际发生程度的标准差: {std_dev_B}")
+    # # print(f'Dev_s:{round(mean_diff / std_dev_B, 3)}')
+    # st.session_state.modelSituationIndexResult[str(tempModel) + '_' + weatherScenes] = [
+    #     resultTempPath, round(mean_diff / std_dev_B, 3)]
+    # st.toast(f'{weatherScenes}---{tempModel}模型评测完毕\n'
+    #          f'Dev_s:{round(mean_diff / std_dev_B, 3)}', icon='✅')
 
 
 # ==============================界面==============================
