@@ -58,6 +58,14 @@ warningInfo = '''
 2. 模版中表头行不可删除;
 3. 删除示例数据后,按需填充数据或删减和扩充字段.
 '''
+warningInfo1 = '''
+注意事项
+1. 病害发生数据需要将文字转为数字;
+2. 字段名称不能包含 '-' , '_' 和数字字符;
+3. 模版中表头行不可删除;
+4. 删除示例数据后,按需填充数据或删减和扩充字段.
+'''
+
 st.markdown(
     """
     <style>
@@ -108,7 +116,7 @@ with dataSCM:
                 )
     if selectedTemplate == '植保数据':
         with placeholder1.container():
-            st.warning(warningInfo, icon="⚠️")
+            st.warning(warningInfo1, icon="⚠️")
             with open(path2, "rb") as file:
                 st.download_button(
                     label="下载植保数据模板",
