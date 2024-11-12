@@ -53,7 +53,12 @@ if 'page12' not in st.session_state:
 
 @st.dialog("气象特征提取")
 def timeResolutionUnification():
-    st.info('为了确保后续数据处理', icon="ℹ️️")
+    # 检测预处理数据是否符合日值且无缺失值
+    if pages_utils.TempDataSet[1].isnull().any().any():
+        st.warning('预处理后数据集仍含缺失值，请前往预处理界面进行插补', icon="⚠️")
+
+    st.info('为了便于后续各环节数据处理，现对数据集时间分辨率进行统一，选项如下：  \n'
+            '分类模型:日值  \n回归模型:每5天、旬、月', icon="ℹ️️")
     # 计算旬、月、年内日期和日期字段
     tempDataSet1 = pages_utils.TempDataSet[1]
     tempDataSet1['日期'] = pd.to_datetime(
@@ -304,20 +309,34 @@ with featureCCV:
     placeholder1 = st.empty()
     if st.session_state.page12 == 0:
         with placeholder1.container():
-            tempLefTabs = ['原始数据', '预处理后数据集', '备选特征']
-            tt1 = st.tabs(tempLefTabs)
-            for i in range(len(tempLefTabs)):
-                with tt1[i]:
-                    if tempLefTabs[i] == '原始数据':
-                        column = ['数据类型', '字段', '上传时间']
-                    elif tempLefTabs[i] == '预处理后数据集':
-                        column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    elif tempLefTabs[i] == '备选特征':
-                        column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+            if pages_utils.TempDataSet[2].columns.tolist() == pages_utils.TempDataSet[1].columns.tolist():
+                tt = st.tabs(['预处理后数据集'])
+                with tt[0]:
                     st.data_editor(
-                        pages_utils.TempDataSet[i],
+                        pages_utils.TempDataSet[1],
                         height=220, width=800, )
-                    # column_order=column)
+            else:
+                tt = st.tabs(['预处理后数据集', '备选特征'])
+                with tt[0]:
+                    # column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
+                    st.data_editor(
+                        pages_utils.TempDataSet[1],
+                        height=220, width=800, )
+                with tt[1]:
+                    st.data_editor(
+                        pages_utils.TempDataSet[2],
+                        height=220, width=800, )
+            # with tt1[i]:
+            #     # if tempLefTabs[i] == '原始数据':
+            #     #     column = ['数据类型', '字段', '上传时间']
+            #     if tempLefTabs[i] == '预处理后数据集':
+            #
+            #     elif tempLefTabs[i] == '备选特征':
+            #         column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+            #     st.data_editor(
+            #         pages_utils.TempDataSet[i],
+            #         height=220, width=800, )
+            # column_order=column)
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
