@@ -182,9 +182,8 @@ def onRun():
                             dataFrameTemp,
                             fields[indexT], reservedField).linearInterpolation(methodParam[indexT])
                         # 显示填补信息
-                        st.toast(f'填补缺失值:{str(missingValueBefore - missingValueAfter)}' +
-                                 '\n' +
-                                 f'剩余缺失值:{missingValueAfter}', icon='✅')
+                        st.toast(f'填补字段:{fields[indexT][0]}  \n填补缺失值:{str(missingValueBefore - missingValueAfter)}条  \n' +
+                                 f'剩余缺失值:{missingValueAfter}条', icon='✅')
                     elif tempMethod == '剔除异常值':
                         (afterHandleData, lengthBefore, lengthAfter,
                          newDataColumn) = PretreatmentMethod(
