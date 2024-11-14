@@ -2,13 +2,15 @@ import datetime
 import os.path
 import time
 
+import numpy as np
 import streamlit as st
 import pandas as pd
+from matplotlib.colors import LinearSegmentedColormap
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
 from st_pages import hide_pages
-
+import matplotlib.cm as cm
 from lib.share import RESOURCE_MODELRESULT_PATH, IMAGECOUNT
 from lib.utils import filterUnique
 from pages import pages_utils
@@ -766,19 +768,19 @@ with modelACM:
             for i in range(len(models)):
                 with tt1[i]:
                     try:
+                        rootPath = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+                        testLabelDF = pd.read_excel(
+                            os.path.join(rootPath,
+                                         models[i] + '_testLabel.xlsx'))
+                        predictLabelDF = pd.read_excel(
+                            os.path.join(rootPath,
+                                         models[i] + '_predictLabel.xlsx'))
+                        # 假设第一列包含要绘制的数据
+                        actual_values = testLabelDF.iloc[:, 0]
+                        predicted_values = predictLabelDF.iloc[:, 0]
                         # 区分回归分类模型
-                        if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[i] == 'SEIR机理模型':
-                            rootPath = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
-                            testLabelDF = pd.read_excel(
-                                os.path.join(rootPath,
-                                             models[i] + '_testLabel.xlsx'))
-                            predictLabelDF = pd.read_excel(
-                                os.path.join(rootPath,
-                                             models[i] + '_predictLabel.xlsx'))
-                            # 假设第一列包含要绘制的数据
-                            actual_values = testLabelDF.iloc[:, 0]
-                            predicted_values = predictLabelDF.iloc[:, 0]
-
+                        if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[
+                            i] == 'SEIR机理模型':
                             colMB1, colMB2 = st.columns(2)
                             with colMB1:
                                 # 选择最多8个纬度
@@ -791,7 +793,8 @@ with modelACM:
                                 #     '经度'].astype(
                                 #     str)
                                 # Explicitly use .loc[] to avoid SettingWithCopyWarning
-                                df_filtered.loc[:, '地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(str)
+                                df_filtered.loc[:, '地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered[
+                                    '经度'].astype(str)
 
                                 # 绘制柱状图
                                 plt.figure(figsize=(10, 6))
@@ -831,42 +834,45 @@ with modelACM:
                                          verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
                                 st.pyplot(fig)
                         else:
-                            colMB1, colMB2 = st.columns(2)
+                            colMB1, colMB2, colMB3 = st.columns([0.2, 0.5, 0.2])
                             with colMB1:
+                                pass
                                 # 分类模型
-                                path1 = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
-                                # testLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_testLabel.xlsx'))
-                                predictLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_predictLabel.xlsx'))
-                                # 绘制二维平面散点图，只标记predictLabel为0和1的点
-                                # 分别绘制 predictLabel 为 0 和 1 的点
-                                fig, ax = plt.subplots()
-
-                                for label in [0, 1]:
-                                    subset = predictLabelDF[predictLabelDF['predictLabel'] == label]
-                                    if label == 0:
-                                        labelStr = '不发生'
-                                    else:
-                                        labelStr = '发生'
-                                    plt.scatter(subset['经度'], subset['纬度'], label=f'病害{labelStr}', s=100, alpha=0.6)
-                                # predicted_values = predictLabelDF.iloc[:, 0]
-                                ax.set_xlabel('经度')
-                                ax.set_ylabel('纬度')
-                                plt.legend(title='预测病害发生程度')
-                                # plt.title(f'{models[i]}模型混淆矩阵图')
-                                plt.figtext(0.5, -0.03,
-                                            f'图{st.session_state.IMAGECOUNT} {models[i]}模型部分预测结果图',
-                                            ha='center', fontsize=15)
-                                st.pyplot(fig)
+                                # predictLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_predictLabel.xlsx'))
+                                # # 绘制二维平面散点图，只标记predictLabel为0和1的点
+                                # # 分别绘制 predictLabel 为 0 和 1 的点
+                                # fig, ax = plt.subplots()
+                                # # 获取 'RdYlGn_r' colormap 对象，从绿到红
+                                # cmap = plt.get_cmap('RdYlGn')
+                                #
+                                # # 假设有 5 个唯一的标签值
+                                # unique_labels = predictLabelDF['predictLabel'].unique()
+                                # num_colors = len(unique_labels)
+                                #
+                                # # 从 colormap 获取等间隔的颜色
+                                # selected_colors = cmap(np.linspace(0, 1, num_colors))
+                                # for idx, label in enumerate(unique_labels):
+                                #     # print(f'获取颜色:{selected_colors[idx]}')
+                                #     # print(label)
+                                #     subset = predictLabelDF[predictLabelDF['predictLabel'] == label]
+                                #     plt.scatter(subset['经度'], subset['纬度'], label=f'{label}', color=selected_colors[idx], s=100, alpha=0.6)
+                                # # predicted_values = predictLabelDF.iloc[:, 0]
+                                # ax.set_xlabel('经度')
+                                # ax.set_ylabel('纬度')
+                                # plt.legend(title=f'预测{testLabelDF.columns[0]}')
+                                # # plt.title(f'{models[i]}模型混淆矩阵图')
+                                # plt.figtext(0.5, -0.03,
+                                #             f'图{st.session_state.IMAGECOUNT} {models[i]}模型部分预测结果图',
+                                #             ha='center', fontsize=15)
+                                # st.pyplot(fig)
                             with colMB2:
-                                actual_values = testLabelDF.iloc[:, 0]
-                                predicted_values = predictLabelDF.iloc[:, 0]
                                 # 绘制混淆矩阵图
                                 fig, ax = plt.subplots()
                                 conf_matrix = confusion_matrix(actual_values, predicted_values)
                                 sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax, cbar=False)
                                 # sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues')
-                                ax.set_xlabel('实际病害发生程度')
-                                ax.set_ylabel('预测病害发生程度')
+                                ax.set_xlabel(f'实际{testLabelDF.columns[0]}')
+                                ax.set_ylabel(f'预测{testLabelDF.columns[0]}')
                                 # plt.title(f'{models[i]}模型精度评价-混淆矩阵')
                                 # st.pyplot(fig)
                                 plt.figtext(0.5, -0.03,
@@ -878,6 +884,8 @@ with modelACM:
                                 # plt.text(-0.1, 0.97, metrics_text, transform=ax.transAxes, fontsize=10,
                                 #          verticalalignment='top', bbox=dict(facecolor='white', alpha=0.1))
                                 st.pyplot(fig)
+                            with colMB3:
+                                pass
                     except BaseException as e:
                         st.toast('运行出错,点击返回上一步', icon="⚠️")
                     finally:
