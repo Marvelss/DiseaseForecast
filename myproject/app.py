@@ -230,6 +230,7 @@ def inputName(dataType):
                          placeholder='水稻纹枯病SEIR动态预测模型',
                          # autocomplete='水稻纹枯病SEIR动态预测模型',
                          label_visibility='collapsed')
+    modelingTypeT = st.selectbox('请选择模型类型', options=['静态模型', '动态模型'])
     if dataType == '面状数据建模':
         st.markdown('##### 设置研究区')
         colTT1, colTT2 = st.columns(2)
@@ -237,6 +238,7 @@ def inputName(dataType):
         st.session_state.areaCenter[1] = colTT2.text_input('经度')
     if st.button("提交并跳转界面"):
         st.session_state.modelingName = name
+        st.session_state.modelingType = modelingTypeT
         if dataType == '点状数据建模':
             st.session_state.isPlanarInterface = False
             switch_page(os.path.join(PAGES_PATH, 'DataSet.py'))
@@ -247,6 +249,7 @@ def inputName(dataType):
 
 if "modelingName" not in st.session_state:
     st.session_state.modelingName = None
+    st.session_state.modelingType = None
 
 category("🗣️ 点/面数据建模入口")
 colAppImg1, colAppImg2, = st.columns(2)

@@ -50,14 +50,13 @@ if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
 
-@st.dialog("气象特征提取")
+@st.dialog("气象特征预处理")
 def timeResolutionUnification():
     # 检测预处理数据是否符合日值且无缺失值
     if pages_utils.TempDataSet[1].isnull().any().any():
         st.warning('预处理后数据集仍含缺失值，请前往预处理界面进行插补', icon="⚠️")
 
-    st.info('为了便于后续各环节数据处理，现对数据集时间分辨率进行统一，选项如下：  \n'
-            '分类模型:日值  \n回归模型:日值、每5天、旬、月', icon="ℹ️️")
+    st.info('为了便于后续各环节数据处理，现对数据集时间分辨率进行统一', icon="ℹ️️")
     # 分辨率统一
     time = st.selectbox('选择时间分辨率', options=('日值', '每5天', '旬值', '月值'))
     if st.button("确认"):
@@ -67,7 +66,10 @@ def timeResolutionUnification():
 
 # 时间分辨率统一
 if 'timeResolution' not in st.session_state:
-    timeResolutionUnification()
+    if st.session_state.modelingType == '动态模型':
+        timeResolutionUnification()
+    else:
+        st.session_state.timeResolution = '日值'
 
 # 处理方法内容记录(任务清单各项值)
 if "preMethodName" not in st.session_state:
@@ -182,8 +184,9 @@ def onRun():
                             dataFrameTemp,
                             fields[indexT], reservedField).linearInterpolation(methodParam[indexT])
                         # 显示填补信息
-                        st.toast(f'填补字段:{fields[indexT][0]}  \n填补缺失值:{str(missingValueBefore - missingValueAfter)}条  \n' +
-                                 f'剩余缺失值:{missingValueAfter}条', icon='✅')
+                        st.toast(
+                            f'填补字段:{fields[indexT][0]}  \n填补缺失值:{str(missingValueBefore - missingValueAfter)}条  \n' +
+                            f'剩余缺失值:{missingValueAfter}条', icon='✅')
                     elif tempMethod == '剔除异常值':
                         (afterHandleData, lengthBefore, lengthAfter,
                          newDataColumn) = PretreatmentMethod(
