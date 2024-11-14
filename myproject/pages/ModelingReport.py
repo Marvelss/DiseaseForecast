@@ -122,12 +122,12 @@ if 'hideBtnDict' not in st.session_state:
     }
 
 hideBtnBrief = st.empty()
-hideBtnRaw = st.empty()
-hideBtnPre = st.empty()
-hideBtnFC = st.empty()
-hideBtnFO = st.empty()
-hideBtnMB = st.empty()
-hideBtnWG = st.empty()
+# hideBtnRaw = st.empty()
+# hideBtnPre = st.empty()
+# hideBtnFC = st.empty()
+# hideBtnFO = st.empty()
+# hideBtnMB = st.empty()
+# hideBtnWG = st.empty()
 
 with hideBtnBrief.container():
     category("ℹ️ 摘要")
@@ -139,7 +139,7 @@ with hideBtnBrief.container():
         pages_utils.TempDataSetField[1]['预处理方法'].tolist()) else '(待进行处理)'
     aInfoGap3 = '、'.join(pages_utils.TempDataSetField[2]['特征计算方法'].tolist()) if len(
         pages_utils.TempDataSetField[2]['特征计算方法'].tolist()) else '(待进行处理)'
-    aInfoGap4 = '、'.join(pages_utils.TempDataSetField[3]['特征优选方法'].tolist()) if len(
+    aInfoGap4 = '、'.join(list(set(pages_utils.TempDataSetField[3]['特征优选方法'].tolist()))) if len(
         pages_utils.TempDataSetField[3]['特征优选方法'].tolist()) else '(待进行处理)'
     aInfoGap5 = '、'.join(pages_utils.TempDataSetField[4]['特征'].tolist()[0]) if len(
         pages_utils.TempDataSetField[4]['特征'].tolist()) else '(待进行处理)'
@@ -152,19 +152,23 @@ with hideBtnBrief.container():
     if len(pages_utils.TempDataSetField[4]['特征'].tolist()):
         mbInfo4_list = []
         for item in pages_utils.TempDataSetField[4]['评价指标']:
-            formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in eval(item).items()])
+            if isinstance(item,dict):
+                formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in item.items()])
+            else:
+                formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in eval(item).items()])
+
             mbInfo4_list.append(formatted)
         aInfoGap8 = '；'.join(mbInfo4_list)
     else:
         aInfoGap8 = '(待进行处理)'
     # st.session_state.modelSituationIndexResult = {'高温多雨': 0.45}
     # st.session_state.modelSituationIndexResult = {}
-    aInfoGap9 = '、'.join(st.session_state.modelReportWeatherInfo['情景']) if len(
-        st.session_state.modelReportWeatherInfo['模型']) else '(待进行处理)'
-    aInfoGap13 = '、'.join(st.session_state.modelReportWeatherInfo['模型']) if len(
-        st.session_state.modelReportWeatherInfo['模型']) else '(待进行处理)'
+    # aInfoGap9 = '、'.join(st.session_state.modelReportWeatherInfo['情景']) if len(
+    #     st.session_state.modelReportWeatherInfo['模型']) else '(待进行处理)'
+    # aInfoGap13 = '、'.join(st.session_state.modelReportWeatherInfo['模型']) if len(
+    #     st.session_state.modelReportWeatherInfo['模型']) else '(待进行处理)'
     # 格式化指标结果
-    if len(st.session_state.modelReportWeatherInfo['模型']):
+    if st.session_state.modelReportWeatherInfo['模型'] is not None:
         values_list = list(st.session_state.modelSituationIndexResult.values())
         # 创建结果列表
         data = {}
@@ -199,6 +203,7 @@ with hideBtnBrief.container():
     ##### 优选算法：{aInfoGap4} \n
     ##### 优选特征：{aInfoGap5}  \n
     ##### 建模方法：{aInfoGap7}  \n
+    ##### 模型类型：{st.session_state.modelingType}  \n
     ##### 模型精度：{aInfoGap8}  \n
     """
     # abstractInfo1 = f"""
