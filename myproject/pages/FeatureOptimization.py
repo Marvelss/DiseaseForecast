@@ -126,7 +126,7 @@ def clear_other(key):
 def firstPage(): st.session_state.page14 = 0
 
 
-@st.experimental_dialog("预览", width='large')
+@st.dialog("预览", width='large')
 # 预览运行结果
 def onPreviewResults():
     afterHandleData, tempResultP, optimalFeatureList = None, None, None

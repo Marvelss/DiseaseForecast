@@ -224,7 +224,7 @@ with colDPF21col2:
 # }
 # </style>
 # """, unsafe_allow_html=True)
-@st.experimental_dialog("请输入建模场景名称")
+@st.dialog("请输入建模场景名称")
 def inputName(dataType):
     name = st.text_input("输入",
                          placeholder='水稻纹枯病SEIR动态预测模型',
@@ -413,7 +413,7 @@ st.markdown(
 )
 
 
-@st.experimental_dialog("接口调用", width='large')
+@st.dialog("接口调用", width='large')
 def vote(titleName):
     afterHandleData = pd.DataFrame()
     if titleName == '降雨日数计算':

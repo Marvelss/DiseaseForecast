@@ -370,7 +370,7 @@ def category(name, description=None):
     # current_category_index += 1
 
 
-@st.experimental_dialog("有效值提取", width='large')
+@st.dialog("有效值提取", width='large')
 def vote():
     isExtract = st.checkbox('提取有效值')
     # 分组并提取每个分组的第一个非空值
