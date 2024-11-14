@@ -49,16 +49,14 @@ if 'page13' not in st.session_state:
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
     st.switch_page("app.py")
+# 判断首次加载页面
+if 'initFlagNum' not in st.session_state:
+    st.session_state.initFlagNum = 0
 
-
-@st.dialog("气象特征提取")
-def timeResolutionUnification():
-    # 检测预处理数据是否符合日值且无缺失值
-    if pages_utils.TempDataSet[1].isnull().any().any():
-        st.warning('预处理后数据集仍含缺失值，请前往预处理界面进行插补', icon="⚠️")
-
-    st.info('为了便于后续各环节数据处理，现对数据集时间分辨率进行统一，选项如下：  \n'
-            '分类模型:日值  \n回归模型:每5天、旬、月', icon="ℹ️️")
+# 检测预处理数据是否符合日值且无缺失值
+if st.session_state.timeResolution and not st.session_state.initFlagNum:
+    print('首次加载计算')
+    st.session_state.initFlagNum += 1
     # 计算旬、月、年内日期和日期字段
     tempDataSet1 = pages_utils.TempDataSet[1]
     tempDataSet1['日期'] = pd.to_datetime(
@@ -71,38 +69,26 @@ def timeResolutionUnification():
     # pages_utils.TempDataSet[1] = tempDataSet1
     # pages_utils.TempDataSet[1].to_excel('计算预处理.xlsx')
     # 分辨率统一
-    time = st.selectbox('选择时间分辨率', options=('日值', '每5天', '旬值', '月值'))
-    if st.button("确认"):
-        if time == '日值':
-            pass
-        elif time == '每5天':
-            # 1. 每5天的降水累积量
-            # 添加一个5天分组列
-            tempDataSet1['5天组'] = (tempDataSet1['DayOfYear'] - 1) // 5 + 1
-            # 删除闰年 2 月 29 日的行
-            tempDataSet1 = tempDataSet1[~((tempDataSet1['年'] % 4 == 0) & (tempDataSet1['年'] % 100 != 0) | (
-                    tempDataSet1['年'] % 400 == 0) & (tempDataSet1['DayOfYear'] == 60))]
-            # tempDataSet1['5天组'] = (tempDataSet1['DayOfYear'] - 1) // 5 + 1  # 创建一个按5天分组的标识
-            pages_utils.TempDataSet[1] = tempDataSet1.groupby(['经度', '纬度', '年', '5天组']).mean(
-                numeric_only=True).reset_index()
-        elif time == '旬值':
-            # 2. 每旬的降水累积量
-            pages_utils.TempDataSet[1] = tempDataSet1.groupby(['经度', '纬度', '年', '月', '旬']).mean(
-                numeric_only=True).reset_index()
-        elif time == '月值':
-            # 3. 每月的降水累积量
-            pages_utils.TempDataSet[1] = tempDataSet1.groupby(['经度', '纬度', '年', '月']).mean(
-                numeric_only=True).reset_index()
-
-        # pages_utils.TempDataSet[1]
-        # 输出结果
-        st.session_state.timeResolution = time
-        st.rerun()
-
-
-# 时间分辨率统一
-if 'timeResolution' not in st.session_state:
-    timeResolutionUnification()
+    if st.session_state.timeResolution == '日值':
+        pass
+    elif st.session_state.timeResolution == '每5天':
+        # 1. 每5天的降水累积量
+        # 添加一个5天分组列
+        tempDataSet1['5天组'] = (tempDataSet1['DayOfYear'] - 1) // 5 + 1
+        # 删除闰年 2 月 29 日的行
+        tempDataSet1 = tempDataSet1[~((tempDataSet1['年'] % 4 == 0) & (tempDataSet1['年'] % 100 != 0) | (
+                tempDataSet1['年'] % 400 == 0) & (tempDataSet1['DayOfYear'] == 60))]
+        # tempDataSet1['5天组'] = (tempDataSet1['DayOfYear'] - 1) // 5 + 1  # 创建一个按5天分组的标识
+        pages_utils.TempDataSet[1] = tempDataSet1.groupby(['经度', '纬度', '年', '5天组']).mean(
+            numeric_only=True).reset_index()
+    elif st.session_state.timeResolution == '旬值':
+        # 2. 每旬的降水累积量
+        pages_utils.TempDataSet[1] = tempDataSet1.groupby(['经度', '纬度', '年', '月', '旬']).mean(
+            numeric_only=True).reset_index()
+    elif st.session_state.timeResolution == '月值':
+        # 3. 每月的降水累积量
+        pages_utils.TempDataSet[1] = tempDataSet1.groupby(['经度', '纬度', '年', '月']).mean(
+            numeric_only=True).reset_index()
 
 st.markdown(
     """

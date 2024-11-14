@@ -49,6 +49,26 @@ div.stButton button {
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
+
+@st.dialog("气象特征提取")
+def timeResolutionUnification():
+    # 检测预处理数据是否符合日值且无缺失值
+    if pages_utils.TempDataSet[1].isnull().any().any():
+        st.warning('预处理后数据集仍含缺失值，请前往预处理界面进行插补', icon="⚠️")
+
+    st.info('为了便于后续各环节数据处理，现对数据集时间分辨率进行统一，选项如下：  \n'
+            '分类模型:日值  \n回归模型:日值、每5天、旬、月', icon="ℹ️️")
+    # 分辨率统一
+    time = st.selectbox('选择时间分辨率', options=('日值', '每5天', '旬值', '月值'))
+    if st.button("确认"):
+        st.session_state.timeResolution = time
+        st.rerun()
+
+
+# 时间分辨率统一
+if 'timeResolution' not in st.session_state:
+    timeResolutionUnification()
+
 # 处理方法内容记录(任务清单各项值)
 if "preMethodName" not in st.session_state:
     st.session_state["preMethodName"] = {
