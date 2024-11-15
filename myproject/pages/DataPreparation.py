@@ -50,11 +50,11 @@ if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
 
-@st.dialog("气象特征预处理")
+@st.dialog("气象数据预处理")
 def timeResolutionUnification():
     # 检测预处理数据是否符合日值且无缺失值
     if pages_utils.TempDataSet[1].isnull().any().any():
-        st.warning('预处理后数据集仍含缺失值，请前往预处理界面进行插补', icon="⚠️")
+        st.warning('数据集含缺失值，请进行缺失值插补', icon="⚠️")
 
     st.info('为了便于后续各环节数据处理，现对数据集时间分辨率进行统一', icon="ℹ️️")
     # 分辨率统一
