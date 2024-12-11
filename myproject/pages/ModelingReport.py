@@ -168,27 +168,28 @@ with hideBtnBrief.container():
     # aInfoGap13 = '、'.join(st.session_state.modelReportWeatherInfo['模型']) if len(
     #     st.session_state.modelReportWeatherInfo['模型']) else '(待进行处理)'
     # 格式化指标结果
-    if st.session_state.modelReportWeatherInfo['模型'] is not None:
-        values_list = list(st.session_state.modelSituationIndexResult.values())
-        # 创建结果列表
-        data = {}
+    # if st.session_state.modelReportWeatherInfo['模型'] is not None:
+    #     values_list = list(st.session_state.modelSituationIndexResult.values())
+    #     # 创建结果列表
+    #     data = {}
+    #
+    #     # 遍历并格式化为指定格式
+    #     for value in values_list:
+    #         # 提取文件路径中的模型名称
+    #         file_path = value[0]
+    #         # 提取模型名称和情景
+    #         model_info = os.path.basename(file_path).split('_applicationPredict.xlsx')[0].split('_')
+    #
+    #         if len(model_info) >= 2:
+    #             model_name, scenario = model_info[0], model_info[1]
+    #
+    #             # 将精度值存入字典
+    #             data.setdefault(model_name, {})[scenario] = float(value[1])
+    #
+    #     aInfoGap10 = data
+    # else:
+    #     aInfoGap10 = '(待进行处理)'
 
-        # 遍历并格式化为指定格式
-        for value in values_list:
-            # 提取文件路径中的模型名称
-            file_path = value[0]
-            # 提取模型名称和情景
-            model_info = os.path.basename(file_path).split('_applicationPredict.xlsx')[0].split('_')
-
-            if len(model_info) >= 2:
-                model_name, scenario = model_info[0], model_info[1]
-
-                # 将精度值存入字典
-                data.setdefault(model_name, {})[scenario] = float(value[1])
-
-        aInfoGap10 = data
-    else:
-        aInfoGap10 = '(待进行处理)'
     aInfoGap11 = '较一致' if 0.45 < 1 else '较不一致'  # 天气情景好
     aInfoGap12 = ['较高', '较好'] if 0.45 < 1 else ['较低', '较差']  # 模型评价和天气情景都好
     aInfoModelName = st.session_state.modelingName
