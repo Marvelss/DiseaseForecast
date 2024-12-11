@@ -27,7 +27,7 @@ hide_pages(
     [
         "测试界面",
         "原始数据",
-        "数据预处理",
+        "气象数据预处理",
         "特征计算",
         "特征优选",
         "模型构建",
@@ -153,9 +153,9 @@ with colDPF1:
 with colDPF21:
     colDPF21col1, colDPF21col2 = st.columns([3, 10])
     with colDPF21col1:
-        st.markdown("##### 原始数据")
+        st.markdown("##### 预处理前")
     with colDPF21col2:
-        onDP1 = st.toggle(label="自动显示对应图层-左侧", help='图层加载时间较长')
+        onDP1 = st.toggle(label="显示图层-左侧", help='多个图层容易加载时间较长')
 
     # 初始化地图
     placeHolderDPF = st.empty()
@@ -179,9 +179,9 @@ with colDPF21:
 with colDPF22:
     colDPF21col3, colDPF21col4 = st.columns([4, 10])
     with colDPF21col3:
-        st.markdown("##### 预处理后数据")
+        st.markdown("##### 预处理后")
     with colDPF21col4:
-        onDP2 = st.toggle(label="自动显示对应图层-右侧", help='图层加载时间较长')
+        onDP2 = st.toggle(label="显示图层-右侧", help='多个图层容易加载时间较长')
     # 初始化地图
     placeHolderDPF2 = st.empty()
     with placeHolderDPF2:

@@ -27,7 +27,7 @@ hide_pages(
     [
         "测试界面",
         "原始数据",
-        "数据预处理",
+        "气象数据预处理",
         "特征计算",
         "特征优选",
         "模型构建",
@@ -134,8 +134,8 @@ with dataSCM:
 
 # ==============================右侧文件上传状态显示==============================
 with dataSCMap:
-    onDS = st.toggle(label="选中文件时自动显示对应图层",
-                     help='图层加载时间较长',
+    onDS = st.toggle(label="显示图层(选中文件时自动显示对应图层)",
+                     help='多个图层容易加载时间较长',
                      value=False)
 
     placeHolderDSF = st.empty()
@@ -144,7 +144,6 @@ with dataSCMap:
     with placeHolderDSF:
         map1 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
         map1.add_basemap('SATELLITE')
-
         # 初始化地图
         # m = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
 
@@ -247,5 +246,6 @@ with dataSCR:
     # ==============================右侧数据模板下载及注意事项==============================
     st.markdown("##### 数据上传注意事项")
     placeholder1 = st.empty()
-    st.warning('* 文件命名格式:特征名称_年份_DOY  \n'
+    st.warning('* 目前只支持上传单年数据  \n'
+               '* 文件命名格式:特征名称_年份_DOY  \n'
                '* shp文件名称不能以shp结尾  \n', icon="⚠️")

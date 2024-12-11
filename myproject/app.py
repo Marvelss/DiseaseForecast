@@ -51,7 +51,7 @@ show_pages(
     [
         Page(os.path.join(PROJECT_PATH, 'app.py'), "主页"),
         Page(os.path.join(PAGES_PATH, 'DataSet.py'), "原始数据"),
-        Page(os.path.join(PAGES_PATH, 'DataPreparation.py'), "数据预处理"),
+        Page(os.path.join(PAGES_PATH, 'DataPreparation.py'), "气象数据预处理"),
         Page(os.path.join(PAGES_PATH, 'FeatureCalculation.py'), "特征计算"),
         Page(os.path.join(PAGES_PATH, 'FeatureOptimization.py'), "特征优选"),
         Page(os.path.join(PAGES_PATH, 'ModelBuilding.py'), "模型构建"),
@@ -76,7 +76,7 @@ show_pages(
 
 # 隐藏页面
 hide_pages(
-    ["原始数据", "数据预处理", "特征计算",
+    ["原始数据", "气象数据预处理", "特征计算",
      "特征优选", "模型构建", "基于天气情景生成器的模型评价", "基于天气情景生成器的模型评价-面状",
      "模型应用", "模型应用-面状",
      "原始数据-面状",
@@ -227,10 +227,10 @@ with colDPF21col2:
 @st.dialog("请输入建模场景名称")
 def inputName(dataType):
     name = st.text_input("输入",
-                         placeholder='水稻纹枯病SEIR动态预测模型',
+                         placeholder='苹果斑点落叶病预测模型',
                          # autocomplete='水稻纹枯病SEIR动态预测模型',
                          label_visibility='collapsed')
-    modelingTypeT = st.selectbox('请选择模型类型', options=['静态模型', '动态模型'])
+    modelingTypeT = st.selectbox('请选择模型类型', options=['静态模型'])
     if dataType == '面状数据建模':
         st.markdown('##### 设置研究区')
         colTT1, colTT2 = st.columns(2)

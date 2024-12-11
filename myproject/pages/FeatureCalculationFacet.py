@@ -27,7 +27,7 @@ hide_pages(
     [
         "测试界面",
         "原始数据",
-        "数据预处理",
+        "气象数据预处理",
         "特征计算",
         "特征优选",
         "模型构建",
@@ -195,7 +195,7 @@ with colFCF1:
             leftBarsPreData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.PreprocessedDataSetFieldFacet))
         leftBarsFCalData = tree_select(nodes=pages_utils.updateLeftBars(pages_utils.FeatureDataSetFieldFacet))
 with colFCF2:
-    onFC = st.toggle(label="自动显示对应图层", help='图层加载时间较长')
+    onFC = st.toggle(label="显示图层", help='多个图层容易加载时间较长')
     # 初始化地图
     pe = st.empty()
     with pe:

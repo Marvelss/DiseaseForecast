@@ -91,27 +91,27 @@ def getDataFiled(dataNum, tempDataSetField):
         agricultureName = list(set([item for sublist in array_2dA for item in sublist]))
 
     # 特征优选界面做单独处理,因为单条记录含多个输出特征
-    if dataNum == 3 and not tempDF['优选特征'].empty:
-        flagT = True
-        for i, row in tempDF.iterrows():
-            if isinstance(tempDF['优选特征'][i], float):
-                # 只要含有nan就不取
-                flagT = False
-        expanded_rows = []
-        if flagT:
-            expanded_rows1, expanded_rows2, expanded_rows3 = [], [], []
-            for i, row in tempDF.iterrows():
-                features = row['优选特征'].split(',')
-                data_types = row['数据类型']
-                # 遍历数据类型和优选特征
-                for j in range(len(data_types)):
-                    if data_types[j] == '气象数据':
-                        expanded_rows1.append(features[j])
-                    elif data_types[j] == '植保数据':
-                        expanded_rows2.append(features[j])
-                    elif data_types[j] == '地理遥感数据':
-                        expanded_rows3.append(features[j])
-            weatherName, plantName, agricultureName = expanded_rows1, expanded_rows2, expanded_rows3
+    # if dataNum == 3 and not tempDF['优选特征'].empty:
+    #     flagT = True
+    #     for i, row in tempDF.iterrows():
+    #         if isinstance(tempDF['优选特征'][i], float):
+    #             # 只要含有nan就不取
+    #             flagT = False
+    #     expanded_rows = []
+    #     if flagT:
+    #         expanded_rows1, expanded_rows2, expanded_rows3 = [], [], []
+    #         for i, row in tempDF.iterrows():
+    #             features = row['优选特征'].split(',')
+    #             data_types = row['数据类型']
+    #             # 遍历数据类型和优选特征
+    #             for j in range(len(data_types)):
+    #                 if data_types[j] == '气象数据':
+    #                     expanded_rows1.append(features[j])
+    #                 elif data_types[j] == '植保数据':
+    #                     expanded_rows2.append(features[j])
+    #                 elif data_types[j] == '地理遥感数据':
+    #                     expanded_rows3.append(features[j])
+    #         weatherName, plantName, agricultureName = expanded_rows1, expanded_rows2, expanded_rows3
     return weatherName, plantName, agricultureName
 
 

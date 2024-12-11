@@ -26,9 +26,27 @@ with colDPF21:
     # 初始化地图
     placeHolderDPF = st.empty()
     with placeHolderDPF:
-        m1 = leafmap.Map(center=st.session_state.areaCenter, zoom_start=16)
+        m1 = leafmap.Map(zoom_start=16)
         m1.add_basemap('SATELLITE')
-        m1.to_streamlit()
+        # m1.to_streamlit()
+
+# dem = "https://github.com/opengeos/datasets/releases/download/raster/srtm90.tif"
+dem = r'E:\a_python\program\diseaseForecastStreamlit\myproject\resource\tempdir\CHN_Wheat_2010.tif'
+m = leafmap.Map(zoom_start=16)
+m.add_basemap('SATELLITE')
+
+m.add_raster(dem, cmap='RdYlGn', layer_name="DEM", nodata=0, attribution='由杭电数字农业团队提供')
+m.add_colorbar(
+    cmap="terrain",
+    vmin=0,
+    vmax=1,
+    label="Elevation (m)",
+    position="bottom-right",
+    width=1,
+    height=3,
+    orientation="vertical", colors=["red", 'yellow', 'blue']
+)
+m.to_streamlit()
 
 
 # with colDPF22:
@@ -45,10 +63,10 @@ def my_fragment():
     st.session_state.m2.to_streamlit()
 
 
-btn = st.button('添加图层')
-if btn:
-    st.session_state.m2.add_basemap('SATELLITE')
-    st.session_state.m2.to_streamlit()
+# btn = st.button('添加图层')
+# if btn:
+#     st.session_state.m2.add_basemap('SATELLITE')
+#     st.session_state.m2.to_streamlit()
 
 # # Read file and keep in variable
 # with open(r"E:\a_python\program\diseaseForecastStreamlit\mymap.html", "r") as f:
@@ -864,7 +882,7 @@ nodes2 = [
 ]
 mainIndex, tempIndex = st.columns([0.9, 0.2])
 with mainIndex:
-    val = stx.stepper_bar(steps=["数据集", "数据预处理", "特征计算", "特征优选", "模型构建"])
+    val = stx.stepper_bar(steps=["数据集", "气象数据预处理", "特征计算", "特征优选", "模型构建"])
     st.info(f"Phase #{val}")
     if val == 1:
         switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\DataPreparation.py")

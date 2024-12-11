@@ -20,7 +20,7 @@ hide_pages(
     [
         "测试界面",
         "原始数据",
-        "数据预处理",
+        "气象数据预处理",
         "特征计算",
         "特征优选",
         "模型构建",
@@ -114,7 +114,7 @@ def clear_other(key):
 def firstPage(): st.session_state.page14Facet = 0
 
 
-@st.experimental_dialog("预览", width='large')
+@st.dialog("预览", width='large')
 # 预览运行结果
 def onPreviewResults():
     afterHandleData, tempResultP, optimalFeatureList = None, None, None
@@ -391,7 +391,7 @@ with dataPCV:
                             #     tempDataSetFacetReveal,
                             #     height=220, width=800)
                             st.data_editor(
-                                pages_utils.TempDataSetFieldFacet[2],
+                                pages_utils.TempDataSetFacet[2],
                                 height=220, width=800)
                         elif st.session_state["leftTabsFacet"][i] == '优选特征':
                             # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
@@ -399,10 +399,7 @@ with dataPCV:
                                 pages_utils.TempDataSetFieldFacet[3],
                                 height=220, width=800)
                     except:
-                        # pass
-                        st.data_editor(
-                            pd.read_excel('特征计算.xlsx').head(1000),
-                            height=220, width=800)
+                        st.markdown('##### 加载出错')
 
     if st.session_state.page12 == 1:
         with placeholder1.container():
@@ -414,7 +411,7 @@ with dataPCV:
                     try:
                         if st.session_state["leftTabsFacet"][i] == '备选特征':
                             st.data_editor(
-                                pages_utils.TempDataSetFieldFacet[2],
+                                pages_utils.TempDataSetFacet[2],
                                 height=220, width=800)
                         elif tempLeftTabs[i] == '优选特征':
                             # column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
@@ -422,9 +419,7 @@ with dataPCV:
                                 pages_utils.TempDataSetFieldFacet[3],
                                 height=220, width=800)
                     except:
-                        st.data_editor(
-                            pd.read_excel('特征计算.xlsx').head(1000),
-                            height=220, width=800)
+                        st.markdown('##### 加载出错')
     # ===============显示左下字段或特征及获取===============
     # a = st.selectbox(
     #     '选择数据集',
@@ -504,7 +499,7 @@ with dataPCM:
                                     value=0.01,
                                     min_value=0.01,
                                     max_value=0.05,
-                                    step=0.01)
+                                    step=0.04)
         st.session_state["OptimizationMethodNameFacet"]['param1'] = option112
         st.session_state["OptimizationMethodNameFacet"]['param2'] = ' '.join(option1122)
         st.session_state["OptimizationMethodNameFacet"]['param3'] = str(number112)
