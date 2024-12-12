@@ -33,6 +33,8 @@ hide_pages(
         "建模报告-面状",
         "模型应用-面状",
         "数据下载中心-面状",
+        "基于天气情景生成器的模型评价",
+        "模型应用"
     ]
 )
 # 取消链接跳转
@@ -507,9 +509,10 @@ with modelACV:
     with modelACVCol2:
         st.markdown("")
         st.markdown("###### 标签\n")
+        _, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
         resultLabel = st.selectbox(
             'predictLabel',
-            filterUnique(pages_utils.TempDataSet[2].columns.tolist(), pages_utils.reservedField),
+            filterUnique(plantNameT0, pages_utils.reservedField),
             label_visibility='collapsed')
 
 # ===============显示右上模型选项===============
@@ -519,6 +522,7 @@ with modelACM:
     if st.session_state.page == 0:
         with ph.container():
             st.markdown("##### 建模方法")
+            st.warning('注意：分类模型针对离散变量；回归模型针对连续变量', icon="⚠️")
             # 按模型分类显示
             st.markdown("###### 分类模型")
             colOption1, colOption2, colOption3, colOption4 = st.columns(4)
@@ -545,17 +549,18 @@ with modelACM:
                 agree5 = st.checkbox('PLSR', key='checkBoxModel5', on_change=clearOtherOption, args=[5])
             with colOption4:
                 pass
-            st.markdown("###### 机理模型")
-            colOption31, colOption32, = st.columns(2)
-            with colOption31:
-                agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4])
-            with colOption32:
-                pass
+            # st.markdown("###### 机理模型")
+            # colOption31, colOption32, = st.columns(2)
+            # with colOption31:
+            #     agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4])
+            # with colOption32:
+            #     pass
 
-            st.markdown('---')
+            # st.markdown('---')
+
 
             # ===============显示和处理右中各个模型参数(主要添加模型时加入checkbox名称)===============
-            if agree or agree1 or agree2 or agree2 or agree3 or agree4 or agree5 or agree6 or agree7:
+            if agree or agree1 or agree2 or agree2 or agree3 or agree5 or agree6 or agree7:
                 model = getCheckboxName()
                 # print(f'--{model}--')
                 formatted_data = []
@@ -574,19 +579,21 @@ with modelACM:
                             })
                 df = pd.DataFrame(formatted_data)
                 # st.table(df)
-                edited_df = st.data_editor(df, height=190, width=900,
-                                           disabled=["参数名", "备注"])
-                # 删除 '备注' 列
-                edited_df_no_remark = edited_df.drop(columns=["备注"])
+                with st.expander('高级设置'):
+                    edited_df = st.data_editor(df, height=190, width=900,
+                                               disabled=["参数名", "备注"])
+                    # 删除 '备注' 列
+                    edited_df_no_remark = edited_df.drop(columns=["备注"])
                 st.session_state["modelParamName"] = edited_df_no_remark.to_dict()
 
             # =======================准备任务清单内容=======================
             if st.session_state.nextBtnShow == 0:
                 interval_col1, interval_col2 = st.columns([5, 1])
-                btn1 = interval_col2.button("下一步", on_click=onModel)
+                # btn1 = interval_col2.button("下一步", on_click=onModel)
             else:
-                interval_col1, interval_col2 = st.columns([5, 1])
-                btn = interval_col2.button("添加模型", on_click=onAddModel)
+                # interval_col1, interval_col2 = st.columns([5, 1])
+                # btn = interval_col2.button("添加模型", on_click=onAddModel)
+                btn = None
                 # =======================添加模型=======================
                 if btn:
                     # 检测目标连续/回归变量对应分类/回归模型
@@ -638,7 +645,26 @@ with modelACM:
                         print('======================模型构建-添加模型======================')
                         print(new_data)
                         pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_data
-                        st.rerun()
+                        # st.rerun()
+            st.markdown("##### 训练与验证数据集划分")
+            colOP1, colOP2 = st.columns(2)
+            with colOP1:
+                option1 = st.selectbox(
+                    label="训练与验证数据集划分", label_visibility='collapsed',
+                    options="按比例划分"
+                )
+            with colOP2:
+                if option1 == '按比例划分':
+                    option = st.selectbox(
+                        label="比例", label_visibility='collapsed',
+                        options=("8:2", "7:3", "6:4")
+                    )
+                # elif option1 == '按年份划分(未实现)':
+                #     option = st.selectbox(
+                #         label="年", label_visibility='collapsed',
+                #         options=('待实现', '')
+                #     )
+
     # Page 1
     elif st.session_state.page == 1:
         # =======================添加评价指标=======================
@@ -740,11 +766,6 @@ with modelACM:
     if st.session_state.page15 == 0:
         # =======================显示右下任务清单表格=======================
         with placeholder.container():
-            st.markdown('##### 任务清单')
-            pages_utils.TempDataSetField[4] = st.data_editor(
-                pages_utils.TempDataSetField[4], height=190, width=1200,
-                column_order=["编号", "特征", "模型", "模型参数", "评价指标", "数据集划分比例", "时间", '处理状态'],
-                disabled=["时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([4, 1])
             with interval_col33:
                 # st.info('当前时间分辨率为:1天')
@@ -752,6 +773,11 @@ with modelACM:
                 btn = st.button('开始模型训练',
                                 on_click=onTrain,
                                 args=[1])
+            st.markdown('##### 任务清单')
+            pages_utils.TempDataSetField[4] = st.data_editor(
+                pages_utils.TempDataSetField[4], height=190, width=1200,
+                column_order=["编号", "特征", "模型", "模型参数", "评价指标", "数据集划分比例", "时间", '处理状态'],
+                disabled=["时间", '处理状态'], num_rows="dynamic", )
     # placeholder1 = st.empty()
     # =======================显示右下可视化图表=======================
     elif st.session_state.page15 == 1:

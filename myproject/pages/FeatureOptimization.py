@@ -28,6 +28,8 @@ hide_pages(
         "建模报告-面状",
         "模型应用-面状",
         "数据下载中心-面状",
+        "基于天气情景生成器的模型评价",
+        "模型应用"
     ]
 )
 # 取消链接跳转
@@ -443,9 +445,20 @@ with dataPCV:
     #         else:
     #             weatherNameList.append(a)
     # 按照数据类型显示左侧字段或特征
+
+    colSelect1 , colSelect2 = st.columns(2)
+    with colSelect1:
+        result5 = pages_utils.multiselect_all(
+            st, '全选-旬均值特征', filterUnique(weatherNameList, pages_utils.reservedField),
+            'dekad', 'collapsed')
+    with colSelect2:
+        result6 = pages_utils.multiselect_all(
+            st, '全选-月均值特征', filterUnique(weatherNameList, pages_utils.reservedField),
+            'month', 'collapsed')
     result1 = pages_utils.multiselect_all(
         st, '全选-气象特征', filterUnique(weatherNameList, pages_utils.reservedField),
         'tempTemperature', 'collapsed')
+
     # result2 = pages_utils.multiselect_all(
     #     st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
     #     'tempPlant', 'collapsed')
@@ -506,6 +519,7 @@ with dataPCM:
 
     # st.markdown('---')
     if genre3:
+        st.warning('注意：Relief - F算法只针对植保数据为离散变量(如病情等级)情形', icon="⚠️")
         option111 = st.selectbox(
             '目标变量',
             mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
