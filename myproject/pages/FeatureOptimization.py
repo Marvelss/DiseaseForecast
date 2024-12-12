@@ -54,7 +54,6 @@ if 'page14' not in st.session_state:
     # df_cleaned = result.drop('DayOfYear', axis=1)
     pages_utils.TempDataSet[2] = result
 
-
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
@@ -430,9 +429,9 @@ with dataPCV:
         # print(weatherNameT22)
         if isinstance(weatherNameT22, str):
             weatherNameT2H += weatherNameT22.split(',')
-    weatherNameList = weatherNameT1 + weatherNameT2H + weatherNameT0
-    plantNameList = plantNameT1 + plantNameT2 + plantNameT0
-    agricultureNameList = agricultureNameT1 + agricultureNameT0 + agricultureNameT2
+    weatherNameList = weatherNameT2H
+    plantNameList = plantNameT2 + plantNameT0
+    agricultureNameList = agricultureNameT2 + agricultureNameT1 + agricultureNameT0
     # print(weatherNameT1 + weatherNameT2 + weatherNameT0)
     # print('---测试优选特征--')
     # print(weatherNameT3)
@@ -447,12 +446,14 @@ with dataPCV:
     result1 = pages_utils.multiselect_all(
         st, '全选-气象特征', filterUnique(weatherNameList, pages_utils.reservedField),
         'tempTemperature', 'collapsed')
-    result2 = pages_utils.multiselect_all(
-        st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
-        'tempPlant', 'collapsed')
-    result3 = pages_utils.multiselect_all(
-        st, '全选-地理遥感特征', filterUnique(agricultureNameList, pages_utils.reservedField),
-        'tempAgriculture', 'collapsed')
+    # result2 = pages_utils.multiselect_all(
+    #     st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
+    #     'tempPlant', 'collapsed')
+    result2 = filterUnique(plantNameList, pages_utils.reservedField)
+    # result3 = pages_utils.multiselect_all(
+    #     st, '全选-地理遥感特征', filterUnique(agricultureNameList, pages_utils.reservedField),
+    #     'tempAgriculture', 'collapsed')
+    result3 = filterUnique(agricultureNameList, pages_utils.reservedField)
     # result4 = pages_utils.multiselect_all(
     #     st, '全选-优选特征', set(st.session_state.preferenceFeature),
     #     'tempOptimal', 'collapsed')
@@ -461,22 +462,22 @@ with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])
     with tab1:
         genre = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other, args=[0])
-        genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1])
-
+        genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1], disabled=True,
+                             help='该功能开发中')
     with tab2:
         genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other, args=[2])
     st.markdown('---')
 
     # ===============显示和处理右中各个处理方法设置参数===============
     if genre:
-        option1122 = st.selectbox(
-            '目标变量',
-            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
-        option1132 = pages_utils.multiselect_all(
-            st, '全选-被比较变量', mergeExcludeArray(
-                result1, result2, result3, [option1122]),
-            'tempFiled', 'collapsed')
-        number33 = st.number_input("剔除相关系数阈值(R)",
+        option1122 = st.selectbox('目标变量', result2)
+        # option1132 = pages_utils.multiselect_all(
+        #     st, '全选-被比较变量', mergeExcludeArray(
+        #         result1, result2, result3, [option1122]),
+        #     'tempFiled', 'collapsed')
+        option1132 = result1
+        # option1132 = mergeExcludeArray(result1, result2, result3, pages_utils.reservedField)
+        number33 = st.number_input("优选相关系数阈值(R)",
                                    value=0.8,
                                    min_value=0.1,
                                    max_value=0.9,
@@ -488,10 +489,10 @@ with dataPCM:
     if genre1:
         option112 = st.selectbox(
             '目标变量',
-            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
+            filterUnique(result2, pages_utils.reservedField))
         option1122 = pages_utils.multiselect_all(
             st, '全选-被比较变量', mergeExcludeArray(
-                result1, result2, result3, [option112]),
+                result1, result3, [], pages_utils.reservedField),
             'tempFiled', 'collapsed')
         number112 = st.number_input("提取敏感性阈值(p-value)",
                                     value=0.01,
@@ -508,16 +509,15 @@ with dataPCM:
         option111 = st.selectbox(
             '目标变量',
             mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
-        option11122 = st.multiselect(
-            '被比较变量',
-            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
+
+        option11122 = result1
         st.session_state["OptimizationMethodName"]['param1'] = option111
         st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option11122)
         st.session_state.inputFeatureList = option11122
 
         option = st.selectbox(
-            '提取条件',
-            ('按百分比选取', '按权重值选取'))
+            '优选条件',
+            '按百分比选取')  # , '按权重值选取'
         if option == '按百分比选取':
             st.session_state["OptimizationMethodName"]['param3'] = option
             number1 = st.number_input("TOP(%)", value=5, min_value=5, step=5)
