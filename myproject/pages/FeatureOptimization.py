@@ -453,9 +453,9 @@ with dataPCV:
     result3 = pages_utils.multiselect_all(
         st, '全选-地理遥感特征', filterUnique(agricultureNameList, pages_utils.reservedField),
         'tempAgriculture', 'collapsed')
-    result4 = pages_utils.multiselect_all(
-        st, '全选-优选特征', set(st.session_state.preferenceFeature),
-        'tempOptimal', 'collapsed')
+    # result4 = pages_utils.multiselect_all(
+    #     st, '全选-优选特征', set(st.session_state.preferenceFeature),
+    #     'tempOptimal', 'collapsed')
 # ===============显示右上处理方法选项===============
 with dataPCM:
     tab1, tab2 = st.tabs(["单因子敏感性分析", "多因子组合优化"])

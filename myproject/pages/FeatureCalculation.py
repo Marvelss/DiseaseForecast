@@ -5,6 +5,7 @@ import pandas as pd
 import streamlit as st
 from PIL import Image
 from st_pages import hide_pages
+from streamlit_pills import pills
 
 from lib.share import RESOURCE_IMAGES_PATH
 from lib.utils import filterUnique, mergeExcludeArray
@@ -55,7 +56,7 @@ if 'initFlagNum' not in st.session_state:
 
 # 检测预处理数据是否符合日值且无缺失值
 if st.session_state.timeResolution and not st.session_state.initFlagNum:
-    print('首次加载计算')
+    # print('首次加载计算')
     st.session_state.initFlagNum += 1
     # 计算旬、月、年内日期和日期字段
     tempDataSet1 = pages_utils.TempDataSet[1]
@@ -285,6 +286,7 @@ def onRun():
                 #                     pages_utils.TempDataSetField[2].loc[index, key] = value
             print('===================特征计算数据集===================')
             print(pages_utils.TempDataSet[2])
+    st.toast('本特征计算环节的数据已保持至下一环节', icon="ℹ️")
 
 
 # ==============================界面==============================
@@ -351,27 +353,29 @@ with featureCCV:
     # plantNameList = plantNameT1 + plantNameT1
     # agricultureNameList = agricultureNameT1 + agricultureNameT1
     # if not pages_utils.TempDataSetField[2].empty:
-    weatherNameT2, plantNameT2, agricultureNameT2 = pages_utils.getDataFiled(2, pages_utils.TempDataSetField[2])
+    # weatherNameT2, plantNameT2, agricultureNameT2 = pages_utils.getDataFiled(2, pages_utils.TempDataSetField[2])
     # print('获取多个特征')
     # print(weatherNameT2)
-    weatherNameT2H = []
-    for weatherNameT22 in weatherNameT2:
-        # print(weatherNameT22)
-        if isinstance(weatherNameT22, str):
-            weatherNameT2H += weatherNameT22.split(',')
-    weatherNameList = weatherNameT1 + weatherNameT2H + weatherNameT0
-    plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0
-    agricultureNameList = agricultureNameT1 + agricultureNameT0
+    # weatherNameT2H = []
+    # for weatherNameT22 in weatherNameT2:
+    #     # print(weatherNameT22)
+    #     if isinstance(weatherNameT22, str):
+    #         weatherNameT2H += weatherNameT22.split(',')
+    weatherNameList = weatherNameT1 + weatherNameT0
+    # plantNameList = plantNameT1 + plantNameT2 + plantNameT1 + plantNameT0
+    # agricultureNameList = agricultureNameT1 + agricultureNameT0
     # 按照数据类型显示左侧字段或特征
-    result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', filterUnique(weatherNameList, pages_utils.reservedField),
-        'tempTemperature', 'collapsed')
-    result2 = pages_utils.multiselect_all(
-        st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
-        'tempPlant', 'collapsed')
-    result3 = pages_utils.multiselect_all(
-        st, '全选-地理遥感数据', filterUnique(agricultureNameList, pages_utils.reservedField),
-        'tempAgriculture', 'collapsed')
+    # result1 = pages_utils.multiselect_all(
+    #     st, '全选-气象数据', filterUnique(weatherNameList, pages_utils.reservedField),
+    #     'tempTemperature', 'collapsed')
+    result1 = pills("气象数据字段选择：", filterUnique(weatherNameList, pages_utils.reservedField))
+    result1 = [result1]
+    # result2 = pages_utils.multiselect_all(
+    #     st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
+    #     'tempPlant', 'collapsed')
+    # result3 = pages_utils.multiselect_all(
+    #     st, '全选-地理遥感数据', filterUnique(agricultureNameList, pages_utils.reservedField),
+    #     'tempAgriculture', 'collapsed')
 
 # ===============显示右上处理方法选项===============
 with (featureCCM):
@@ -523,7 +527,7 @@ with (featureCCM):
         new_data = {
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
-            "输入特征": mergeExcludeArray(result1, result2, result3, pages_utils.reservedField),
+            "输入特征": filterUnique(result1, pages_utils.reservedField),
             "特征计算方法": getCheckboxName(st.session_state["featureMethodName"]['checkBox']),
             "方法参数": modelP,
             "时间": datetime.datetime.now().time(),

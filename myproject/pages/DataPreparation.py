@@ -9,9 +9,10 @@ import streamlit as st
 from PIL import Image
 from matplotlib.ticker import MaxNLocator
 from st_pages import hide_pages
+from streamlit_pills import pills
 
 from lib.share import RESOURCE_IMAGES_PATH
-from lib.utils import mergeExcludeArray, filterUnique
+from lib.utils import filterUnique
 from pages import pages_utils
 from pages.modelandmethod.PretreatmentMethod import PretreatmentMethod
 
@@ -238,6 +239,8 @@ def onRun():
                 print('===================预处理数据集===================')
                 print(pages_utils.TempDataSet[1])
 
+    st.toast('本气象数据预处理环节的数据已保持至下一环节', icon="ℹ️")
+
 
 # ==============================界面==============================
 # 界面名称+布局+布局内容
@@ -289,15 +292,17 @@ with dataPCV:
     plantNameList = plantNameT1 + plantNameT2
     agricultureNameList = agricultureNameT1 + agricultureNameT2
     # 按照数据类型显示左侧字段或特征
-    result1 = pages_utils.multiselect_all(
-        st, '全选-气象数据', filterUnique(weatherNameList, pages_utils.reservedField),
-        'tempTemperature', 'collapsed')
-    result2 = pages_utils.multiselect_all(
-        st, '全选-植保数据', filterUnique(plantNameList, pages_utils.reservedField),
-        'tempPlant', 'collapsed')
-    result3 = pages_utils.multiselect_all(
-        st, '全选-地理遥感数据', filterUnique(agricultureNameList, pages_utils.reservedField),
-        'tempAgriculture', 'collapsed')
+    # result1 = pages_utils.multiselect_all(
+    #     st, '全选-', filterUnique(weatherNameList, pages_utils.reservedField),
+    #     'tempTemperature', 'collapsed')
+    result1 = pills("气象数据字段选择：", filterUnique(weatherNameList, pages_utils.reservedField))
+    result1 = [result1]
+    # result2 = pages_utils.multiselect_all(
+    #     st, '全选-植保数据', filterUnique(plantNameList, pages_utils.reservedField),
+    #     'tempPlant', 'collapsed')
+    # result3 = pages_utils.multiselect_all(
+    #     st, '全选-地理遥感数据', filterUnique(agricultureNameList, pages_utils.reservedField),
+    #     'tempAgriculture', 'collapsed')
 
 # ===============显示右上预处理方法选项===============
 with dataPCM:
@@ -411,20 +416,22 @@ with dataPCM:
     btn = interval_col2.button('添加处理', on_click=clearOption)
     if btn:
         # 检测用户行为-输入特征为空(预处理方法空判定未添加)
-        if not len(result1 + result2 + result3):
+        # if not len(result1 + result2 + result3):
+        if not len(result1):
+
             st.toast('未选择特征  \n请重新添加处理', icon="⚠️")
         else:
             # 获取数据类型
             if result1:
                 dataType = '气象数据'
-            elif result2:
-                dataType = '植保数据'
-            elif result3:
-                dataType = '地理遥感数据'
+            # elif result2:
+            #     dataType = '植保数据'
+            # elif result3:
+            #     dataType = '地理遥感数据'
             new_data = {
                 "编号": pages_utils.generateID(),
                 "数据类型": dataType,
-                "输入字段": mergeExcludeArray(result1, result2, result3, pages_utils.reservedField),
+                "输入字段": filterUnique(result1, pages_utils.reservedField),
                 "预处理后字段": None,
                 "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
                 "方法参数": [value for key, value in st.session_state["preMethodName"].items() if
