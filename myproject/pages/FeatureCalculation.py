@@ -125,7 +125,7 @@ def getCheckboxName(checkbox):
     elif checkbox == 'checkbox2':
         return '降水累积量计算'
     elif checkbox == 'checkbox3':
-        return '基于活动积温的生育期计算'
+        return '气象指标均值计算'
 
 
 # 取消所有选项按钮
@@ -158,7 +158,7 @@ def getFeatureName(processName):
         return '降雨日数'
     elif processName == '降水累积量计算':
         return '降水累积量'
-    elif processName == '基于活动积温的生育期计算':
+    elif processName == '气象指标均值计算':
         return '生育期'
 
 
@@ -213,7 +213,7 @@ def onRun():
                     afterHandleData, newColumn = FeatureCalculationMethod(
                         dataFrameTemp, reservedField).precipitationAccumulation(
                         fields[indexT], methodParam[indexT])
-                elif tempMethod == '基于活动积温的生育期计算':
+                elif tempMethod == '气象指标均值计算':
                     afterHandleData, newColumn = FeatureCalculationMethod(
                         dataFrameTemp, reservedField).growthPeriodCalculation(
                         fields[indexT], methodParam[indexT])
@@ -370,7 +370,8 @@ with featureCCV:
     # result1 = pages_utils.multiselect_all(
     #     st, '全选-气象数据', filterUnique(weatherNameList, pages_utils.reservedField),
     #     'tempTemperature', 'collapsed')
-    result1 = pills("气象数据字段选择：", filterUnique(weatherNameList, pages_utils.reservedField))
+    st.markdown('#### 气象数据字段选择')
+    result1 = pills("特征计算", filterUnique(weatherNameList, pages_utils.reservedField), label_visibility='collapsed')
     result1 = [result1]
     # result2 = pages_utils.multiselect_all(
     #     st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
@@ -387,7 +388,7 @@ with (featureCCM):
         option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1])
         option16 = st.checkbox('降水累积量计算', key='checkbox2', on_change=clear_other, args=[2])
     with col2:
-        option17 = st.checkbox('基于活动积温的生育期计算', key='checkbox3', on_change=clear_other, args=[3])
+        option17 = st.checkbox('气象指标均值计算', key='checkbox3', on_change=clear_other, args=[3])
         option14 = st.checkbox('活动积温计算', key='checkbox0', on_change=clear_other, args=[0])
 
     st.markdown('---')
@@ -455,27 +456,37 @@ with (featureCCM):
             img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'))
             st.image(img)
     if option17:
-        growthPeriod = st.selectbox(
-            '生育期',
-            ('抽穗期', '孕穗期', '移栽期'))
-        growthPeriodStartDate = st.date_input("开始时间", value='today')
-        growthPeriodEndDate = st.date_input("结束时间", value='today')
-        # 积温阈值默认为50
-        threshold = 50
-        if growthPeriod == '抽穗期':
-            threshold = 50
-        elif growthPeriod == '孕穗期':
-            threshold = 100
-        elif growthPeriod == '移栽期':
-            threshold = 150
-        growthPeriodNumber = st.number_input(
-            "积温阈值温度(50-300℃)", value=threshold, step=50,
-            min_value=50, max_value=300)
+        colFC213, colFC223 = st.columns([0.3, 0.6])
+        with colFC213:
+            growthPeriod = st.selectbox('时间分辨率', ('旬均值', '月均值'))
 
-        st.session_state["featureMethodName"]['param1'] = growthPeriod
-        st.session_state["featureMethodName"]['param2'] = growthPeriodStartDate.strftime('%m-%d')
-        st.session_state["featureMethodName"]['param3'] = growthPeriodEndDate.strftime('%m-%d')
-        st.session_state["featureMethodName"]['param4'] = str(growthPeriodNumber)
+        with colFC223:
+            st.info('方法描述\n'
+                    '* 计算气象指标的旬、月均值\n', icon="ℹ️")
+            img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'))
+            st.image(img)
+        # 基于活动积温的生育期计算
+        # growthPeriod = st.selectbox(
+        #     '生育期',
+        #     ('抽穗期', '孕穗期', '移栽期'))
+        # growthPeriodStartDate = st.date_input("开始时间", value='today')
+        # growthPeriodEndDate = st.date_input("结束时间", value='today')
+        # # 积温阈值默认为50
+        # threshold = 50
+        # if growthPeriod == '抽穗期':
+        #     threshold = 50
+        # elif growthPeriod == '孕穗期':
+        #     threshold = 100
+        # elif growthPeriod == '移栽期':
+        #     threshold = 150
+        # growthPeriodNumber = st.number_input(
+        #     "积温阈值温度(50-300℃)", value=threshold, step=50,
+        #     min_value=50, max_value=300)
+        #
+        # st.session_state["featureMethodName"]['param1'] = growthPeriod
+        # st.session_state["featureMethodName"]['param2'] = growthPeriodStartDate.strftime('%m-%d')
+        # st.session_state["featureMethodName"]['param3'] = growthPeriodEndDate.strftime('%m-%d')
+        # st.session_state["featureMethodName"]['param4'] = str(growthPeriodNumber)
 
     # =======================添加处理至任务清单=======================
     interval_col1, interval_col2 = st.columns([5, 1])
@@ -584,7 +595,7 @@ with (featureCCM):
                         # 去除重复值
                         data_after = data_after.drop_duplicates()
 
-                        if idFMethods[o] == '基于活动积温的生育期计算':
+                        if idFMethods[o] == '气象指标均值计算':
                             # 选择最多8个纬度
                             top_stations = data_after['纬度'].value_counts().nlargest(8).index
                             df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
@@ -628,7 +639,7 @@ with (featureCCM):
                             top_stations = data_after['纬度'].value_counts().nlargest(8).index
                             df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
                             # 选择最多5个年份
-                            top_years = data_after['年'].value_counts().nlargest(5).index
+                            top_years = data_after['年'].value_counts().nlargest(1).index
                             df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
                             df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
                                 str)
@@ -642,10 +653,16 @@ with (featureCCM):
                                 dodge=True,
                                 saturation=1
                             )
+                            # std_values = df_filtered.groupby(['地区', '年'])[dataColumn].std().reset_index(name='std')
                             # 设置标签和标题
                             plt.gca().set_xlabel("")  # 隐藏x轴标题
                             plt.xticks(rotation=30)  # x轴标签旋转65度
                             plt.ylabel("降水累积量(mm)")
+                            # for i, row in std_values.iterrows():
+                            #     x_pos = df_filtered[(df_filtered['地区'] == row['地区']) & (df_filtered['年'] == row['年'])].index[0]
+                            #     y_pos = row[dataColumn]
+                            #     std_value = row['std']
+                            #     plt.text(x_pos, y_pos + 0.1, f'{std_value:.2f}', ha='center', fontsize=10, color='black')
                             plt.figtext(0.5, -0.1,
                                         f'图{st.session_state.IMAGECOUNT} 部分地区各年份{integratedDataColumn}图',
                                         ha='center', fontsize=16)

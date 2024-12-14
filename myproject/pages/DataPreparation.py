@@ -297,7 +297,8 @@ with dataPCV:
     # result1 = pages_utils.multiselect_all(
     #     st, '全选-', filterUnique(weatherNameList, pages_utils.reservedField),
     #     'tempTemperature', 'collapsed')
-    result1 = pills("气象数据字段选择：", filterUnique(weatherNameList, pages_utils.reservedField))
+    st.markdown("##### 气象数据字段选择")
+    result1 = pills("", filterUnique(weatherNameList, pages_utils.reservedField), label_visibility='collapsed')
     result1 = [result1]
     # result2 = pages_utils.multiselect_all(
     #     st, '全选-植保数据', filterUnique(plantNameList, pages_utils.reservedField),
@@ -313,7 +314,7 @@ with dataPCM:
     col1, col2 = st.columns(2)
 
     with col1:
-        agree = st.checkbox('剔除异常值', key='checkbox0', on_change=clear_other, args=[0])
+        agree = st.checkbox('剔除异常值及插补', key='checkbox0', on_change=clear_other, args=[0])
     with col2:
         agree10 = st.checkbox("缺失值插补", key='checkbox1', on_change=clear_other, args=[1])
 
@@ -367,6 +368,8 @@ with dataPCM:
             st.image(img)
         # st.markdown('---')
     if agree:
+        st.markdown(' 1.异常值值内容(范围或具体值)  \n2.插补内容')
+
         # 异常值检测(温度和降水)
         # 显示缺失值信息
         # info = '疑似异常字段:\n'

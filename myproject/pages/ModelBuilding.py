@@ -558,7 +558,6 @@ with modelACM:
 
             # st.markdown('---')
 
-
             # ===============显示和处理右中各个模型参数(主要添加模型时加入checkbox名称)===============
             if agree or agree1 or agree2 or agree2 or agree3 or agree5 or agree6 or agree7:
                 model = getCheckboxName()
@@ -910,6 +909,15 @@ with modelACM:
                                 # plt.text(-0.1, 0.97, metrics_text, transform=ax.transAxes, fontsize=10,
                                 #          verticalalignment='top', bbox=dict(facecolor='white', alpha=0.1))
                                 st.pyplot(fig)
+                                metrics = []
+                                for key, value in evaluationIndex[i].items():
+                                    metrics.append((key, round(value, 3)))
+                                    half = len(metrics) // 2
+                                col1, col2 = st.columns(2)
+                                for h in range(half):
+                                    col2.metric(metrics[h][0], metrics[h][1])
+                                for h in range(half, len(metrics)):
+                                    col1.metric(metrics[h][0], metrics[h][1])
                             with colMB3:
                                 pass
                     except BaseException as e:
