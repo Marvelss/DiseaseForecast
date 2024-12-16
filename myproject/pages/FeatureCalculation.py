@@ -591,11 +591,11 @@ with (featureCCM):
 
                         if idFMethods[o] == '基于活动积温的生育期计算':
                             # 选择最多8个纬度
-                            top_stations = data_after['纬度'].value_counts().nlargest(8).index
+                            top_stations = data_after['纬度'].value_counts().nlargest(15).index
                             df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
 
                             # 选择最多3个年份
-                            top_years = data_after['年'].value_counts().nlargest(3).index
+                            top_years = data_after['年'].value_counts().nlargest(1).index
                             df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
                             df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
                                 str)
@@ -616,7 +616,7 @@ with (featureCCM):
                             # 设置整数天
                             plt.gca().yaxis.get_major_locator().set_params(integer=True)
                             plt.figtext(0.5, -0.1,
-                                        f'图{st.session_state.IMAGECOUNT} 部分地区各年份{dataColumn}',
+                                        f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{dataColumn}',
                                         ha='center', fontsize=16)
                             st.pyplot(plt)
                         elif idFMethods[o] == '气象指标均值计算':
@@ -646,7 +646,7 @@ with (featureCCM):
                             plt.xticks(rotation=30)  # x轴标签旋转65度
                             plt.ylabel(f"{integratedDataColumn}")
                             plt.figtext(0.5, -0.1,
-                                        f'图{st.session_state.IMAGECOUNT} 部分地区各年份{integratedDataColumn}图',
+                                        f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumn}图',
                                         ha='center', fontsize=16)
                             st.pyplot(plt)
                             st.session_state.IMAGECOUNT += 1
@@ -661,7 +661,7 @@ with (featureCCM):
                                 integratedDataColumnT = dataColumn.split('_')
                                 integratedDataColumn = integratedDataColumnT[0] + integratedDataColumnT[1]
                             # 选择最多8个纬度
-                            top_stations = data_after['纬度'].value_counts().nlargest(8).index
+                            top_stations = data_after['纬度'].value_counts().nlargest(15).index
                             df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
                             # 选择最多5个年份
                             top_years = data_after['年'].value_counts().nlargest(1).index
@@ -712,7 +712,7 @@ with (featureCCM):
                             #     std_value = row['std']
                             #     plt.text(x_pos, y_pos + 0.1, f'{std_value:.2f}', ha='center', fontsize=10, color='black')
                             plt.figtext(0.5, -0.1,
-                                        f'图{st.session_state.IMAGECOUNT} 部分地区各年份{integratedDataColumn}图',
+                                        f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumn}图',
                                         ha='center', fontsize=16)
                             st.pyplot(plt)
                             st.session_state.IMAGECOUNT += 1
@@ -722,11 +722,11 @@ with (featureCCM):
                             integratedDataColumnR = integratedDataColumnRT[0] + '至' + integratedDataColumnRT[1] + \
                                                     integratedDataColumnRT[2]
                             # 选择最多8个纬度
-                            top_stations = data_after['纬度'].value_counts().nlargest(8).index
+                            top_stations = data_after['纬度'].value_counts().nlargest(15).index
                             df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
 
                             # 选择最多5个年份
-                            top_years = data_after['年'].value_counts().nlargest(5).index
+                            top_years = data_after['年'].value_counts().nlargest(1).index
                             df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
                             # 创建一个新的列，将纬度和经度组合成一个标签
                             df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
@@ -746,7 +746,7 @@ with (featureCCM):
                             plt.gca().set_xlabel("")  # 隐藏x轴标题
                             plt.xticks(rotation=30)  # x轴标签旋转65度
                             plt.figtext(0.5, -0.1,
-                                        f'图{st.session_state.IMAGECOUNT} 部分地区各年份{integratedDataColumnR}',
+                                        f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumnR}',
                                         ha='center', fontsize=16)
                             st.pyplot(plt)
                             st.session_state.IMAGECOUNT += 1
