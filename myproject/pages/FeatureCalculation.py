@@ -150,18 +150,6 @@ def clear_other(key):
 def firstPage(): st.session_state.page13 = 0
 
 
-# 获取输出特征名称
-def getFeatureName(processName):
-    if processName == '活动积温计算':
-        return '活动积温'
-    elif processName == '降雨日数计算':
-        return '降雨日数'
-    elif processName == '降水累积量计算':
-        return '降水累积量'
-    elif processName == '气象指标均值计算':
-        return '生育期'
-
-
 def onRun():
     if '备选特征' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('备选特征')
@@ -213,9 +201,13 @@ def onRun():
                     afterHandleData, newColumn = FeatureCalculationMethod(
                         dataFrameTemp, reservedField).precipitationAccumulation(
                         fields[indexT], methodParam[indexT])
-                elif tempMethod == '气象指标均值计算':
+                elif tempMethod == '基于活动积温的生育期计算':
                     afterHandleData, newColumn = FeatureCalculationMethod(
                         dataFrameTemp, reservedField).growthPeriodCalculation(
+                        fields[indexT], methodParam[indexT])
+                elif tempMethod == '气象指标均值计算':
+                    afterHandleData, newColumn = FeatureCalculationMethod(
+                        dataFrameTemp, reservedField).meteorologicalMeanAccumulation(
                         fields[indexT], methodParam[indexT])
                 elif tempMethod == '活动积温计算':
                     afterHandleData, newColumn = FeatureCalculationMethod(
@@ -458,13 +450,15 @@ with (featureCCM):
     if option17:
         colFC213, colFC223 = st.columns([0.3, 0.6])
         with colFC213:
-            growthPeriod = st.selectbox('时间分辨率', ('旬均值', '月均值'))
-
+            timePeriod = st.selectbox('时间分辨率', ('旬均值', '月均值'))
         with colFC223:
             st.info('方法描述\n'
                     '* 计算气象指标的旬、月均值\n', icon="ℹ️")
             img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'))
             st.image(img)
+
+        st.session_state["featureMethodName"]['param1'] = timePeriod
+
         # 基于活动积温的生育期计算
         # growthPeriod = st.selectbox(
         #     '生育期',
@@ -643,6 +637,19 @@ with (featureCCM):
                             df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
                             df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
                                 str)
+                            # df_filtered.to_excel('源.xlsx', index=False)
+                            # print('-------------------')
+                            # print(dataColumn)
+                            # 直接计算整个 dataColumn 列的标准差
+                            # mean_value = df_filtered[dataColumn].mean()
+                            # df_filtered['std'] = df_filtered[dataColumn] - mean_value
+                            # # 按地区分组计算标准差
+                            # std_values = df_filtered.groupby('地区')['std'].std().reset_index(name='标准差')
+                            # print(std_values)
+                            # 将计算得到的标准差合并回
+                            # 保存为 Excel 文件
+                            # df_filtered.to_excel('output_file.xlsx', index=False)
+
                             # 绘制柱状图
                             plt.figure(figsize=(10, 6))
                             sns.barplot(
@@ -653,6 +660,16 @@ with (featureCCM):
                                 dodge=True,
                                 saturation=1
                             )
+
+                            # width = 0.8  # 可根据实际图形调整
+                            # # 遍历每个标准差值并在柱子上方显示
+                            # for i, (index, row) in enumerate(df_filtered.iterrows()):
+                            #     x_pos = df_filtered[
+                            #         (df_filtered['地区'] == row['地区']) & (df_filtered['年'] == row['年'])].index[0]
+                            #     y_pos = row[dataColumn]  # 柱子的高度
+                            #     std_value = row['std']  # 标准差值
+                            #     # 在每个柱子的顶部显示标准差值
+                            #     plt.text(x_pos, y_pos + 0.1, f'{std_value:.2f}', ha='center', fontsize=10, color='black')
                             # std_values = df_filtered.groupby(['地区', '年'])[dataColumn].std().reset_index(name='std')
                             # 设置标签和标题
                             plt.gca().set_xlabel("")  # 隐藏x轴标题

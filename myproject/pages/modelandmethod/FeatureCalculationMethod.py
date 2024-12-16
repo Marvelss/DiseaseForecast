@@ -268,3 +268,49 @@ class FeatureCalculationMethod:
             self.dataFrame.loc[group.index, newColumn] = tempAAT
         self.newColumn.append(newColumn)
         return self.dataFrame, ','.join(self.newColumn)
+
+    # 气象指标均值计算
+    def meteorologicalMeanAccumulation(self, inputFields, timeRation):
+        temp = None
+        # newColumn = '降水累积量'
+        inputField = inputFields[0]
+        flag = timeRation[0]
+        if flag == '月均值':
+            # 计算每月均值
+            monthly_precipitation_mean = self.dataFrame.groupby(['经度', '纬度', '年', '月'])[
+                inputField].mean().reset_index(name='月均值')
+            # 将月降水量总和合并回原始DataFrame
+            temp = pd.merge(self.dataFrame, monthly_precipitation_mean, on=['经度', '纬度', '年', '月'], how='left')
+
+            # 根据数据集提取月份列并去除重复值和排序
+            unique_months = sorted(temp['月'].drop_duplicates().to_numpy().tolist())
+            # print(unique_months)
+            # print(temp.columns)
+            # 将每月降水量总和作为新列
+            # temp = temp.loc[:, ~temp.columns.str.endswith('_x')]
+            for month in unique_months:
+                col_name = f'{month}月_{inputField}均值'
+                temp[col_name] = temp['月均值'].where(temp['月'] == month, None)
+                # print(col_name)
+                self.newColumn.append(col_name)
+            # 删除'月','旬' '日期'字段
+            temp = temp.drop(['月均值'], axis=1)
+            # temp = temp.drop(['月', '日期'], axis=1)
+        elif flag == '旬均值':
+            # 计算每旬均值
+            decade_precipitation_mean = self.dataFrame.groupby(['经度', '纬度', '年', '月', '旬'])[inputField].mean().reset_index(name='旬均值')
+            temp = pd.merge(self.dataFrame, decade_precipitation_mean, on=['经度', '纬度', '年', '月', '旬'], how='left')
+            # 根据数据集提取月份列并去除重复值和排序
+            unique_months = sorted(temp['月'].drop_duplicates().to_numpy().tolist())
+            # print(decade_precipitation_sum)
+            # 将每旬降水量总和作为新列
+            decade_names = {1: "上旬", 2: "中旬", 3: "下旬"}
+
+            for month in unique_months:
+                for decade in range(1, 4):  # 假设每个月有3个旬
+                    col_name = f'{month}月{decade_names[decade]}_{inputField}均值'
+                    temp[col_name] = temp['旬均值'].where((temp['月'] == month) & (temp['旬'] == decade), None)
+                    self.newColumn.append(col_name)
+            # 删除不再需要的字段
+            temp = temp.drop(['旬均值'], axis=1)
+        return temp, ','.join(self.newColumn)
