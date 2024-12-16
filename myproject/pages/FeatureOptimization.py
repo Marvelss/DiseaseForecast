@@ -426,12 +426,23 @@ with dataPCV:
     # agricultureNameList = agricultureNameT1 + agricultureNameT0
     # if not pages_utils.TempDataSetField[3].empty:
     # weatherNameT3, plantNameT3, agricultureNameT3 = pages_utils.getDataFiled(3, pages_utils.TempDataSetField[3])
-    weatherNameT2H = []
+    weatherNameT2Decade, weatherNameT2Month, weatherNameT2Other = [], [], []
     for weatherNameT22 in weatherNameT2:
-        # print(weatherNameT22)
-        if isinstance(weatherNameT22, str):
-            weatherNameT2H += weatherNameT22.split(',')
-    weatherNameList = weatherNameT2H
+        if '均值' in weatherNameT22:
+            # 旬均值获取
+            if '旬' in weatherNameT22:
+                weatherNameT2Decade += weatherNameT22.split(',')
+            # 月均值获取
+            else:
+                weatherNameT2Month += weatherNameT22.split(',')
+        # 其他气象特征获取
+        else:
+            weatherNameT2Other += weatherNameT22.split(',')
+    #     if isinstance(weatherNameT22, str):
+    #         weatherNameT2H
+    #
+    #
+    # weatherNameList = weatherNameT2H
     plantNameList = plantNameT2 + plantNameT0
     agricultureNameList = agricultureNameT2 + agricultureNameT1 + agricultureNameT0
     # print(weatherNameT1 + weatherNameT2 + weatherNameT0)
@@ -446,17 +457,17 @@ with dataPCV:
     #             weatherNameList.append(a)
     # 按照数据类型显示左侧字段或特征
 
-    colSelect1 , colSelect2 = st.columns(2)
+    colSelect1, colSelect2 = st.columns(2)
     with colSelect1:
         result5 = pages_utils.multiselect_all(
-            st, '全选-旬均值特征', filterUnique(weatherNameList, pages_utils.reservedField),
+            st, '全选-旬均值特征', filterUnique(weatherNameT2Decade, pages_utils.reservedField),
             'dekad', 'collapsed')
     with colSelect2:
         result6 = pages_utils.multiselect_all(
-            st, '全选-月均值特征', filterUnique(weatherNameList, pages_utils.reservedField),
+            st, '全选-月均值特征', filterUnique(weatherNameT2Month, pages_utils.reservedField),
             'month', 'collapsed')
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象特征', filterUnique(weatherNameList, pages_utils.reservedField),
+        st, '全选-气象特征', filterUnique(weatherNameT2Other, pages_utils.reservedField),
         'tempTemperature', 'collapsed')
 
     # result2 = pages_utils.multiselect_all(
@@ -488,7 +499,7 @@ with dataPCM:
         #     st, '全选-被比较变量', mergeExcludeArray(
         #         result1, result2, result3, [option1122]),
         #     'tempFiled', 'collapsed')
-        option1132 = result1
+        option1132 = result1 + result5 + result6
         # option1132 = mergeExcludeArray(result1, result2, result3, pages_utils.reservedField)
         number33 = st.number_input("优选相关系数阈值(R)",
                                    value=0.8,
@@ -520,11 +531,9 @@ with dataPCM:
     # st.markdown('---')
     if genre3:
         st.warning('注意：Relief - F算法只针对植保数据为离散变量(如病情等级)情形', icon="⚠️")
-        option111 = st.selectbox(
-            '目标变量',
-            mergeExcludeArray(result1, result2, result3, pages_utils.reservedField))
+        option111 = st.selectbox('目标变量', result2)
 
-        option11122 = result1
+        option11122 = result1 + result5 + result6
         st.session_state["OptimizationMethodName"]['param1'] = option111
         st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option11122)
         st.session_state.inputFeatureList = option11122
