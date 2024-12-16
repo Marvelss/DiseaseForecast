@@ -589,7 +589,7 @@ with (featureCCM):
                         # 去除重复值
                         data_after = data_after.drop_duplicates()
 
-                        if idFMethods[o] == '气象指标均值计算':
+                        if idFMethods[o] == '基于活动积温的生育期计算':
                             # 选择最多8个纬度
                             top_stations = data_after['纬度'].value_counts().nlargest(8).index
                             df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
@@ -619,8 +619,39 @@ with (featureCCM):
                                         f'图{st.session_state.IMAGECOUNT} 部分地区各年份{dataColumn}',
                                         ha='center', fontsize=16)
                             st.pyplot(plt)
-                        elif idFMethods[o] == '降水累积量计算':
+                        elif idFMethods[o] == '气象指标均值计算':
+                            # 时期范围名称修剪
 
+                            integratedDataColumnT = dataColumn.split('_')
+                            integratedDataColumn = integratedDataColumnT[0] + integratedDataColumnT[1]
+                            # 选择最多15个地区
+                            top_stations = data_after['纬度'].value_counts().nlargest(15).index
+                            df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
+                            # 选择最多1个年份
+                            top_years = data_after['年'].value_counts().nlargest(1).index
+                            df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+                            df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
+                                str)
+                            # 绘制柱状图
+                            plt.figure(figsize=(10, 6))
+                            sns.barplot(
+                                data=df_filtered,
+                                x="地区",
+                                y=dataColumn,
+                                hue="年",
+                                dodge=True,
+                                saturation=1
+                            )
+                            plt.gca().set_xlabel("")  # 隐藏x轴标题
+                            plt.xticks(rotation=30)  # x轴标签旋转65度
+                            plt.ylabel(f"{integratedDataColumn}")
+                            plt.figtext(0.5, -0.1,
+                                        f'图{st.session_state.IMAGECOUNT} 部分地区各年份{integratedDataColumn}图',
+                                        ha='center', fontsize=16)
+                            st.pyplot(plt)
+                            st.session_state.IMAGECOUNT += 1
+
+                        elif idFMethods[o] == '降水累积量计算':
                             # 时期范围名称修剪
                             if '-' in dataColumn:
                                 integratedDataColumnT = dataColumn.split('_')
