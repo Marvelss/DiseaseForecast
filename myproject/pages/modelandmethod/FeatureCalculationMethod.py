@@ -59,6 +59,7 @@ class FeatureCalculationMethod:
                 # print(col_name)
                 self.newColumn.append(col_name)
             # 删除'月','旬' '日期'字段
+            temp = temp.drop(['月_降水累积量'], axis=1)
             # temp = temp.drop(['月', '日期'], axis=1)
         elif flag == '旬累积降水量':
             # # 转换DayOfYear为日期，以便提取月份
@@ -91,6 +92,7 @@ class FeatureCalculationMethod:
                     self.newColumn.append(col_name)
 
             # 删除不再需要的字段
+            temp = temp.drop(['旬_降水累积量'], axis=1)
             # temp = temp.drop(['月', '旬', '日期'], axis=1)
             # 删除'月','旬' '日期'字段
             # temp = temp.drop(['旬', '日期'], axis=1)

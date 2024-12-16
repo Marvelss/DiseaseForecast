@@ -583,20 +583,27 @@ with modelACV:
     # # 剔除在其他特征中重复的优选特征
     # otherFeature = [ofT for ofT in otherFeature if not any(ofT in prT for prT in preferenceFeature)]
 
+    _, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
     modelACVCol1, modelACVCol2 = st.columns([0.7, 0.4])
     with modelACVCol1:
         # 按照数据类型显示左侧字段或特征
         result1 = pages_utils.multiselect_all(
             st, '全选-优选特征', filterUnique(st.session_state.preferenceFeature, []),
             'tempTemperature', 'collapsed')
+        # 去除年、月、年内日期等字段
         result2 = pages_utils.multiselect_all(
             st, '全选-其他特征', filterUnique(pages_utils.TempDataSet[2].columns.tolist(),
-                                              st.session_state.preferenceFeature + pages_utils.reservedField),
+                                              st.session_state.preferenceFeature +
+                                              pages_utils.reservedField +
+                                              ['日期', '年内日期', '月', '旬'] +
+                                              plantNameT0 +
+                                              # 预处理环节的数据，排除地理遥感数据
+                                              filterUnique(pages_utils.TempDataSet[1].columns.tolist(),
+                                                           agricultureNameT0)),
             'tempPlant', 'collapsed')
     with modelACVCol2:
         st.markdown("")
         st.markdown("###### 标签\n")
-        _, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
         resultLabel = st.selectbox(
             'predictLabel',
             filterUnique(plantNameT0, pages_utils.reservedField),
