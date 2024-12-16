@@ -195,12 +195,13 @@ class PretreatmentMethod:
             maxValue = float(methodParam[1])
             minValue = float(methodParam[2])
             # 剔除超出范围的异常值
-            df_filtered = newDataFrame[(newDataFrame[self.fieldName] >= minValue) &
-                                       (newDataFrame[self.fieldName] <= maxValue)]
+            newDataFrame[self.fieldName] = newDataFrame[self.fieldName].where(
+                (newDataFrame[self.fieldName] >= minValue) & (newDataFrame[self.fieldName] <= maxValue), np.nan)
 
+            newDataFrame.to_excel('剔除.xlsx')
             # 使用线性插值填补NaN值
-            df_filtered[self.fieldName] = df_filtered[self.fieldName].interpolate(method='linear',
+            newDataFrame[self.fieldName] = newDataFrame[self.fieldName].interpolate(method='linear',
                                                                                   limit_direction='both')
-            newDataFrame = df_filtered
+            newDataFrame.to_excel('插补.xlsx')
 
         return newDataFrame
