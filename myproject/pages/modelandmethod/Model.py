@@ -87,6 +87,10 @@ class Model:
             parameters_dict['C'] = float(parameters_dict['C'])
         # print(parameters_dict)
         # 使用SVM回归模型进行拟合
+        # print('-------------------测试4-------------------')
+        # print(parameters_dict)
+        # print(X_train)
+        # print(y_train)
         model1 = svm.SVC(**parameters_dict)
         model1.fit(X_train, y_train)
         # 进行预测

@@ -178,26 +178,101 @@ def getModelName(temp1):
         return 'SVR'
 
 
+def getModelName1():
+    modelListTemp = []
+    if agree:
+        modelListTemp.append('SVM')
+    if agree1:
+        modelListTemp.append('RF')
+    if agree2:
+        modelListTemp.append('KNN')
+    if agree3:
+        modelListTemp.append('FLDA')
+    if agree5:
+        modelListTemp.append('PLSR')
+    if agree6:
+        modelListTemp.append('LR')
+    if agree7:
+        modelListTemp.append('SVR')
+    return modelListTemp
+
+
+def getModelParam(modelT):
+    formatted_dataT = []
+    # Loop through model_params to find the desired model and extract its details
+    for entryT in model_params:
+        if entryT.get("模型名称") == modelT:
+            # Unpack the parameters and remarks together
+            for param_nameT, param_valueT in entryT["模型参数"].items():
+                formatted_dataT.append({
+                    # "模型名称": model,
+                    "参数名": param_nameT,
+                    "参数值": param_valueT,
+                })
+    return pd.DataFrame(formatted_dataT)
+
+
 # 取消其他选项按钮
 def clearOtherOption(key1):
     # 显示添加模型按钮
     st.session_state.nextBtnShow = 0 if st.session_state.nextBtnShow == 1 else 1
 
-    # st.markdown(key)
-    for h in range(checkBoxModelNum):
-        if h != key1:
-            st.session_state[f'checkBoxModel{h}'] = False
+    # # st.markdown(key)
+    # for h in range(checkBoxModelNum):
+    #     if h != key1:
+    #         st.session_state[f'checkBoxModel{h}'] = False
     # 若已经在可视化展示状态,则默认返回任务清单
     st.session_state.page15 = 0
     return
 
 
 # 模型训练
-def onTrain(temporaResolution):
+def onTrain():
     if '模型' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('模型')
     st.session_state.page = 0
     st.session_state.page15 += 1
+    # 获取所有被选中的checkbox
+    selected_models = []
+
+    if agree:
+        selected_models.append('SVM')
+    if agree1:
+        selected_models.append('RF')
+    if agree2:
+        selected_models.append('KNN')
+    if agree3:
+        selected_models.append('FLDA')
+    if agree5:
+        selected_models.append('PLSR')
+    if agree6:
+        selected_models.append('LR')
+    if agree7:
+        selected_models.append('SVR')
+    for modelNameTemp1 in selected_models:
+        # =======================准备任务清单内容=======================
+        new_dataT = {
+            "编号": pages_utils.generateID(),
+            "模型": modelNameTemp1,
+            "模型参数": getModelParam(modelNameTemp1),  # getModelParam(modelNameTemp1)
+            "特征": result1 + result2,  # result1 + result2
+            "标签": resultLabel,
+            "评价指标": onPrecision(modelNameTemp1),
+            "时间": datetime.datetime.now().time(),
+            "数据集划分比例": option,
+            "处理状态": False}
+        # 检查是否有缺失值
+        # for p in range(len(pages_utils.TempDataSet) - 2, -1, -1):
+        #     beforeDF = pages_utils.TempDataSet[p]
+        #     if not beforeDF.empty:
+        # pages_utils.TempDataSet[4] = beforeDF
+        # if 'DayOfYear' not in beforeDF.columns:
+        #     beforeDF['DayOfYear'] = 0
+        # beforeDF = beforeDF[result1 + result2 + [resultLabel] + pages_utils.reservedField]
+
+        print('======================模型构建-添加模型======================')
+        print(new_dataT)
+        pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_dataT
 
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[4]["编号"].tolist()
@@ -209,9 +284,11 @@ def onTrain(temporaResolution):
     targets = pages_utils.TempDataSetField[4]["标签"].tolist()
     isHandledFlags = pages_utils.TempDataSetField[4]["处理状态"]
     # print('============测试抽取数据集==============')
+    # 训练的数据集直接使用备选特征环节数据
+    pages_utils.TempDataSet[4] = pages_utils.TempDataSet[2]
     inputDataSet = pages_utils.TempDataSet[4]
-    # print(inputDataSet)
-
+    print('-------------------测试1-------------------')
+    print(models)
     with emptyHeadMBP:
         with st.spinner('训练模型中...'):
             # ===============运行任务清单调用模型准备训练===============
@@ -222,11 +299,19 @@ def onTrain(temporaResolution):
                 evaluationResult = None
                 modelStruct = None
                 actualAndPredictResult = None
+                print('-------------------测试2-------------------')
+                print(tempModel)
+                print(dataPartitioning)
                 if tempModel == 'SVM':
+                    print('-------------------测试3-------------------')
+
+                    print(features[tempIndex])
+                    print(dataPartitioning[tempIndex])
+                    print(modelParam[tempIndex])
                     evaluationResult, actualAndPredictResult, modelStruct = Model(
                         inputDataSet,
                         features[tempIndex], targets[tempIndex],
-                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        dataPartitioning[tempIndex], modelParam[tempIndex],
                         evaluationIndicator[tempIndex]).onSVM()
                     # print('======测试返回模型评价结果======')
                     # print(evaluationResult)
@@ -241,7 +326,7 @@ def onTrain(temporaResolution):
                     evaluationResult, actualAndPredictResult, modelStruct = Model(
                         inputDataSet,
                         features[tempIndex], targets[tempIndex],
-                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        dataPartitioning[tempIndex], modelParam[tempIndex],
                         evaluationIndicator[tempIndex]).onKNN()
 
                     # 显示模型训练结果信息
@@ -255,7 +340,7 @@ def onTrain(temporaResolution):
                     evaluationResult, actualAndPredictResult, modelStruct = Model(
                         inputDataSet,
                         features[tempIndex], targets[tempIndex],
-                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        dataPartitioning[tempIndex], modelParam[tempIndex],
                         evaluationIndicator[tempIndex]).onFLDA()
 
                     # 显示模型训练结果信息
@@ -269,7 +354,7 @@ def onTrain(temporaResolution):
                     evaluationResult, actualAndPredictResult, modelStruct = Model(
                         inputDataSet,
                         features[tempIndex], targets[tempIndex],
-                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        dataPartitioning[tempIndex], modelParam[tempIndex],
                         evaluationIndicator[tempIndex]).onRF()
 
                     # 显示模型训练结果信息
@@ -283,7 +368,7 @@ def onTrain(temporaResolution):
                     evaluationResult, actualAndPredictResult, modelStruct = Model(
                         inputDataSet,
                         features[tempIndex], targets[tempIndex],
-                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        dataPartitioning[tempIndex], modelParam[tempIndex],
                         evaluationIndicator[tempIndex]).onPLSR()
                     print('======测试返回模型评价结果======')
                     print(evaluationResult)
@@ -300,7 +385,7 @@ def onTrain(temporaResolution):
                     evaluationResult, actualAndPredictResult, modelStruct = Model(
                         inputDataSet,
                         features[tempIndex], targets[tempIndex],
-                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        dataPartitioning[tempIndex], modelParam[tempIndex],
                         evaluationIndicator[tempIndex]).onLR()
                     print('======测试返回模型评价结果======')
                     print(evaluationResult)
@@ -317,7 +402,7 @@ def onTrain(temporaResolution):
                     evaluationResult, actualAndPredictResult, modelStruct = Model(
                         inputDataSet,
                         features[tempIndex], targets[tempIndex],
-                        dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                        dataPartitioning[tempIndex], modelParam[tempIndex],
                         evaluationIndicator[tempIndex]).onSVR()
                     print('======测试返回模型评价结果======')
                     print(evaluationResult)
@@ -335,7 +420,7 @@ def onTrain(temporaResolution):
                         evaluationResult, actualAndPredictResult, modelStruct = Model(
                             inputDataSet,
                             features[tempIndex], targets[tempIndex],
-                            dataPartitioning[tempIndex], eval(modelParam[tempIndex]),
+                            dataPartitioning[tempIndex], modelParam[tempIndex],
                             evaluationIndicator[tempIndex]).onSEIR()
                     # print('======测试返回SEIR模型评价结果======')
                     # print(f'精度:{evaluationResult}')
@@ -355,9 +440,9 @@ def onTrain(temporaResolution):
                 update_values = {
                     "时间": datetime.datetime.now().time(),
                     "评价指标": evaluationResult,
-                    "处理状态": True,
                     "模型训练结果": actualAndPredictResult,
-                    "模型结构": modelStruct}
+                    "模型结构": modelStruct,
+                    "处理状态": True}
                 print('======更新指标======')
                 print(update_values)
                 # 查找要更新的数据记录
@@ -370,11 +455,6 @@ def onTrain(temporaResolution):
             # print(pages_utils.TempDataSetField[4])
 
 
-def onModel():
-    st.session_state.page += 1
-    return
-
-
 def onAddModel():
     # print(st.session_state["modelParamName"])
     for h in range(checkBoxModelNum):
@@ -384,22 +464,29 @@ def onAddModel():
     return
 
 
-# 获取评价指标
-def onPrecision(*cboxList):
-    # print('传入接收参数')
+# 获取模型
+def onModel(*cboxList):
     if cboxList[0]:
         st.session_state["modelPrecisionName"].append('OA')
     if cboxList[1]:
         st.session_state["modelPrecisionName"].append('Kappa')
     if cboxList[2]:
         st.session_state["modelPrecisionName"].append('MSE')
-    if cboxList[3]:
-        st.session_state["modelPrecisionName"].append('R方')
-    if cboxList[4]:
-        st.session_state["modelPrecisionName"].append('RMSE')
-    # print(st.session_state["modelPrecisionName"])
-    pages_utils.TempDataSetField[4]['评价指标'] = ','.join(st.session_state["modelPrecisionName"])
-    st.session_state.page += 1
+
+
+# 获取评价指标
+def onPrecision(modelName):
+    precisionListT = []
+    # print('传入接收参数')
+    if modelName == 'SVM' or modelName == 'FLDA' or modelName == 'KNN' or modelName == 'RF':
+        precisionListT.append('OA')
+        precisionListT.append('Kappa')
+    elif modelName == 'LR' or modelName == 'SVR' or modelName == 'PLSR':
+        precisionListT.append('MSE')
+        precisionListT.append('R方')
+        precisionListT.append('RMSE')
+    precisionStrT = ','.join(precisionListT)
+    return precisionStrT
 
 
 def firstPage(): st.session_state.page = 0
@@ -527,10 +614,10 @@ with modelACM:
             st.markdown("###### 分类模型")
             colOption1, colOption2, colOption3, colOption4 = st.columns(4)
             with colOption1:
-                agree = st.checkbox('SVM', key='checkBoxModel0', on_change=clearOtherOption, args=[0])
+                agree = st.checkbox('SVM', key='checkBoxModel0')
                 # agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
             with colOption2:
-                agree1 = st.checkbox('RF', key='checkBoxModel1', on_change=clearOtherOption, args=[1])
+                agree1 = st.checkbox('RF', key='checkBoxModel1')
 
             with colOption3:
                 agree3 = st.checkbox('FLDA', key='checkBoxModel3', on_change=clearOtherOption, args=[3])
@@ -560,8 +647,7 @@ with modelACM:
 
             # ===============显示和处理右中各个模型参数(主要添加模型时加入checkbox名称)===============
             if agree or agree1 or agree2 or agree2 or agree3 or agree5 or agree6 or agree7:
-                model = getCheckboxName()
-                # print(f'--{model}--')
+                model = getModelName1().pop()
                 formatted_data = []
 
                 # Loop through model_params to find the desired model and extract its details
@@ -585,66 +671,8 @@ with modelACM:
                     edited_df_no_remark = edited_df.drop(columns=["备注"])
                 st.session_state["modelParamName"] = edited_df_no_remark.to_dict()
 
-            # =======================准备任务清单内容=======================
-            if st.session_state.nextBtnShow == 0:
-                interval_col1, interval_col2 = st.columns([5, 1])
-                # btn1 = interval_col2.button("下一步", on_click=onModel)
-            else:
-                # interval_col1, interval_col2 = st.columns([5, 1])
-                # btn = interval_col2.button("添加模型", on_click=onAddModel)
-                btn = None
-                # =======================添加模型=======================
-                if btn:
-                    # 检测目标连续/回归变量对应分类/回归模型
-                    # 根据唯一值数据占比判断
-                    dfT = pages_utils.TempDataSet[2]
-                    dataRation = dfT[resultLabel].nunique() / len(dfT[resultLabel])
-                    addModelFlag = True
-                    # 占比<0.005
-                    if dataRation < (5 * 0.001):
-                        model_mapping1 = {
-                            'agree': 'SVM',
-                            'agree1': 'RF',
-                            'agree2': 'KNN',
-                            'agree3': 'FLDA'
-                        }
-                        # 查找第一个满足条件的 key
-                        for _, message in model_mapping1.items():
+            # =======================添加验证与训练数据集划分=======================
 
-                            if message == getModelName(st.session_state["modelName"]['checkBoxModel']):
-                                # xmt
-                                # addModelFlag = False
-                                # st.toast(f'{message}不支持回归模型构建', icon="⚠️")
-                                time.sleep(1)
-                    else:
-                        model_mapping2 = {
-                            'agree4': 'SEIR机理模型',
-                            'agree5': 'PLSR',
-                            'agree6': 'LR',
-                            'agree7': 'SVR'
-                        }
-                        # 查找第一个满足条件的 key
-                        for condition, message in model_mapping2.items():
-                            if condition == getModelName(st.session_state["modelName"]['checkBoxModel']):
-                                addModelFlag = False
-                                st.toast(f'{message}不支持分类模型构建', icon="⚠️")
-                                time.sleep(1)
-                    # 若无错误选择模型
-                    if addModelFlag:
-                        # 隐藏添加模型按钮
-                        st.session_state.nextBtnShow = 0
-                        new_data = {
-                            "编号": pages_utils.generateID(),
-                            "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
-                            "模型参数": st.session_state["modelParamName"],
-                            "特征": result1 + result2,
-                            "标签": resultLabel,
-                            "时间": datetime.datetime.now().time(),
-                            "处理状态": False}
-                        print('======================模型构建-添加模型======================')
-                        print(new_data)
-                        pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_data
-                        # st.rerun()
             st.markdown("##### 训练与验证数据集划分")
             colOP1, colOP2 = st.columns(2)
             with colOP1:
@@ -664,102 +692,6 @@ with modelACM:
                 #         options=('待实现', '')
                 #     )
 
-    # Page 1
-    elif st.session_state.page == 1:
-        # =======================添加评价指标=======================
-        with ph.container():
-            st.markdown("##### 评价指标")
-            st.markdown('###### 分类指标')
-            tempCol21, tempCol22, tempCol23 = st.columns(3)
-            with tempCol21:
-                agree6 = st.checkbox('OA', key='checkBoxPrecision0')
-            with tempCol22:
-                agree7 = st.checkbox('Kappa', key='checkBoxPrecision1')
-            with tempCol23:
-                pass
-            st.markdown('###### 回归指标')
-            tempCol1, tempCol2, tempCol3 = st.columns(3)
-            with tempCol1:
-                agree10 = st.checkbox('RMSE', key='checkBoxPrecision4')
-            with tempCol2:
-                agree9 = st.checkbox('R方', key='checkBoxPrecision3')
-            with tempCol3:
-                agree8 = st.checkbox('MSE', key='checkBoxPrecision2')
-
-            # 检测判断精度指标回归/分类
-            classify_models = ['SVM', 'FLDA', 'KNN', 'RF']
-            regression_models = ['LR', 'SVR', 'PLSR', 'SEIR机理模型']
-
-            model_name = getModelName(st.session_state["modelName"]['checkBoxModel'])
-
-            if model_name in classify_models:
-                if agree8 or agree9 or agree10:
-                    st.toast(f'该指标不支持回归模型', icon="⚠️")
-            if model_name in regression_models:
-                if agree6 or agree7:
-                    st.toast(f'该指标不支持分类模型', icon="⚠️")
-
-            interval_col1, interval_col2 = st.columns([5, 1])
-            # 传入指标
-            btn21 = interval_col2.button(
-                "下一步",
-                on_click=onPrecision,
-                args=[agree6, agree7, agree8, agree9, agree10])
-
-    # Page 2
-    elif st.session_state.page == 2:
-        # =======================添加验证与训练数据集划分=======================
-        with ph.container():
-            # st.markdown("###### 有效特征集提取")
-            # 检查是否有缺失值
-            for p in range(len(pages_utils.TempDataSet) - 2, -1, -1):
-                beforeDF = pages_utils.TempDataSet[p]
-                if not beforeDF.empty:
-                    break
-            if 'DayOfYear' not in beforeDF.columns:
-                beforeDF['DayOfYear'] = 0
-            beforeDF = beforeDF[result1 + result2 + [resultLabel] + pages_utils.reservedField]
-
-            # 若是SEIR机理模型则保留DayOfYear
-            if 'SEIR机理模型' not in pages_utils.TempDataSetField[4]["模型"].tolist():
-                # 分组并提取每个分组的第一个非空值
-                result = beforeDF.groupby(['经度', '纬度', '年']).first().reset_index()
-                # ******删除DayOfYear列******
-                # df_cleaned = result.drop('DayOfYear', axis=1)
-                pages_utils.TempDataSet[4] = result
-            else:
-                pages_utils.TempDataSet[4] = beforeDF
-            st.markdown('###### 最终输入模型特征预览')
-            st.dataframe(pages_utils.TempDataSet[4], width=900, height=200)
-            # st.markdown('---')
-            st.markdown("###### 训练与验证数据集划分")
-            colOP1, colOP2 = st.columns(2)
-            with colOP1:
-                option1 = st.selectbox(
-                    label="训练与验证数据集划分", label_visibility='collapsed',
-                    options=("按比例划分", "按年份划分(未实现)")
-                )
-            with colOP2:
-                if option1 == '按比例划分':
-                    option = st.selectbox(
-                        label="比例", label_visibility='collapsed',
-                        options=("8:2", "7:3", "6:4")
-                    )
-                elif option1 == '按年份划分(未实现)':
-                    option = st.selectbox(
-                        label="年", label_visibility='collapsed',
-                        options=('待实现', '')
-                    )
-
-            for index, row in pages_utils.TempDataSetField[4].iterrows():
-                pages_utils.TempDataSetField[4].loc[index, '数据集划分比例'] = option
-
-            # 将列名列表赋值给 '特征' 列
-            pages_utils.TempDataSetField[4]['特征'] = [result1 + result2] * len(
-                pages_utils.TempDataSetField[4])
-            interval_col1, interval_col2 = st.columns([5, 1])
-            interval_col2.button("保存", on_click=firstPage)
-
     # =======================显示右下内容=======================
     placeholder = st.empty()
     if st.session_state.page15 == 0:
@@ -770,12 +702,11 @@ with modelACM:
                 # st.info('当前时间分辨率为:1天')
                 # temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)
                 btn = st.button('开始模型训练',
-                                on_click=onTrain,
-                                args=[1])
+                                on_click=onTrain)
             st.markdown('##### 任务清单')
             pages_utils.TempDataSetField[4] = st.data_editor(
                 pages_utils.TempDataSetField[4], height=190, width=1200,
-                column_order=["编号", "特征", "模型", "模型参数", "评价指标", "数据集划分比例", "时间", '处理状态'],
+                column_order=["编号", "特征", "标签", "模型", "评价指标", "数据集划分比例", "时间", '处理状态'],
                 disabled=["时间", '处理状态'], num_rows="dynamic", )
     # placeholder1 = st.empty()
     # =======================显示右下可视化图表=======================
@@ -859,69 +790,72 @@ with modelACM:
                                          verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
                                 st.pyplot(fig)
                         else:
-                            colMB1, colMB2, colMB3 = st.columns([0.2, 0.5, 0.2])
-                            with colMB1:
-                                pass
-                                # 分类模型
-                                # predictLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_predictLabel.xlsx'))
-                                # # 绘制二维平面散点图，只标记predictLabel为0和1的点
-                                # # 分别绘制 predictLabel 为 0 和 1 的点
-                                # fig, ax = plt.subplots()
-                                # # 获取 'RdYlGn_r' colormap 对象，从绿到红
-                                # cmap = plt.get_cmap('RdYlGn')
-                                #
-                                # # 假设有 5 个唯一的标签值
-                                # unique_labels = predictLabelDF['predictLabel'].unique()
-                                # num_colors = len(unique_labels)
-                                #
-                                # # 从 colormap 获取等间隔的颜色
-                                # selected_colors = cmap(np.linspace(0, 1, num_colors))
-                                # for idx, label in enumerate(unique_labels):
-                                #     # print(f'获取颜色:{selected_colors[idx]}')
-                                #     # print(label)
-                                #     subset = predictLabelDF[predictLabelDF['predictLabel'] == label]
-                                #     plt.scatter(subset['经度'], subset['纬度'], label=f'{label}', color=selected_colors[idx], s=100, alpha=0.6)
-                                # # predicted_values = predictLabelDF.iloc[:, 0]
-                                # ax.set_xlabel('经度')
-                                # ax.set_ylabel('纬度')
-                                # plt.legend(title=f'预测{testLabelDF.columns[0]}')
-                                # # plt.title(f'{models[i]}模型混淆矩阵图')
-                                # plt.figtext(0.5, -0.03,
-                                #             f'图{st.session_state.IMAGECOUNT} {models[i]}模型部分预测结果图',
-                                #             ha='center', fontsize=15)
-                                # st.pyplot(fig)
-                            with colMB2:
-                                # 绘制混淆矩阵图
-                                fig, ax = plt.subplots()
-                                conf_matrix = confusion_matrix(actual_values, predicted_values)
-                                sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax, cbar=False)
-                                # sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues')
-                                ax.set_xlabel(f'实际{testLabelDF.columns[0]}')
-                                ax.set_ylabel(f'预测{testLabelDF.columns[0]}')
-                                # plt.title(f'{models[i]}模型精度评价-混淆矩阵')
-                                # st.pyplot(fig)
-                                plt.figtext(0.5, -0.03,
-                                            f'图{st.session_state.IMAGECOUNT} {models[i]}模型混淆矩阵图',
-                                            ha='center', fontsize=15)
-                                # 精度结果直接显示在图中
-                                # metrics_text = "\n".join(
-                                #     [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
-                                # plt.text(-0.1, 0.97, metrics_text, transform=ax.transAxes, fontsize=10,
-                                #          verticalalignment='top', bbox=dict(facecolor='white', alpha=0.1))
-                                st.pyplot(fig)
-                                metrics = []
-                                for key, value in evaluationIndex[i].items():
-                                    metrics.append((key, round(value, 3)))
-                                    half = len(metrics) // 2
-                                col1, col2 = st.columns(2)
-                                for h in range(half):
-                                    col2.metric(metrics[h][0], metrics[h][1])
-                                for h in range(half, len(metrics)):
-                                    col1.metric(metrics[h][0], metrics[h][1])
-                            with colMB3:
-                                pass
+                            # colMB1, colMB2, colMB3 = st.columns([0.2, 0.5, 0.2])
+                            # with colMB1:
+                            #     pass
+                            # 分类模型
+                            # predictLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_predictLabel.xlsx'))
+                            # # 绘制二维平面散点图，只标记predictLabel为0和1的点
+                            # # 分别绘制 predictLabel 为 0 和 1 的点
+                            # fig, ax = plt.subplots()
+                            # # 获取 'RdYlGn_r' colormap 对象，从绿到红
+                            # cmap = plt.get_cmap('RdYlGn')
+                            #
+                            # # 假设有 5 个唯一的标签值
+                            # unique_labels = predictLabelDF['predictLabel'].unique()
+                            # num_colors = len(unique_labels)
+                            #
+                            # # 从 colormap 获取等间隔的颜色
+                            # selected_colors = cmap(np.linspace(0, 1, num_colors))
+                            # for idx, label in enumerate(unique_labels):
+                            #     # print(f'获取颜色:{selected_colors[idx]}')
+                            #     # print(label)
+                            #     subset = predictLabelDF[predictLabelDF['predictLabel'] == label]
+                            #     plt.scatter(subset['经度'], subset['纬度'], label=f'{label}', color=selected_colors[idx], s=100, alpha=0.6)
+                            # # predicted_values = predictLabelDF.iloc[:, 0]
+                            # ax.set_xlabel('经度')
+                            # ax.set_ylabel('纬度')
+                            # plt.legend(title=f'预测{testLabelDF.columns[0]}')
+                            # # plt.title(f'{models[i]}模型混淆矩阵图')
+                            # plt.figtext(0.5, -0.03,
+                            #             f'图{st.session_state.IMAGECOUNT} {models[i]}模型部分预测结果图',
+                            #             ha='center', fontsize=15)
+                            # st.pyplot(fig)
+                            # with colMB2:
+                            # 绘制混淆矩阵图
+                            fig, ax = plt.subplots()
+                            conf_matrix = confusion_matrix(actual_values, predicted_values)
+                            sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax, cbar=False)
+                            # sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues')
+                            ax.set_xlabel(f'实际{testLabelDF.columns[0]}')
+                            ax.set_ylabel(f'预测{testLabelDF.columns[0]}')
+                            # plt.title(f'{models[i]}模型精度评价-混淆矩阵')
+                            # st.pyplot(fig)
+                            plt.figtext(0.5, -0.03,
+                                        f'图{st.session_state.IMAGECOUNT} {models[i]}模型混淆矩阵图',
+                                        ha='center', fontsize=15)
+                            # 精度结果直接显示在图中
+                            # metrics_text = "\n".join(
+                            #     [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
+                            # plt.text(-0.1, 0.97, metrics_text, transform=ax.transAxes, fontsize=10,
+                            #          verticalalignment='top', bbox=dict(facecolor='white', alpha=0.1))
+                            st.columns([0.2, 0.5, 0.2])[1].pyplot(fig)
+                            metrics = []
+                            if isinstance(evaluationIndex[i], str):
+                                evaluationIndex[i] = eval(evaluationIndex[i])
+                            for key, value in evaluationIndex[i].items():
+                                metrics.append((key, round(value, 3)))
+                                half = len(metrics) // 2
+                            col111, col211 = st.columns(2)
+                            for h in range(half):
+                                col211.metric(metrics[h][0], metrics[h][1])
+                            for h in range(half, len(metrics)):
+                                col111.metric(metrics[h][0], metrics[h][1])
+                            # with colMB3:
+                            #     pass
                     except BaseException as e:
-                        st.toast('运行出错,点击返回上一步', icon="⚠️")
+                        raise e
+                        # st.toast('运行出错,点击返回上一步', icon="⚠️")
                     finally:
                         st.session_state.page = 0
             interval_col34, interval_col33 = st.columns([5, 1])
