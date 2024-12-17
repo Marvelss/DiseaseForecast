@@ -248,7 +248,7 @@ def onRun():
                 print('===================预处理数据集===================')
                 print(pages_utils.TempDataSet[1])
 
-    st.toast('本气象数据预处理环节的数据已保持至下一环节', icon="ℹ️")
+    # st.toast('本气象数据预处理环节的数据已保持至下一环节', icon="ℹ️")
 
 
 # ==============================界面==============================
@@ -291,7 +291,7 @@ with dataPCV:
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
     # if not pages_utils.TempDataSetField[0].empty:
-    # weatherNameT1, plantNameT1, agricultureNameT1 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
+    weatherNameT1, plantNameT1, agricultureNameT1 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
     # weatherNameList = weatherNameT1
     # plantNameList = plantNameT1
     # agricultureNameList = agricultureNameT1
@@ -305,7 +305,9 @@ with dataPCV:
     #     st, '全选-', filterUnique(weatherNameList, pages_utils.reservedField),
     #     'tempTemperature', 'collapsed')
     st.markdown("##### 气象数据字段选择")
-    result1 = pills("", filterUnique(pages_utils.TempDataSet[0], pages_utils.reservedField), label_visibility='collapsed')
+    result1 = pills("", filterUnique(pages_utils.TempDataSet[0],
+                                     plantNameT1 + agricultureNameT1 + pages_utils.reservedField),
+                    label_visibility='collapsed')
     result1 = [result1]
     # result2 = pages_utils.multiselect_all(
     #     st, '全选-植保数据', filterUnique(plantNameList, pages_utils.reservedField),
@@ -443,8 +445,7 @@ with dataPCM:
 
         with coll22:
             st.info('方法介绍\n'
-                    '* 描述:剔除最大值和最小值区域外的异常值\n'
-                    '* 疑似异常值检测:基于四分位数上下限\n', icon="ℹ️")
+                    '* 描述:剔除单个数值或指定范围内的异常值，然后对其进行自定义插补或线性插值\n', icon="ℹ️")
             img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'Figure_5.png'))
             st.image(img)
 

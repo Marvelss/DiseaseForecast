@@ -280,7 +280,7 @@ def onRun():
                 #                     pages_utils.TempDataSetField[2].loc[index, key] = value
             print('===================特征计算数据集===================')
             print(pages_utils.TempDataSet[2])
-    st.toast('本特征计算环节的数据已保持至下一环节', icon="ℹ️")
+    st.toast('本环节计算的所有特征已保存至下一环节', icon="ℹ️")
 
 
 # ==============================界面==============================
@@ -453,9 +453,9 @@ with (featureCCM):
             timePeriod = st.selectbox('时间分辨率', ('旬均值', '月均值'))
         with colFC223:
             st.info('方法描述\n'
-                    '* 计算气象指标的旬、月均值\n', icon="ℹ️")
-            img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'))
-            st.image(img)
+                    '* 计算气象数据的旬均值和月均值，以提取不同时期的气象特征\n', icon="ℹ️")
+            # img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'))
+            # st.image(img)
 
         st.session_state["featureMethodName"]['param1'] = timePeriod
 

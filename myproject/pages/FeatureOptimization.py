@@ -274,7 +274,7 @@ def onPreviewResults():
     st.session_state["FOVisualInformation"].append(FOVisualInformationTemp)
 
     # 选择后变化
-    if st.button("保留优选特征", on_click=clear_all):
+    if st.button("保留优选特征至下一环节", on_click=clear_all):
         st.session_state.preferenceFeature += st.session_state.expectedRetentionFeature
 
         # print(st.session_state.expectedRetentionFeature)
@@ -567,6 +567,7 @@ with dataPCM:
                 st.toast('Relief-F不支持回归模型,请重新选择', icon="⚠️")
             else:
                 onPreviewResults()
+
     st.markdown('---')
 
     # =======================显示右下内容=======================
