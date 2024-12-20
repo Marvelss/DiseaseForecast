@@ -1,6 +1,7 @@
 import datetime
 import os
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 from PIL import Image
@@ -588,7 +589,6 @@ with (featureCCM):
                         data_after = data_after.dropna()
                         # 去除重复值
                         data_after = data_after.drop_duplicates()
-
                         if idFMethods[o] == '基于活动积温的生育期计算':
                             # 选择最多8个纬度
                             top_stations = data_after['纬度'].value_counts().nlargest(15).index
@@ -660,6 +660,9 @@ with (featureCCM):
                             else:
                                 integratedDataColumnT = dataColumn.split('_')
                                 integratedDataColumn = integratedDataColumnT[0] + integratedDataColumnT[1]
+
+                            # 暂时直接从原数据集获取
+                            data_after = pages_utils.TempDataSet[2]
                             # 选择最多8个纬度
                             top_stations = data_after['纬度'].value_counts().nlargest(15).index
                             df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
@@ -682,15 +685,40 @@ with (featureCCM):
                             # df_filtered.to_excel('output_file.xlsx', index=False)
 
                             # 绘制柱状图
-                            plt.figure(figsize=(10, 6))
-                            sns.barplot(
-                                data=df_filtered,
-                                x="地区",
-                                y=dataColumn,
-                                hue="年",
-                                dodge=True,
-                                saturation=1
-                            )
+                            # 计算每个月的平均降水量和标准差
+                            months = ['1月_累积降水量', '2月_累积降水量', '3月_累积降水量', '4月_累积降水量',
+                                      '5月_累积降水量', '6月_累积降水量',
+                                      '7月_累积降水量', '8月_累积降水量', '9月_累积降水量', '10月_累积降水量',
+                                      '11月_累积降水量', '12月_累积降水量']
+                            mean_values = df_filtered[months].mean()
+                            std_values = df_filtered[months].std()
+
+                            # 绘制柱状图
+                            fig, ax = plt.subplots(figsize=(10, 6))
+                            x = np.arange(len(months))  # x轴的位置
+                            width = 0.35  # 柱子的宽度
+
+                            # 绘制柱状图
+                            rects = ax.bar(x, mean_values, width, label='月平均累积降水量', yerr=std_values, capsize=5)
+
+                            # 添加标签和标题
+                            ax.set_xlabel('月份')
+                            ax.set_ylabel('累积降水量 (mm)')
+                            plt.figtext(0.5, -0.1,
+                                        f'图{st.session_state.IMAGECOUNT} 各地区{top_years[0]}年累计降水量',
+                                        ha='center', fontsize=16)
+                            # ax.set_title('2014年累积降水量')
+                            ax.set_xticks(x)
+                            ax.set_xticklabels([m.split('_')[0] for m in months])
+                            # plt.figure(figsize=(10, 6))
+                            # sns.barplot(
+                            #     data=df_filtered,
+                            #     x="地区",
+                            #     y=dataColumn,
+                            #     hue="年",
+                            #     dodge=True,
+                            #     saturation=1
+                            # )
 
                             # width = 0.8  # 可根据实际图形调整
                             # # 遍历每个标准差值并在柱子上方显示
@@ -703,17 +731,17 @@ with (featureCCM):
                             #     plt.text(x_pos, y_pos + 0.1, f'{std_value:.2f}', ha='center', fontsize=10, color='black')
                             # std_values = df_filtered.groupby(['地区', '年'])[dataColumn].std().reset_index(name='std')
                             # 设置标签和标题
-                            plt.gca().set_xlabel("")  # 隐藏x轴标题
-                            plt.xticks(rotation=30)  # x轴标签旋转65度
-                            plt.ylabel("降水累积量(mm)")
+                            # plt.gca().set_xlabel("")  # 隐藏x轴标题
+                            # plt.xticks(rotation=30)  # x轴标签旋转65度
+                            # plt.ylabel("降水累积量(mm)")
                             # for i, row in std_values.iterrows():
                             #     x_pos = df_filtered[(df_filtered['地区'] == row['地区']) & (df_filtered['年'] == row['年'])].index[0]
                             #     y_pos = row[dataColumn]
                             #     std_value = row['std']
                             #     plt.text(x_pos, y_pos + 0.1, f'{std_value:.2f}', ha='center', fontsize=10, color='black')
-                            plt.figtext(0.5, -0.1,
-                                        f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumn}图',
-                                        ha='center', fontsize=16)
+                            # plt.figtext(0.5, -0.1,
+                            #             f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumn}图',
+                            #             ha='center', fontsize=16)
                             st.pyplot(plt)
                             st.session_state.IMAGECOUNT += 1
                         elif idFMethods[o] == '降雨日数计算':

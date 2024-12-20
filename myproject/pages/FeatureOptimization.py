@@ -467,7 +467,7 @@ with dataPCV:
             st, '全选-月均值特征', filterUnique(weatherNameT2Month, pages_utils.reservedField),
             'month', 'collapsed')
     result1 = pages_utils.multiselect_all(
-        st, '全选-气象特征', filterUnique(weatherNameT2Other, pages_utils.reservedField),
+        st, '全选-其他气象特征', filterUnique(weatherNameT2Other, pages_utils.reservedField),
         'tempTemperature', 'collapsed')
 
     # result2 = pages_utils.multiselect_all(

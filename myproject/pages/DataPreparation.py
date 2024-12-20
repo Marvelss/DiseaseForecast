@@ -617,60 +617,61 @@ with dataPCM:
                             st.pyplot(fig)
                             st.session_state.IMAGECOUNT += 1
 
-                        elif idPreMethods[o] == '剔除异常值及插':
-                            data_before_temp = st.session_state["DPVisualInformation"][o]['before']
-                            data_after_temp = st.session_state["DPVisualInformation"][o]['after']
-                            # print(inputFields[o][0])
-                            data_before = pd.DataFrame({inputFields[o][0]: data_before_temp})
-                            data_after = pd.DataFrame({inputFields[o][0]: data_after_temp})
-                            # 查找缺失值的索引
-                            missing_indices = data_before[data_before[inputFields[o][0]].isna()].index
-                            # print(f'缺失索引:{missing_indices}')
-                            # 获取第一个缺失值的索引
-                            first_missing_index = missing_indices[0]
-                            # 获取第一个缺失值的行号
-                            # first_missing_index = 130
-                            # print(f"第一个缺失值的行号: {first_missing_index}")
-                            # 计算前5行和后5行的起始和结束索引
-                            start_index = max(first_missing_index - 80, 0)
-                            end_index = min(first_missing_index + 80 + 1, len(data_before))
-                            # 取第一个缺失值对应前15行和后15行预处理数据
-                            data_before_surrounding_data = data_before.iloc[start_index:end_index]
-                            data_after_surrounding_data = data_after.iloc[start_index:end_index]
-                            # 绘制对比折线图
-                            fig, ax = plt.subplots(figsize=(10, 6))
-                            # print(pages_utils.TempDataSet[1]['DayOfYear'])
-                            # 取第一个缺失值对应前15行和后15行'经度', '纬度', '年'数据
-                            missing_rows = \
-                                pages_utils.TempDataSet[1].loc[
-                                    missing_indices, ['经度', '纬度', '年', 'DayOfYear']].to_dict(
-                                    'records')[0]
-                            province, station, year = missing_rows['经度'], missing_rows['纬度'], missing_rows[
-                                '年']
-                            # print(missing_rows['DayOfYear'])
-                            # 整理前后15天dayOfYear为x轴
-                            # 提取数据列，获取从 start_index 到 end_index 范围内的行数
-                            # 生成从 start_index 到 end_index 的数字序列
-                            figure_x = pd.DataFrame({'row': list(range(start_index, end_index))})
-                            # 绘制插补前的折线图
-                            plt.plot(figure_x, data_before_surrounding_data[inputFields[o][0]],
-                                     label='原始数据',
-                                     color='black',
-                                     linestyle='-', marker='o')
-                            # 绘制插补后的折线图
-                            plt.plot(figure_x, data_after_surrounding_data[inputFields[o][0]],
-                                     label='插补后数据', color='blue',
-                                     linestyle='--',
-                                     marker='o', alpha=0.3)
-                            plt.xlabel('行号')
-                            ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-                            plt.ylabel(inputFields[o][0])
-                            plt.figtext(0.5, -0.01,
-                                        f'图{st.session_state.IMAGECOUNT} {inputFields[o][0]}字段部分数据插补前后对比图',
-                                        ha='center', fontsize=16)
-                            plt.legend()
-                            st.pyplot(fig)
-                            st.session_state.IMAGECOUNT += 1
+                        elif idPreMethods[o] == '剔除异常值及插补':
+                            st.info('剔除异常值及插补功能的可视化正在优化中', icon="ℹ️")
+                            # data_before_temp = st.session_state["DPVisualInformation"][o]['before']
+                            # data_after_temp = st.session_state["DPVisualInformation"][o]['after']
+                            # # print(inputFields[o][0])
+                            # data_before = pd.DataFrame({inputFields[o][0]: data_before_temp})
+                            # data_after = pd.DataFrame({inputFields[o][0]: data_after_temp})
+                            # # 查找缺失值的索引
+                            # missing_indices = data_before[data_before[inputFields[o][0]].isna()].index
+                            # # print(f'缺失索引:{missing_indices}')
+                            # # 获取第一个缺失值的索引
+                            # first_missing_index = missing_indices[0]
+                            # # 获取第一个缺失值的行号
+                            # # first_missing_index = 130
+                            # # print(f"第一个缺失值的行号: {first_missing_index}")
+                            # # 计算前5行和后5行的起始和结束索引
+                            # start_index = max(first_missing_index - 80, 0)
+                            # end_index = min(first_missing_index + 80 + 1, len(data_before))
+                            # # 取第一个缺失值对应前15行和后15行预处理数据
+                            # data_before_surrounding_data = data_before.iloc[start_index:end_index]
+                            # data_after_surrounding_data = data_after.iloc[start_index:end_index]
+                            # # 绘制对比折线图
+                            # fig, ax = plt.subplots(figsize=(10, 6))
+                            # # print(pages_utils.TempDataSet[1]['DayOfYear'])
+                            # # 取第一个缺失值对应前15行和后15行'经度', '纬度', '年'数据
+                            # missing_rows = \
+                            #     pages_utils.TempDataSet[1].loc[
+                            #         missing_indices, ['经度', '纬度', '年', 'DayOfYear']].to_dict(
+                            #         'records')[0]
+                            # province, station, year = missing_rows['经度'], missing_rows['纬度'], missing_rows[
+                            #     '年']
+                            # # print(missing_rows['DayOfYear'])
+                            # # 整理前后15天dayOfYear为x轴
+                            # # 提取数据列，获取从 start_index 到 end_index 范围内的行数
+                            # # 生成从 start_index 到 end_index 的数字序列
+                            # figure_x = pd.DataFrame({'row': list(range(start_index, end_index))})
+                            # # 绘制插补前的折线图
+                            # plt.plot(figure_x, data_before_surrounding_data[inputFields[o][0]],
+                            #          label='原始数据',
+                            #          color='black',
+                            #          linestyle='-', marker='o')
+                            # # 绘制插补后的折线图
+                            # plt.plot(figure_x, data_after_surrounding_data[inputFields[o][0]],
+                            #          label='插补后数据', color='blue',
+                            #          linestyle='--',
+                            #          marker='o', alpha=0.3)
+                            # plt.xlabel('行号')
+                            # ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+                            # plt.ylabel(inputFields[o][0])
+                            # plt.figtext(0.5, -0.01,
+                            #             f'图{st.session_state.IMAGECOUNT} {inputFields[o][0]}字段部分数据插补前后对比图',
+                            #             ha='center', fontsize=16)
+                            # plt.legend()
+                            # st.pyplot(fig)
+                            # st.session_state.IMAGECOUNT += 1
 
             else:
                 st.info('跳过预处理', icon="ℹ️️")
