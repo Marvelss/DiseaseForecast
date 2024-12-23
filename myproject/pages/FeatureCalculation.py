@@ -31,8 +31,6 @@ hide_pages(
         "建模报告-面状",
         "模型应用-面状",
         "数据下载中心-面状",
-        "基于天气情景生成器的模型评价",
-        "模型应用"
     ]
 )
 # 取消链接跳转
@@ -364,7 +362,9 @@ with featureCCV:
     #     st, '全选-气象数据', filterUnique(weatherNameList, pages_utils.reservedField),
     #     'tempTemperature', 'collapsed')
     st.markdown('#### 气象数据字段选择')
-    result1 = pills("特征计算", filterUnique(weatherNameList, pages_utils.reservedField), label_visibility='collapsed')
+    fieldF = filterUnique(weatherNameList, pages_utils.reservedField)
+    fieldF = fieldF if len(fieldF) != 0 else ['待原始数据上传']
+    result1 = pills("特征计算", fieldF, label_visibility='collapsed')
     result1 = [result1]
     # result2 = pages_utils.multiselect_all(
     #     st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),

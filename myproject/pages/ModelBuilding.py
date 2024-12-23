@@ -33,8 +33,6 @@ hide_pages(
         "建模报告-面状",
         "模型应用-面状",
         "数据下载中心-面状",
-        "基于天气情景生成器的模型评价",
-        "模型应用"
     ]
 )
 # 取消链接跳转
@@ -691,7 +689,7 @@ with modelACM:
                 if option1 == '按比例划分':
                     option = st.selectbox(
                         label="比例", label_visibility='collapsed',
-                        options=("8:2", "7:3", "6:4")
+                        options=("7:3", "8:2", "6:4")
                     )
                 # elif option1 == '按年份划分(未实现)':
                 #     option = st.selectbox(

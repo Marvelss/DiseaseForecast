@@ -64,6 +64,20 @@ with colTemp2:
         # 获取特征字段
         feature_names = model.feature_names_in_ if hasattr(model, 'feature_names_in_') else None
         st.info(f"模型输入特征:{' '.join(feature_names)}")
+        if feature_names.any():
+            # 创建一个 DataFrame，其中包含特征字段作为表头
+            df = pd.DataFrame(columns=feature_names)
+
+            # 将 DataFrame 保存为 Excel 文件
+            file_path = "features.xlsx"  # 文件路径可以根据需要调整
+            df.to_excel(file_path, index=False)
+        with open(file_path, "rb") as file:
+            st.download_button(
+                label="下载模型应用数据模板",
+                data=file,
+                file_name="模型应用数据模板.xlsx",
+                mime="application/octet-stream"
+            )
 
     with col3:
         st.markdown("##### 输入特征")
@@ -73,6 +87,7 @@ with colTemp2:
             label_visibility='collapsed')
 
     if uploaded_dataSet:
+        # st.markdown("##### 预测结果")
         bytes_data = uploaded_dataSet.read()
         predictDF = pd.read_excel(bytes_data)
         predictions = model.predict(predictDF)
