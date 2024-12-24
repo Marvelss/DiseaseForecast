@@ -5,6 +5,7 @@ import streamlit as st
 import pandas as pd
 from st_pages import hide_pages
 from lib.share import RESOURCE_MODELRESULT_PATH
+import streamlit_antd_components as sac
 from pages import pages_utils
 
 st.set_page_config(
@@ -26,11 +27,7 @@ hide_pages(
     ]
 )
 
-st.markdown('')
-st.markdown('')
-st.markdown('')
-st.markdown('')
-
+st.header('多场景作物病虫害快速预测建模系统')
 
 # 取消链接跳转
 st.markdown("""
@@ -38,6 +35,17 @@ st.markdown("""
     .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
     </style>
     """, unsafe_allow_html=True)
+
+sac.steps(
+    items=[
+        sac.StepsItem(title='数据集', subtitle='extra msg', description='description text', disabled=True),
+        sac.StepsItem(title='气象数据预处理', disabled=True),
+        sac.StepsItem(title='特征计算', disabled=True),
+        sac.StepsItem(title='特征优选', disabled=True),
+        sac.StepsItem(title='模型构建', disabled=True),
+        sac.StepsItem(title='模型应用', disabled=True),
+    ], index=5
+)
 
 colTemp1, colTemp2, colTemp3 = st.columns([0.1, 0.8, 0.1])
 with colTemp1:
@@ -48,7 +56,9 @@ with colTemp2:
     col2, col3 = st.columns(2)
     with col2:
         st.markdown("##### 加载模型")
-        st.selectbox('加载模型', options=['SVM'], label_visibility='collapsed')
+        modelOptionS = pages_utils.TempDataSetField[4]['模型'].tolist() if pages_utils.TempDataSetField[4][
+            '模型'].tolist() else ['SVM']
+        st.selectbox('加载模型', options=modelOptionS, label_visibility='collapsed')
         modelDF = pages_utils.TempDataSetField[4]
         # models = modelDF["特征"].tolist()
         models = [1]

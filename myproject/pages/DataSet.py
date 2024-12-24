@@ -5,6 +5,7 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 from st_pages import hide_pages
+import streamlit_antd_components as sac
 
 from lib.share import RESOURCE_TEMPLATE_PATH
 from pages import pages_utils
@@ -78,6 +79,16 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.header('多场景作物病虫害快速预测建模系统')
+sac.steps(
+    items=[
+        sac.StepsItem(title='数据集', subtitle='extra msg', description='description text', disabled=True),
+        sac.StepsItem(title='气象数据预处理', disabled=True),
+        sac.StepsItem(title='特征计算', disabled=True),
+        sac.StepsItem(title='特征优选', disabled=True),
+        sac.StepsItem(title='模型构建', disabled=True),
+        sac.StepsItem(title='模型应用', disabled=True),
+    ], index=0
+)
 # st.markdown("<h1 style='text-align: left; color: red;'>Some title</h1>", unsafe_allow_html=True)
 
 emptyHeadDSP = st.empty()
