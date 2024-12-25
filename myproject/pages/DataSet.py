@@ -55,10 +55,12 @@ path3 = os.path.join(RESOURCE_TEMPLATE_PATH, '地理遥感数据-模板.xlsx')
 
 warningInfo = '''
 注意事项
-1. 请用户进行数据检查，保证无大面积缺失和异常情况，以免影响建模
-2. 模版中表头名称不能包含 '-' , '_' 和数字字符;
-3. 模版中表头行不可删除;
-4. 删除示例数据后,按需填充或删减数据.
+1. 建议建模数据量大于（），以免影响模型的稳定性
+
+2. 请将数据中的文字描述转为数字，如病害发生程度，若为健康输入0，轻度输入1，重度输入2
+3. 模版中表头行不可删除，且字段名称不能包含 '-' , '_' 和数字字符;
+5. 删除示例数据后,按需填充或删减字段与数据.
+6. 完成数据添加后，删除注意事项两行单元格，并对数据检查，保证无大面积缺失和异常情况，以免影响建模.
 '''
 warningInfo1 = '''
 注意事项
@@ -128,7 +130,7 @@ with dataSCM:
                 )
     if selectedTemplate == '植保数据':
         with placeholder1.container():
-            st.warning(warningInfo1, icon="⚠️")
+            st.warning(warningInfo, icon="⚠️")
             with open(path2, "rb") as file:
                 st.download_button(
                     label="下载植保数据模板",
