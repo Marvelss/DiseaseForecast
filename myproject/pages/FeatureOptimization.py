@@ -37,6 +37,16 @@ st.markdown("""
     .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
     </style>
     """, unsafe_allow_html=True)
+
+st.markdown("""
+    <style>
+        div [data-baseweb=select]  {
+            max-height: 150px;
+            overflow: auto;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
 st.markdown(("""
 <style>
 div.stButton button {
