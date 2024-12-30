@@ -629,16 +629,16 @@ with modelACM:
             st.markdown("###### 分类模型")
             colOption1, colOption2, colOption3, colOption4 = st.columns(4)
             with colOption1:
-                agree = st.checkbox('SVM', key='checkBoxModel0')
+                agree = st.checkbox('SVM', key='checkBoxModel0', value=True)
                 # agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
             with colOption2:
-                agree1 = st.checkbox('RF', key='checkBoxModel1')
+                agree1 = st.checkbox('RF', key='checkBoxModel1', value=True)
 
             with colOption3:
-                agree3 = st.checkbox('FLDA', key='checkBoxModel3', on_change=clearOtherOption, args=[3])
+                agree3 = st.checkbox('FLDA', key='checkBoxModel3', args=[3], value=True)
 
             with colOption4:
-                agree2 = st.checkbox('KNN', key='checkBoxModel2', on_change=clearOtherOption, args=[2])
+                agree2 = st.checkbox('KNN', key='checkBoxModel2', args=[2], value=True)
                 # agree4 = st.checkbox('贝叶斯统计')
                 # agree5 = st.checkbox('模糊综合评价')
             st.markdown("###### 回归模型")
