@@ -5,8 +5,10 @@ import streamlit as st
 import pandas as pd
 from st_pages import hide_pages
 from lib.share import RESOURCE_MODELRESULT_PATH
+from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 import streamlit_antd_components as sac
 from pages import pages_utils
+import leafmap.foliumap as leafmap
 
 st.set_page_config(
     layout="wide"
@@ -28,6 +30,7 @@ hide_pages(
 )
 
 st.header('多场景作物病虫害快速预测建模系统')
+emptyHeadFCP = st.empty()
 
 # 取消链接跳转
 st.markdown("""
@@ -55,39 +58,57 @@ with colTemp3:
 with colTemp2:
     col2, col3 = st.columns(2)
     with col2:
+        # 默认获取最优模型进行应用
         st.markdown("##### 加载模型")
-        modelOptionS = pages_utils.TempDataSetField[4]['模型'].tolist() if pages_utils.TempDataSetField[4][
-            '模型'].tolist() else ['SVM']
-        st.selectbox('加载模型', options=modelOptionS, label_visibility='collapsed')
-        modelDF = pages_utils.TempDataSetField[4]
-        # models = modelDF["特征"].tolist()
-        models = [1]
+        best_model = None
+        best_oa = -float('inf')
+        best_kappa = -float('inf')
+        if pages_utils.TempDataSetField[4]['模型'].tolist():
+            for idx, row in pages_utils.TempDataSetField[4].iterrows():
+                metrics = row['评价指标']  # 提取评价指标
+                if not isinstance(metrics, dict):  # 确保是字典
+                    metrics = eval(metrics)
+                oa = metrics.get('OA', 0)
+                kappa = metrics.get('Kappa', 0)
 
-        for tempModel in models:
-            # model = joblib.load(
-            #     os.path.join(RESOURCE_MODELRESULT_PATH, 'structure',
-            #                  f'{tempModel}_structure.pkl'))
+                # 优先比较 OA
+                if oa > best_oa or (oa == best_oa and kappa > best_kappa):
+                    best_oa = oa
+                    best_kappa = kappa
+                    best_model = row['模型']  # 假设模型列存在
+
+            # 输出最优精度和对应的模型
+            print("最优模型:", best_model)
+            print("最优OA:", best_oa)
+            print("最优KAPPA:", best_kappa)
+            tempModels = pages_utils.TempDataSetField[4]['模型'].tolist()
+            tempModels.remove(best_model)
+            tempModels.insert(0, best_model)
+            # 默认最优模型放置第一个
+            st.selectbox('加载模型',
+                         options=tempModels,
+                         label_visibility='collapsed')
             model = joblib.load(
                 os.path.join(RESOURCE_MODELRESULT_PATH, 'structure',
-                             'FLDA_structure.pkl'))
+                             f'{best_model}_structure.pkl'))
 
-        # 获取特征字段
-        feature_names = model.feature_names_in_ if hasattr(model, 'feature_names_in_') else None
-        st.info(f"模型输入特征:{' '.join(feature_names)}")
-        if feature_names.any():
-            # 创建一个 DataFrame，其中包含特征字段作为表头
-            df = pd.DataFrame(columns=feature_names)
-
-            # 将 DataFrame 保存为 Excel 文件
-            file_path = "features.xlsx"  # 文件路径可以根据需要调整
-            df.to_excel(file_path, index=False)
-        with open(file_path, "rb") as file:
-            st.download_button(
-                label="下载模型应用数据模板",
-                data=file,
-                file_name="模型应用数据模板.xlsx",
-                mime="application/octet-stream"
-            )
+            # 获取特征字段
+            feature_names = model.feature_names_in_ if hasattr(model, 'feature_names_in_') else None
+            st.info(f"模型输入特征:{'、'.join(feature_names)}")
+        # if feature_names.any():
+        #     # 创建一个 DataFrame，其中包含特征字段作为表头
+        #     df = pd.DataFrame(columns=feature_names)
+        #
+        #     # 将 DataFrame 保存为 Excel 文件
+        #     file_path = "features.xlsx"  # 文件路径可以根据需要调整
+        #     # df.to_excel(file_path, index=False)
+        # with open(file_path, "rb") as file:
+        #     st.download_button(
+        #         label="下载模型应用数据模板",
+        #         data=file,
+        #         file_name="模型应用数据模板.xlsx",
+        #         mime="application/octet-stream"
+        #     )
 
     with col3:
         st.markdown("##### 输入特征")
@@ -96,6 +117,91 @@ with colTemp2:
             accept_multiple_files=False,
             label_visibility='collapsed')
 
+    # 自动模型应用
+    # 获取原始上传数据
+    dataFrameTemp = st.session_state.modelApplicationData
+    # dataFrameTemp.to_excel('原始书.xlsx', index=False)
+    # print(dataFrameTemp)
+    # 自动计算特征
+    # ===============计算月、旬===============
+    # 计算旬、月、年内日期和日期字段
+    dataFrameTemp['日期'] = pd.to_datetime(
+        dataFrameTemp['年'].astype(str) + dataFrameTemp['DayOfYear'].astype(str), format='%Y%j')
+    dataFrameTemp['年内日期'] = dataFrameTemp['日期'].dt.strftime('%m-%d')
+    # 提取月份
+    dataFrameTemp['月'] = dataFrameTemp['日期'].dt.month
+    # 计算每天所在的旬，假设1-10日为第一旬，11-20日为第二旬，21日至月末为第三旬
+    dataFrameTemp['旬'] = dataFrameTemp['日期'].dt.day.apply(FeatureCalculationMethod.get_decade)
+
+    # ===============获取特征计算任务清单内容===============
+
+    predictDF = None
+    fields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
+    methodParam = pages_utils.TempDataSetField[2]["方法参数"].tolist()
+    methodList = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
+
+    with emptyHeadFCP:
+        with st.spinner('处理数据中...'):
+            afterHandleData = None
+            newColumn = '错误'
+            # ===============根据名称匹配调用并执行各个处理方法===============
+            # 初始化特征计算方法
+            # methodTool = FeatureCalculationMethod(
+            #     pages_utils.TempDataSet[1],
+            #     reservedField + outFields)
+            for indexT, tempMethod in enumerate(methodList):
+                # 使用处理后最新的字段内容
+                reservedField = pages_utils.TempDataSet[1].columns.tolist()
+                # print(f'=============测试保留字段-{reservedField}=============')
+                if tempMethod == '时间(温度)分辨率转换':
+                    pass
+                elif tempMethod == '降雨日数计算':
+                    afterHandleData, newColumn = FeatureCalculationMethod(
+                        dataFrameTemp, reservedField).rainfallDaysAccumulation(
+                        fields[indexT], methodParam[indexT])
+                elif tempMethod == '降水累积量计算':
+                    afterHandleData, newColumn = FeatureCalculationMethod(
+                        dataFrameTemp, reservedField).precipitationAccumulation(
+                        fields[indexT], methodParam[indexT])
+                elif tempMethod == '基于活动积温的生育期计算':
+                    afterHandleData, newColumn = FeatureCalculationMethod(
+                        dataFrameTemp, reservedField).growthPeriodCalculation(
+                        fields[indexT], methodParam[indexT])
+                elif tempMethod == '气象指标均值计算':
+                    afterHandleData, newColumn = FeatureCalculationMethod(
+                        dataFrameTemp, reservedField).meteorologicalMeanAccumulation(
+                        fields[indexT], methodParam[indexT])
+                elif tempMethod == '活动积温计算':
+                    afterHandleData, newColumn = FeatureCalculationMethod(
+                        dataFrameTemp, reservedField).activeAccumulatedTemperature(
+                        fields[indexT], methodParam[indexT])
+                # afterHandleData.to_excel(f'处理{tempMethod}.xlsx')
+                # ===============合并处理后数据集===============
+                row_size = len(afterHandleData)
+                intersection_cols = pages_utils.getIntersectionCols(
+                    dataFrameTemp, afterHandleData
+                )
+                dataFrameTemp = pd.merge(
+                    afterHandleData, dataFrameTemp,
+                    on=intersection_cols, how="left")
+                st.toast(f"完成{tempMethod}计算", icon="ℹ️️")
+
+    # 保留优选特征
+    # dataFrameTemp.to_excel('计算完特征.xlsx')
+    dataFrameTemp = dataFrameTemp[['经度', '纬度', '年'] + st.session_state.preferenceFeature]
+    # dataFrameTemp.to_excel('计算完特征并删减.xlsx')
+    # 提取非空值
+    dataFrameTemp = dataFrameTemp.groupby(['经度', '纬度', '年']).first().reset_index()
+    # dataFrameTemp.to_excel('提取非空值.xlsx')
+    # 去重
+    dataFrameTemp = dataFrameTemp.drop_duplicates()
+    # dataFrameTemp.to_excel('去重.xlsx')
+
+    predictDF = dataFrameTemp[st.session_state.preferenceFeature]
+    predictions = model.predict(predictDF)
+    dataFrameTemp['预测结果'] = predictions
+    st.table(dataFrameTemp)
+
     if uploaded_dataSet:
         # st.markdown("##### 预测结果")
         bytes_data = uploaded_dataSet.read()
@@ -103,3 +209,20 @@ with colTemp2:
         predictions = model.predict(predictDF)
         predictDF['预测结果'] = predictions
         st.table(predictDF)
+
+        dem = r'E:\a_python\program\diseaseForecastStreamlit\myproject\resource\tempdir\CHN_Wheat_2010.tif'
+        m = leafmap.Map(zoom_start=16)
+        m.add_basemap('SATELLITE')
+
+        m.add_raster(dem, cmap='RdYlGn', layer_name="DEM", nodata=0, attribution='由杭电数字农业团队提供')
+        m.add_colorbar(
+            cmap="terrain",
+            vmin=0,
+            vmax=1,
+            label="Elevation (m)",
+            position="bottom-right",
+            width=1,
+            height=3,
+            orientation="vertical", colors=["red", 'yellow', 'blue']
+        )
+        m.to_streamlit()
