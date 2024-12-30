@@ -9,6 +9,7 @@ from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMeth
 import streamlit_antd_components as sac
 from pages import pages_utils
 import leafmap.foliumap as leafmap
+from lib.utils import excelToJson
 
 st.set_page_config(
     layout="wide"
@@ -200,7 +201,21 @@ with colTemp2:
     predictDF = dataFrameTemp[st.session_state.preferenceFeature]
     predictions = model.predict(predictDF)
     dataFrameTemp['预测结果'] = predictions
-    st.table(dataFrameTemp)
+    # st.table(dataFrameTemp)
+
+    # 地图可视化
+    # 获取经度和纬度的最小值和最大值
+    # min_longitude = dataFrameTemp["经度"].min()
+    # max_longitude = dataFrameTemp["经度"].max()
+    # min_latitude = dataFrameTemp["纬度"].min()
+    # max_latitude = dataFrameTemp["纬度"].max()
+    geoJsonPredict = excelToJson(dataFrameTemp, '经度', '纬度', '预测结果')
+    # m = leafmap.Map(center=[30.314207, 120.343200], zoom_start=16)
+    m = leafmap.Map(zoom_start=16)
+    m.add_basemap('SATELLITE')
+
+    m.add_geojson(geoJsonPredict, layer_name="模型应用结果")
+    m.to_streamlit()
 
     if uploaded_dataSet:
         # st.markdown("##### 预测结果")
