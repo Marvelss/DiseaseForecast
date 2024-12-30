@@ -595,7 +595,7 @@ with modelACV:
     modelACVCol1, modelACVCol2 = st.columns([0.7, 0.4])
     with modelACVCol1:
         # 按照数据类型显示左侧字段或特征
-        result1 = pages_utils.multiselect_all(
+        result1 = pages_utils.multiselect_all_checked(
             st, '全选-优选特征', filterUnique(st.session_state.preferenceFeature, []),
             'tempTemperature', 'collapsed')
         # 去除年、月、年内日期等字段
