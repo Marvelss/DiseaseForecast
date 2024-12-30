@@ -23,6 +23,20 @@ def multiselect_all(streamlit, box_name, value_list, label, temp_label_visibilit
     return selected_options
 
 
+# 带有全选的多选框(默认选中)
+def multiselect_all_checked(streamlit, box_name, value_list, label, temp_label_visibility):
+    checkbox_all = streamlit.checkbox(box_name, value=True)
+    if checkbox_all:
+        selected_options = streamlit.multiselect(
+            label,
+            value_list, value_list, label_visibility=temp_label_visibility)
+    else:
+        selected_options = streamlit.multiselect(
+            label,
+            value_list, label_visibility=temp_label_visibility)
+    return selected_options
+
+
 def plot_metrics(st, metrics_list, model, x_test, y_test, class_names):
     if "Confusion Matrix" in metrics_list:
         st.subheader("Confusion Matrix")
