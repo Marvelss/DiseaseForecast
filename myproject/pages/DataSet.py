@@ -47,7 +47,9 @@ div.stButton button {
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
-
+# 模型应用数据
+if 'modelApplicationData' not in st.session_state:
+    st.session_state.modelApplicationData = None
 # 模板路径及注释信息
 path1 = os.path.join(RESOURCE_TEMPLATE_PATH, '气象数据-模板.xlsx')
 path2 = os.path.join(RESOURCE_TEMPLATE_PATH, '植保数据-模板.xlsx')
@@ -98,8 +100,8 @@ emptyHeadDSP = st.empty()
 dataSCM, dataSCR = st.columns([0.7, 0.4])
 with dataSCM:
     st.markdown("##### 上传数据集")
-
-    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '地理遥感数据'], ["🌨️️", "🌾", "🌎"])
+    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '地理遥感数据', '模型应用数据'],
+                             ["🌨️️", "🌾", "🌎", ""])
 
     uploaded_files = st.file_uploader(
         "上传数据集",
@@ -148,6 +150,17 @@ with dataSCM:
                     file_name="地理遥感数据-模板.xlsx",
                     mime="application/octet-stream"
                 )
+
+    if selectedTemplate == '模型应用数据':
+        with placeholder1.container():
+            st.warning(warningInfo, icon="⚠️")
+            with open(path3, "rb") as file:
+                st.download_button(
+                    label="下载模型应用数据模板",
+                    data=file,
+                    file_name="模型应用数据-模板.xlsx",
+                    mime="application/octet-stream"
+                )
     # ==============================控制文件上传逻辑==============================
     with emptyHeadDSP:
         with st.spinner('处理数据中...'):
@@ -187,14 +200,18 @@ with dataSCM:
                             "字段": data33.columns.tolist()}
                         # 添加并合并至原始数据集
                         pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
-                        # 获取两个DataFrame列名的交集
-                        intersection_cols = pages_utils.getIntersectionCols(
-                            data33, pages_utils.TempDataSet[0]
-                        )
-                        # 合并数据
-                        pages_utils.TempDataSet[0] = pd.merge(
-                            data33, pages_utils.TempDataSet[0],
-                            on=intersection_cols, how="outer")
+                        # 若为模型应用数据，不合并
+                        if selectedTemplate == '模型应用数据':
+                            st.session_state.modelApplicationData = data33
+                        else:
+                            # 获取两个DataFrame列名的交集
+                            intersection_cols = pages_utils.getIntersectionCols(
+                                data33, pages_utils.TempDataSet[0]
+                            )
+                            # 合并数据
+                            pages_utils.TempDataSet[0] = pd.merge(
+                                data33, pages_utils.TempDataSet[0],
+                                on=intersection_cols, how="outer")
                 # 上传出错提示
                 except BaseException as e:
                     st.toast('上传错误  \n请检查文件内容及格式无误后重新上传', icon="⚠️")
