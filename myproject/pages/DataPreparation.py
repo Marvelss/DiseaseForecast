@@ -338,7 +338,7 @@ with dataPCV:
             if isNan:
                 needHandledList.append(filedTTT1)
         if len(needHandledList) == 0:
-            needHandledList = ['无异常值']
+            st.toast("未发现缺失值", icon="ℹ️️")
     else:
         needHandledList = ['待原始数据上传']
 

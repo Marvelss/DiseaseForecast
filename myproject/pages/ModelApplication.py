@@ -60,7 +60,7 @@ with colTemp2:
     col2, col3 = st.columns(2)
     with col2:
         # 默认获取最优模型进行应用
-        st.markdown("##### 加载模型")
+        st.markdown("##### 加载模型(默认使用精度最优模型)")
         best_model = None
         best_oa = -float('inf')
         best_kappa = -float('inf')
@@ -197,8 +197,9 @@ with colTemp2:
     # 去重
     dataFrameTemp = dataFrameTemp.drop_duplicates()
     # dataFrameTemp.to_excel('去重.xlsx')
+    predictDF = dataFrameTemp[pages_utils.TempDataSetField[4]['特征'][0]]
+    # predictDF.to_excel('输入.xlsx')
 
-    predictDF = dataFrameTemp[st.session_state.preferenceFeature]
     predictions = model.predict(predictDF)
     dataFrameTemp['预测结果'] = predictions
     # st.table(dataFrameTemp)
