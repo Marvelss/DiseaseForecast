@@ -66,10 +66,11 @@ warningInfo = '''
 '''
 warningInfo1 = '''
 注意事项
-1. 病害发生数据需要将文字转为数字;
-2. 字段名称不能包含 '-' , '_' 和数字字符;
-3. 模版中表头行不可删除;
-4. 删除示例数据后,按需填充数据或删减和扩充字段.
+1. 模型应用数据用于模型应用环节，利用该上传数据自动输入已构建的模型，实现未来作物病虫害发生预测;
+
+2. 根据提供的模板，填充数据;
+3. 上传内容应为未来的数据;
+4. 数据条数至少一年以上，且无缺失值
 '''
 
 st.markdown(
@@ -101,7 +102,7 @@ dataSCM, dataSCR = st.columns([0.7, 0.4])
 with dataSCM:
     st.markdown("##### 上传数据集")
     selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '地理遥感数据', '模型应用数据'],
-                             ["🌨️️", "🌾", "🌎", ""])
+                             ["🌨️️", "🌾", "🌎", "🗺️"])
 
     uploaded_files = st.file_uploader(
         "上传数据集",
@@ -153,7 +154,7 @@ with dataSCM:
 
     if selectedTemplate == '模型应用数据':
         with placeholder1.container():
-            st.warning(warningInfo, icon="⚠️")
+            st.warning(warningInfo1, icon="⚠️")
             with open(path3, "rb") as file:
                 st.download_button(
                     label="下载模型应用数据模板",
