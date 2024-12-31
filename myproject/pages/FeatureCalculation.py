@@ -180,9 +180,11 @@ def onRun():
     # print('======================特征计算-添加任务清单记录(测试)======================')
     # print(new_dataT)
     # pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
+    # 左下角选中的特征
+    featureListT1 = result1
 
     # 降水累积量-月
-    if option16:
+    if option16 and '降水' in featureListT1:
         new_dataT = {
             "编号": pages_utils.generateID(),
             "数据类型": '气象数据',
@@ -198,7 +200,7 @@ def onRun():
     #
     # 气象指标均值计算-旬
     if option17:
-        featureListT1 = filterUnique(weatherNameList, pages_utils.reservedField)
+        # featureListT1 = filterUnique(weatherNameList, pages_utils.reservedField)
         for fieldT in featureListT1:
             new_dataT = {
                 "编号": pages_utils.generateID(),
@@ -430,8 +432,9 @@ with featureCCV:
     st.markdown('#### 气象数据字段选择')
     fieldF = filterUnique(weatherNameList, pages_utils.reservedField)
     fieldF = fieldF if len(fieldF) != 0 else ['待原始数据上传']
-    result1 = pills("特征计算", fieldF, label_visibility='collapsed')
-    result1 = [result1]
+    result1 = st.multiselect("特征计算", options=fieldF, default=fieldF,
+                             label_visibility='collapsed')
+    # result1 = [result1]
     # result2 = pages_utils.multiselect_all(
     #     st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
     #     'tempPlant', 'collapsed')
