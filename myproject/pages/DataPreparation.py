@@ -9,7 +9,6 @@ import streamlit as st
 from PIL import Image
 from matplotlib.ticker import MaxNLocator
 from st_pages import hide_pages
-from streamlit_pills import pills
 import streamlit_antd_components as sac
 
 from lib.share import RESOURCE_IMAGES_PATH
@@ -158,6 +157,20 @@ def onRun():
     if '预处理后数据集' not in st.session_state["leftTabs"]:
         st.session_state["leftTabs"].append('预处理后数据集')
     st.session_state.page12 += 1
+
+    for fieldTT2 in result1:
+        new_dataT = {
+            "编号": pages_utils.generateID(),
+            "数据类型": '气象数据',
+            "输入字段": [fieldTT2],
+            "预处理后字段": None,
+            "预处理方法": '剔除异常值及插补',
+            "方法参数": ['具体数值', 'nan', ''],
+            "时间": datetime.datetime.now().time(),
+            "处理状态": False}
+        # print('======================预处理-添加任务清单记录======================')
+        # print(new_dataT)
+        pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_dataT
 
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[1]["编号"]
@@ -314,12 +327,24 @@ with dataPCV:
     #     st, '全选-', filterUnique(weatherNameList, pages_utils.reservedField),
     #     'tempTemperature', 'collapsed')
     st.markdown("##### 气象数据字段选择")
+    needHandledList = []
     fieldT = filterUnique(pages_utils.TempDataSet[0],
                           plantNameT1 + agricultureNameT1 + pages_utils.reservedField)
-    fieldT = fieldT if len(fieldT) != 0 else ['待原始数据上传']
-    result1 = pills("", fieldT,
-                    label_visibility='collapsed')
-    result1 = [result1]
+    if len(fieldT) != 0:
+        # 检查异常值
+        for filedTTT1 in fieldT:
+            isNan = PretreatmentMethod.detectGeneralNumber(
+                pages_utils.TempDataSet[0], filedTTT1, 'nan')
+            if isNan:
+                needHandledList.append(filedTTT1)
+        if len(needHandledList) == 0:
+            needHandledList = ['无异常值']
+    else:
+        needHandledList = ['待原始数据上传']
+
+    result1 = st.multiselect("s", options=needHandledList,
+                             default=needHandledList, label_visibility='collapsed')
+    # result1 = [result1]
     # result2 = pages_utils.multiselect_all(
     #     st, '全选-植保数据', filterUnique(plantNameList, pages_utils.reservedField),
     #     'tempPlant', 'collapsed')
@@ -333,10 +358,12 @@ with dataPCM:
     # with tab1:
     col1, col2 = st.columns(2)
     with col1:
+
         agree = st.checkbox('剔除异常值及插补', key='checkbox0', on_change=clear_other, args=[0])
     with col2:
         # agree10 = st.checkbox("缺失值插补", key='checkbox1', on_change=clear_other, args=[1])
         agree10 = None
+    paramPlaceHolder = st.empty()
     # ===============显示和处理右中各个处理方法设置参数===============
     if agree10:
         # 显示缺失值信息
@@ -387,83 +414,107 @@ with dataPCM:
             st.image(img)
         # st.markdown('---')
     if agree:
-        # 异常值检测(温度和降水)
-        # 显示缺失值信息
-        # info = '疑似异常字段:\n'
-        # 第一次使用原始数据集,而后基于预处理后数据集多次处理
-        if pages_utils.TempDataSet[1].shape[0] == 0:
-            dataFrameTemp = pages_utils.TempDataSet[0]
-        else:
-            dataFrameTemp = pages_utils.TempDataSet[1]
-
-        # infoT1 = PretreatmentMethod.detectLinearInterpolationWeather(dataFrameTemp)
-        # infoT2 = PretreatmentMethod.detectLinearInterpolationRain(dataFrameTemp)
-        # columnList, lowNum, upNum, lowCount, upCount = PretreatmentMethod.detect_outliers_iqr(dataFrameTemp,
-        #                                                                                       pages_utils.reservedField)
-        # info1 = '无异常字段\n'
-        # if not len(columnList):
-        #     st.info(f"{info1}\n", icon="ℹ️️")
-        # else:
-        #     st.info(f"{info1}\n", icon="ℹ️️")
-
-        # infoT1 = ''
-        # for columnT, lowNumT, upNumT, lowCountT, upCountT in zip(columnList, lowNum, upNum, lowCount, upCount):
-        #     infoT1 += f"* {columnT} 下限:{round(lowNumT, 3)} 个数:{lowCountT} 上限:{round(upNumT, 3)} 个数:{upCountT}\n"
-        # st.warning(f"{info}  \n{infoT1}", icon="⚠️")
-        st.markdown('---')
-
-        coll11, coll22 = st.columns([0.3, 0.6])
-        with coll11:
-            optionDP1 = st.selectbox(
-                '异常值查找方式',
-                ('具体数值', '范围数值'))
-
-            if optionDP1 == '范围数值':
-                detectUp, detectLow = 0.1, 0.1
-                if '温度' == result1[0]:
-                    detectUp, detectLow = 50, -30
-                elif '降水' == result1[0]:
-                    detectUp, detectLow = 1500, 0
-                number2 = st.text_input("大于以下数值外的值", value=detectUp)
-                number3 = st.text_input("小于以下数值外的值", value=detectLow)
-                infoT1Low, infoT1Up = PretreatmentMethod.detectGeneralScope(dataFrameTemp, result1[0], float(number2),
-                                                                            float(number3))
-                if infoT1Low or infoT1Up:
-                    st.warning(f"存在异常数据:  \n超过上限数据:{infoT1Up}条  \n超过下限数据:{infoT1Low}条", icon="⚠️")
+        with paramPlaceHolder.container():
+            with st.expander("高级设置"):
+                # 异常值检测(温度和降水)
+                # 显示缺失值信息
+                # info = '疑似异常字段:\n'
+                # 第一次使用原始数据集,而后基于预处理后数据集多次处理
+                if pages_utils.TempDataSet[1].shape[0] == 0:
+                    dataFrameTemp = pages_utils.TempDataSet[0]
                 else:
-                    st.info(f"无异常数据\n", icon="ℹ️️")
-                option = st.selectbox(
-                    '插补方法',
-                    options='线性插值')
-                st.session_state["preMethodName"]['param1'] = optionDP1
-                st.session_state["preMethodName"]['param2'] = number2
-                st.session_state["preMethodName"]['param3'] = number3
-                if number3:
-                    # 检测剔除参数最小值>最大值
-                    if PretreatmentMethod.detectLinearInterpolationParam([number2, number3]):
-                        st.toast('剔除数据的最小值>最大值', icon="⚠️")
-            elif optionDP1 == '具体数值':
-                num = st.text_input('异常值', value=np.nan)
-                infoT1 = PretreatmentMethod.detectGeneralNumber(dataFrameTemp, result1[0], num)
-                if infoT1:
-                    st.warning(f"存在异常数据:{infoT1}条", icon="⚠️")
-                else:
-                    st.info(f"无异常数据\n", icon="ℹ️️")
-                num1 = st.text_input('插补值')
-                st.session_state["preMethodName"]['param1'] = optionDP1
-                st.session_state["preMethodName"]['param2'] = num
-                st.session_state["preMethodName"]['param3'] = num1
+                    dataFrameTemp = pages_utils.TempDataSet[1]
 
-        with coll22:
-            st.info('方法介绍\n'
-                    '* 描述:剔除单个数值或指定范围内的异常值，然后对其进行自定义插补或线性插值\n', icon="ℹ️")
-            img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'Figure_5.png'))
-            st.image(img)
+                # infoT1 = PretreatmentMethod.detectLinearInterpolationWeather(dataFrameTemp)
+                # infoT2 = PretreatmentMethod.detectLinearInterpolationRain(dataFrameTemp)
+                # columnList, lowNum, upNum, lowCount, upCount = PretreatmentMethod.detect_outliers_iqr(dataFrameTemp,
+                #                                                                                       pages_utils.reservedField)
+                # info1 = '无异常字段\n'
+                # if not len(columnList):
+                #     st.info(f"{info1}\n", icon="ℹ️️")
+                # else:
+                #     st.info(f"{info1}\n", icon="ℹ️️")
+
+                # infoT1 = ''
+                # for columnT, lowNumT, upNumT, lowCountT, upCountT in zip(columnList, lowNum, upNum, lowCount, upCount):
+                #     infoT1 += f"* {columnT} 下限:{round(lowNumT, 3)} 个数:{lowCountT} 上限:{round(upNumT, 3)} 个数:{upCountT}\n"
+                # st.warning(f"{info}  \n{infoT1}", icon="⚠️")
+                st.markdown('---')
+
+                coll11, coll22 = st.columns([0.3, 0.6])
+                with coll11:
+                    optionDP1 = st.selectbox(
+                        '异常值查找方式',
+                        ('具体数值', '范围数值'))
+
+                    if optionDP1 == '范围数值':
+                        detectUp, detectLow = 0.1, 0.1
+                        if '温度' in result1:
+                            detectUp, detectLow = 50, -30
+                        elif '降水' == result1:
+                            detectUp, detectLow = 1500, 0
+                        number2 = st.text_input("大于以下数值外的值", value=detectUp)
+                        number3 = st.text_input("小于以下数值外的值", value=detectLow)
+                        # infoT1Low, infoT1Up = PretreatmentMethod.detectGeneralScope(dataFrameTemp, '温度',
+                        #                                                             float(number2),
+                        #                                                             float(number3))
+                        # infoT1Low, infoT1Up = PretreatmentMethod.detectGeneralScope(dataFrameTemp, '降水',
+                        #                                                             float(number2),
+                        #                                                             float(number3))
+
+                        # if infoT1Low or infoT1Up:
+                        #     st.warning(f"存在异常数据:  \n超过上限数据:{infoT1Up}条  \n超过下限数据:{infoT1Low}条",
+                        #                icon="⚠️")
+                        # else:
+                        #     st.info(f"无异常数据\n", icon="ℹ️️")
+                        option = st.selectbox(
+                            '插补方法',
+                            options='线性插值')
+                        st.session_state["preMethodName"]['param1'] = optionDP1
+                        st.session_state["preMethodName"]['param2'] = number2
+                        st.session_state["preMethodName"]['param3'] = number3
+                        if number3:
+                            # 检测剔除参数最小值>最大值
+                            if PretreatmentMethod.detectLinearInterpolationParam([number2, number3]):
+                                st.toast('剔除数据的最小值>最大值', icon="⚠️")
+                    elif optionDP1 == '具体数值':
+                        num = st.text_input('异常值', value=np.nan)
+                        infoT1_dict = {}
+                        # 初始化用于存储警告信息的字符串
+                        warning_message = "存在以下异常数据:\n  "
+                        # 遍历 result1
+                        for field in result1:
+                            # 检测具体数据异常数目
+                            infoT1 = PretreatmentMethod.detectGeneralNumber(dataFrameTemp, field, num)
+                            # 如果存在异常数据，则更新 infoT1_dict
+                            if infoT1:
+                                infoT1_dict[field] = infoT1
+                        # 遍历 infoT1_dict 字典
+                        for field, infoT1 in infoT1_dict.items():
+                            # 如果存在异常，添加到警告信息中
+                            if infoT1:
+                                warning_message += f"字段:{field}异常数量:{infoT1}条\n  "
+                        # 如果有异常数据，显示警告
+                        if warning_message != "存在以下异常数据:\n":
+                            st.warning(warning_message, icon="⚠️")
+                        else:
+                            st.info(f"无异常数据\n", icon="ℹ️️")
+                        num1 = st.text_input('插补值')
+                        st.session_state["preMethodName"]['param1'] = optionDP1
+                        st.session_state["preMethodName"]['param2'] = num
+                        st.session_state["preMethodName"]['param3'] = num1
+
+                with coll22:
+                    st.info('方法介绍\n'
+                            '* 描述:剔除单个数值或指定范围内的异常值，然后对其进行自定义插补或线性插值\n', icon="ℹ️")
+                    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'Figure_5.png'))
+                    st.image(img)
 
     # =======================添加处理至任务清单=======================
 
-    interval_col1, interval_col2 = st.columns([5, 1])
-    btn = interval_col2.button('添加处理', on_click=clearOption)
+    # interval_col1, interval_col2 = st.columns([5, 1])
+    # btn = interval_col2.button('添加处理', on_click=clearOption)
+    btn = None
     if btn:
         # 检测用户行为-输入特征为空(预处理方法空判定未添加)
         # if not len(result1 + result2 + result3):
@@ -526,7 +577,7 @@ with dataPCM:
                 #     st, '全选',
                 #     residualField,
                 #     'temp1', 'collapsed')
-                btn2 = st.button('运行', on_click=onRun)
+                btn2 = st.button('下一步', on_click=onRun)
 
             # btn2 = interval_col33.button('运行', on_click=onRun)
 
