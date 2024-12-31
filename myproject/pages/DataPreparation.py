@@ -358,8 +358,11 @@ with dataPCM:
     # with tab1:
     col1, col2 = st.columns(2)
     with col1:
+        if len(result1):
+            agree = st.checkbox('剔除异常值及插补', key='checkbox0', value=True, args=[0])
+        else:
+            agree = st.checkbox('剔除异常值及插补', key='checkbox0', on_change=clear_other, args=[0])
 
-        agree = st.checkbox('剔除异常值及插补', key='checkbox0', on_change=clear_other, args=[0])
     with col2:
         # agree10 = st.checkbox("缺失值插补", key='checkbox1', on_change=clear_other, args=[1])
         agree10 = None
