@@ -111,7 +111,7 @@ class PretreatmentMethod:
 
     # 缺失值插补
     def linearInterpolation(self, methodParam):
-        print(f'预处理方法参数:{methodParam}')
+        # print(f'预处理方法参数:{methodParam}')
         missingValueBefore, missingValueAfter = None, None
         # 处理单个字段
         self.fieldName = self.fieldName[0]
@@ -170,8 +170,8 @@ class PretreatmentMethod:
 
     # 剔除异常值及插补
     def outlierEliminatorInterpolation(self, methodParam):
-        print('-----------测试5------------')
-        print(methodParam)
+        # print('-----------测试5------------')
+        # print(methodParam)
         # 处理单值或范围
         flagSingle = methodParam[0]
         # 处理单个字段
@@ -182,15 +182,22 @@ class PretreatmentMethod:
         if flagSingle == '具体数值':
             missValue = methodParam[1]
             filledValue = methodParam[2]
-            # 若指定字段为空
-            if missValue == 'nan':
-                missingValueBefore = (newDataFrame[newDataColumn] == np.nan).sum()
-                newDataFrame[newDataColumn] = newDataFrame[newDataColumn].fillna(float(filledValue))
-                missingValueAfter = (newDataFrame[newDataColumn] == np.nan).sum()
+            # 优选自动填补
+            if not filledValue:
+                newDataFrame[newDataColumn] = newDataFrame[newDataColumn].interpolate(
+                    method='linear',
+                    limit_direction='both')
             else:
-                missingValueBefore = (newDataFrame[newDataColumn] == float(missValue)).sum()
-                newDataFrame[newDataColumn] = newDataFrame[newDataColumn].replace(float(missValue), float(filledValue))
-                missingValueAfter = (newDataFrame[newDataColumn] == float(missValue)).sum()
+                # 若指定字段为空
+                if missValue == 'nan':
+                    missingValueBefore = (newDataFrame[newDataColumn] == np.nan).sum()
+                    newDataFrame[newDataColumn] = newDataFrame[newDataColumn].fillna(float(filledValue))
+                    missingValueAfter = (newDataFrame[newDataColumn] == np.nan).sum()
+                else:
+                    missingValueBefore = (newDataFrame[newDataColumn] == float(missValue)).sum()
+                    newDataFrame[newDataColumn] = newDataFrame[newDataColumn].replace(float(missValue),
+                                                                                      float(filledValue))
+                    missingValueAfter = (newDataFrame[newDataColumn] == float(missValue)).sum()
         elif flagSingle == '范围数值':
             maxValue = float(methodParam[1])
             minValue = float(methodParam[2])
@@ -198,10 +205,10 @@ class PretreatmentMethod:
             newDataFrame[self.fieldName] = newDataFrame[self.fieldName].where(
                 (newDataFrame[self.fieldName] >= minValue) & (newDataFrame[self.fieldName] <= maxValue), np.nan)
 
-            newDataFrame.to_excel('剔除.xlsx')
+            # newDataFrame.to_excel('剔除.xlsx')
             # 使用线性插值填补NaN值
             newDataFrame[self.fieldName] = newDataFrame[self.fieldName].interpolate(method='linear',
-                                                                                  limit_direction='both')
-            newDataFrame.to_excel('插补.xlsx')
+                                                                                    limit_direction='both')
+            # newDataFrame.to_excel('插补.xlsx')
 
         return newDataFrame
