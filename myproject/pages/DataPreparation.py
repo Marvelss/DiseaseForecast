@@ -158,20 +158,6 @@ def onRun():
         st.session_state["leftTabs"].append('预处理后数据集')
     st.session_state.page12 += 1
 
-    for fieldTT2 in result1:
-        new_dataT = {
-            "编号": pages_utils.generateID(),
-            "数据类型": '气象数据',
-            "输入字段": [fieldTT2],
-            "预处理后字段": None,
-            "预处理方法": '剔除异常值及插补',
-            "方法参数": ['具体数值', 'nan', ''],
-            "时间": datetime.datetime.now().time(),
-            "处理状态": False}
-        # print('======================预处理-添加任务清单记录======================')
-        # print(new_dataT)
-        pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_dataT
-
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[1]["编号"]
     fields = pages_utils.TempDataSetField[1]["输入字段"]
@@ -330,17 +316,19 @@ with dataPCV:
     needHandledList = []
     fieldT = filterUnique(pages_utils.TempDataSet[0],
                           plantNameT1 + agricultureNameT1 + pages_utils.reservedField)
-    if len(fieldT) != 0:
-        # 检查异常值
-        for filedTTT1 in fieldT:
-            isNan = PretreatmentMethod.detectGeneralNumber(
-                pages_utils.TempDataSet[0], filedTTT1, 'nan')
-            if isNan:
-                needHandledList.append(filedTTT1)
-        if len(needHandledList) == 0:
-            st.toast("未发现缺失值", icon="ℹ️️")
-    else:
-        needHandledList = ['待原始数据上传']
+    if not st.session_state.page12:
+        if len(fieldT) != 0:
+            # 检查异常值
+            for filedTTT1 in fieldT:
+                isNan = PretreatmentMethod.detectGeneralNumber(
+                    pages_utils.TempDataSet[0], filedTTT1, 'nan')
+                if isNan:
+                    needHandledList.append(filedTTT1)
+            if len(needHandledList) == 0:
+                st.toast("未发现缺失值", icon="ℹ️️")
+            st.toast("检测到缺失值，已添加至任务清单", icon="ℹ️️")
+        else:
+            needHandledList = ['待原始数据上传']
 
     result1 = st.multiselect("s", options=needHandledList,
                              default=needHandledList, label_visibility='collapsed')
@@ -514,6 +502,21 @@ with dataPCM:
                     st.image(img)
 
     # =======================添加处理至任务清单=======================
+    # 自动添加
+    if not st.session_state.page12:
+        for fieldTT2 in result1:
+            new_dataT = {
+                "编号": pages_utils.generateID(),
+                "数据类型": '气象数据',
+                "输入字段": [fieldTT2],
+                "预处理后字段": None,
+                "预处理方法": '剔除异常值及插补',
+                "方法参数": ['具体数值', 'nan', ''],
+                "时间": datetime.datetime.now().time(),
+                "处理状态": False}
+            # print('======================预处理-添加任务清单记录======================')
+            # print(new_dataT)
+            pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_dataT
 
     # interval_col1, interval_col2 = st.columns([5, 1])
     # btn = interval_col2.button('添加处理', on_click=clearOption)

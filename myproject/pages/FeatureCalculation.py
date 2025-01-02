@@ -165,63 +165,6 @@ def onRun():
         st.session_state["leftTabs"].append('备选特征')
     st.session_state.page13 += 1
 
-    # 一键自动添加方法
-    # 降雨日数
-
-    # 降水累积量-旬
-    # new_dataT = {
-    #     "编号": pages_utils.generateID(),
-    #     "数据类型": '气象数据',
-    #     "输入特征": ['降水'],
-    #     "特征计算方法": '降水累积量计算',
-    #     "方法参数": ['月累积降水量'],
-    #     "时间": datetime.datetime.now().time(),
-    #     "处理状态": False}
-    # print('======================特征计算-添加任务清单记录(测试)======================')
-    # print(new_dataT)
-    # pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
-    # 左下角选中的特征
-    featureListT1 = result1
-
-    # 降水累积量-月
-    if option16 and '降水' in featureListT1:
-        new_dataT = {
-            "编号": pages_utils.generateID(),
-            "数据类型": '气象数据',
-            "输入特征": ['降水'],
-            "特征计算方法": '降水累积量计算',
-            "方法参数": ['月累积降水量'],
-            "时间": datetime.datetime.now().time(),
-            "处理状态": False}
-        pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
-    # 活动积温-旬
-    #
-    # 活动积温-月
-    #
-    # 气象指标均值计算-旬
-    if option17:
-        # featureListT1 = filterUnique(weatherNameList, pages_utils.reservedField)
-        for fieldT in featureListT1:
-            new_dataT = {
-                "编号": pages_utils.generateID(),
-                "数据类型": '气象数据',
-                "输入特征": [fieldT],
-                "特征计算方法": '气象指标均值计算',
-                "方法参数": ['旬均值'],
-                "时间": datetime.datetime.now().time(),
-                "处理状态": False}
-            pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
-        # 气象指标均值计算-月
-        for fieldT in featureListT1:
-            new_dataT = {
-                "编号": pages_utils.generateID(),
-                "数据类型": '气象数据',
-                "输入特征": [fieldT],
-                "特征计算方法": '气象指标均值计算',
-                "方法参数": ['月均值'],
-                "时间": datetime.datetime.now().time(),
-                "处理状态": False}
-            pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[2]["编号"].tolist()
     fields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
@@ -566,7 +509,66 @@ with (featureCCM):
                 # st.session_state["featureMethodName"]['param3'] = growthPeriodEndDate.strftime('%m-%d')
                 # st.session_state["featureMethodName"]['param4'] = str(growthPeriodNumber)
 
-    # =======================添加处理至任务清单=======================
+        # =======================添加处理至任务清单=======================
+    if not st.session_state.page13:
+        # 一键自动添加方法
+        # 降雨日数
+
+        # 降水累积量-旬
+        # new_dataT = {
+        #     "编号": pages_utils.generateID(),
+        #     "数据类型": '气象数据',
+        #     "输入特征": ['降水'],
+        #     "特征计算方法": '降水累积量计算',
+        #     "方法参数": ['月累积降水量'],
+        #     "时间": datetime.datetime.now().time(),
+        #     "处理状态": False}
+        # print('======================特征计算-添加任务清单记录(测试)======================')
+        # print(new_dataT)
+        # pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
+        # 左下角选中的特征
+        featureListT1 = result1
+
+        # 降水累积量-月
+        if option16 and '降水' in featureListT1:
+            new_dataT = {
+                "编号": pages_utils.generateID(),
+                "数据类型": '气象数据',
+                "输入特征": ['降水'],
+                "特征计算方法": '降水累积量计算',
+                "方法参数": ['月累积降水量'],
+                "时间": datetime.datetime.now().time(),
+                "处理状态": False}
+            pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
+        # 活动积温-旬
+        #
+        # 活动积温-月
+        #
+        # 气象指标均值计算-旬
+        if option17:
+            # featureListT1 = filterUnique(weatherNameList, pages_utils.reservedField)
+            for fieldT in featureListT1:
+                new_dataT = {
+                    "编号": pages_utils.generateID(),
+                    "数据类型": '气象数据',
+                    "输入特征": [fieldT],
+                    "特征计算方法": '气象指标均值计算',
+                    "方法参数": ['旬均值'],
+                    "时间": datetime.datetime.now().time(),
+                    "处理状态": False}
+                pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
+            # 气象指标均值计算-月
+            for fieldT in featureListT1:
+                new_dataT = {
+                    "编号": pages_utils.generateID(),
+                    "数据类型": '气象数据',
+                    "输入特征": [fieldT],
+                    "特征计算方法": '气象指标均值计算',
+                    "方法参数": ['月均值'],
+                    "时间": datetime.datetime.now().time(),
+                    "处理状态": False}
+                pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
+
     # interval_col1, interval_col2 = st.columns([5, 1])
     # btn = interval_col2.button('添加处理', on_click=clear_all)
     btn = None
