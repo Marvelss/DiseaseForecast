@@ -69,7 +69,7 @@ show_pages(
         # Page(os.path.join(PAGES_PATH, 'ModelingReportFacet.py'), "建模报告-面状"),
         # Page(os.path.join(PAGES_PATH, 'ModelApplicationFacet.py'), "模型应用-面状"),
         # Page(os.path.join(PAGES_PATH, 'VisualizationFacet.py'), "数据下载中心-面状"),
-        # Page(os.path.join(PAGES_PATH, 'ModelEvaluation.py'), "testInterface"),
+        Page(os.path.join(PAGES_PATH, 'ModelEvaluation.py'), "testInterface"),
 
     ]
 )
