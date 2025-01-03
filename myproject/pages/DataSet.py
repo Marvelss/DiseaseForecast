@@ -170,9 +170,14 @@ with dataSCM:
                 try:
                     bytes_data = uploaded_files.read()
                     data33 = pd.read_excel(bytes_data)
-                    # 保存上传文件到本地
-                    data33.to_excel(os.path.join(
-                        RESOURCE_TEMPDIR_PATH, uploaded_files.name), index=False)
+                    # 设定保存路径
+                    save_path = f"./{uploaded_files.name}"
+
+                    # 将文件保存到本地
+                    with open(save_path, "wb") as f:
+                        f.write(bytes_data)
+
+                    st.success(f"文件已保存到: {save_path}")
                     isErrorData = False
                     # 检测非数值型输入
                     # 取前10行
