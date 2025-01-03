@@ -7,7 +7,7 @@ import streamlit as st
 from st_pages import hide_pages
 import streamlit_antd_components as sac
 
-from lib.share import RESOURCE_TEMPLATE_PATH
+from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_TEMPDIR_PATH
 from pages import pages_utils
 from streamlit_pills import pills
 from warnings import simplefilter
@@ -170,6 +170,9 @@ with dataSCM:
                 try:
                     bytes_data = uploaded_files.read()
                     data33 = pd.read_excel(bytes_data)
+                    # 保存上传文件到本地
+                    data33.to_excel(os.path.join(
+                        RESOURCE_TEMPDIR_PATH, uploaded_files.name), index=False)
                     isErrorData = False
                     # 检测非数值型输入
                     # 取前10行
