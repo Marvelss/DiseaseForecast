@@ -64,14 +64,7 @@ warningInfo = '''
 5. 删除示例数据后,按需填充或删减字段与数据.
 6. 完成数据添加后，删除注意事项两行单元格，并对数据检查，保证无大面积缺失和异常情况，以免影响建模.
 '''
-warningInfo1 = '''
-注意事项
-1. 模型应用数据用于模型应用环节，利用该上传数据自动输入已构建的模型，实现未来作物病虫害发生预测;
 
-2. 根据提供的模板，填充数据;
-3. 上传内容应为未来的数据;
-4. 数据条数至少一年以上，且无缺失值
-'''
 
 st.markdown(
     """
@@ -101,8 +94,8 @@ emptyHeadDSP = st.empty()
 dataSCM, dataSCR = st.columns([0.7, 0.4])
 with dataSCM:
     st.markdown("##### 上传数据集")
-    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '地理遥感数据', '模型应用数据'],
-                             ["🌨️️", "🌾", "🌎", "🗺️"])
+    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '地理遥感数据'],
+                             ["🌨️️", "🌾", "🌎"])
 
     uploaded_files = st.file_uploader(
         "上传数据集",
@@ -152,16 +145,16 @@ with dataSCM:
                     mime="application/octet-stream"
                 )
 
-    if selectedTemplate == '模型应用数据':
-        with placeholder1.container():
-            st.warning(warningInfo1, icon="⚠️")
-            with open(path3, "rb") as file:
-                st.download_button(
-                    label="下载模型应用数据模板",
-                    data=file,
-                    file_name="模型应用数据-模板.xlsx",
-                    mime="application/octet-stream"
-                )
+    # if selectedTemplate == '模型应用数据':
+    #     with placeholder1.container():
+    #         st.warning(warningInfo1, icon="⚠️")
+    #         with open(path3, "rb") as file:
+    #             st.download_button(
+    #                 label="下载模型应用数据模板",
+    #                 data=file,
+    #                 file_name="模型应用数据-模板.xlsx",
+    #                 mime="application/octet-stream"
+    #             )
     # ==============================控制文件上传逻辑==============================
     with emptyHeadDSP:
         with st.spinner('处理数据中...'):
@@ -170,14 +163,14 @@ with dataSCM:
                 try:
                     bytes_data = uploaded_files.read()
                     data33 = pd.read_excel(bytes_data)
-                    # 设定保存路径
-                    save_path = f"./{uploaded_files.name}"
-
-                    # 将文件保存到本地
-                    with open(save_path, "wb") as f:
-                        f.write(bytes_data)
-
-                    st.success(f"文件已保存到: {save_path}")
+                    # # 设定保存路径
+                    # save_path = f"./{uploaded_files.name}"
+                    #
+                    # # 将文件保存到本地
+                    # with open(save_path, "wb") as f:
+                    #     f.write(bytes_data)
+                    #
+                    # st.success(f"文件已保存到: {save_path}")
                     isErrorData = False
                     # 检测非数值型输入
                     # 取前10行
@@ -211,7 +204,8 @@ with dataSCM:
                         pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
                         # 若为模型应用数据，不合并
                         if selectedTemplate == '模型应用数据':
-                            st.session_state.modelApplicationData = data33
+                            pass
+                            # st.session_state.modelApplicationData = data33
                         else:
                             # 获取两个DataFrame列名的交集
                             intersection_cols = pages_utils.getIntersectionCols(

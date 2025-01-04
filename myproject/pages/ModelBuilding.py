@@ -611,7 +611,7 @@ with modelACV:
             'tempPlant', 'collapsed')
     with modelACVCol2:
         st.markdown("")
-        st.markdown("###### 标签\n")
+        st.markdown("###### 预测目标变量\n")
         resultLabel = st.selectbox(
             'predictLabel',
             filterUnique(plantNameT0, pages_utils.reservedField),
