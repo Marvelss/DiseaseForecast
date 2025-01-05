@@ -56,6 +56,7 @@ div.stButton button {
 """), unsafe_allow_html=True)
 if 'page14' not in st.session_state:
     st.session_state.page14 = 0
+    st.toast('本环节已默认勾选上一环节计算的所有特征及相应的优选方法，并添加至任务清单待处理', icon="ℹ️")
 
     # 数据集统一分辨率
     if st.session_state.timeResolution == '':
@@ -101,7 +102,7 @@ st.markdown(
 st.header('多场景作物病虫害快速预测建模系统')
 sac.steps(
     items=[
-        sac.StepsItem(title='数据集', subtitle='extra msg', description='description text', disabled=True),
+        sac.StepsItem(title='数据集', disabled=True),
         sac.StepsItem(title='气象数据预处理', disabled=True),
         sac.StepsItem(title='特征计算', disabled=True),
         sac.StepsItem(title='特征优选', disabled=True),
@@ -325,7 +326,7 @@ def onRunAutomatic():
     # 使用特征计算数据集
     dataFrameTempT = pages_utils.TempDataSet[2]
 
-    print('-------------优选特征(参数)-----------')
+    # print('-------------优选特征(参数)-----------')
     # 默认先使用Pearson相关性分析剔除冗余特征
     # 先Pearson相关性分析,后Relief-F
     if genre and genre3:
@@ -395,6 +396,7 @@ def onRunAutomatic():
             "时间": datetime.datetime.now().time(),
             "处理状态": True}
         pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
+    st.toast(f"优选特征已保留至下一环节", icon="ℹ️️")
 
 
 def onRun():
@@ -666,7 +668,7 @@ with dataPCM:
 
     # =======================添加处理至任务清单=======================
     interval_col34, interval_col33 = st.columns([5, 1])
-    btn2 = interval_col33.button('下一步', on_click=onRunAutomatic)
+    btn2 = interval_col33.button('运行', on_click=onRunAutomatic)
 
     # interval_col1, interval_col2 = st.columns([4, 1])
     # with interval_col2:

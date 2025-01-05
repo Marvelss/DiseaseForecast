@@ -53,6 +53,8 @@ if 'page' not in st.session_state:
     st.session_state.page = 0
 if 'page15' not in st.session_state:
     st.session_state.page15 = 0
+    st.toast('本环节已默认勾选上一环节优选的特征及可训练的模型，用户也可以自行选用其他特征建模', icon="ℹ️")
+
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
@@ -82,7 +84,7 @@ st.markdown(
 st.header('多场景作物病虫害快速预测建模系统')
 sac.steps(
     items=[
-        sac.StepsItem(title='数据集', subtitle='extra msg', description='description text', disabled=True),
+        sac.StepsItem(title='数据集', disabled=True),
         sac.StepsItem(title='气象数据预处理', disabled=True),
         sac.StepsItem(title='特征计算', disabled=True),
         sac.StepsItem(title='特征优选', disabled=True),

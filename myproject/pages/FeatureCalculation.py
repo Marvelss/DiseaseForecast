@@ -49,17 +49,19 @@ div.stButton button {
 """), unsafe_allow_html=True)
 if 'page13' not in st.session_state:
     st.session_state.page13 = 0
+
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
     st.switch_page("app.py")
 # 判断首次加载页面
 if 'initFlagNum' not in st.session_state:
     st.session_state.initFlagNum = 0
+    st.toast('本环节已默认将各字段每旬、月特征的计算任务添加至任务清单，用户也自行添加自定义时段的计算', icon="ℹ️")
 
 # 检测预处理数据是否符合日值且无缺失值
 if st.session_state.timeResolution and not st.session_state.initFlagNum:
+
     # print('首次加载计算')
-    st.session_state.initFlagNum += 1
     # 计算旬、月、年内日期和日期字段
     tempDataSet1 = pages_utils.TempDataSet[1]
     tempDataSet1['日期'] = pd.to_datetime(
@@ -106,7 +108,7 @@ st.markdown(
 st.header('多场景作物病虫害快速预测建模系统')
 sac.steps(
     items=[
-        sac.StepsItem(title='数据集', subtitle='extra msg', description='description text', disabled=True),
+        sac.StepsItem(title='数据集', disabled=True),
         sac.StepsItem(title='气象数据预处理', disabled=True),
         sac.StepsItem(title='特征计算', disabled=True),
         sac.StepsItem(title='特征优选', disabled=True),
@@ -375,9 +377,8 @@ with featureCCV:
     st.markdown('#### 气象数据字段选择')
     fieldF = filterUnique(weatherNameList, pages_utils.reservedField)
     fieldF = fieldF if len(fieldF) != 0 else ['待原始数据上传']
-    result1 = st.multiselect("特征计算", options=fieldF, default=fieldF,
-                             label_visibility='collapsed')
-    # result1 = [result1]
+    result1 = pills("特征计算", fieldF, label_visibility='collapsed')
+    result1 = [result1]
     # result2 = pages_utils.multiselect_all(
     #     st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
     #     'tempPlant', 'collapsed')
@@ -396,121 +397,114 @@ with (featureCCM):
     #     option17 = st.checkbox('气象指标均值计算', key='checkbox3', on_change=clear_other, args=[3], value=True)
     #     option14 = st.checkbox('活动积温计算', key='checkbox0', on_change=clear_other, args=[0], value=True)
     with col1:
-        option15 = st.checkbox('降雨日数计算', key='checkbox1', args=[1], value=True)
-        option16 = st.checkbox('降水累积量计算', key='checkbox2', args=[2], value=True)
+        option15 = st.checkbox('降雨日数计算', key='checkbox1', on_change=clear_other, args=[1])
+        option16 = st.checkbox('降水累积量计算', key='checkbox2', on_change=clear_other, args=[2])
     with col2:
-        option17 = st.checkbox('气象指标均值计算', key='checkbox3', args=[3], value=True)
-        option14 = st.checkbox('活动积温计算', key='checkbox0', args=[0], value=True)
-    paramPlaceHolder = st.empty()
-    # st.markdown('---')
+        option17 = st.checkbox('气象指标均值计算', key='checkbox3', on_change=clear_other, args=[3])
+        option14 = st.checkbox('活动积温计算', key='checkbox0', on_change=clear_other, args=[0])
+
+    st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
     if option14:
-        with paramPlaceHolder.container():
-            with st.expander("高级设置"):
-                colFC31, colFC32 = st.columns([0.3, 0.6])
-                with colFC31:
-                    d1 = st.date_input("开始时间(默认处理各年数据集)",
-                                       value=datetime.date(2024, 1, 1),
-                                       format='MM/DD/YYYY',
-                                       )
-                    d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 8, 9))
-                    st.session_state["featureMethodName"]['param1'] = str(d1)
-                    st.session_state["featureMethodName"]['param2'] = str(d2)
-                with colFC32:
-                    st.info('方法描述\n'
-                            '* 积累加某个时间段内活动温度以计算积温\n', icon="ℹ️")
-                    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP3.png'))
-                    st.image(img)
-    elif option15:
-        with paramPlaceHolder.container():
-            with st.expander("高级设置"):
-                colFC11, colFC12 = st.columns([0.3, 0.6])
-                with colFC11:
-                    d1 = st.date_input("开始时间",
-                                       value=datetime.date(2024, 1, 1),
-                                       format='MM/DD/YYYY',
-                                       )
-                    d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 1, 1))
-                    option = st.selectbox(
-                        '计算阈值方式',
-                        ('单日降水量', '总降水量'))
-                    st.session_state["featureMethodName"]['param1'] = str(d1)
-                    st.session_state["featureMethodName"]['param2'] = str(d2)
-                    st.session_state["featureMethodName"]['param3'] = option
-                    if option == '总降水量':
-                        number11 = st.number_input("总降水量数值(mm)", value=100)
-                        st.toast('该方法未实现,请选择其他方法', icon="⚠️")
-                        st.session_state["featureMethodName"]['param4'] = str(number11)
-                    if option == '单日降水量':
-                        number2 = st.text_input("单日降水量数值(mm)", value=0.1)
-                        st.session_state["featureMethodName"]['param4'] = str(number2)
-                    number1 = st.number_input("连续降雨日数时长(天数)", value=1, min_value=1)
-                    st.session_state["featureMethodName"]['param5'] = str(number1)
-                with colFC12:
-                    st.info('方法描述\n'
-                            '* 基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数\n', icon="ℹ️")
-                    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP1.png'))
-                    st.image(img)
-    elif option16:
-        with paramPlaceHolder.container():
+        colFC31, colFC32 = st.columns([0.3, 0.6])
+        with colFC31:
+            d1 = st.date_input("开始时间(默认处理各年数据集)",
+                               value=datetime.date(2024, 1, 1),
+                               format='MM/DD/YYYY',
+                               )
+            d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 8, 9))
+            st.session_state["featureMethodName"]['param1'] = str(d1)
+            st.session_state["featureMethodName"]['param2'] = str(d2)
+        with colFC32:
+            st.info('方法描述\n'
+                    '* 积累加某个时间段内活动温度以计算积温\n', icon="ℹ️")
+            img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP3.png'))
+            st.image(img)
+    if option15:
+        colFC11, colFC12 = st.columns([0.3, 0.6])
+        with colFC11:
+            d1 = st.date_input("开始时间(默认处理各年数据集)",
+                               value=datetime.date(2024, 1, 1),
+                               format='MM/DD/YYYY',
+                               )
+            d2 = st.date_input("结束时间", format='MM/DD/YYYY', value=datetime.date(2024, 1, 1))
+            option = st.selectbox(
+                '计算阈值方式',
+                ('单日降水量', '总降水量'))
+            st.session_state["featureMethodName"]['param1'] = str(d1)
+            st.session_state["featureMethodName"]['param2'] = str(d2)
+            st.session_state["featureMethodName"]['param3'] = option
+            if option == '总降水量':
+                number11 = st.number_input("总降水量数值(mm)", value=100)
+                st.toast('该方法未实现,请选择其他方法', icon="⚠️")
+                st.session_state["featureMethodName"]['param4'] = str(number11)
+            if option == '单日降水量':
+                number2 = st.text_input("单日降水量数值(mm)", value=0.1)
+                st.session_state["featureMethodName"]['param4'] = str(number2)
+            number1 = st.number_input("连续降雨日数时长(天数)", value=1, min_value=1)
+            st.session_state["featureMethodName"]['param5'] = str(number1)
+        with colFC12:
+            st.info('方法描述\n'
+                    '* 基于特定时间段内降雨量和阈值及连续时长计算有效降雨日数\n', icon="ℹ️")
+            img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP1.png'))
+            st.image(img)
+    if option16:
+        colFC21, colFC22 = st.columns([0.3, 0.6])
+        with colFC21:
 
-            with st.expander("高级设置"):
-                colFC21, colFC22 = st.columns([0.3, 0.6])
-                with colFC21:
-                    option3 = st.selectbox(
-                        '降水累积量计算',
-                        ('指定日期', '月累积降水量', '旬累积降水量'))
-                    st.session_state["featureMethodName"]['param1'] = option3
+            option3 = st.selectbox(
+                '降水累积量计算',
+                ('指定日期', '月累积降水量', '旬累积降水量'))
+            st.session_state["featureMethodName"]['param1'] = option3
 
-                    if option3 == '指定日期':
-                        sd1 = st.date_input("开始时间", value=datetime.date(2024, 7, 1))
-                        ed1 = st.date_input("结束时间", value=datetime.date(2024, 8, 1))
-                        st.session_state["featureMethodName"]['param2'] = sd1.strftime('%m-%d')
-                        st.session_state["featureMethodName"]['param3'] = ed1.strftime('%m-%d')
-                with colFC22:
-                    st.info('方法描述\n'
-                            '* 积累某个时间段内降雨量以计算降水累量\n', icon="ℹ️")
-                    img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'))
-                    st.image(img)
-    elif option17:
-        with paramPlaceHolder.container():
-            with st.expander("高级设置"):
-                colFC213, colFC223 = st.columns([0.3, 0.6])
-                with colFC213:
-                    timePeriod = st.selectbox('时间分辨率', ('旬均值', '月均值'))
-                with colFC223:
-                    st.info('方法描述\n'
-                            '* 计算气象数据的旬均值和月均值，以提取不同时期的气象特征\n', icon="ℹ️")
-                    # img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'))
-                    # st.image(img)
+            if option3 == '指定日期':
+                sd1 = st.date_input("开始时间", value=datetime.date(2024, 7, 1))
+                ed1 = st.date_input("结束时间", value=datetime.date(2024, 8, 1))
+                st.session_state["featureMethodName"]['param2'] = sd1.strftime('%m-%d')
+                st.session_state["featureMethodName"]['param3'] = ed1.strftime('%m-%d')
+        with colFC22:
+            st.info('方法描述\n'
+                    '* 积累某个时间段内降雨量以计算降水累量\n', icon="ℹ️")
+            img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'))
+            st.image(img)
+    if option17:
+        colFC213, colFC223 = st.columns([0.3, 0.6])
+        with colFC213:
+            timePeriod = st.selectbox('时间分辨率', ('旬均值', '月均值'))
+        with colFC223:
+            st.info('方法描述\n'
+                    '* 计算气象数据的旬均值和月均值，以提取不同时期的气象特征\n', icon="ℹ️")
+            # img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'featureP2.png'))
+            # st.image(img)
 
-                st.session_state["featureMethodName"]['param1'] = timePeriod
+        st.session_state["featureMethodName"]['param1'] = timePeriod
 
-                # 基于活动积温的生育期计算
-                # growthPeriod = st.selectbox(
-                #     '生育期',
-                #     ('抽穗期', '孕穗期', '移栽期'))
-                # growthPeriodStartDate = st.date_input("开始时间", value='today')
-                # growthPeriodEndDate = st.date_input("结束时间", value='today')
-                # # 积温阈值默认为50
-                # threshold = 50
-                # if growthPeriod == '抽穗期':
-                #     threshold = 50
-                # elif growthPeriod == '孕穗期':
-                #     threshold = 100
-                # elif growthPeriod == '移栽期':
-                #     threshold = 150
-                # growthPeriodNumber = st.number_input(
-                #     "积温阈值温度(50-300℃)", value=threshold, step=50,
-                #     min_value=50, max_value=300)
-                #
-                # st.session_state["featureMethodName"]['param1'] = growthPeriod
-                # st.session_state["featureMethodName"]['param2'] = growthPeriodStartDate.strftime('%m-%d')
-                # st.session_state["featureMethodName"]['param3'] = growthPeriodEndDate.strftime('%m-%d')
-                # st.session_state["featureMethodName"]['param4'] = str(growthPeriodNumber)
+        # 基于活动积温的生育期计算
+        # growthPeriod = st.selectbox(
+        #     '生育期',
+        #     ('抽穗期', '孕穗期', '移栽期'))
+        # growthPeriodStartDate = st.date_input("开始时间", value='today')
+        # growthPeriodEndDate = st.date_input("结束时间", value='today')
+        # # 积温阈值默认为50
+        # threshold = 50
+        # if growthPeriod == '抽穗期':
+        #     threshold = 50
+        # elif growthPeriod == '孕穗期':
+        #     threshold = 100
+        # elif growthPeriod == '移栽期':
+        #     threshold = 150
+        # growthPeriodNumber = st.number_input(
+        #     "积温阈值温度(50-300℃)", value=threshold, step=50,
+        #     min_value=50, max_value=300)
+        #
+        # st.session_state["featureMethodName"]['param1'] = growthPeriod
+        # st.session_state["featureMethodName"]['param2'] = growthPeriodStartDate.strftime('%m-%d')
+        # st.session_state["featureMethodName"]['param3'] = growthPeriodEndDate.strftime('%m-%d')
+        # st.session_state["featureMethodName"]['param4'] = str(growthPeriodNumber)
 
-        # =======================添加处理至任务清单=======================
-    if not st.session_state.page13:
+    # =======================添加处理至任务清单=======================
+    if not st.session_state.initFlagNum:
+        st.session_state.initFlagNum += 1
         # 一键自动添加方法
         # 降雨日数
 
@@ -527,10 +521,10 @@ with (featureCCM):
         # print(new_dataT)
         # pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
         # 左下角选中的特征
-        featureListT1 = result1
+        featureListT1 = fieldF
 
         # 降水累积量-月
-        if option16 and '降水' in featureListT1:
+        if '降水' in featureListT1:
             new_dataT = {
                 "编号": pages_utils.generateID(),
                 "数据类型": '气象数据',
@@ -545,33 +539,32 @@ with (featureCCM):
         # 活动积温-月
         #
         # 气象指标均值计算-旬
-        if option17:
-            # featureListT1 = filterUnique(weatherNameList, pages_utils.reservedField)
-            for fieldT in featureListT1:
-                new_dataT = {
-                    "编号": pages_utils.generateID(),
-                    "数据类型": '气象数据',
-                    "输入特征": [fieldT],
-                    "特征计算方法": '气象指标均值计算',
-                    "方法参数": ['旬均值'],
-                    "时间": datetime.datetime.now().time(),
-                    "处理状态": False}
-                pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
-            # 气象指标均值计算-月
-            for fieldT in featureListT1:
-                new_dataT = {
-                    "编号": pages_utils.generateID(),
-                    "数据类型": '气象数据',
-                    "输入特征": [fieldT],
-                    "特征计算方法": '气象指标均值计算',
-                    "方法参数": ['月均值'],
-                    "时间": datetime.datetime.now().time(),
-                    "处理状态": False}
-                pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
+        # if option17:
+        # featureListT1 = filterUnique(weatherNameList, pages_utils.reservedField)
+        for fieldT in featureListT1:
+            new_dataT = {
+                "编号": pages_utils.generateID(),
+                "数据类型": '气象数据',
+                "输入特征": [fieldT],
+                "特征计算方法": '气象指标均值计算',
+                "方法参数": ['旬均值'],
+                "时间": datetime.datetime.now().time(),
+                "处理状态": False}
+            pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
+        # 气象指标均值计算-月
+        for fieldT in featureListT1:
+            new_dataT = {
+                "编号": pages_utils.generateID(),
+                "数据类型": '气象数据',
+                "输入特征": [fieldT],
+                "特征计算方法": '气象指标均值计算',
+                "方法参数": ['月均值'],
+                "时间": datetime.datetime.now().time(),
+                "处理状态": False}
+            pages_utils.TempDataSetField[2].loc[len(pages_utils.TempDataSetField[2])] = new_dataT
 
-    # interval_col1, interval_col2 = st.columns([5, 1])
-    # btn = interval_col2.button('添加处理', on_click=clear_all)
-    btn = None
+    interval_col1, interval_col2 = st.columns([5, 1])
+    btn = interval_col2.button('添加处理', on_click=clear_all)
     if btn:
         # 检测用户行为-数据中含缺失值
         tempMissingColumn = []
@@ -645,7 +638,7 @@ with (featureCCM):
                 column_order=["编号", "数据类型", "输入特征", "备选特征", "特征计算方法", '时间', '处理状态'],
                 disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
             interval_col34, interval_col33 = st.columns([5, 1])
-            btn2 = interval_col33.button('下一步', on_click=onRun)
+            btn2 = interval_col33.button('运行', on_click=onRun)
     elif st.session_state.page13 == 1:
         # =======================显示右下可视化图表=======================
         with placeholder.container():
