@@ -58,7 +58,7 @@ show_pages(
         Page(os.path.join(PAGES_PATH, 'ModelApplication.py'), "模型应用"),
         Page(os.path.join(PAGES_PATH, 'ModelingReport.py'), "建模报告"),
         Page(os.path.join(PAGES_PATH, 'Visualization.py'), "数据下载中心"),
-        Page(os.path.join(PAGES_PATH, 'WeatherGenerator.py'), "基于天气情景生成器的模型评价"),
+        # Page(os.path.join(PAGES_PATH, 'WeatherGenerator.py'), "基于天气情景生成器的模型评价"),
         #
         # Page(os.path.join(PAGES_PATH, 'DataSetFacet.py'), "原始数据-面状"),
         # Page(os.path.join(PAGES_PATH, 'DataPreparationFacet.py'), "数据预处理-面状"),
@@ -69,7 +69,7 @@ show_pages(
         # Page(os.path.join(PAGES_PATH, 'ModelingReportFacet.py'), "建模报告-面状"),
         # Page(os.path.join(PAGES_PATH, 'ModelApplicationFacet.py'), "模型应用-面状"),
         # Page(os.path.join(PAGES_PATH, 'VisualizationFacet.py'), "数据下载中心-面状"),
-        Page(os.path.join(PAGES_PATH, 'ModelEvaluation.py'), "testInterface"),
+        # Page(os.path.join(PAGES_PATH, 'ModelEvaluation.py'), "testInterface"),
 
     ]
 )
