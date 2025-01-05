@@ -520,7 +520,10 @@ with dataPCM:
     # =======================添加处理至任务清单=======================
     # 自动添加
     if not st.session_state.pageDPIsInit:
+        st.session_state.pageDPIsInit += 1
         for fieldTT2 in needHandledList:
+            if fieldTT2 == '无缺失值':
+                continue
             new_dataT = {
                 "编号": pages_utils.generateID(),
                 "数据类型": '气象数据',
@@ -533,7 +536,6 @@ with dataPCM:
             # print('======================预处理-添加任务清单记录======================')
             # print(new_dataT)
             pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_dataT
-        st.session_state.pageDPIsInit += 1
     # interval_col1, interval_col2 = st.columns([5, 1])
     # btn = interval_col2.button('添加处理', on_click=clearOption)
     # btn = None
