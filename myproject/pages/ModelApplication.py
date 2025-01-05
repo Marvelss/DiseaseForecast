@@ -43,7 +43,7 @@ st.markdown("""
 
 sac.steps(
     items=[
-        sac.StepsItem(title='数据集', subtitle='extra msg', description='description text', disabled=True),
+        sac.StepsItem(title='数据集', disabled=True),
         sac.StepsItem(title='气象数据预处理', disabled=True),
         sac.StepsItem(title='特征计算', disabled=True),
         sac.StepsItem(title='特征优选', disabled=True),
@@ -61,7 +61,7 @@ with colTemp2:
     col2, col3 = st.columns(2)
     with col2:
         # 默认获取最优模型进行应用
-        st.markdown("##### 加载模型(默认使用精度最优模型)")
+        st.markdown("##### 加载模型(已默认选用精度最优模型)")
         best_model = None
         best_oa = -float('inf')
         best_kappa = -float('inf')
@@ -100,15 +100,12 @@ with colTemp2:
 
             warningInfo1 = '''
             注意事项
-            1. 模型应用数据用于模型应用环节，利用该上传数据自动输入已构建的模型，实现未来作物病虫害发生预测;
+            1. 根据提供的模板填充数据，将该数据上传后，系统自动输入已训练的模型，完成目标变量的预测;
 
-            2. 根据提供的模板，填充数据;
-            3. 上传内容应为未来的数据;
-            4. 数据条数至少一年以上，且无缺失值
+            2. 上传内容应为未来数据，其中气象数据量至少一年以上，并确保无缺失值
             '''
 
             # 下载模板
-
         if model:
             # 创建一个 DataFrame，其中包含特征字段作为表头
             # 创建一个 DataFrame，其中包含特征字段作为表头
@@ -141,7 +138,7 @@ with colTemp2:
             )
 
     with col3:
-        st.markdown("##### 输入特征")
+        st.markdown("##### 上传数据")
         uploaded_dataSet = st.file_uploader(
             "输入原始字段",
             accept_multiple_files=False,
