@@ -56,7 +56,7 @@ div.stButton button {
 """), unsafe_allow_html=True)
 if 'page14' not in st.session_state:
     st.session_state.page14 = 0
-    st.toast('本环节已默认勾选上一环节计算的所有特征及相应的优选方法，并添加至任务清单待处理', icon="ℹ️")
+    st.toast('本环节已默认勾选上一环节计算的所有特征及相应的优选方法', icon="ℹ️")
 
     # 数据集统一分辨率
     if st.session_state.timeResolution == '':
