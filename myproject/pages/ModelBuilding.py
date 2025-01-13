@@ -84,13 +84,20 @@ st.markdown(
 st.header('多场景作物病虫害快速预测建模系统')
 sac.steps(
     items=[
-        sac.StepsItem(title='数据集', disabled=True),
-        sac.StepsItem(title='气象数据预处理', disabled=True),
-        sac.StepsItem(title='特征计算', disabled=True),
-        sac.StepsItem(title='特征优选', disabled=True),
-        sac.StepsItem(title='模型构建', disabled=True),
-        sac.StepsItem(title='模型应用', disabled=True),
-    ], index=4
+        sac.StepsItem(title='原始建模数据', subtitle='',
+                      description='上传建模数据集', disabled=True),
+        sac.StepsItem(title='气象数据预处理',
+                      disabled=True,
+                      description='清洗气象数据如异常和缺失值，以免影响建模'),
+        sac.StepsItem(title='特征计算', disabled=True,
+                      description='提取相关特征，增强模型表现'),
+        sac.StepsItem(title='特征优选', disabled=True,
+                      description='筛选有用特征，提升训练质量'),
+        sac.StepsItem(title='模型构建', disabled=True,
+                      description='训练并验证模型'),
+        sac.StepsItem(title='模型应用', disabled=True,
+                      description='应用模型进行作物病虫害预测'),
+    ], index=4, color='#008000'
 )
 emptyHeadMBP = st.empty()
 
