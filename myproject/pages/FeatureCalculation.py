@@ -6,10 +6,11 @@ import pandas as pd
 import streamlit as st
 from PIL import Image
 from st_pages import hide_pages
+from streamlit import switch_page
 from streamlit_pills import pills
 import streamlit_antd_components as sac
 
-from lib.share import RESOURCE_IMAGES_PATH
+from lib.share import RESOURCE_IMAGES_PATH, PAGES_PATH
 from lib.utils import filterUnique
 from pages import pages_utils
 from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
@@ -50,6 +51,8 @@ div.stButton button {
 """), unsafe_allow_html=True)
 if 'page13' not in st.session_state:
     st.session_state.page13 = 0
+    st.toast('已根据默认配置添加任务至清单', icon="ℹ️")
+
 
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
@@ -57,7 +60,6 @@ if 'page12' not in st.session_state:
 # 判断首次加载页面
 if 'initFlagNum' not in st.session_state:
     st.session_state.initFlagNum = 0
-    st.toast('本环节已默认将各字段每旬、月特征的计算任务添加至任务清单，用户也自行添加自定义时段的计算', icon="ℹ️")
 
 # 检测预处理数据是否符合日值且无缺失值
 if st.session_state.timeResolution and not st.session_state.initFlagNum:
@@ -155,7 +157,7 @@ def clear_all():
             st.session_state["featureMethodName"]['checkBox'] = f'checkbox{h}'
         st.session_state[f'checkbox{h}'] = False
     # 若已经在可视化展示状,则默认返回任务清单
-    st.session_state.page13 = 0
+    # st.session_state.page13 = 0
     return
 
 
@@ -304,60 +306,60 @@ def onRun():
 
 
 # ==============================界面==============================
-featureCCV, featureCCM = st.columns([0.5, 0.7])
+featureCCV, featureCCM = st.columns([0.7, 0.5])
 with featureCCV:
-    st.markdown("##### 数据与特征")
-    # =======================显示左侧数据与特征表格=======================
-    placeholder1 = st.empty()
-    if st.session_state.page12 == 0:
-        with placeholder1.container():
-            if pages_utils.TempDataSet[2].columns.tolist() == pages_utils.TempDataSet[1].columns.tolist():
-                tt = st.tabs(['预处理后数据集'])
-                with tt[0]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[1],
-                        height=220, width=800, )
-            else:
-                tt = st.tabs(['预处理后数据集', '备选特征'])
-                with tt[0]:
-                    # column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-                    st.data_editor(
-                        pages_utils.TempDataSet[1],
-                        height=220, width=800, )
-                with tt[1]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[2],
-                        height=220, width=800, )
-            # with tt1[i]:
-            #     # if tempLefTabs[i] == '原始数据':
-            #     #     column = ['数据类型', '字段', '上传时间']
-            #     if tempLefTabs[i] == '预处理后数据集':
-            #
-            #     elif tempLefTabs[i] == '备选特征':
-            #         column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
-            #     st.data_editor(
-            #         pages_utils.TempDataSet[i],
-            #         height=220, width=800, )
-            # column_order=column)
-
-    if st.session_state.page12 == 1:
-        with placeholder1.container():
-            if pages_utils.TempDataSet[2].columns.tolist() == pages_utils.TempDataSet[1].columns.tolist():
-                tt = st.tabs(['备选特征'])
-                with tt[0]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[2],
-                        height=220, width=800, )
-            else:
-                tt = st.tabs(['预处理后数据集', '备选特征'])
-                with tt[0]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[1],
-                        height=220, width=800, )
-                with tt[1]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[2],
-                        height=220, width=800, )
+    # st.markdown("##### 数据与特征")
+    # # =======================显示左侧数据与特征表格=======================
+    # placeholder1 = st.empty()
+    # if st.session_state.page12 == 0:
+    #     with placeholder1.container():
+    #         if pages_utils.TempDataSet[2].columns.tolist() == pages_utils.TempDataSet[1].columns.tolist():
+    #             tt = st.tabs(['预处理后数据集'])
+    #             with tt[0]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[1],
+    #                     height=220, width=800, )
+    #         else:
+    #             tt = st.tabs(['预处理后数据集', '备选特征'])
+    #             with tt[0]:
+    #                 # column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[1],
+    #                     height=220, width=800, )
+    #             with tt[1]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[2],
+    #                     height=220, width=800, )
+    #         # with tt1[i]:
+    #         #     # if tempLefTabs[i] == '原始数据':
+    #         #     #     column = ['数据类型', '字段', '上传时间']
+    #         #     if tempLefTabs[i] == '预处理后数据集':
+    #         #
+    #         #     elif tempLefTabs[i] == '备选特征':
+    #         #         column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+    #         #     st.data_editor(
+    #         #         pages_utils.TempDataSet[i],
+    #         #         height=220, width=800, )
+    #         # column_order=column)
+    #
+    # if st.session_state.page12 == 1:
+    #     with placeholder1.container():
+    #         if pages_utils.TempDataSet[2].columns.tolist() == pages_utils.TempDataSet[1].columns.tolist():
+    #             tt = st.tabs(['备选特征'])
+    #             with tt[0]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[2],
+    #                     height=220, width=800, )
+    #         else:
+    #             tt = st.tabs(['预处理后数据集', '备选特征'])
+    #             with tt[0]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[1],
+    #                     height=220, width=800, )
+    #             with tt[1]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[2],
+    #                     height=220, width=800, )
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
     # if not pages_utils.TempDataSetField[1].empty:
@@ -382,7 +384,7 @@ with featureCCV:
     # result1 = pages_utils.multiselect_all(
     #     st, '全选-气象数据', filterUnique(weatherNameList, pages_utils.reservedField),
     #     'tempTemperature', 'collapsed')
-    st.markdown('#### 气象数据字段选择')
+    st.markdown('##### 气象数据字段选择')
     fieldF = filterUnique(weatherNameList, pages_utils.reservedField)
     fieldF = fieldF if len(fieldF) != 0 else ['待原始数据上传']
     result1 = pills("特征计算", fieldF, label_visibility='collapsed')
@@ -393,9 +395,9 @@ with featureCCV:
     # result3 = pages_utils.multiselect_all(
     #     st, '全选-地理遥感数据', filterUnique(agricultureNameList, pages_utils.reservedField),
     #     'tempAgriculture', 'collapsed')
+    st.markdown('---')
 
-# ===============显示右上处理方法选项===============
-with (featureCCM):
+    # ===============显示右上处理方法选项===============
     st.markdown("##### 特征计算方法")
     col1, col2 = st.columns(2)
     # with col1:
@@ -411,7 +413,6 @@ with (featureCCM):
         option17 = st.checkbox('气象指标均值计算', key='checkbox3', on_change=clear_other, args=[3])
         option14 = st.checkbox('活动积温计算', key='checkbox0', on_change=clear_other, args=[0])
 
-    st.markdown('---')
     # ===============显示和处理右中各个处理方法设置参数===============
     if option14:
         colFC31, colFC32 = st.columns([0.3, 0.6])
@@ -633,24 +634,28 @@ with (featureCCM):
 
         st.rerun()
 
-    st.markdown('---')
-
+with featureCCM:
     # =======================显示右下内容=======================
+    # placeholder = st.empty()
+    # if st.session_state.page13 == 0:
+    # =======================显示右下任务清单表格=======================
+    # with placeholder.container():
+    st.markdown('##### 任务清单')
+    st.info('本环节已默认将各字段每旬、月特征的计算任务添加至任务清单，用户也自行添加自定义时段的计算', icon="ℹ️")
+
+    pages_utils.TempDataSetField[2] = st.data_editor(
+        pages_utils.TempDataSetField[2], height=190, width=900,
+        column_order=["数据类型", "输入特征", "备选特征", "特征计算方法", '时间', '处理状态'],
+        disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
+    interval_col34, interval_col33 = st.columns([5, 1])
+    btn2 = interval_col33.button('运行', on_click=onRun)
+    # elif st.session_state.page13 == 1:
+    # =======================显示右下可视化图表=======================
     placeholder = st.empty()
-    if st.session_state.page13 == 0:
-        # =======================显示右下任务清单表格=======================
+    # 运行一次就一直显示结果
+    if st.session_state.page13 >= 1:
         with placeholder.container():
-            st.markdown('##### 任务清单')
-            pages_utils.TempDataSetField[2] = st.data_editor(
-                pages_utils.TempDataSetField[2], height=190, width=900,
-                column_order=["编号", "数据类型", "输入特征", "备选特征", "特征计算方法", '时间', '处理状态'],
-                disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
-            interval_col34, interval_col33 = st.columns([5, 1])
-            btn2 = interval_col33.button('运行', on_click=onRun)
-    elif st.session_state.page13 == 1:
-        # =======================显示右下可视化图表=======================
-        with placeholder.container():
-            st.markdown('##### 可视化')
+            st.markdown('##### 结果')
             idFMethods = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
             # inputFields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
 
@@ -871,4 +876,6 @@ with (featureCCM):
             else:
                 st.info('跳过特征计算', icon="ℹ️️")
             interval_col34, interval_col33 = st.columns([5, 1])
-            btn3 = interval_col33.button('返回', on_click=firstPage)
+            btn3 = interval_col33.button('下一步')
+            if btn3:
+                switch_page(os.path.join(PAGES_PATH, 'FeatureOptimization.py'))

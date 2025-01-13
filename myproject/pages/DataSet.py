@@ -6,8 +6,9 @@ import pandas as pd
 import streamlit as st
 from st_pages import hide_pages
 import streamlit_antd_components as sac
+from streamlit import switch_page
 
-from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_TEMPDIR_PATH
+from lib.share import RESOURCE_TEMPLATE_PATH, RESOURCE_TEMPDIR_PATH, PAGES_PATH
 from pages import pages_utils
 from streamlit_pills import pills
 from warnings import simplefilter
@@ -66,7 +67,6 @@ warningInfo = '''
 5. 删除示例数据后,按需填充或删减字段与数据.
 6. 完成数据添加后，删除注意事项两行单元格，并对数据检查，保证无大面积缺失和异常情况，以免影响建模.
 '''
-
 
 st.markdown(
     """
@@ -239,10 +239,15 @@ with dataSCM:
 # ==============================右侧文件上传状态显示==============================
 with dataSCR:
     st.markdown("##### 文件上传状态显示")
+    # placeholder = st.empty()
+    # with placeholder.container():
+    st.data_editor(
+        pages_utils.TempDataSetField[0], height=250, width=800,
+        disabled=["数据集", "文件名称", "传输状态", "上传时间"],
+        column_order=["数据类型", "文件名称", "传输状态", "上传时间"],
+        hide_index=False, )
     placeholder = st.empty()
     with placeholder.container():
-        st.data_editor(
-            pages_utils.TempDataSetField[0], height=390, width=800,
-            disabled=["数据集", "文件名称", "传输状态", "上传时间"],
-            column_order=["数据类型", "文件名称", "传输状态", "上传时间"],
-            hide_index=False, )
+        btn3 = st.columns([4, 1])[1].button('下一步')
+        if btn3:
+            switch_page(os.path.join(PAGES_PATH, 'DataPreparation.py'))

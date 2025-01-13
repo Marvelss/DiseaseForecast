@@ -12,7 +12,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from st_pages import hide_pages
 import matplotlib.cm as cm
-from lib.share import RESOURCE_MODELRESULT_PATH, IMAGECOUNT
+from streamlit import switch_page
+
+from lib.share import RESOURCE_MODELRESULT_PATH, IMAGECOUNT, PAGES_PATH
 from lib.utils import filterUnique
 from pages import pages_utils
 from pages.modelandmethod.Model import Model
@@ -54,7 +56,10 @@ if 'page' not in st.session_state:
     st.session_state.page = 0
 if 'page15' not in st.session_state:
     st.session_state.page15 = 0
-    st.toast('本环节已默认勾选上一环节优选的特征及可训练的模型，用户也可以自行选用其他特征建模', icon="ℹ️")
+    st.toast('已根据默认配置添加任务至清单', icon="ℹ️")
+
+if 'pageMBIsInit' not in st.session_state:
+    st.session_state.pageMBIsInit = 0
 
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
@@ -227,20 +232,20 @@ def getModelParam(modelT):
                     "参数名": param_nameT,
                     "参数值": param_valueT,
                 })
-    return pd.DataFrame(formatted_dataT)
+    return pd.DataFrame(formatted_dataT).to_dict()
 
 
 # 取消其他选项按钮
 def clearOtherOption(key1):
     # 显示添加模型按钮
-    st.session_state.nextBtnShow = 0 if st.session_state.nextBtnShow == 1 else 1
+    # st.session_state.nextBtnShow = 0 if st.session_state.nextBtnShow == 1 else 1
 
-    # # st.markdown(key)
-    # for h in range(checkBoxModelNum):
-    #     if h != key1:
-    #         st.session_state[f'checkBoxModel{h}'] = False
+    # st.markdown(key)
+    for h in range(checkBoxModelNum):
+        if h != key1:
+            st.session_state[f'checkBoxModel{h}'] = False
     # 若已经在可视化展示状态,则默认返回任务清单
-    st.session_state.page15 = 0
+    # st.session_state.page15 = 0
     return
 
 
@@ -250,47 +255,6 @@ def onTrain():
         st.session_state["leftTabs"].append('模型')
     st.session_state.page = 0
     st.session_state.page15 += 1
-    # 获取所有被选中的checkbox
-    selected_models = []
-
-    if agree:
-        selected_models.append('SVM')
-    if agree1:
-        selected_models.append('RF')
-    if agree2:
-        selected_models.append('KNN')
-    if agree3:
-        selected_models.append('FLDA')
-    if agree5:
-        selected_models.append('PLSR')
-    if agree6:
-        selected_models.append('LR')
-    if agree7:
-        selected_models.append('SVR')
-    for modelNameTemp1 in selected_models:
-        # =======================准备任务清单内容=======================
-        new_dataT = {
-            "编号": pages_utils.generateID(),
-            "模型": modelNameTemp1,
-            "模型参数": getModelParam(modelNameTemp1),  # getModelParam(modelNameTemp1)
-            "特征": result1 + result2,  # result1 + result2
-            "标签": resultLabel,
-            "评价指标": onPrecision(modelNameTemp1),
-            "时间": datetime.datetime.now().time(),
-            "数据集划分比例": option,
-            "处理状态": False}
-        # 检查是否有缺失值
-        # for p in range(len(pages_utils.TempDataSet) - 2, -1, -1):
-        #     beforeDF = pages_utils.TempDataSet[p]
-        #     if not beforeDF.empty:
-        # pages_utils.TempDataSet[4] = beforeDF
-        # if 'DayOfYear' not in beforeDF.columns:
-        #     beforeDF['DayOfYear'] = 0
-        # beforeDF = beforeDF[result1 + result2 + [resultLabel] + pages_utils.reservedField]
-
-        print('======================模型构建-添加模型======================')
-        print(new_dataT)
-        pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_dataT
 
     # ===============获取任务清单内容===============
     idNumber = pages_utils.TempDataSetField[4]["编号"].tolist()
@@ -305,8 +269,6 @@ def onTrain():
     # 训练的数据集直接使用备选特征环节数据
     pages_utils.TempDataSet[4] = pages_utils.TempDataSet[2]
     inputDataSet = pages_utils.TempDataSet[4]
-    print('-------------------测试1-------------------')
-    print(models)
     with emptyHeadMBP:
         with st.spinner('训练模型中...'):
             # ===============运行任务清单调用模型准备训练===============
@@ -317,15 +279,11 @@ def onTrain():
                 evaluationResult = None
                 modelStruct = None
                 actualAndPredictResult = None
-                print('-------------------测试2-------------------')
-                print(tempModel)
-                print(dataPartitioning)
-                if tempModel == 'SVM':
-                    print('-------------------测试3-------------------')
+                # 转换类型
+                if isinstance(modelParam[tempIndex], str):
+                    modelParam[tempIndex] = eval(modelParam[tempIndex])
 
-                    print(features[tempIndex])
-                    print(dataPartitioning[tempIndex])
-                    print(modelParam[tempIndex])
+                if tempModel == 'SVM':
                     evaluationResult, actualAndPredictResult, modelStruct = Model(
                         inputDataSet,
                         features[tempIndex], targets[tempIndex],
@@ -369,6 +327,8 @@ def onTrain():
                     st.toast('FLDA训练完成 \n' + '       ' + ' \n' + info,
                              icon='✅')
                 elif tempModel == 'RF':
+                    print('-' * 20)
+                    print(modelParam[tempIndex])
                     evaluationResult, actualAndPredictResult, modelStruct = Model(
                         inputDataSet,
                         features[tempIndex], targets[tempIndex],
@@ -514,71 +474,71 @@ def backPage(): st.session_state.page15 = 0
 
 
 # ==============================界面==============================
-modelACV, modelACM = st.columns([0.5, 0.7])
+modelACV, modelACM = st.columns([0.5, 0.5])
 with modelACV:
-    st.markdown("##### 特征与模型")
+    # st.markdown("##### 特征与模型")
 
     # =======================显示左侧特征与模型=======================
-    placeholder1 = st.empty()
-    if st.session_state.page12 == 0:
-        with placeholder1.container():
-            tt1 = st.tabs(['优选特征'])
-            with tt1[0]:
-                st.data_editor(
-                    pages_utils.TempDataSet[2],
-                    height=220, width=800, )
-            # tt1 = st.tabs(st.session_state["leftTabs"])
-            # for i in range(len(st.session_state["leftTabs"])):
-            #     with tt1[i]:
-            #         if st.session_state["leftTabs"][i] != '模型':
-            #             if st.session_state["leftTabs"][i] == '原始数据':
-            #                 column = ['数据类型', '字段', '上传时间']
-            #                 st.data_editor(
-            #                     pages_utils.TempDataSet[0],
-            #                     height=220, width=800, )
-            #             elif st.session_state["leftTabs"][i] == '预处理后数据集':
-            #                 column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
-            #                 st.data_editor(
-            #                     pages_utils.TempDataSet[1],
-            #                     height=220, width=800, )
-            #             elif st.session_state["leftTabs"][i] == '备选特征':
-            #                 column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
-            #                 st.data_editor(
-            #                     pages_utils.TempDataSet[2],
-            #                     height=220, width=800, )
-            #             elif st.session_state["leftTabs"][i] == '优选特征':
-            #                 column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
-            #                 st.data_editor(
-            #                     pages_utils.TempDataSet[3],
-            #                     height=220, width=800, )
-            #             # column_order=column)
-            #         else:
-            #             column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
-            #             st.data_editor(
-            #                 pages_utils.TempDataSetField[i],
-            #                 height=220, width=800,
-            #                 column_order=column)
-
-    if st.session_state.page12 == 1:
-        with placeholder1.container():
-            if pages_utils.TempDataSet[4].columns.tolist() == pages_utils.TempDataSet[3].columns.tolist():
-                tt = st.tabs(['优选特征'])
-                with tt[0]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[2],
-                        height=220, width=800, )
-            else:
-                tt = st.tabs(['优选特征', '模型'])
-                with tt[0]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[2],
-                        height=220, width=800, )
-                with tt[1]:
-                    column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
-                    st.data_editor(
-                        pages_utils.TempDataSetField[4],
-                        height=220, width=800,
-                        column_order=column)
+    # placeholder1 = st.empty()
+    # if st.session_state.page12 == 0:
+    #     with placeholder1.container():
+    #         tt1 = st.tabs(['优选特征'])
+    #         with tt1[0]:
+    #             st.data_editor(
+    #                 pages_utils.TempDataSet[2],
+    #                 height=220, width=800, )
+    #         # tt1 = st.tabs(st.session_state["leftTabs"])
+    #         # for i in range(len(st.session_state["leftTabs"])):
+    #         #     with tt1[i]:
+    #         #         if st.session_state["leftTabs"][i] != '模型':
+    #         #             if st.session_state["leftTabs"][i] == '原始数据':
+    #         #                 column = ['数据类型', '字段', '上传时间']
+    #         #                 st.data_editor(
+    #         #                     pages_utils.TempDataSet[0],
+    #         #                     height=220, width=800, )
+    #         #             elif st.session_state["leftTabs"][i] == '预处理后数据集':
+    #         #                 column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
+    #         #                 st.data_editor(
+    #         #                     pages_utils.TempDataSet[1],
+    #         #                     height=220, width=800, )
+    #         #             elif st.session_state["leftTabs"][i] == '备选特征':
+    #         #                 column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+    #         #                 st.data_editor(
+    #         #                     pages_utils.TempDataSet[2],
+    #         #                     height=220, width=800, )
+    #         #             elif st.session_state["leftTabs"][i] == '优选特征':
+    #         #                 column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+    #         #                 st.data_editor(
+    #         #                     pages_utils.TempDataSet[3],
+    #         #                     height=220, width=800, )
+    #         #             # column_order=column)
+    #         #         else:
+    #         #             column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
+    #         #             st.data_editor(
+    #         #                 pages_utils.TempDataSetField[i],
+    #         #                 height=220, width=800,
+    #         #                 column_order=column)
+    #
+    # if st.session_state.page12 == 1:
+    #     with placeholder1.container():
+    #         if pages_utils.TempDataSet[4].columns.tolist() == pages_utils.TempDataSet[3].columns.tolist():
+    #             tt = st.tabs(['优选特征'])
+    #             with tt[0]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[2],
+    #                     height=220, width=800, )
+    #         else:
+    #             tt = st.tabs(['优选特征', '模型'])
+    #             with tt[0]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[2],
+    #                     height=220, width=800, )
+    #             with tt[1]:
+    #                 column = ["编号", "模型", "评价指标", "数据集划分比例", "时间", "下载模型结构、结果和参数值"]
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSetField[4],
+    #                     height=220, width=800,
+    #                     column_order=column)
 
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
@@ -602,8 +562,10 @@ with modelACV:
     # otherFeature = [ofT for ofT in otherFeature if not any(ofT in prT for prT in preferenceFeature)]
 
     _, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
+    st.markdown("##### 特征与预测目标变量选择")
     modelACVCol1, modelACVCol2 = st.columns([0.7, 0.4])
     with modelACVCol1:
+        st.markdown("###### 特征")
         # 按照数据类型显示左侧字段或特征
         result1 = pages_utils.multiselect_all_checked(
             st, '全选-优选特征', filterUnique(st.session_state.preferenceFeature, []),
@@ -620,133 +582,179 @@ with modelACV:
                                                            agricultureNameT0)),
             'tempPlant', 'collapsed')
     with modelACVCol2:
-        st.markdown("")
-        st.markdown("###### 预测目标变量\n")
+        # st.markdown("")
+        st.markdown("###### 预测目标变量")
         resultLabel = st.selectbox(
             'predictLabel',
             filterUnique(plantNameT0, pages_utils.reservedField),
             label_visibility='collapsed')
 
-# ===============显示右上模型选项===============
+    st.markdown('---')
+    # ===============显示右上模型选项===============
+    st.markdown("##### 建模方法")
+    st.warning('注意：分类模型针对离散变量；回归模型针对连续变量', icon="⚠️")
+    # 按模型分类显示
+    st.markdown("###### 分类模型")
+    colOption1, colOption2, colOption3, colOption4 = st.columns(4)
+    with colOption1:
+        agree = st.checkbox('SVM', key='checkBoxModel0', args=[0], on_change=clearOtherOption)
+        # agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
+    with colOption2:
+        agree1 = st.checkbox('RF', key='checkBoxModel1', args=[1], on_change=clearOtherOption)
+
+    with colOption3:
+        agree3 = st.checkbox('FLDA', key='checkBoxModel3', args=[3], on_change=clearOtherOption)
+
+    with colOption4:
+        agree2 = st.checkbox('KNN', key='checkBoxModel2', args=[2], on_change=clearOtherOption)
+        # agree4 = st.checkbox('贝叶斯统计')
+        # agree5 = st.checkbox('模糊综合评价')
+    st.markdown("###### 回归模型")
+    colOption21, colOption22, colOption23, colOption24 = st.columns(4)
+    with colOption21:
+        agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
+    with colOption22:
+        agree7 = st.checkbox('SVR', key='checkBoxModel7', on_change=clearOtherOption, args=[7])
+    with colOption23:
+        agree5 = st.checkbox('PLSR', key='checkBoxModel5', on_change=clearOtherOption, args=[5])
+    with colOption4:
+        pass
+    # st.markdown("###### 机理模型")
+    # colOption31, colOption32, = st.columns(2)
+    # with colOption31:
+    #     agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4])
+    # with colOption32:
+    #     pass
+
+    # st.markdown('---')
+
+    # ===============显示和处理右中各个模型参数(主要添加模型时加入checkbox名称)===============
+    if agree or agree1 or agree2 or agree2 or agree3 or agree5 or agree6 or agree7:
+        model = getModelName1().pop()
+        formatted_data = []
+
+        # Loop through model_params to find the desired model and extract its details
+        for entry in model_params:
+            if entry.get("模型名称") == model:
+                # Unpack the parameters and remarks together
+                for param_name, param_value in entry["模型参数"].items():
+                    remark = entry["备注"].pop(0)  # Get the corresponding remark for each parameter
+                    formatted_data.append({
+                        # "模型名称": model,
+                        "参数名": param_name,
+                        "参数值": param_value,
+                        "备注": remark
+                    })
+        df = pd.DataFrame(formatted_data)
+        # st.table(df)
+        with st.expander('高级设置'):
+            edited_df = st.data_editor(df, height=190, width=900,
+                                       disabled=["参数名", "备注"])
+            # 删除 '备注' 列
+            edited_df_no_remark = edited_df.drop(columns=["备注"])
+        st.session_state["modelParamName"] = edited_df_no_remark.to_dict()
+    # =======================添加验证与训练数据集划分=======================
+
+    st.markdown("##### 训练与验证数据集划分")
+    colOP1, colOP2 = st.columns(2)
+    with colOP1:
+        option1 = st.selectbox(
+            label="训练与验证数据集划分", label_visibility='collapsed',
+            options="按比例划分"
+        )
+    with colOP2:
+        if option1 == '按比例划分':
+            option = st.selectbox(
+                label="比例", label_visibility='collapsed',
+                options=("7:3", "8:2", "6:4")
+            )
+        # elif option1 == '按年份划分(未实现)':
+        #     option = st.selectbox(
+        #         label="年", label_visibility='collapsed',
+        #         options=('待实现', '')
+        #     )
+
+    # st.info('当前时间分辨率为:1天')
+    # temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)
+    btn = st.columns([4, 1])[1].button('添加模型', on_click=onAddModel)
+    if btn:
+        # =======================准备任务清单内容=======================
+        new_dataTT = {
+            "编号": pages_utils.generateID(),
+            "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
+            "模型参数": st.session_state["modelParamName"],
+            "特征": result1 + result2,
+            "标签": resultLabel,
+            "评价指标": onPrecision(getModelName(st.session_state["modelName"]['checkBoxModel'])),
+            "数据集划分比例": option,
+            "时间": datetime.datetime.now().time(),
+            "处理状态": False}
+        print('======================模型构建-添加模型======================')
+        print(new_dataTT)
+        pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_dataTT
+    # 自动添加
+    if not st.session_state.pageMBIsInit:
+        st.session_state.pageMBIsInit += 1
+        # 通过判断预测目标变量在0-5内判断分类模型(未添加代码)
+        for modelNameTemp1 in ['SVM', 'RF', 'FLDA', 'KNN']:
+            # =======================准备任务清单内容=======================
+            new_dataT = {
+                "编号": pages_utils.generateID(),
+                "模型": modelNameTemp1,
+                "模型参数": getModelParam(modelNameTemp1),  # getModelParam(modelNameTemp1)
+                "特征": filterUnique(st.session_state.preferenceFeature, []),  # result1 + result2
+                "标签": filterUnique(plantNameT0, pages_utils.reservedField)[0],
+                "评价指标": onPrecision(modelNameTemp1),
+                "时间": datetime.datetime.now().time(),
+                "数据集划分比例": option,
+                "处理状态": False}
+            # print('======================模型构建-自动添加模型======================')
+            # print(new_dataT)
+            pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_dataT
+
 with modelACM:
-    ph = st.empty()
+    # ph = st.empty()
     # Page 0
-    if st.session_state.page == 0:
-        with ph.container():
-            st.markdown("##### 建模方法")
-            st.warning('注意：分类模型针对离散变量；回归模型针对连续变量', icon="⚠️")
-            # 按模型分类显示
-            st.markdown("###### 分类模型")
-            colOption1, colOption2, colOption3, colOption4 = st.columns(4)
-            with colOption1:
-                agree = st.checkbox('SVM', key='checkBoxModel0', value=True)
-                # agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
-            with colOption2:
-                agree1 = st.checkbox('RF', key='checkBoxModel1', value=True)
-
-            with colOption3:
-                agree3 = st.checkbox('FLDA', key='checkBoxModel3', args=[3], value=True)
-
-            with colOption4:
-                agree2 = st.checkbox('KNN', key='checkBoxModel2', args=[2], value=True)
-                # agree4 = st.checkbox('贝叶斯统计')
-                # agree5 = st.checkbox('模糊综合评价')
-            st.markdown("###### 回归模型")
-            colOption21, colOption22, colOption23, colOption24 = st.columns(4)
-            with colOption21:
-                agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
-            with colOption22:
-                agree7 = st.checkbox('SVR', key='checkBoxModel7', on_change=clearOtherOption, args=[7])
-            with colOption23:
-                agree5 = st.checkbox('PLSR', key='checkBoxModel5', on_change=clearOtherOption, args=[5])
-            with colOption4:
-                pass
-            # st.markdown("###### 机理模型")
-            # colOption31, colOption32, = st.columns(2)
-            # with colOption31:
-            #     agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4])
-            # with colOption32:
-            #     pass
-
-            # st.markdown('---')
-
-            # ===============显示和处理右中各个模型参数(主要添加模型时加入checkbox名称)===============
-            if agree or agree1 or agree2 or agree2 or agree3 or agree5 or agree6 or agree7:
-                model = getModelName1().pop()
-                formatted_data = []
-
-                # Loop through model_params to find the desired model and extract its details
-                for entry in model_params:
-                    if entry.get("模型名称") == model:
-                        # Unpack the parameters and remarks together
-                        for param_name, param_value in entry["模型参数"].items():
-                            remark = entry["备注"].pop(0)  # Get the corresponding remark for each parameter
-                            formatted_data.append({
-                                # "模型名称": model,
-                                "参数名": param_name,
-                                "参数值": param_value,
-                                "备注": remark
-                            })
-                df = pd.DataFrame(formatted_data)
-                # st.table(df)
-                with st.expander('高级设置'):
-                    edited_df = st.data_editor(df, height=190, width=900,
-                                               disabled=["参数名", "备注"])
-                    # 删除 '备注' 列
-                    edited_df_no_remark = edited_df.drop(columns=["备注"])
-                st.session_state["modelParamName"] = edited_df_no_remark.to_dict()
-
-            # =======================添加验证与训练数据集划分=======================
-
-            st.markdown("##### 训练与验证数据集划分")
-            colOP1, colOP2 = st.columns(2)
-            with colOP1:
-                option1 = st.selectbox(
-                    label="训练与验证数据集划分", label_visibility='collapsed',
-                    options="按比例划分"
-                )
-            with colOP2:
-                if option1 == '按比例划分':
-                    option = st.selectbox(
-                        label="比例", label_visibility='collapsed',
-                        options=("7:3", "8:2", "6:4")
-                    )
-                # elif option1 == '按年份划分(未实现)':
-                #     option = st.selectbox(
-                #         label="年", label_visibility='collapsed',
-                #         options=('待实现', '')
-                #     )
+    # if st.session_state.page == 0:
+    #     with ph.container():
 
     # =======================显示右下内容=======================
-    placeholder = st.empty()
-    if st.session_state.page15 == 0:
-        # =======================显示右下任务清单表格=======================
-        with placeholder.container():
-            interval_col34, interval_col33 = st.columns([4, 1])
-            with interval_col33:
-                # st.info('当前时间分辨率为:1天')
-                # temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)
-                btn = st.button('开始模型训练',
-                                on_click=onTrain)
-            st.markdown('##### 任务清单')
-            pages_utils.TempDataSetField[4] = st.data_editor(
-                pages_utils.TempDataSetField[4], height=190, width=1200,
-                column_order=["编号", "特征", "标签", "模型", "评价指标", "数据集划分比例", "时间", '处理状态'],
-                disabled=["时间", '处理状态'], num_rows="dynamic", )
+    # placeholder = st.empty()
+    # if st.session_state.page15 == 0:
+    # =======================显示右下任务清单表格=======================
+    # with placeholder.container():
+
+    st.markdown('##### 任务清单')
+    st.info('本环节已默认勾选上一环节优选的特征及可训练的模型，用户也可以自行选用其他特征建模', icon="ℹ️")
+
+    pages_utils.TempDataSetField[4] = st.data_editor(
+        pages_utils.TempDataSetField[4], height=274, width=1200,
+        column_order=["特征", "模型参数", "标签", "模型", "评价指标", "数据集划分比例", "时间", '处理状态'],
+        disabled=["时间", '处理状态'], num_rows="dynamic", )
+
+    btn2 = st.columns([5, 1])[1].button('运行', on_click=onTrain)
     # placeholder1 = st.empty()
+    placeholder = st.empty()
+
     # =======================显示右下可视化图表=======================
-    elif st.session_state.page15 == 1:
+    # elif st.session_state.page15 == 1:
+    if st.session_state.page15 >= 1:
         with placeholder.container():
             st.markdown('---')
-            st.write('###### 预测结果与精度评价')
+            st.write('##### 建模结果')
             models = pages_utils.TempDataSetField[4]["模型"].tolist()
             evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
             targets = pages_utils.TempDataSetField[4]["标签"].tolist()
+            isHandledFlagsT = pages_utils.TempDataSetField[4]["处理状态"]
+
             # actualAndPredictList = pages_utils.TempDataSetField[4]["模型训练结果"].tolist()
             # print(print(actualAndPredictList))
 
-            tt1 = st.tabs(models)
-            for i in range(len(models)):
+            # 计算处理状态为True的模型数量
+            handled_models = [model for model, is_handled in zip(models, isHandledFlagsT) if is_handled]
+            # 创建tabs
+            tt1 = st.tabs(handled_models)
+            for i in range(len(handled_models)):
                 with tt1[i]:
                     try:
                         rootPath = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
@@ -759,6 +767,10 @@ with modelACM:
                         # 假设第一列包含要绘制的数据
                         actual_values = testLabelDF.iloc[:, 0]
                         predicted_values = predictLabelDF.iloc[:, 0]
+                        #
+                        # st.markdown("##### 验证集预测结果")
+                        # st.data_editor(testLabelDF)
+
                         # 区分回归分类模型
                         if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[
                             i] == 'SEIR机理模型':
@@ -848,23 +860,25 @@ with modelACM:
                             # st.pyplot(fig)
                             # with colMB2:
                             # 绘制混淆矩阵图
-                            fig, ax = plt.subplots()
-                            conf_matrix = confusion_matrix(actual_values, predicted_values)
-                            sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax, cbar=False)
-                            # sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues')
-                            ax.set_xlabel(f'实际{testLabelDF.columns[0]}')
-                            ax.set_ylabel(f'预测{testLabelDF.columns[0]}')
-                            # plt.title(f'{models[i]}模型精度评价-混淆矩阵')
-                            # st.pyplot(fig)
-                            plt.figtext(0.5, -0.03,
-                                        f'图{st.session_state.IMAGECOUNT} {models[i]}模型混淆矩阵图',
-                                        ha='center', fontsize=15)
+                            # fig, ax = plt.subplots()
+                            # conf_matrix = confusion_matrix(actual_values, predicted_values)
+                            # sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax, cbar=False)
+                            # # sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues')
+                            # ax.set_xlabel(f'实际{testLabelDF.columns[0]}')
+                            # ax.set_ylabel(f'预测{testLabelDF.columns[0]}')
+                            # # plt.title(f'{models[i]}模型精度评价-混淆矩阵')
+                            # # st.pyplot(fig)
+                            # plt.figtext(0.5, -0.03,
+                            #             f'图{st.session_state.IMAGECOUNT} {models[i]}模型混淆矩阵图',
+                            #             ha='center', fontsize=15)
                             # 精度结果直接显示在图中
                             # metrics_text = "\n".join(
                             #     [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
                             # plt.text(-0.1, 0.97, metrics_text, transform=ax.transAxes, fontsize=10,
                             #          verticalalignment='top', bbox=dict(facecolor='white', alpha=0.1))
-                            st.columns([0.2, 0.5, 0.2])[1].pyplot(fig)
+                            # st.columns([0.2, 0.5, 0.2])[1].pyplot(fig)
+
+                            st.markdown("###### 模型精度")
                             metrics = []
                             if isinstance(evaluationIndex[i], str):
                                 evaluationIndex[i] = eval(evaluationIndex[i])
@@ -884,4 +898,6 @@ with modelACM:
                     finally:
                         st.session_state.page = 0
             interval_col34, interval_col33 = st.columns([5, 1])
-            btn3 = interval_col33.button('返回', on_click=backPage)
+            btn3 = interval_col33.button('下一步', on_click=backPage)
+            if btn3:
+                switch_page(os.path.join(PAGES_PATH, 'ModelApplication.py'))

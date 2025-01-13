@@ -10,9 +10,10 @@ from PIL import Image
 from matplotlib.ticker import MaxNLocator
 from st_pages import hide_pages
 import streamlit_antd_components as sac
+from streamlit import switch_page
 from streamlit_pills import pills
 
-from lib.share import RESOURCE_IMAGES_PATH
+from lib.share import RESOURCE_IMAGES_PATH, PAGES_PATH
 from lib.utils import filterUnique
 from pages import pages_utils
 from pages.modelandmethod.PretreatmentMethod import PretreatmentMethod
@@ -53,7 +54,13 @@ if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 if 'pageDPIsInit' not in st.session_state:
     st.session_state.pageDPIsInit = 0
-    st.toast('本环节已将含缺失值的字段添加至任务清单，待进行自动插补处理，用户也可自行定义异常值进行插补处理', icon="ℹ️")
+
+    # 检查异常值
+    has_missing = pages_utils.TempDataSet[0].isnull().values.any()
+    if not has_missing:
+        st.toast("未发现缺失值", icon="ℹ️️")
+    else:
+        st.toast('发现缺失值,已根据默认配置添加任务至清单', icon="ℹ️")
 
 
 @st.dialog("气象数据预处理")
@@ -148,7 +155,7 @@ def clearOption():
             st.session_state["preMethodName"]['checkBox'] = f'checkbox{h}'
         st.session_state[f'checkbox{h}'] = False
     # 若已经在可视化展示状,则默认返回任务清单
-    st.session_state.page12 = 0
+    # st.session_state.page12 = 0
     return
 
 
@@ -163,6 +170,10 @@ def clear_other(key1):
 
 # 控制左侧表格不同数据集显示
 def firstPage(): st.session_state.page12 = 0
+
+
+# 控制左侧表格不同数据集显示
+def nextPage(): st.session_state.page12 += 1
 
 
 # 运行任务清单中所有方法
@@ -275,39 +286,39 @@ def onRun():
 # ==============================界面==============================
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
-dataPCV, dataPCM = st.columns([0.5, 0.7])
+dataPCV, dataPCM = st.columns([0.7, 0.5])
 with dataPCV:
-    st.markdown("##### 数据与特征")
+    # st.markdown("##### 数据与特征")
     # ===============显示左侧数据与特征表格===============
     # 根据st.session_state.page12的值刷新表格
-    placeholder1 = st.empty()
-    if st.session_state.page12 == 0:
-        with placeholder1.container():
-            tt1 = st.tabs(['原始数据'])
-            with tt1[0]:
-                st.data_editor(
-                    pages_utils.TempDataSet[0],
-                    height=220, width=800, )
-
-    if st.session_state.page12 == 1:
-        with placeholder1.container():
-            if pages_utils.TempDataSet[0].columns.tolist() == pages_utils.TempDataSet[1].columns.tolist():
-                tt = st.tabs(['预处理后数据集'])
-                with tt[0]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[1],
-                        height=220, width=800, )
-            else:
-                tt = st.tabs(['原始数据', '预处理后数据集'])
-                with tt[0]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[0],
-                        height=220, width=800, )
-                with tt[1]:
-                    st.data_editor(
-                        pages_utils.TempDataSet[1],
-                        height=220, width=800, )
-                # column_order=column)
+    # placeholder1 = st.empty()
+    # if st.session_state.page12 == 0:
+    #     with placeholder1.container():
+    #         tt1 = st.tabs(['原始数据'])
+    #         with tt1[0]:
+    #             st.data_editor(
+    #                 pages_utils.TempDataSet[0],
+    #                 height=220, width=800, )
+    #
+    # if st.session_state.page12 == 1:
+    #     with placeholder1.container():
+    #         if pages_utils.TempDataSet[0].columns.tolist() == pages_utils.TempDataSet[1].columns.tolist():
+    #             tt = st.tabs(['预处理后数据集'])
+    #             with tt[0]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[1],
+    #                     height=220, width=800, )
+    #         else:
+    #             tt = st.tabs(['原始数据', '预处理后数据集'])
+    #             with tt[0]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[0],
+    #                     height=220, width=800, )
+    #             with tt[1]:
+    #                 st.data_editor(
+    #                     pages_utils.TempDataSet[1],
+    #                     height=220, width=800, )
+    #                     column_order=column)
 
     # ===============显示左下字段或特征及获取===============
     # weatherNameList, plantNameList, agricultureNameList = ['无1'], ['无2'], ['无3']
@@ -329,7 +340,7 @@ with dataPCV:
     needHandledList = []
     fieldT = filterUnique(pages_utils.TempDataSet[0],
                           plantNameT1 + agricultureNameT1 + pages_utils.reservedField)
-    if not st.session_state.page12:
+    if not st.session_state.pageDPIsInit:
         if len(fieldT) != 0:
             # 检查异常值
             for filedTTT1 in fieldT:
@@ -337,21 +348,21 @@ with dataPCV:
                     pages_utils.TempDataSet[0], filedTTT1, 'nan')
                 if isNan:
                     needHandledList.append(filedTTT1)
-            if len(needHandledList) == 0:
-                st.toast("未发现缺失值", icon="ℹ️️")
+            # if len(needHandledList) == 0:
+            #     st.toast("未发现缺失值", icon="ℹ️️")
+
             # st.toast("检测到缺失值，已添加至任务清单", icon="ℹ️️")
         else:
             needHandledList = ['待原始数据上传']
 
     # result1 = st.multiselect("s", options=needHandledList,
     #                          default=needHandledList, label_visibility='collapsed')
-    if len(needHandledList) == 0:
-        needHandledList = ['无缺失值']
-    result1 = pills("", needHandledList,
+    # if len(needHandledList) == 0:
+    #     needHandledList = ['无缺失值']
+    result1 = pills("", fieldT,
                     label_visibility='collapsed')
 
     result1 = [result1]
-    # result1 = [result1]
     # result2 = pages_utils.multiselect_all(
     #     st, '全选-植保数据', filterUnique(plantNameList, pages_utils.reservedField),
     #     'tempPlant', 'collapsed')
@@ -359,8 +370,9 @@ with dataPCV:
     #     st, '全选-地理遥感数据', filterUnique(agricultureNameList, pages_utils.reservedField),
     #     'tempAgriculture', 'collapsed')
 
-# ===============显示右上预处理方法选项===============
-with dataPCM:
+    st.markdown('---')
+
+    # ===============显示右上预处理方法选项===============
     st.markdown("##### 预处理方法")
     # with tab1:
     col1, col2 = st.columns(2)
@@ -443,7 +455,7 @@ with dataPCM:
         # for columnT, lowNumT, upNumT, lowCountT, upCountT in zip(columnList, lowNum, upNum, lowCount, upCount):
         #     infoT1 += f"* {columnT} 下限:{round(lowNumT, 3)} 个数:{lowCountT} 上限:{round(upNumT, 3)} 个数:{upCountT}\n"
         # st.warning(f"{info}  \n{infoT1}", icon="⚠️")
-        st.markdown('---')
+        # st.markdown('---')
 
         coll11, coll22 = st.columns([0.3, 0.6])
         with coll11:
@@ -492,38 +504,37 @@ with dataPCM:
                     '* 描述:剔除单个数值或指定范围内的异常值，然后对其进行自定义插补或线性插值\n', icon="ℹ️")
             img = Image.open(os.path.join(RESOURCE_IMAGES_PATH, 'Figure_5.png'))
             st.image(img)
+        # =======================添加处理至任务清单=======================
 
-    # =======================添加处理至任务清单=======================
+        interval_col1, interval_col2 = st.columns([5, 1])
+        btn = interval_col2.button('添加处理', on_click=clearOption)
+        if btn:
+            # 检测用户行为-输入特征为空(预处理方法空判定未添加)
+            # if not len(result1 + result2 + result3):
+            if not len(result1):
 
-    interval_col1, interval_col2 = st.columns([5, 1])
-    btn = interval_col2.button('添加处理', on_click=clearOption)
-    if btn:
-        # 检测用户行为-输入特征为空(预处理方法空判定未添加)
-        # if not len(result1 + result2 + result3):
-        if not len(result1):
-
-            st.toast('未选择特征  \n请重新添加处理', icon="⚠️")
-        else:
-            # 获取数据类型
-            if result1:
-                dataType = '气象数据'
-            # elif result2:
-            #     dataType = '植保数据'
-            # elif result3:
-            #     dataType = '地理遥感数据'
-            new_data = {
-                "编号": pages_utils.generateID(),
-                "数据类型": dataType,
-                "输入字段": filterUnique(result1, pages_utils.reservedField),
-                "预处理后字段": None,
-                "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
-                "方法参数": [value for key, value in st.session_state["preMethodName"].items() if
-                             key != 'checkBox'],
-                "时间": datetime.datetime.now().time(), "处理状态": False}
-            print('======================预处理-添加任务清单记录======================')
-            print(new_data)
-            pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
-            st.rerun()
+                st.toast('未选择特征  \n请重新添加处理', icon="⚠️")
+            else:
+                # 获取数据类型
+                if result1:
+                    dataType = '气象数据'
+                # elif result2:
+                #     dataType = '植保数据'
+                # elif result3:
+                #     dataType = '地理遥感数据'
+                new_data = {
+                    "编号": pages_utils.generateID(),
+                    "数据类型": dataType,
+                    "输入字段": filterUnique(result1, pages_utils.reservedField),
+                    "预处理后字段": None,
+                    "预处理方法": getCheckboxName(st.session_state["preMethodName"]['checkBox']),
+                    "方法参数": [value for key, value in st.session_state["preMethodName"].items() if
+                                 key != 'checkBox'],
+                    "时间": datetime.datetime.now().time(), "处理状态": False}
+                print('======================预处理-添加任务清单记录======================')
+                print(new_data)
+                pages_utils.TempDataSetField[1].loc[len(pages_utils.TempDataSetField[1])] = new_data
+                st.rerun()
 
     # =======================添加处理至任务清单=======================
     # 自动添加
@@ -548,48 +559,51 @@ with dataPCM:
     # btn = interval_col2.button('添加处理', on_click=clearOption)
     # btn = None
 
-    st.markdown('---')
-
+with dataPCM:
     # =======================显示右下内容=======================
+    # placeholder = st.empty()
+    # if st.session_state.page12 == 0:
+    # pages_utils.TempDataSet[1] = pages_utils.TempDataSet[0].copy()
+    # # 初始化添加旬、月字段
+    # pages_utils.TempDataSet[1]['MonthOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
+    #     lambda x: (x - 1) // 30 + 1)  # 简化的月份计算，实际应用中可能需要更精确的方法
+    # pages_utils.TempDataSet[1]['DecadeOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
+    #     lambda x: (x - 1) // 10 + 1)  # 计算旬
+
+    # =======================显示右下任务清单表格=======================
+    # with placeholder.container():
+    st.markdown('##### 任务清单')
+    st.info('本环节已将含缺失值的字段添加至任务清单，待进行自动插补处理，用户也可自行定义异常值进行插补处理', icon="ℹ️")
+    # want_to_contribute = st.button("跳转可视化")
+    # if want_to_contribute:
+    #     switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\ModelEvaluation.py")
+    pages_utils.TempDataSetField[1] = st.data_editor(
+        pages_utils.TempDataSetField[1], height=190, width=900,
+        column_order=["数据类型", "输入字段", "预处理方法", '时间', '处理状态'],
+        disabled=["数据类型", "输入字段", "预处理后字段", "时间", '处理状态'], num_rows="dynamic", )
+    interval_col34, interval_col33 = st.columns([6, 1])
+    with interval_col33:
+        # residualField = [arr for arr in pages_utils.TempDataSet[0].columns if
+        #                  arr not in mergeArray4(
+        #                      ['经度', '纬度',
+        #                       "年", "DayOfYear"], result1, result2, result3)]
+        # print(f'剩余字段{residualField}')
+        # 默认保留上一环节所有字段
+        # reservedFiled = pages_utils.multiselect_all(
+        #     st, '全选',
+        #     residualField,
+        #     'temp1', 'collapsed')
+        btn2 = st.button('运行', on_click=onRun)
+
+    # btn2 = interval_col33.button('运行', on_click=onRun)
     placeholder = st.empty()
-    if st.session_state.page12 == 0:
-        # pages_utils.TempDataSet[1] = pages_utils.TempDataSet[0].copy()
-        # # 初始化添加旬、月字段
-        # pages_utils.TempDataSet[1]['MonthOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
-        #     lambda x: (x - 1) // 30 + 1)  # 简化的月份计算，实际应用中可能需要更精确的方法
-        # pages_utils.TempDataSet[1]['DecadeOfYear'] = pages_utils.TempDataSet[1]['DayOfYear'].apply(
-        #     lambda x: (x - 1) // 10 + 1)  # 计算旬
+    # =======================显示右下可视化图表=======================
+    # elif st.session_state.page12 == 1:
+    # 运行一次就一直显示结果
 
-        # =======================显示右下任务清单表格=======================
+    if st.session_state.page12 >= 1:
         with placeholder.container():
-            st.markdown('##### 任务清单')
-            # want_to_contribute = st.button("跳转可视化")
-            # if want_to_contribute:
-            #     switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\ModelEvaluation.py")
-            pages_utils.TempDataSetField[1] = st.data_editor(
-                pages_utils.TempDataSetField[1], height=190, width=900,
-                column_order=["编号", "数据类型", "输入字段", "预处理后字段", "预处理方法", '时间', '处理状态'],
-                disabled=["数据类型", "输入字段", "预处理后字段", "时间", '处理状态'], num_rows="dynamic", )
-            interval_col34, interval_col33 = st.columns([6, 1])
-            with interval_col33:
-                # residualField = [arr for arr in pages_utils.TempDataSet[0].columns if
-                #                  arr not in mergeArray4(
-                #                      ['经度', '纬度',
-                #                       "年", "DayOfYear"], result1, result2, result3)]
-                # print(f'剩余字段{residualField}')
-                # 默认保留上一环节所有字段
-                # reservedFiled = pages_utils.multiselect_all(
-                #     st, '全选',
-                #     residualField,
-                #     'temp1', 'collapsed')
-                btn2 = st.button('运行', on_click=onRun)
-
-            # btn2 = interval_col33.button('运行', on_click=onRun)
-
-        # =======================显示右下可视化图表=======================
-    elif st.session_state.page12 == 1:
-        with placeholder.container():
-            st.markdown('##### 可视化')
+            st.markdown('##### 结果')
             idPreMethods = pages_utils.TempDataSetField[1]["预处理方法"].tolist()
             inputFields = pages_utils.TempDataSetField[1]["输入字段"].tolist()
             # 若无方法处理,则直接跳过该环节
@@ -743,8 +757,9 @@ with dataPCM:
             else:
                 st.info('跳过预处理', icon="ℹ️️")
 
-            interval_col34, interval_col33 = st.columns([5, 1])
             # want_to_contribute = interval_col34.button("跳转至可视化界面")
             # if want_to_contribute:
             #     switch_page(r"E:\a_python\program\diseaseForecastStreamlit\pages\Visualization.py")
-            btn3 = interval_col33.button('返回', on_click=firstPage)
+            btn3 = st.columns([5, 1])[1].button('下一步')
+            if btn3:
+                switch_page(os.path.join(PAGES_PATH, 'FeatureCalculation.py'))
