@@ -138,7 +138,7 @@ with colTemp2:
 
         with open(file_path, "rb") as file:
             st.download_button(
-                label="下载",
+                label="模板下载",
                 data=file,
                 file_name="模型应用数据模板.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -257,7 +257,7 @@ with colTemp2:
         predictions = model.predict(predictDF)
         dataFrameTemp['预测结果'] = predictions
         st.toast(f"模型应用完成", icon="ℹ️️")
-        st.table(dataFrameTemp)
+        st.data_editor(dataFrameTemp)
 
         # dem = r'E:\a_python\program\diseaseForecastStreamlit\myproject\resource\tempdir\CHN_Wheat_2010.tif'
         # m = leafmap.Map(zoom_start=16)
