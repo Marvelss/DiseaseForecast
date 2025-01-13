@@ -18,7 +18,8 @@ from pages import pages_utils
 from pages.modelandmethod.PretreatmentMethod import PretreatmentMethod
 
 st.set_page_config(
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state='collapsed'
 )
 # 隐藏页面
 hide_pages(

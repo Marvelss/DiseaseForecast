@@ -14,7 +14,8 @@ from warnings import simplefilter
 
 simplefilter(action="ignore", category=FutureWarning)
 st.set_page_config(
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state='collapsed'
 )
 # 隐藏页面
 hide_pages(

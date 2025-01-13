@@ -13,7 +13,8 @@ import leafmap.foliumap as leafmap
 from lib.utils import excelToJson, filterUnique
 
 st.set_page_config(
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state='collapsed'
 )
 # 隐藏页面
 hide_pages(
