@@ -90,8 +90,8 @@ with tt1[3]:
         pages_utils.TempDataSet[4],
         height=250, width=1500)
 st.markdown('###### 各环节方法执行记录')
-tt2 = st.tabs(['原始数据', '预处理后数据', '备选特征', '优选特征', '模型'])
-for j in range(len(['原始数据', '预处理后数据', '备选特征', '优选特征', '模型'])):
+tt2 = st.tabs(['原始建模数据', '预处理后数据', '备选特征', '优选特征', '模型'])
+for j in range(len(['原始建模数据', '预处理后数据', '备选特征', '优选特征', '模型'])):
     with tt2[j]:
         st.dataframe(
             pages_utils.TempDataSetField[j],

@@ -353,7 +353,7 @@ with dataPCV:
 
             # st.toast("检测到缺失值，已添加至任务清单", icon="ℹ️️")
         else:
-            needHandledList = ['待原始数据上传']
+            needHandledList = ['待原始建模数据上传']
 
     # result1 = st.multiselect("s", options=needHandledList,
     #                          default=needHandledList, label_visibility='collapsed')

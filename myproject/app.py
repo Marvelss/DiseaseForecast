@@ -50,7 +50,7 @@ st.logo(sidebar_logo, icon_image=main_body_logo)
 show_pages(
     [
         Page(os.path.join(PROJECT_PATH, 'app.py'), "主页"),
-        Page(os.path.join(PAGES_PATH, 'DataSet.py'), "原始数据"),
+        Page(os.path.join(PAGES_PATH, 'DataSet.py'), "原始建模数据"),
         Page(os.path.join(PAGES_PATH, 'DataPreparation.py'), "气象数据预处理"),
         Page(os.path.join(PAGES_PATH, 'FeatureCalculation.py'), "特征计算"),
         Page(os.path.join(PAGES_PATH, 'FeatureOptimization.py'), "特征优选"),
@@ -90,7 +90,7 @@ show_pages(
 # )
 # 隐藏页面
 hide_pages(
-    ["原始数据", "气象数据预处理", "特征计算",
+    ["原始建模数据", "气象数据预处理", "特征计算",
      "特征优选", "模型构建",
      "建模报告", '基于天气情景生成器的模型评价', '模型应用', "数据下载中心",
      ]
@@ -101,7 +101,7 @@ if 'page12' not in st.session_state:
     st.session_state.page12 = 0
 # 左侧内容标题
 if "leftTabs" not in st.session_state:
-    st.session_state["leftTabs"] = ['原始数据']
+    st.session_state["leftTabs"] = ['原始建模数据']
 if "leftTabsFacet" not in st.session_state:
     st.session_state["leftTabsFacet"] = ['备选特征']
 # 控制模型构建等后续步骤点/面界面显示
@@ -208,7 +208,7 @@ def emptyValue():
     # 预处理界面初始化(使用系统界面右上角界面clear cache自动清空)
     # st.session_state["preMethodName"] = {'checkBox': None}
     # st.session_state["DPVisualInformation"] = []
-    # st.session_state["leftTabs"] = ['原始数据']
+    # st.session_state["leftTabs"] = ['原始建模数据']
     # st.session_state.page12 = 0
 
 

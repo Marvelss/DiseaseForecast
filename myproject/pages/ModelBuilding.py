@@ -491,7 +491,7 @@ with modelACV:
     #         # for i in range(len(st.session_state["leftTabs"])):
     #         #     with tt1[i]:
     #         #         if st.session_state["leftTabs"][i] != '模型':
-    #         #             if st.session_state["leftTabs"][i] == '原始数据':
+    #         #             if st.session_state["leftTabs"][i] == '原始建模数据':
     #         #                 column = ['数据类型', '字段', '上传时间']
     #         #                 st.data_editor(
     #         #                     pages_utils.TempDataSet[0],

@@ -331,7 +331,7 @@ with featureCCV:
     #                     pages_utils.TempDataSet[2],
     #                     height=220, width=800, )
     #         # with tt1[i]:
-    #         #     # if tempLefTabs[i] == '原始数据':
+    #         #     # if tempLefTabs[i] == '原始建模数据':
     #         #     #     column = ['数据类型', '字段', '上传时间']
     #         #     if tempLefTabs[i] == '预处理后数据集':
     #         #
@@ -386,7 +386,7 @@ with featureCCV:
     #     'tempTemperature', 'collapsed')
     st.markdown('##### 气象数据字段选择')
     fieldF = filterUnique(weatherNameList, pages_utils.reservedField)
-    fieldF = fieldF if len(fieldF) != 0 else ['待原始数据上传']
+    fieldF = fieldF if len(fieldF) != 0 else ['待原始建模数据上传']
     result1 = pills("特征计算", fieldF, label_visibility='collapsed')
     result1 = [result1]
     # result2 = pages_utils.multiselect_all(
