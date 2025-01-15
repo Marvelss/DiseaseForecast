@@ -729,7 +729,7 @@ with modelACM:
 
     pages_utils.TempDataSetField[4] = st.data_editor(
         pages_utils.TempDataSetField[4], height=274, width=1200,
-        column_order=["特征", "模型参数", "标签", "模型", "评价指标", "数据集划分比例", "时间", '处理状态'],
+        column_order=["模型", "标签", "特征", "评价指标", "数据集划分比例", "时间", '处理状态'],
         disabled=["时间", '处理状态'], num_rows="dynamic", )
 
     btn2 = st.columns([5, 1])[1].button('运行', on_click=onTrain)
@@ -898,6 +898,6 @@ with modelACM:
                     finally:
                         st.session_state.page = 0
             interval_col34, interval_col33 = st.columns([5, 1])
-            btn3 = interval_col33.button('下一步', on_click=backPage)
+            btn3 = interval_col33.button('下一步')
             if btn3:
                 switch_page(os.path.join(PAGES_PATH, 'ModelApplication.py'))
