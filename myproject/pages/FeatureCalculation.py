@@ -644,7 +644,7 @@ with featureCCM:
 
     pages_utils.TempDataSetField[2] = st.data_editor(
         pages_utils.TempDataSetField[2], height=190, width=900,
-        column_order=["数据类型", "输入特征", "方法参数",  "特征计算方法", '时间', '处理状态'],
+        column_order=["数据类型", "输入特征", "特征计算方法", "方法参数", '时间', '处理状态'],
         disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
     interval_col34, interval_col33 = st.columns([5, 1])
     btn2 = interval_col33.button('运行', on_click=onRun)
