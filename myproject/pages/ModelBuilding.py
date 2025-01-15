@@ -415,14 +415,19 @@ def onTrain():
                 # print(pages_utils.TempDataSetField[4])
                 # ===============更新左侧显示内容===============
                 # print(actualAndPredictResult)
+                # 精度结果保留三位小数
+                for keyT1, valueT1 in evaluationResult.items():
+                    # 格式化每个值为三位小数
+                    evaluationResult[keyT1] = round(valueT1, 3)
+                # 显示精度结果
                 update_values = {
                     "时间": datetime.datetime.now().time(),
                     "评价指标": evaluationResult,
                     "模型训练结果": actualAndPredictResult,
                     "模型结构": modelStruct,
                     "处理状态": True}
-                print('======更新指标======')
-                print(update_values)
+                # print('======更新指标======')
+                # print(update_values)
                 # 查找要更新的数据记录
                 for index1, row1 in pages_utils.TempDataSetField[4].iterrows():
                     if row1["编号"] == idNumber[tempIndex]:
