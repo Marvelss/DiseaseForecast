@@ -595,6 +595,26 @@ with modelACV:
             label_visibility='collapsed')
 
     st.markdown('---')
+    # =======================添加验证与训练数据集划分=======================
+
+    st.markdown("##### 训练与验证数据集划分")
+    colOP1, colOP2 = st.columns(2)
+    with colOP1:
+        option1 = st.selectbox(
+            label="训练与验证数据集划分", label_visibility='collapsed',
+            options="按比例划分"
+        )
+    with colOP2:
+        if option1 == '按比例划分':
+            option = st.selectbox(
+                label="比例", label_visibility='collapsed',
+                options=("7:3", "8:2", "6:4")
+            )
+        # elif option1 == '按年份划分(未实现)':
+        #     option = st.selectbox(
+        #         label="年", label_visibility='collapsed',
+        #         options=('待实现', '')
+        #     )
     # ===============显示右上模型选项===============
     st.markdown("##### 建模方法")
     st.warning('注意：分类模型针对离散变量；回归模型针对连续变量', icon="⚠️")
@@ -658,26 +678,7 @@ with modelACV:
             # 删除 '备注' 列
             edited_df_no_remark = edited_df.drop(columns=["备注"])
         st.session_state["modelParamName"] = edited_df_no_remark.to_dict()
-    # =======================添加验证与训练数据集划分=======================
 
-    st.markdown("##### 训练与验证数据集划分")
-    colOP1, colOP2 = st.columns(2)
-    with colOP1:
-        option1 = st.selectbox(
-            label="训练与验证数据集划分", label_visibility='collapsed',
-            options="按比例划分"
-        )
-    with colOP2:
-        if option1 == '按比例划分':
-            option = st.selectbox(
-                label="比例", label_visibility='collapsed',
-                options=("7:3", "8:2", "6:4")
-            )
-        # elif option1 == '按年份划分(未实现)':
-        #     option = st.selectbox(
-        #         label="年", label_visibility='collapsed',
-        #         options=('待实现', '')
-        #     )
 
     # st.info('当前时间分辨率为:1天')
     # temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)
