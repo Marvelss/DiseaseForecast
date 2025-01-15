@@ -53,7 +53,6 @@ if 'page13' not in st.session_state:
     st.session_state.page13 = 0
     st.toast('已根据默认配置添加任务至清单', icon="ℹ️")
 
-
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
     st.switch_page("app.py")
@@ -645,7 +644,7 @@ with featureCCM:
 
     pages_utils.TempDataSetField[2] = st.data_editor(
         pages_utils.TempDataSetField[2], height=190, width=900,
-        column_order=["数据类型", "输入特征", "备选特征", "特征计算方法", '时间', '处理状态'],
+        column_order=["数据类型", "输入特征", "方法参数",  "特征计算方法", '时间', '处理状态'],
         disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
     interval_col34, interval_col33 = st.columns([5, 1])
     btn2 = interval_col33.button('运行', on_click=onRun)
