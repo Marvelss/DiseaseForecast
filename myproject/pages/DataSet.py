@@ -34,11 +34,11 @@ hide_pages(
     ]
 )
 # 取消链接跳转
-st.markdown("""
-    <style>
-    .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
-    </style>
-    """, unsafe_allow_html=True)
+# st.markdown("""
+#     <style>
+#     .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
+#     </style>
+#     """, unsafe_allow_html=True)
 st.markdown(("""
 <style>
 div.stButton button {
@@ -78,22 +78,31 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-st.header('多场景作物病虫害快速预测建模系统')
+# 隐藏markdown锚点链接
+st.markdown("""
+    <style>
+    .stApp a:first-child {
+        display: none;
+    }
+
+    .css-15zrgzn {display: none}
+    .css-eczf16 {display: none}
+    .css-jn99sy {display: none}
+    </style>
+    """, unsafe_allow_html=True)
+st.header('原始建模数据', help='本环节用于原始数据上传', divider='grey', anchor=False)
+# st.subheader('本环节用于原始数据上传',)
+# st.markdown('#### 本环节用于原始数据上传')
+
+# with st.container(border=True, key='flow-bar'):
 sac.steps(
     items=[
-        sac.StepsItem(title='原始建模数据', subtitle='',
-                      description='上传建模数据集', disabled=True),
-        sac.StepsItem(title='气象数据预处理',
-                      disabled=True,
-                      description='清洗气象数据如异常和缺失值，以免影响建模'),
-        sac.StepsItem(title='特征计算', disabled=True,
-                      description='提取相关特征，增强模型表现'),
-        sac.StepsItem(title='特征优选', disabled=True,
-                      description='筛选有用特征，提升训练质量'),
-        sac.StepsItem(title='模型构建', disabled=True,
-                      description='训练并验证模型'),
-        sac.StepsItem(title='模型应用', disabled=True,
-                      description='应用模型进行作物病虫害预测'),
+        sac.StepsItem(title='原始建模数据', disabled=True),
+        sac.StepsItem(title='气象数据预处理', disabled=True),
+        sac.StepsItem(title='特征计算', disabled=True),
+        sac.StepsItem(title='特征优选', disabled=True),
+        sac.StepsItem(title='模型构建', disabled=True),
+        sac.StepsItem(title='模型应用', disabled=True),
     ], index=0, color='#008000'
 )
 # st.markdown("<h1 style='text-align: left; color: red;'>Some title</h1>", unsafe_allow_html=True)
@@ -102,152 +111,155 @@ emptyHeadDSP = st.empty()
 # ==============================文件上传显示==============================
 dataSCM, dataSCR = st.columns([0.7, 0.4])
 with dataSCM:
-    st.markdown("##### 上传数据集")
-    selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '地理遥感数据'],
-                             ["🌨️️", "🌾", "🌎"])
+    with st.container(border=True):
+        st.markdown("##### 上传数据集", unsafe_allow_html=False)
+        selectedTemplate = pills("选择数据集", ['气象数据', '植保数据', '地理遥感数据'],
+                                 ["🌨️️", "🌾", "🌎"])
 
-    uploaded_files = st.file_uploader(
-        "上传数据集",
-        accept_multiple_files=False,
-        label_visibility='collapsed',
-        type=['xlsx', 'csv', 'txt', 'xls', 'zip'],
-        help='help')
+        uploaded_files = st.file_uploader(
+            "上传数据集",
+            accept_multiple_files=False,
+            label_visibility='collapsed',
+            type=['xlsx', 'csv', 'txt', 'xls', 'zip'],
+            help='help')
 
-    # st.markdown('''
-    #     <style>
-    #         .uploadedFile {display: none}
-    #     <style>''',
-    #             unsafe_allow_html=True)
+        # st.markdown('''
+        #     <style>
+        #         .uploadedFile {display: none}
+        #     <style>''',
+        #             unsafe_allow_html=True)
 
-    st.markdown('---')
-    # ==============================右侧数据模板下载及注意事项==============================
-    st.markdown("##### 数据模板下载及注意事项")
-    placeholder1 = st.empty()
-    if selectedTemplate == '气象数据':
-        with placeholder1.container():
-            st.warning(warningInfo, icon="⚠️")
-            with open(path1, "rb") as file:
-                st.download_button(
-                    label="下载气象数据模板",
-                    data=file,
-                    file_name="气象数据-模板.xlsx",
-                    mime="application/octet-stream"
-                )
-    if selectedTemplate == '植保数据':
-        with placeholder1.container():
-            st.warning(warningInfo, icon="⚠️")
-            with open(path2, "rb") as file:
-                st.download_button(
-                    label="下载植保数据模板",
-                    data=file,
-                    file_name="植保数据-模板.xlsx",
-                    mime="application/octet-stream"
-                )
-    if selectedTemplate == '地理遥感数据':
-        with placeholder1.container():
-            st.warning(warningInfo, icon="⚠️")
-            with open(path3, "rb") as file:
-                st.download_button(
-                    label="下载地理遥感数据模板",
-                    data=file,
-                    file_name="地理遥感数据-模板.xlsx",
-                    mime="application/octet-stream"
-                )
+        # st.markdown('---')
+    with st.container(border=True):
+        # ==============================右侧数据模板下载及注意事项==============================
+        st.markdown("##### 数据模板下载及注意事项")
+        placeholder1 = st.empty()
+        if selectedTemplate == '气象数据':
+            with placeholder1.container():
+                st.warning(warningInfo, icon="⚠️")
+                with open(path1, "rb") as file:
+                    st.download_button(
+                        label="下载气象数据模板",
+                        data=file,
+                        file_name="气象数据-模板.xlsx",
+                        mime="application/octet-stream"
+                    )
+        if selectedTemplate == '植保数据':
+            with placeholder1.container():
+                st.warning(warningInfo, icon="⚠️")
+                with open(path2, "rb") as file:
+                    st.download_button(
+                        label="下载植保数据模板",
+                        data=file,
+                        file_name="植保数据-模板.xlsx",
+                        mime="application/octet-stream"
+                    )
+        if selectedTemplate == '地理遥感数据':
+            with placeholder1.container():
+                st.warning(warningInfo, icon="⚠️")
+                with open(path3, "rb") as file:
+                    st.download_button(
+                        label="下载地理遥感数据模板",
+                        data=file,
+                        file_name="地理遥感数据-模板.xlsx",
+                        mime="application/octet-stream"
+                    )
 
-    # if selectedTemplate == '模型应用数据':
-    #     with placeholder1.container():
-    #         st.warning(warningInfo1, icon="⚠️")
-    #         with open(path3, "rb") as file:
-    #             st.download_button(
-    #                 label="下载模型应用数据模板",
-    #                 data=file,
-    #                 file_name="模型应用数据-模板.xlsx",
-    #                 mime="application/octet-stream"
-    #             )
-    # ==============================控制文件上传逻辑==============================
-    with emptyHeadDSP:
-        with st.spinner('处理数据中...'):
-            if uploaded_files:
-                # print(uploaded_files)
-                try:
-                    bytes_data = uploaded_files.read()
-                    data33 = pd.read_excel(bytes_data)
-                    # # 设定保存路径
-                    # save_path = f"./{uploaded_files.name}"
-                    #
-                    # # 将文件保存到本地
-                    # with open(save_path, "wb") as f:
-                    #     f.write(bytes_data)
-                    #
-                    # st.success(f"文件已保存到: {save_path}")
-                    isErrorData = False
-                    # 检测非数值型输入
-                    # 取前10行
-                    subset = data33.head(10)
+        # if selectedTemplate == '模型应用数据':
+        #     with placeholder1.container():
+        #         st.warning(warningInfo1, icon="⚠️")
+        #         with open(path3, "rb") as file:
+        #             st.download_button(
+        #                 label="下载模型应用数据模板",
+        #                 data=file,
+        #                 file_name="模型应用数据-模板.xlsx",
+        #                 mime="application/octet-stream"
+        #             )
+        # ==============================控制文件上传逻辑==============================
+        with emptyHeadDSP:
+            with st.spinner('处理数据中...'):
+                if uploaded_files:
+                    # print(uploaded_files)
+                    try:
+                        bytes_data = uploaded_files.read()
+                        data33 = pd.read_excel(bytes_data)
+                        # # 设定保存路径
+                        # save_path = f"./{uploaded_files.name}"
+                        #
+                        # # 将文件保存到本地
+                        # with open(save_path, "wb") as f:
+                        #     f.write(bytes_data)
+                        #
+                        # st.success(f"文件已保存到: {save_path}")
+                        isErrorData = False
+                        # 检测非数值型输入
+                        # 取前10行
+                        subset = data33.head(10)
 
-                    # 检测每一列是否包含非数值型数据，并显示对应的列名
-                    non_numeric_columns = []
+                        # 检测每一列是否包含非数值型数据，并显示对应的列名
+                        non_numeric_columns = []
 
-                    for column in subset.columns:
-                        non_null_data = subset[column].dropna()
-                        if not pd.to_numeric(non_null_data, errors='coerce').notna().all():
-                            non_numeric_columns.append(column)
-                    # 去除经度、纬度(固定)
-                    tempT1 = [col for col in non_numeric_columns if col not in ['经度', '纬度']]
+                        for column in subset.columns:
+                            non_null_data = subset[column].dropna()
+                            if not pd.to_numeric(non_null_data, errors='coerce').notna().all():
+                                non_numeric_columns.append(column)
+                        # 去除经度、纬度(固定)
+                        tempT1 = [col for col in non_numeric_columns if col not in ['经度', '纬度']]
 
-                    # 防止重复添加
-                    if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():
-                        pass
-                    # 存在非数值型输入
-                    elif len(tempT1):
-                        tempT2 = ' '.join(tempT1)
-                        st.toast(f'以下列存在非数值型数据,请转换为数值后重新上传  \n字段:{tempT2}', icon="⚠️")
-                    # 正确情况
-                    else:
-                        new_data = {
-                            "编号": pages_utils.generateID(),
-                            "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "已上传",
-                            "上传时间": datetime.now().strftime("%H:%M:%S"),
-                            "字段": data33.columns.tolist()}
-                        # 添加并合并至原始数据集
-                        pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
-                        # 若为模型应用数据，不合并
-                        if selectedTemplate == '模型应用数据':
+                        # 防止重复添加
+                        if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():
                             pass
-                            # st.session_state.modelApplicationData = data33
+                        # 存在非数值型输入
+                        elif len(tempT1):
+                            tempT2 = ' '.join(tempT1)
+                            st.toast(f'以下列存在非数值型数据,请转换为数值后重新上传  \n字段:{tempT2}', icon="⚠️")
+                        # 正确情况
                         else:
-                            # 获取两个DataFrame列名的交集
-                            intersection_cols = pages_utils.getIntersectionCols(
-                                data33, pages_utils.TempDataSet[0]
-                            )
-                            # 合并数据
-                            pages_utils.TempDataSet[0] = pd.merge(
-                                data33, pages_utils.TempDataSet[0],
-                                on=intersection_cols, how="outer")
-                # 上传出错提示
-                except BaseException as e:
-                    st.toast('上传错误  \n请检查文件内容及格式无误后重新上传', icon="⚠️")
-                    print(e)
-                    # new_data = {
-                    #     "编号": pages_utils.generateID(),
-                    #     "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "上传出错",
-                    #     "上传时间": datetime.now().strftime("%H:%M:%S"),
-                    #     "字段": '未识别'}
-                    # pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
-                print('======================原始数据集======================')
-                print(pages_utils.TempDataSet[0])
+                            new_data = {
+                                "编号": pages_utils.generateID(),
+                                "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "已上传",
+                                "上传时间": datetime.now().strftime("%H:%M:%S"),
+                                "字段": data33.columns.tolist()}
+                            # 添加并合并至原始数据集
+                            pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
+                            # 若为模型应用数据，不合并
+                            if selectedTemplate == '模型应用数据':
+                                pass
+                                # st.session_state.modelApplicationData = data33
+                            else:
+                                # 获取两个DataFrame列名的交集
+                                intersection_cols = pages_utils.getIntersectionCols(
+                                    data33, pages_utils.TempDataSet[0]
+                                )
+                                # 合并数据
+                                pages_utils.TempDataSet[0] = pd.merge(
+                                    data33, pages_utils.TempDataSet[0],
+                                    on=intersection_cols, how="outer")
+                    # 上传出错提示
+                    except BaseException as e:
+                        st.toast('上传错误  \n请检查文件内容及格式无误后重新上传', icon="⚠️")
+                        print(e)
+                        # new_data = {
+                        #     "编号": pages_utils.generateID(),
+                        #     "数据类型": selectedTemplate, "文件名称": uploaded_files.name, "传输状态": "上传出错",
+                        #     "上传时间": datetime.now().strftime("%H:%M:%S"),
+                        #     "字段": '未识别'}
+                        # pages_utils.TempDataSetField[0].loc[len(pages_utils.TempDataSetField[0])] = new_data
+                    print('======================原始数据集======================')
+                    print(pages_utils.TempDataSet[0])
 # ==============================右侧文件上传状态显示==============================
 with dataSCR:
-    st.markdown("##### 文件上传状态显示")
-    # placeholder = st.empty()
-    # with placeholder.container():
-    st.data_editor(
-        pages_utils.TempDataSetField[0], height=250, width=800,
-        disabled=["数据集", "文件名称", "传输状态", "上传时间"],
-        column_order=["数据类型", "文件名称", "传输状态", "上传时间"],
-        hide_index=False, )
-    placeholder = st.empty()
-    with placeholder.container():
-        btn3 = st.columns([4, 1])[1].button('下一步')
-        if btn3:
-            switch_page(os.path.join(PAGES_PATH, 'DataPreparation.py'))
+    with st.container(border=True):
+        st.markdown("##### 文件上传状态显示")
+        # placeholder = st.empty()
+        # with placeholder.container():
+        st.data_editor(
+            pages_utils.TempDataSetField[0], height=250, width=800,
+            disabled=["数据集", "文件名称", "传输状态", "上传时间"],
+            column_order=["数据类型", "文件名称", "传输状态", "上传时间"],
+            hide_index=False, )
+        placeholder = st.empty()
+        with placeholder.container():
+            btn3 = st.columns([4, 1])[1].button('下一步')
+            if btn3:
+                switch_page(os.path.join(PAGES_PATH, 'DataPreparation.py'))
