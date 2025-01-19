@@ -39,12 +39,7 @@ hide_pages(
         "数据下载中心-面状",
     ]
 )
-# 取消链接跳转
-st.markdown("""
-    <style>
-    .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
-    </style>
-    """, unsafe_allow_html=True)
+
 st.markdown(("""
 <style>
 div.stButton button {
@@ -87,24 +82,32 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-st.header('多场景作物病虫害快速预测建模系统')
+# 隐藏markdown锚点链接
+st.markdown("""
+    <style>
+    .stApp a:first-child {
+        display: none;
+    }
+
+    .css-15zrgzn {display: none}
+    .css-eczf16 {display: none}
+    .css-jn99sy {display: none}
+    </style>
+    """, unsafe_allow_html=True)
+st.header('模型构建',
+          help='训练并验证模型', divider='grey', anchor=False)
+
 sac.steps(
     items=[
-        sac.StepsItem(title='原始建模数据', subtitle='',
-                      description='上传建模数据集', disabled=True),
-        sac.StepsItem(title='气象数据预处理',
-                      disabled=True,
-                      description='清洗气象数据如异常和缺失值，以免影响建模'),
-        sac.StepsItem(title='特征计算', disabled=True,
-                      description='提取相关特征，增强模型表现'),
-        sac.StepsItem(title='特征优选', disabled=True,
-                      description='筛选有用特征，提升训练质量'),
-        sac.StepsItem(title='模型构建', disabled=True,
-                      description='训练并验证模型'),
-        sac.StepsItem(title='模型应用', disabled=True,
-                      description='应用模型进行作物病虫害预测'),
+        sac.StepsItem(title='原始建模数据', disabled=True),
+        sac.StepsItem(title='气象数据预处理', disabled=True),
+        sac.StepsItem(title='特征计算', disabled=True),
+        sac.StepsItem(title='特征优选', disabled=True),
+        sac.StepsItem(title='模型构建', disabled=True),
+        sac.StepsItem(title='模型应用', disabled=True),
     ], index=4, color='#008000'
 )
+
 emptyHeadMBP = st.empty()
 
 checkBoxModelNum = 8
@@ -678,7 +681,6 @@ with modelACV:
             # 删除 '备注' 列
             edited_df_no_remark = edited_df.drop(columns=["备注"])
         st.session_state["modelParamName"] = edited_df_no_remark.to_dict()
-
 
     # st.info('当前时间分辨率为:1天')
     # temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)

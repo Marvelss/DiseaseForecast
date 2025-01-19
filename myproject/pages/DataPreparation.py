@@ -37,12 +37,12 @@ hide_pages(
         "数据下载中心-面状",
     ]
 )
-# 取消链接跳转
-st.markdown("""
-    <style>
-    .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
-    </style>
-    """, unsafe_allow_html=True)
+# # 取消链接跳转
+# st.markdown("""
+#     <style>
+#     .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
+#     </style>
+#     """, unsafe_allow_html=True)
 st.markdown(("""
 <style>
 div.stButton button {
@@ -107,22 +107,29 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-st.header('多场景作物病虫害快速预测建模系统')
+# 隐藏markdown锚点链接
+st.markdown("""
+    <style>
+    .stApp a:first-child {
+        display: none;
+    }
+
+    .css-15zrgzn {display: none}
+    .css-eczf16 {display: none}
+    .css-jn99sy {display: none}
+    </style>
+    """, unsafe_allow_html=True)
+st.header('气象数据预处理',
+          help='清洗气象数据如异常和缺失值，以免影响建模', divider='grey', anchor=False)
+
 sac.steps(
     items=[
-        sac.StepsItem(title='原始建模数据', subtitle='',
-                      description='上传建模数据集', disabled=True),
-        sac.StepsItem(title='气象数据预处理',
-                      disabled=True,
-                      description='清洗气象数据如异常和缺失值，以免影响建模'),
-        sac.StepsItem(title='特征计算', disabled=True,
-                      description='提取相关特征，增强模型表现'),
-        sac.StepsItem(title='特征优选', disabled=True,
-                      description='筛选有用特征，提升训练质量'),
-        sac.StepsItem(title='模型构建', disabled=True,
-                      description='训练并验证模型'),
-        sac.StepsItem(title='模型应用', disabled=True,
-                      description='应用模型进行作物病虫害预测'),
+        sac.StepsItem(title='原始建模数据', disabled=True),
+        sac.StepsItem(title='气象数据预处理', disabled=True),
+        sac.StepsItem(title='特征计算', disabled=True),
+        sac.StepsItem(title='特征优选', disabled=True),
+        sac.StepsItem(title='模型构建', disabled=True),
+        sac.StepsItem(title='模型应用', disabled=True),
     ], index=1, color='#008000'
 )
 
@@ -336,6 +343,9 @@ with dataPCV:
     # result1 = pages_utils.multiselect_all(
     #     st, '全选-', filterUnique(weatherNameList, pages_utils.reservedField),
     #     'tempTemperature', 'collapsed')
+    st.markdown("##### 原始建模数据集")
+    st.data_editor(pages_utils.TempDataSet[0], height=220, width=800, )
+    st.markdown('---')
     st.markdown("##### 气象数据字段选择")
     needHandledList = []
     fieldT = filterUnique(pages_utils.TempDataSet[0],
@@ -603,7 +613,10 @@ with dataPCM:
 
     if st.session_state.page12 >= 1:
         with placeholder.container():
-            st.markdown('##### 结果')
+            st.markdown('##### 预处理后数据集')
+            # st.markdown("##### 原始建模")
+            st.data_editor(data=pages_utils.TempDataSet[1], height=220, width=800, )
+
             idPreMethods = pages_utils.TempDataSetField[1]["预处理方法"].tolist()
             inputFields = pages_utils.TempDataSetField[1]["输入字段"].tolist()
             # 若无方法处理,则直接跳过该环节
@@ -614,7 +627,9 @@ with dataPCM:
                 # 创建标签页并重新命名记录
                 new_ids = [f'记录编号_{h}' for h in new_ids]
 
-                tt1 = st.tabs(new_ids)
+                # tt1 = st.tabs(new_ids)
+                tt1 = st.tabs([' ', ' '])
+
                 for o in range(len(idPreMethods)):
                     with tt1[o]:
                         if idPreMethods[o] == '缺失值插补':
@@ -699,7 +714,16 @@ with dataPCM:
                             st.session_state.IMAGECOUNT += 1
 
                         elif idPreMethods[o] == '剔除异常值及插补':
-                            st.info('剔除异常值及插补功能的可视化正在优化中', icon="ℹ️")
+                            pass
+                            # st.markdown('处理字段名称：降水')
+                            # st.markdown('最小值：0')
+                            # st.markdown('最大值：200')
+                            # st.markdown('标准差：3')
+                            # st.markdown('均值：20')
+                            # st.markdown('众数：0')
+                            # st.markdown('中位数：10')
+
+                            # st.info('剔除异常值及插补功能的可视化正在优化中', icon="ℹ️")
                             # data_before_temp = st.session_state["DPVisualInformation"][o]['before']
                             # data_after_temp = st.session_state["DPVisualInformation"][o]['after']
                             # # print(inputFields[o][0])
@@ -755,6 +779,7 @@ with dataPCM:
                             # st.session_state.IMAGECOUNT += 1
 
             else:
+
                 st.info('跳过预处理', icon="ℹ️️")
 
             # want_to_contribute = interval_col34.button("跳转至可视化界面")

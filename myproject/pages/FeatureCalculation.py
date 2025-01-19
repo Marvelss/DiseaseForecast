@@ -36,12 +36,7 @@ hide_pages(
         "数据下载中心-面状",
     ]
 )
-# 取消链接跳转
-st.markdown("""
-    <style>
-    .st-emotion-cache-gi0tri.e1nzilvr2 {display: none;}
-    </style>
-    """, unsafe_allow_html=True)
+
 st.markdown(("""
 <style>
 div.stButton button {
@@ -107,22 +102,29 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-st.header('多场景作物病虫害快速预测建模系统')
+# 隐藏markdown锚点链接
+st.markdown("""
+    <style>
+    .stApp a:first-child {
+        display: none;
+    }
+
+    .css-15zrgzn {display: none}
+    .css-eczf16 {display: none}
+    .css-jn99sy {display: none}
+    </style>
+    """, unsafe_allow_html=True)
+st.header('特征计算',
+          help='提取相关特征，增强模型表现', divider='grey', anchor=False)
+
 sac.steps(
     items=[
-        sac.StepsItem(title='原始建模数据', subtitle='',
-                      description='上传建模数据集', disabled=True),
-        sac.StepsItem(title='气象数据预处理',
-                      disabled=True,
-                      description='清洗气象数据如异常和缺失值，以免影响建模'),
-        sac.StepsItem(title='特征计算', disabled=True,
-                      description='提取相关特征，增强模型表现'),
-        sac.StepsItem(title='特征优选', disabled=True,
-                      description='筛选有用特征，提升训练质量'),
-        sac.StepsItem(title='模型构建', disabled=True,
-                      description='训练并验证模型'),
-        sac.StepsItem(title='模型应用', disabled=True,
-                      description='应用模型进行作物病虫害预测'),
+        sac.StepsItem(title='原始建模数据', disabled=True),
+        sac.StepsItem(title='气象数据预处理', disabled=True),
+        sac.StepsItem(title='特征计算', disabled=True),
+        sac.StepsItem(title='特征优选', disabled=True),
+        sac.StepsItem(title='模型构建', disabled=True),
+        sac.StepsItem(title='模型应用', disabled=True),
     ], index=2, color='#008000'
 )
 emptyHeadFCP = st.empty()
@@ -383,6 +385,9 @@ with featureCCV:
     # result1 = pages_utils.multiselect_all(
     #     st, '全选-气象数据', filterUnique(weatherNameList, pages_utils.reservedField),
     #     'tempTemperature', 'collapsed')
+    st.markdown("##### 预处理后数据集")
+    st.data_editor(pages_utils.TempDataSet[1], height=220, width=800, )
+    st.markdown('---')
     st.markdown('##### 气象数据字段选择')
     fieldF = filterUnique(weatherNameList, pages_utils.reservedField)
     fieldF = fieldF if len(fieldF) != 0 else ['待原始建模数据上传']
@@ -654,7 +659,11 @@ with featureCCM:
     # 运行一次就一直显示结果
     if st.session_state.page13 >= 1:
         with placeholder.container():
-            st.markdown('##### 结果')
+            st.markdown('##### 特征计算结果')
+            # st.markdown('##### 预处理后数据集')
+            # st.markdown("##### 原始建模")
+            st.data_editor(data=pages_utils.TempDataSet[2], height=220, width=800, )
+
             idFMethods = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
             # inputFields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
 
@@ -833,7 +842,10 @@ with featureCCM:
                             # plt.figtext(0.5, -0.1,
                             #             f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumn}图',
                             #             ha='center', fontsize=16)
-                            st.pyplot(plt)
+                            # st.pyplot(plt)
+                            st.info('可前往数据下载中心界面查询或下载计算后的结果数据', icon="ℹ️")
+                            st.markdown('输入字段：降水')
+                            st.markdown('计算特征数量：12')
                             st.session_state.IMAGECOUNT += 1
                         elif idFMethods[o] == '降雨日数计算':
                             # 时期范围名称修剪
