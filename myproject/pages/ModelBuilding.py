@@ -622,7 +622,7 @@ with modelACV:
     st.markdown("##### 建模方法")
     st.warning('注意：分类模型针对离散变量；回归模型针对连续变量', icon="⚠️")
     # 按模型分类显示
-    st.markdown("###### 分类模型")
+    st.markdown("###### 分类模型（离散变量）")
     colOption1, colOption2, colOption3, colOption4 = st.columns(4)
     with colOption1:
         agree = st.checkbox('SVM', key='checkBoxModel0', args=[0], on_change=clearOtherOption)
@@ -637,7 +637,7 @@ with modelACV:
         agree2 = st.checkbox('KNN', key='checkBoxModel2', args=[2], on_change=clearOtherOption)
         # agree4 = st.checkbox('贝叶斯统计')
         # agree5 = st.checkbox('模糊综合评价')
-    st.markdown("###### 回归模型")
+    st.markdown("###### 回归模型（连续变量）")
     colOption21, colOption22, colOption23, colOption24 = st.columns(4)
     with colOption21:
         agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
@@ -733,7 +733,7 @@ with modelACM:
     # with placeholder.container():
 
     st.markdown('##### 任务清单')
-    st.info('本环节已默认勾选上一环节优选的特征及可训练的模型，用户也可以自行选用其他特征建模', icon="ℹ️")
+    # st.info('本环节已默认勾选上一环节优选的特征及可训练的模型，用户也可以自行选用其他特征建模', icon="ℹ️")
 
     pages_utils.TempDataSetField[4] = st.data_editor(
         pages_utils.TempDataSetField[4], height=274, width=1200,
@@ -750,161 +750,173 @@ with modelACM:
         with placeholder.container():
             st.markdown('---')
             st.write('##### 建模结果')
-            models = pages_utils.TempDataSetField[4]["模型"].tolist()
             evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
-            targets = pages_utils.TempDataSetField[4]["标签"].tolist()
-            isHandledFlagsT = pages_utils.TempDataSetField[4]["处理状态"]
+            for item in evaluationIndex:
+                if isinstance(item, dict):
+                    formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in item.items()])
+                else:
+                    formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in eval(item).items()])
+            models = pages_utils.TempDataSetField[4]["模型"].tolist()
+            # 创建一个新的 DataFrame，组合精度评价和模型
+            st.toast(formatted)
+            tempResult = pd.DataFrame({
+                '模型': models,
+                '精度': formatted
+            })
+            st.table(tempResult)
+            # targets = pages_utils.TempDataSetField[4]["标签"].tolist()
+            # isHandledFlagsT = pages_utils.TempDataSetField[4]["处理状态"]
 
             # actualAndPredictList = pages_utils.TempDataSetField[4]["模型训练结果"].tolist()
             # print(print(actualAndPredictList))
 
             # 计算处理状态为True的模型数量
-            handled_models = [model for model, is_handled in zip(models, isHandledFlagsT) if is_handled]
-            # 创建tabs
-            tt1 = st.tabs(handled_models)
-            for i in range(len(handled_models)):
-                with tt1[i]:
-                    try:
-                        rootPath = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
-                        testLabelDF = pd.read_excel(
-                            os.path.join(rootPath,
-                                         models[i] + '_testLabel.xlsx'))
-                        predictLabelDF = pd.read_excel(
-                            os.path.join(rootPath,
-                                         models[i] + '_predictLabel.xlsx'))
-                        # 假设第一列包含要绘制的数据
-                        actual_values = testLabelDF.iloc[:, 0]
-                        predicted_values = predictLabelDF.iloc[:, 0]
-                        #
-                        # st.markdown("##### 验证集预测结果")
-                        # st.data_editor(testLabelDF)
-
-                        # 区分回归分类模型
-                        if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[
-                            i] == 'SEIR机理模型':
-                            colMB1, colMB2 = st.columns(2)
-                            with colMB1:
-                                # 选择最多8个纬度
-                                top_stations = predictLabelDF['纬度'].value_counts().nlargest(8).index
-                                df_filtered_stations = predictLabelDF[predictLabelDF['纬度'].isin(top_stations)]
-                                # 选择最多5个年份
-                                top_years = predictLabelDF['年'].value_counts().nlargest(3).index
-                                df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                                # df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered[
-                                #     '经度'].astype(
-                                #     str)
-                                # Explicitly use .loc[] to avoid SettingWithCopyWarning
-                                df_filtered.loc[:, '地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered[
-                                    '经度'].astype(str)
-
-                                # 绘制柱状图
-                                plt.figure(figsize=(10, 6))
-                                sns.barplot(
-                                    data=df_filtered,
-                                    x="地区",
-                                    y='predictLabel',
-                                    hue="年",
-                                    dodge=True,
-                                    saturation=1
-                                )
-                                # 设置标签和标题
-                                plt.gca().set_xlabel("")  # 隐藏x轴标题
-                                plt.xticks(rotation=30)  # x轴标签旋转65度
-                                plt.ylabel(testLabelDF.columns[0])
-                                plt.figtext(0.5, -0.1,
-                                            f'图{st.session_state.IMAGECOUNT} 部分地区各年份预测结果图',
-                                            ha='center', fontsize=16)
-                                st.pyplot(plt)
-                            with colMB2:
-                                # 绘制散点图
-                                fig, ax = plt.subplots()
-                                sns.scatterplot(x=actual_values, y=predicted_values)
-                                plt.plot([actual_values.min(), actual_values.max()],
-                                         [actual_values.min(), actual_values.max()],
-                                         'r--')
-                                ax.set_xlabel(f'实际{testLabelDF.columns[0]}')
-                                ax.set_ylabel(f'预测{testLabelDF.columns[0]}')
-                                # plt.figure(figsize=(10, 6))
-                                plt.figtext(0.5, -0.03,
-                                            f'图{IMAGECOUNT} {models[i]}模型精度评价结果图',
-                                            ha='center', fontsize=16)
-                                # 精度结果直接显示在图中
-                                metrics_text = "\n".join(
-                                    [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
-                                plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
-                                         verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
-                                st.pyplot(fig)
-                        else:
-                            # colMB1, colMB2, colMB3 = st.columns([0.2, 0.5, 0.2])
-                            # with colMB1:
-                            #     pass
-                            # 分类模型
-                            # predictLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_predictLabel.xlsx'))
-                            # # 绘制二维平面散点图，只标记predictLabel为0和1的点
-                            # # 分别绘制 predictLabel 为 0 和 1 的点
-                            # fig, ax = plt.subplots()
-                            # # 获取 'RdYlGn_r' colormap 对象，从绿到红
-                            # cmap = plt.get_cmap('RdYlGn')
-                            #
-                            # # 假设有 5 个唯一的标签值
-                            # unique_labels = predictLabelDF['predictLabel'].unique()
-                            # num_colors = len(unique_labels)
-                            #
-                            # # 从 colormap 获取等间隔的颜色
-                            # selected_colors = cmap(np.linspace(0, 1, num_colors))
-                            # for idx, label in enumerate(unique_labels):
-                            #     # print(f'获取颜色:{selected_colors[idx]}')
-                            #     # print(label)
-                            #     subset = predictLabelDF[predictLabelDF['predictLabel'] == label]
-                            #     plt.scatter(subset['经度'], subset['纬度'], label=f'{label}', color=selected_colors[idx], s=100, alpha=0.6)
-                            # # predicted_values = predictLabelDF.iloc[:, 0]
-                            # ax.set_xlabel('经度')
-                            # ax.set_ylabel('纬度')
-                            # plt.legend(title=f'预测{testLabelDF.columns[0]}')
-                            # # plt.title(f'{models[i]}模型混淆矩阵图')
-                            # plt.figtext(0.5, -0.03,
-                            #             f'图{st.session_state.IMAGECOUNT} {models[i]}模型部分预测结果图',
-                            #             ha='center', fontsize=15)
-                            # st.pyplot(fig)
-                            # with colMB2:
-                            # 绘制混淆矩阵图
-                            # fig, ax = plt.subplots()
-                            # conf_matrix = confusion_matrix(actual_values, predicted_values)
-                            # sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax, cbar=False)
-                            # # sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues')
-                            # ax.set_xlabel(f'实际{testLabelDF.columns[0]}')
-                            # ax.set_ylabel(f'预测{testLabelDF.columns[0]}')
-                            # # plt.title(f'{models[i]}模型精度评价-混淆矩阵')
-                            # # st.pyplot(fig)
-                            # plt.figtext(0.5, -0.03,
-                            #             f'图{st.session_state.IMAGECOUNT} {models[i]}模型混淆矩阵图',
-                            #             ha='center', fontsize=15)
-                            # 精度结果直接显示在图中
-                            # metrics_text = "\n".join(
-                            #     [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
-                            # plt.text(-0.1, 0.97, metrics_text, transform=ax.transAxes, fontsize=10,
-                            #          verticalalignment='top', bbox=dict(facecolor='white', alpha=0.1))
-                            # st.columns([0.2, 0.5, 0.2])[1].pyplot(fig)
-
-                            st.markdown("###### 模型精度")
-                            metrics = []
-                            if isinstance(evaluationIndex[i], str):
-                                evaluationIndex[i] = eval(evaluationIndex[i])
-                            for key, value in evaluationIndex[i].items():
-                                metrics.append((key, round(value, 3)))
-                                half = len(metrics) // 2
-                            col111, col211 = st.columns(2)
-                            for h in range(half):
-                                col211.metric(metrics[h][0], metrics[h][1])
-                            for h in range(half, len(metrics)):
-                                col111.metric(metrics[h][0], metrics[h][1])
-                            # with colMB3:
-                            #     pass
-                    except BaseException as e:
-                        raise e
-                        # st.toast('运行出错,点击返回上一步', icon="⚠️")
-                    finally:
-                        st.session_state.page = 0
+            # handled_models = [model for model, is_handled in zip(models, isHandledFlagsT) if is_handled]
+            # # 创建tabs
+            # tt1 = st.tabs(handled_models)
+            # for i in range(len(handled_models)):
+            #     with tt1[i]:
+            #         try:
+            #             rootPath = os.path.join(RESOURCE_MODELRESULT_PATH, 'predict')
+            #             testLabelDF = pd.read_excel(
+            #                 os.path.join(rootPath,
+            #                              models[i] + '_testLabel.xlsx'))
+            #             predictLabelDF = pd.read_excel(
+            #                 os.path.join(rootPath,
+            #                              models[i] + '_predictLabel.xlsx'))
+            #             # 假设第一列包含要绘制的数据
+            #             actual_values = testLabelDF.iloc[:, 0]
+            #             predicted_values = predictLabelDF.iloc[:, 0]
+            #             #
+            #             # st.markdown("##### 验证集预测结果")
+            #             # st.data_editor(testLabelDF)
+            #
+            #             # 区分回归分类模型
+            #             if models[i] == 'LR' or models[i] == 'SVR' or models[i] == 'PLSR' or models[
+            #                 i] == 'SEIR机理模型':
+            #                 colMB1, colMB2 = st.columns(2)
+            #                 with colMB1:
+            #                     # 选择最多8个纬度
+            #                     top_stations = predictLabelDF['纬度'].value_counts().nlargest(8).index
+            #                     df_filtered_stations = predictLabelDF[predictLabelDF['纬度'].isin(top_stations)]
+            #                     # 选择最多5个年份
+            #                     top_years = predictLabelDF['年'].value_counts().nlargest(3).index
+            #                     df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+            #                     # df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered[
+            #                     #     '经度'].astype(
+            #                     #     str)
+            #                     # Explicitly use .loc[] to avoid SettingWithCopyWarning
+            #                     df_filtered.loc[:, '地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered[
+            #                         '经度'].astype(str)
+            #
+            #                     # 绘制柱状图
+            #                     plt.figure(figsize=(10, 6))
+            #                     sns.barplot(
+            #                         data=df_filtered,
+            #                         x="地区",
+            #                         y='predictLabel',
+            #                         hue="年",
+            #                         dodge=True,
+            #                         saturation=1
+            #                     )
+            #                     # 设置标签和标题
+            #                     plt.gca().set_xlabel("")  # 隐藏x轴标题
+            #                     plt.xticks(rotation=30)  # x轴标签旋转65度
+            #                     plt.ylabel(testLabelDF.columns[0])
+            #                     plt.figtext(0.5, -0.1,
+            #                                 f'图{st.session_state.IMAGECOUNT} 部分地区各年份预测结果图',
+            #                                 ha='center', fontsize=16)
+            #                     st.pyplot(plt)
+            #                 with colMB2:
+            #                     # 绘制散点图
+            #                     fig, ax = plt.subplots()
+            #                     sns.scatterplot(x=actual_values, y=predicted_values)
+            #                     plt.plot([actual_values.min(), actual_values.max()],
+            #                              [actual_values.min(), actual_values.max()],
+            #                              'r--')
+            #                     ax.set_xlabel(f'实际{testLabelDF.columns[0]}')
+            #                     ax.set_ylabel(f'预测{testLabelDF.columns[0]}')
+            #                     # plt.figure(figsize=(10, 6))
+            #                     plt.figtext(0.5, -0.03,
+            #                                 f'图{IMAGECOUNT} {models[i]}模型精度评价结果图',
+            #                                 ha='center', fontsize=16)
+            #                     # 精度结果直接显示在图中
+            #                     metrics_text = "\n".join(
+            #                         [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
+            #                     plt.text(0.05, 0.95, metrics_text, transform=ax.transAxes, fontsize=10,
+            #                              verticalalignment='top', bbox=dict(facecolor='white', alpha=0.2))
+            #                     st.pyplot(fig)
+            #             else:
+            #                 # colMB1, colMB2, colMB3 = st.columns([0.2, 0.5, 0.2])
+            #                 # with colMB1:
+            #                 #     pass
+            #                 # 分类模型
+            #                 # predictLabelDF = pd.read_excel(os.path.join(path1, f'{models[i]}_predictLabel.xlsx'))
+            #                 # # 绘制二维平面散点图，只标记predictLabel为0和1的点
+            #                 # # 分别绘制 predictLabel 为 0 和 1 的点
+            #                 # fig, ax = plt.subplots()
+            #                 # # 获取 'RdYlGn_r' colormap 对象，从绿到红
+            #                 # cmap = plt.get_cmap('RdYlGn')
+            #                 #
+            #                 # # 假设有 5 个唯一的标签值
+            #                 # unique_labels = predictLabelDF['predictLabel'].unique()
+            #                 # num_colors = len(unique_labels)
+            #                 #
+            #                 # # 从 colormap 获取等间隔的颜色
+            #                 # selected_colors = cmap(np.linspace(0, 1, num_colors))
+            #                 # for idx, label in enumerate(unique_labels):
+            #                 #     # print(f'获取颜色:{selected_colors[idx]}')
+            #                 #     # print(label)
+            #                 #     subset = predictLabelDF[predictLabelDF['predictLabel'] == label]
+            #                 #     plt.scatter(subset['经度'], subset['纬度'], label=f'{label}', color=selected_colors[idx], s=100, alpha=0.6)
+            #                 # # predicted_values = predictLabelDF.iloc[:, 0]
+            #                 # ax.set_xlabel('经度')
+            #                 # ax.set_ylabel('纬度')
+            #                 # plt.legend(title=f'预测{testLabelDF.columns[0]}')
+            #                 # # plt.title(f'{models[i]}模型混淆矩阵图')
+            #                 # plt.figtext(0.5, -0.03,
+            #                 #             f'图{st.session_state.IMAGECOUNT} {models[i]}模型部分预测结果图',
+            #                 #             ha='center', fontsize=15)
+            #                 # st.pyplot(fig)
+            #                 # with colMB2:
+            #                 # 绘制混淆矩阵图
+            #                 # fig, ax = plt.subplots()
+            #                 # conf_matrix = confusion_matrix(actual_values, predicted_values)
+            #                 # sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g', ax=ax, cbar=False)
+            #                 # # sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues')
+            #                 # ax.set_xlabel(f'实际{testLabelDF.columns[0]}')
+            #                 # ax.set_ylabel(f'预测{testLabelDF.columns[0]}')
+            #                 # # plt.title(f'{models[i]}模型精度评价-混淆矩阵')
+            #                 # # st.pyplot(fig)
+            #                 # plt.figtext(0.5, -0.03,
+            #                 #             f'图{st.session_state.IMAGECOUNT} {models[i]}模型混淆矩阵图',
+            #                 #             ha='center', fontsize=15)
+            #                 # 精度结果直接显示在图中
+            #                 # metrics_text = "\n".join(
+            #                 #     [f"{key}={round(value, 3)}" for key, value in evaluationIndex[i].items()])
+            #                 # plt.text(-0.1, 0.97, metrics_text, transform=ax.transAxes, fontsize=10,
+            #                 #          verticalalignment='top', bbox=dict(facecolor='white', alpha=0.1))
+            #                 # st.columns([0.2, 0.5, 0.2])[1].pyplot(fig)
+            #
+            #                 st.markdown("###### 模型精度")
+            #                 metrics = []
+            #                 if isinstance(evaluationIndex[i], str):
+            #                     evaluationIndex[i] = eval(evaluationIndex[i])
+            #                 for key, value in evaluationIndex[i].items():
+            #                     metrics.append((key, round(value, 3)))
+            #                     half = len(metrics) // 2
+            #                 col111, col211 = st.columns(2)
+            #                 for h in range(half):
+            #                     col211.metric(metrics[h][0], metrics[h][1])
+            #                 for h in range(half, len(metrics)):
+            #                     col111.metric(metrics[h][0], metrics[h][1])
+            #                 # with colMB3:
+            #                 #     pass
+            #         except BaseException as e:
+            #             raise e
+            #             # st.toast('运行出错,点击返回上一步', icon="⚠️")
+            #         finally:
+            #             st.session_state.page = 0
             interval_col34, interval_col33 = st.columns([5, 1])
             btn3 = interval_col33.button('下一步')
             if btn3:

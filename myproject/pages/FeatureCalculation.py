@@ -386,7 +386,9 @@ with featureCCV:
     #     st, '全选-气象数据', filterUnique(weatherNameList, pages_utils.reservedField),
     #     'tempTemperature', 'collapsed')
     st.markdown("##### 预处理后数据集")
-    st.data_editor(pages_utils.TempDataSet[1], height=220, width=800, )
+    st.data_editor(
+        pages_utils.TempDataSet[1],
+        height=220, width=800)
     st.markdown('---')
     st.markdown('##### 气象数据字段选择')
     fieldF = filterUnique(weatherNameList, pages_utils.reservedField)
@@ -645,7 +647,7 @@ with featureCCM:
     # =======================显示右下任务清单表格=======================
     # with placeholder.container():
     st.markdown('##### 任务清单')
-    st.info('本环节已默认将各字段每旬、月特征的计算任务添加至任务清单，用户也自行添加自定义时段的计算', icon="ℹ️")
+    # st.info('本环节已默认将各字段每旬、月特征的计算任务添加至任务清单，用户也自行添加自定义时段的计算', icon="ℹ️")
 
     pages_utils.TempDataSetField[2] = st.data_editor(
         pages_utils.TempDataSetField[2], height=190, width=900,
@@ -664,228 +666,228 @@ with featureCCM:
             # st.markdown("##### 原始建模")
             st.data_editor(data=pages_utils.TempDataSet[2], height=220, width=800, )
 
-            idFMethods = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
-            # inputFields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
-
-            # 若无方法处理,则直接跳过该环节
-            if len(idFMethods):
-                # 创建新的从 1 开始的编号列表
-                new_ids = list(range(0, len(idFMethods)))
-                # 创建标签页并重新命名记录
-                new_ids = [f'记录编号_{h}' for h in new_ids]
-
-                tt1 = st.tabs(new_ids)
-                print(st.session_state["FCVisualInformation"])
-                for o in range(len(idFMethods)):
-                    with tt1[o]:
-                        if not st.session_state["FCVisualInformation"][o]:
-                            st.warning('计算错误出错', icon="⚠️")
-                            continue
-                        # 创建DataFrame
-                        data_after = st.session_state["FCVisualInformation"][o]['after']
-                        # 特征名称
-                        dataColumn = st.session_state["FCVisualInformation"][o]['column']
-                        # 删除含有缺失值的行
-                        data_after = data_after.dropna()
-                        # 去除重复值
-                        data_after = data_after.drop_duplicates()
-                        if idFMethods[o] == '基于活动积温的生育期计算':
-                            # 选择最多8个纬度
-                            top_stations = data_after['纬度'].value_counts().nlargest(15).index
-                            df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
-
-                            # 选择最多3个年份
-                            top_years = data_after['年'].value_counts().nlargest(1).index
-                            df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                            df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
-                                str)
-
-                            # 绘制折线图
-                            plt.figure(figsize=(10, 6))
-                            sns.lineplot(
-                                data=df_filtered,
-                                x="地区",
-                                y=dataColumn,
-                                hue="年",
-                                marker="o"
-                            )
-                            # 设置标签和标题
-                            plt.gca().set_xlabel("")  # 隐藏x轴标题
-                            plt.xticks(rotation=30)  # x轴标签旋转65度
-                            plt.ylabel(f'{dataColumn}(Day Of Year)')
-                            # 设置整数天
-                            plt.gca().yaxis.get_major_locator().set_params(integer=True)
-                            plt.figtext(0.5, -0.1,
-                                        f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{dataColumn}',
-                                        ha='center', fontsize=16)
-                            st.pyplot(plt)
-                        elif idFMethods[o] == '气象指标均值计算':
-                            # 时期范围名称修剪
-
-                            integratedDataColumnT = dataColumn.split('_')
-                            integratedDataColumn = integratedDataColumnT[0] + integratedDataColumnT[1]
-                            # 选择最多15个地区
-                            top_stations = data_after['纬度'].value_counts().nlargest(15).index
-                            df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
-                            # 选择最多1个年份
-                            top_years = data_after['年'].value_counts().nlargest(1).index
-                            df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                            df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
-                                str)
-                            # 绘制柱状图
-                            plt.figure(figsize=(10, 6))
-                            sns.barplot(
-                                data=df_filtered,
-                                x="地区",
-                                y=dataColumn,
-                                hue="年",
-                                dodge=True,
-                                saturation=1
-                            )
-                            plt.gca().set_xlabel("")  # 隐藏x轴标题
-                            plt.xticks(rotation=30)  # x轴标签旋转65度
-                            plt.ylabel(f"{integratedDataColumn}")
-                            plt.figtext(0.5, -0.1,
-                                        f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumn}图',
-                                        ha='center', fontsize=16)
-                            st.pyplot(plt)
-                            st.session_state.IMAGECOUNT += 1
-
-                        elif idFMethods[o] == '降水累积量计算':
-                            # 时期范围名称修剪
-                            if '-' in dataColumn:
-                                integratedDataColumnT = dataColumn.split('_')
-                                integratedDataColumn = integratedDataColumnT[0] + '至' + integratedDataColumnT[1] + \
-                                                       integratedDataColumnT[2]
-                            else:
-                                integratedDataColumnT = dataColumn.split('_')
-                                integratedDataColumn = integratedDataColumnT[0] + integratedDataColumnT[1]
-
-                            # 暂时直接从原数据集获取
-                            data_after = pages_utils.TempDataSet[2]
-                            # 选择最多8个纬度
-                            top_stations = data_after['纬度'].value_counts().nlargest(15).index
-                            df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
-                            # 选择最多5个年份
-                            top_years = data_after['年'].value_counts().nlargest(1).index
-                            df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                            df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
-                                str)
-                            # df_filtered.to_excel('源.xlsx', index=False)
-                            # print('-------------------')
-                            # print(dataColumn)
-                            # 直接计算整个 dataColumn 列的标准差
-                            # mean_value = df_filtered[dataColumn].mean()
-                            # df_filtered['std'] = df_filtered[dataColumn] - mean_value
-                            # # 按地区分组计算标准差
-                            # std_values = df_filtered.groupby('地区')['std'].std().reset_index(name='标准差')
-                            # print(std_values)
-                            # 将计算得到的标准差合并回
-                            # 保存为 Excel 文件
-                            # df_filtered.to_excel('output_file.xlsx', index=False)
-
-                            # 绘制柱状图
-                            # 计算每个月的平均降水量和标准差
-                            months = ['1月_累积降水量', '2月_累积降水量', '3月_累积降水量', '4月_累积降水量',
-                                      '5月_累积降水量', '6月_累积降水量',
-                                      '7月_累积降水量', '8月_累积降水量', '9月_累积降水量', '10月_累积降水量',
-                                      '11月_累积降水量', '12月_累积降水量']
-                            mean_values = df_filtered[months].mean()
-                            std_values = df_filtered[months].std()
-
-                            # 绘制柱状图
-                            fig, ax = plt.subplots(figsize=(10, 6))
-                            x = np.arange(len(months))  # x轴的位置
-                            width = 0.35  # 柱子的宽度
-
-                            # 绘制柱状图
-                            rects = ax.bar(x, mean_values, width, label='月平均累积降水量', yerr=std_values, capsize=5)
-
-                            # 添加标签和标题
-                            ax.set_xlabel('月份')
-                            ax.set_ylabel('累积降水量 (mm)')
-                            plt.figtext(0.5, -0.1,
-                                        f'图{st.session_state.IMAGECOUNT} 各地区{top_years[0]}年累计降水量',
-                                        ha='center', fontsize=16)
-                            # ax.set_title('2014年累积降水量')
-                            ax.set_xticks(x)
-                            ax.set_xticklabels([m.split('_')[0] for m in months])
-                            # plt.figure(figsize=(10, 6))
-                            # sns.barplot(
-                            #     data=df_filtered,
-                            #     x="地区",
-                            #     y=dataColumn,
-                            #     hue="年",
-                            #     dodge=True,
-                            #     saturation=1
-                            # )
-
-                            # width = 0.8  # 可根据实际图形调整
-                            # # 遍历每个标准差值并在柱子上方显示
-                            # for i, (index, row) in enumerate(df_filtered.iterrows()):
-                            #     x_pos = df_filtered[
-                            #         (df_filtered['地区'] == row['地区']) & (df_filtered['年'] == row['年'])].index[0]
-                            #     y_pos = row[dataColumn]  # 柱子的高度
-                            #     std_value = row['std']  # 标准差值
-                            #     # 在每个柱子的顶部显示标准差值
-                            #     plt.text(x_pos, y_pos + 0.1, f'{std_value:.2f}', ha='center', fontsize=10, color='black')
-                            # std_values = df_filtered.groupby(['地区', '年'])[dataColumn].std().reset_index(name='std')
-                            # 设置标签和标题
-                            # plt.gca().set_xlabel("")  # 隐藏x轴标题
-                            # plt.xticks(rotation=30)  # x轴标签旋转65度
-                            # plt.ylabel("降水累积量(mm)")
-                            # for i, row in std_values.iterrows():
-                            #     x_pos = df_filtered[(df_filtered['地区'] == row['地区']) & (df_filtered['年'] == row['年'])].index[0]
-                            #     y_pos = row[dataColumn]
-                            #     std_value = row['std']
-                            #     plt.text(x_pos, y_pos + 0.1, f'{std_value:.2f}', ha='center', fontsize=10, color='black')
-                            # plt.figtext(0.5, -0.1,
-                            #             f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumn}图',
-                            #             ha='center', fontsize=16)
-                            # st.pyplot(plt)
-                            st.info('可前往数据下载中心界面查询或下载计算后的结果数据', icon="ℹ️")
-                            st.markdown('输入字段：降水')
-                            st.markdown('计算特征数量：12')
-                            st.session_state.IMAGECOUNT += 1
-                        elif idFMethods[o] == '降雨日数计算':
-                            # 时期范围名称修剪
-                            integratedDataColumnRT = dataColumn.split('_')
-                            integratedDataColumnR = integratedDataColumnRT[0] + '至' + integratedDataColumnRT[1] + \
-                                                    integratedDataColumnRT[2]
-                            # 选择最多8个纬度
-                            top_stations = data_after['纬度'].value_counts().nlargest(15).index
-                            df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
-
-                            # 选择最多5个年份
-                            top_years = data_after['年'].value_counts().nlargest(1).index
-                            df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
-                            # 创建一个新的列，将纬度和经度组合成一个标签
-                            df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
-                                str)
-                            # 绘制折线图
-                            plt.figure(figsize=(10, 6))
-                            sns.lineplot(
-                                data=df_filtered,
-                                x="地区",
-                                y=dataColumn,
-                                hue="年",
-                                marker="o"
-                            )
-                            # 设置标签和标题
-                            # plt.xlabel("地区")
-                            plt.ylabel("降雨日数(天)")
-                            plt.gca().set_xlabel("")  # 隐藏x轴标题
-                            plt.xticks(rotation=30)  # x轴标签旋转65度
-                            plt.figtext(0.5, -0.1,
-                                        f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumnR}',
-                                        ha='center', fontsize=16)
-                            st.pyplot(plt)
-                            st.session_state.IMAGECOUNT += 1
-                        elif idFMethods[o] == '活动积温计算':
-                            st.info('该功能优化中', icon="ℹ️️")
-
-            else:
-                st.info('跳过特征计算', icon="ℹ️️")
+            # idFMethods = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
+            # # inputFields = pages_utils.TempDataSetField[2]["输入特征"].tolist()
+            #
+            # # 若无方法处理,则直接跳过该环节
+            # if len(idFMethods):
+            #     # 创建新的从 1 开始的编号列表
+            #     new_ids = list(range(0, len(idFMethods)))
+            #     # 创建标签页并重新命名记录
+            #     new_ids = [f'记录编号_{h}' for h in new_ids]
+            #
+            #     tt1 = st.tabs(new_ids)
+            #     print(st.session_state["FCVisualInformation"])
+            #     for o in range(len(idFMethods)):
+            #         with tt1[o]:
+            #             if not st.session_state["FCVisualInformation"][o]:
+            #                 st.warning('计算错误出错', icon="⚠️")
+            #                 continue
+            #             # 创建DataFrame
+            #             data_after = st.session_state["FCVisualInformation"][o]['after']
+            #             # 特征名称
+            #             dataColumn = st.session_state["FCVisualInformation"][o]['column']
+            #             # 删除含有缺失值的行
+            #             data_after = data_after.dropna()
+            #             # 去除重复值
+            #             data_after = data_after.drop_duplicates()
+            #             if idFMethods[o] == '基于活动积温的生育期计算':
+            #                 # 选择最多8个纬度
+            #                 top_stations = data_after['纬度'].value_counts().nlargest(15).index
+            #                 df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
+            #
+            #                 # 选择最多3个年份
+            #                 top_years = data_after['年'].value_counts().nlargest(1).index
+            #                 df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+            #                 df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
+            #                     str)
+            #
+            #                 # 绘制折线图
+            #                 plt.figure(figsize=(10, 6))
+            #                 sns.lineplot(
+            #                     data=df_filtered,
+            #                     x="地区",
+            #                     y=dataColumn,
+            #                     hue="年",
+            #                     marker="o"
+            #                 )
+            #                 # 设置标签和标题
+            #                 plt.gca().set_xlabel("")  # 隐藏x轴标题
+            #                 plt.xticks(rotation=30)  # x轴标签旋转65度
+            #                 plt.ylabel(f'{dataColumn}(Day Of Year)')
+            #                 # 设置整数天
+            #                 plt.gca().yaxis.get_major_locator().set_params(integer=True)
+            #                 plt.figtext(0.5, -0.1,
+            #                             f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{dataColumn}',
+            #                             ha='center', fontsize=16)
+            #                 st.pyplot(plt)
+            #             elif idFMethods[o] == '气象指标均值计算':
+            #                 # 时期范围名称修剪
+            #
+            #                 integratedDataColumnT = dataColumn.split('_')
+            #                 integratedDataColumn = integratedDataColumnT[0] + integratedDataColumnT[1]
+            #                 # 选择最多15个地区
+            #                 top_stations = data_after['纬度'].value_counts().nlargest(15).index
+            #                 df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
+            #                 # 选择最多1个年份
+            #                 top_years = data_after['年'].value_counts().nlargest(1).index
+            #                 df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+            #                 df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
+            #                     str)
+            #                 # 绘制柱状图
+            #                 plt.figure(figsize=(10, 6))
+            #                 sns.barplot(
+            #                     data=df_filtered,
+            #                     x="地区",
+            #                     y=dataColumn,
+            #                     hue="年",
+            #                     dodge=True,
+            #                     saturation=1
+            #                 )
+            #                 plt.gca().set_xlabel("")  # 隐藏x轴标题
+            #                 plt.xticks(rotation=30)  # x轴标签旋转65度
+            #                 plt.ylabel(f"{integratedDataColumn}")
+            #                 plt.figtext(0.5, -0.1,
+            #                             f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumn}图',
+            #                             ha='center', fontsize=16)
+            #                 st.pyplot(plt)
+            #                 st.session_state.IMAGECOUNT += 1
+            #
+            #             elif idFMethods[o] == '降水累积量计算':
+            #                 # 时期范围名称修剪
+            #                 if '-' in dataColumn:
+            #                     integratedDataColumnT = dataColumn.split('_')
+            #                     integratedDataColumn = integratedDataColumnT[0] + '至' + integratedDataColumnT[1] + \
+            #                                            integratedDataColumnT[2]
+            #                 else:
+            #                     integratedDataColumnT = dataColumn.split('_')
+            #                     integratedDataColumn = integratedDataColumnT[0] + integratedDataColumnT[1]
+            #
+            #                 # 暂时直接从原数据集获取
+            #                 data_after = pages_utils.TempDataSet[2]
+            #                 # 选择最多8个纬度
+            #                 top_stations = data_after['纬度'].value_counts().nlargest(15).index
+            #                 df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
+            #                 # 选择最多5个年份
+            #                 top_years = data_after['年'].value_counts().nlargest(1).index
+            #                 df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+            #                 df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
+            #                     str)
+            #                 # df_filtered.to_excel('源.xlsx', index=False)
+            #                 # print('-------------------')
+            #                 # print(dataColumn)
+            #                 # 直接计算整个 dataColumn 列的标准差
+            #                 # mean_value = df_filtered[dataColumn].mean()
+            #                 # df_filtered['std'] = df_filtered[dataColumn] - mean_value
+            #                 # # 按地区分组计算标准差
+            #                 # std_values = df_filtered.groupby('地区')['std'].std().reset_index(name='标准差')
+            #                 # print(std_values)
+            #                 # 将计算得到的标准差合并回
+            #                 # 保存为 Excel 文件
+            #                 # df_filtered.to_excel('output_file.xlsx', index=False)
+            #
+            #                 # 绘制柱状图
+            #                 # 计算每个月的平均降水量和标准差
+            #                 months = ['1月_累积降水量', '2月_累积降水量', '3月_累积降水量', '4月_累积降水量',
+            #                           '5月_累积降水量', '6月_累积降水量',
+            #                           '7月_累积降水量', '8月_累积降水量', '9月_累积降水量', '10月_累积降水量',
+            #                           '11月_累积降水量', '12月_累积降水量']
+            #                 mean_values = df_filtered[months].mean()
+            #                 std_values = df_filtered[months].std()
+            #
+            #                 # 绘制柱状图
+            #                 fig, ax = plt.subplots(figsize=(10, 6))
+            #                 x = np.arange(len(months))  # x轴的位置
+            #                 width = 0.35  # 柱子的宽度
+            #
+            #                 # 绘制柱状图
+            #                 rects = ax.bar(x, mean_values, width, label='月平均累积降水量', yerr=std_values, capsize=5)
+            #
+            #                 # 添加标签和标题
+            #                 ax.set_xlabel('月份')
+            #                 ax.set_ylabel('累积降水量 (mm)')
+            #                 plt.figtext(0.5, -0.1,
+            #                             f'图{st.session_state.IMAGECOUNT} 各地区{top_years[0]}年累计降水量',
+            #                             ha='center', fontsize=16)
+            #                 # ax.set_title('2014年累积降水量')
+            #                 ax.set_xticks(x)
+            #                 ax.set_xticklabels([m.split('_')[0] for m in months])
+            #                 # plt.figure(figsize=(10, 6))
+            #                 # sns.barplot(
+            #                 #     data=df_filtered,
+            #                 #     x="地区",
+            #                 #     y=dataColumn,
+            #                 #     hue="年",
+            #                 #     dodge=True,
+            #                 #     saturation=1
+            #                 # )
+            #
+            #                 # width = 0.8  # 可根据实际图形调整
+            #                 # # 遍历每个标准差值并在柱子上方显示
+            #                 # for i, (index, row) in enumerate(df_filtered.iterrows()):
+            #                 #     x_pos = df_filtered[
+            #                 #         (df_filtered['地区'] == row['地区']) & (df_filtered['年'] == row['年'])].index[0]
+            #                 #     y_pos = row[dataColumn]  # 柱子的高度
+            #                 #     std_value = row['std']  # 标准差值
+            #                 #     # 在每个柱子的顶部显示标准差值
+            #                 #     plt.text(x_pos, y_pos + 0.1, f'{std_value:.2f}', ha='center', fontsize=10, color='black')
+            #                 # std_values = df_filtered.groupby(['地区', '年'])[dataColumn].std().reset_index(name='std')
+            #                 # 设置标签和标题
+            #                 # plt.gca().set_xlabel("")  # 隐藏x轴标题
+            #                 # plt.xticks(rotation=30)  # x轴标签旋转65度
+            #                 # plt.ylabel("降水累积量(mm)")
+            #                 # for i, row in std_values.iterrows():
+            #                 #     x_pos = df_filtered[(df_filtered['地区'] == row['地区']) & (df_filtered['年'] == row['年'])].index[0]
+            #                 #     y_pos = row[dataColumn]
+            #                 #     std_value = row['std']
+            #                 #     plt.text(x_pos, y_pos + 0.1, f'{std_value:.2f}', ha='center', fontsize=10, color='black')
+            #                 # plt.figtext(0.5, -0.1,
+            #                 #             f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumn}图',
+            #                 #             ha='center', fontsize=16)
+            #                 # st.pyplot(plt)
+            #                 st.info('可前往数据下载中心界面查询或下载计算后的结果数据', icon="ℹ️")
+            #                 st.markdown('输入字段：降水')
+            #                 st.markdown('计算特征数量：12')
+            #                 st.session_state.IMAGECOUNT += 1
+            #             elif idFMethods[o] == '降雨日数计算':
+            #                 # 时期范围名称修剪
+            #                 integratedDataColumnRT = dataColumn.split('_')
+            #                 integratedDataColumnR = integratedDataColumnRT[0] + '至' + integratedDataColumnRT[1] + \
+            #                                         integratedDataColumnRT[2]
+            #                 # 选择最多8个纬度
+            #                 top_stations = data_after['纬度'].value_counts().nlargest(15).index
+            #                 df_filtered_stations = data_after[data_after['纬度'].isin(top_stations)]
+            #
+            #                 # 选择最多5个年份
+            #                 top_years = data_after['年'].value_counts().nlargest(1).index
+            #                 df_filtered = df_filtered_stations[df_filtered_stations['年'].isin(top_years)]
+            #                 # 创建一个新的列，将纬度和经度组合成一个标签
+            #                 df_filtered['地区'] = df_filtered['纬度'].astype(str) + " " + df_filtered['经度'].astype(
+            #                     str)
+            #                 # 绘制折线图
+            #                 plt.figure(figsize=(10, 6))
+            #                 sns.lineplot(
+            #                     data=df_filtered,
+            #                     x="地区",
+            #                     y=dataColumn,
+            #                     hue="年",
+            #                     marker="o"
+            #                 )
+            #                 # 设置标签和标题
+            #                 # plt.xlabel("地区")
+            #                 plt.ylabel("降雨日数(天)")
+            #                 plt.gca().set_xlabel("")  # 隐藏x轴标题
+            #                 plt.xticks(rotation=30)  # x轴标签旋转65度
+            #                 plt.figtext(0.5, -0.1,
+            #                             f'图{st.session_state.IMAGECOUNT} 部分地区{top_years[0]}年{integratedDataColumnR}',
+            #                             ha='center', fontsize=16)
+            #                 st.pyplot(plt)
+            #                 st.session_state.IMAGECOUNT += 1
+            #             elif idFMethods[o] == '活动积温计算':
+            #                 st.info('该功能优化中', icon="ℹ️️")
+            #
+            # else:
+            #     st.info('跳过特征计算', icon="ℹ️️")
             interval_col34, interval_col33 = st.columns([5, 1])
             btn3 = interval_col33.button('下一步')
             if btn3:
