@@ -570,155 +570,157 @@ with modelACV:
     # otherFeature = [ofT for ofT in otherFeature if not any(ofT in prT for prT in preferenceFeature)]
 
     _, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
-    st.markdown("##### 特征与预测目标变量选择")
-    modelACVCol1, modelACVCol2 = st.columns([0.7, 0.4])
-    with modelACVCol1:
-        st.markdown("###### 特征")
-        # 按照数据类型显示左侧字段或特征
-        result1 = pages_utils.multiselect_all_checked(
-            st, '全选-优选特征', filterUnique(st.session_state.preferenceFeature, []),
-            'tempTemperature', 'collapsed')
-        # 去除年、月、年内日期等字段
-        result2 = pages_utils.multiselect_all(
-            st, '全选-其他特征', filterUnique(pages_utils.TempDataSet[2].columns.tolist(),
-                                              st.session_state.preferenceFeature +
-                                              pages_utils.reservedField +
-                                              ['日期', '年内日期', '月', '旬'] +
-                                              plantNameT0 +
-                                              # 预处理环节的数据，排除地理遥感数据
-                                              filterUnique(pages_utils.TempDataSet[1].columns.tolist(),
-                                                           agricultureNameT0)),
-            'tempPlant', 'collapsed')
-    with modelACVCol2:
-        # st.markdown("")
-        st.markdown("###### 预测目标变量")
-        resultLabel = st.selectbox(
-            'predictLabel',
-            filterUnique(plantNameT0, pages_utils.reservedField),
-            label_visibility='collapsed')
-
-    st.markdown('---')
-    # =======================添加验证与训练数据集划分=======================
-
-    st.markdown("##### 训练与验证数据集划分")
-    colOP1, colOP2 = st.columns(2)
-    with colOP1:
-        option1 = st.selectbox(
-            label="训练与验证数据集划分", label_visibility='collapsed',
-            options="按比例划分"
-        )
-    with colOP2:
-        if option1 == '按比例划分':
-            option = st.selectbox(
-                label="比例", label_visibility='collapsed',
-                options=("7:3", "8:2", "6:4")
-            )
-        # elif option1 == '按年份划分(未实现)':
-        #     option = st.selectbox(
-        #         label="年", label_visibility='collapsed',
-        #         options=('待实现', '')
-        #     )
-    # ===============显示右上模型选项===============
-    st.markdown("##### 建模方法")
-    st.warning('注意：分类模型针对离散变量；回归模型针对连续变量', icon="⚠️")
-    # 按模型分类显示
-    st.markdown("###### 分类模型（离散变量）")
-    colOption1, colOption2, colOption3, colOption4 = st.columns(4)
-    with colOption1:
-        agree = st.checkbox('SVM', key='checkBoxModel0', args=[0], on_change=clearOtherOption)
-        # agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
-    with colOption2:
-        agree1 = st.checkbox('RF', key='checkBoxModel1', args=[1], on_change=clearOtherOption)
-
-    with colOption3:
-        agree3 = st.checkbox('FLDA', key='checkBoxModel3', args=[3], on_change=clearOtherOption)
-
-    with colOption4:
-        agree2 = st.checkbox('KNN', key='checkBoxModel2', args=[2], on_change=clearOtherOption)
-        # agree4 = st.checkbox('贝叶斯统计')
-        # agree5 = st.checkbox('模糊综合评价')
-    st.markdown("###### 回归模型（连续变量）")
-    colOption21, colOption22, colOption23, colOption24 = st.columns(4)
-    with colOption21:
-        agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
-    with colOption22:
-        agree7 = st.checkbox('SVR', key='checkBoxModel7', on_change=clearOtherOption, args=[7])
-    with colOption23:
-        agree5 = st.checkbox('PLSR', key='checkBoxModel5', on_change=clearOtherOption, args=[5])
-    with colOption4:
-        pass
-    # st.markdown("###### 机理模型")
-    # colOption31, colOption32, = st.columns(2)
-    # with colOption31:
-    #     agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4])
-    # with colOption32:
-    #     pass
+    # st.markdown("##### 特征与预测目标变量")
+    with st.container(border=True):
+        modelACVCol1, modelACVCol2 = st.columns([0.7, 0.4])
+        with modelACVCol1:
+            st.markdown("##### 特征选择")
+            # 按照数据类型显示左侧字段或特征
+            result1 = pages_utils.multiselect_all_checked(
+                st, '全选-优选特征', filterUnique(st.session_state.preferenceFeature, []),
+                'tempTemperature', 'collapsed')
+            # 去除年、月、年内日期等字段
+            result2 = pages_utils.multiselect_all(
+                st, '全选-其他特征', filterUnique(pages_utils.TempDataSet[2].columns.tolist(),
+                                                  st.session_state.preferenceFeature +
+                                                  pages_utils.reservedField +
+                                                  ['日期', '年内日期', '月', '旬'] +
+                                                  plantNameT0 +
+                                                  # 预处理环节的数据，排除地理遥感数据
+                                                  filterUnique(pages_utils.TempDataSet[1].columns.tolist(),
+                                                               agricultureNameT0)),
+                'tempPlant', 'collapsed')
+        with modelACVCol2:
+            # st.markdown("")
+            st.markdown("##### 预测目标变量选择")
+            resultLabel = st.selectbox(
+                'predictLabel',
+                filterUnique(plantNameT0, pages_utils.reservedField),
+                label_visibility='collapsed')
 
     # st.markdown('---')
+    # =======================添加验证与训练数据集划分=======================
+    with st.container(border=True):
+        st.markdown("##### 训练与验证数据集划分")
+        colOP1, colOP2 = st.columns(2)
+        with colOP1:
+            option1 = st.selectbox(
+                label="训练与验证数据集划分", label_visibility='collapsed',
+                options="按比例划分"
+            )
+        with colOP2:
+            if option1 == '按比例划分':
+                option = st.selectbox(
+                    label="比例", label_visibility='collapsed',
+                    options=("7:3", "8:2", "6:4")
+                )
+            # elif option1 == '按年份划分(未实现)':
+            #     option = st.selectbox(
+            #         label="年", label_visibility='collapsed',
+            #         options=('待实现', '')
+            #     )
+    # ===============显示右上模型选项===============
+    with st.container(border=True):
+        st.markdown("##### 建模方法")
+        st.warning('注意：分类模型针对离散变量；回归模型针对连续变量', icon="⚠️")
+        # 按模型分类显示
+        st.markdown("###### 分类模型（离散变量）")
+        colOption1, colOption2, colOption3, colOption4 = st.columns(4)
+        with colOption1:
+            agree = st.checkbox('SVM', key='checkBoxModel0', args=[0], on_change=clearOtherOption)
+            # agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
+        with colOption2:
+            agree1 = st.checkbox('RF', key='checkBoxModel1', args=[1], on_change=clearOtherOption)
 
-    # ===============显示和处理右中各个模型参数(主要添加模型时加入checkbox名称)===============
-    if agree or agree1 or agree2 or agree2 or agree3 or agree5 or agree6 or agree7:
-        model = getModelName1().pop()
-        formatted_data = []
+        with colOption3:
+            agree3 = st.checkbox('FLDA', key='checkBoxModel3', args=[3], on_change=clearOtherOption)
 
-        # Loop through model_params to find the desired model and extract its details
-        for entry in model_params:
-            if entry.get("模型名称") == model:
-                # Unpack the parameters and remarks together
-                for param_name, param_value in entry["模型参数"].items():
-                    remark = entry["备注"].pop(0)  # Get the corresponding remark for each parameter
-                    formatted_data.append({
-                        # "模型名称": model,
-                        "参数名": param_name,
-                        "参数值": param_value,
-                        "备注": remark
-                    })
-        df = pd.DataFrame(formatted_data)
-        # st.table(df)
-        with st.expander('高级设置'):
-            edited_df = st.data_editor(df, height=190, width=900,
-                                       disabled=["参数名", "备注"])
-            # 删除 '备注' 列
-            edited_df_no_remark = edited_df.drop(columns=["备注"])
-        st.session_state["modelParamName"] = edited_df_no_remark.to_dict()
+        with colOption4:
+            agree2 = st.checkbox('KNN', key='checkBoxModel2', args=[2], on_change=clearOtherOption)
+            # agree4 = st.checkbox('贝叶斯统计')
+            # agree5 = st.checkbox('模糊综合评价')
+        st.markdown("###### 回归模型（连续变量）")
+        colOption21, colOption22, colOption23, colOption24 = st.columns(4)
+        with colOption21:
+            agree6 = st.checkbox('LR', key='checkBoxModel6', on_change=clearOtherOption, args=[6])
+        with colOption22:
+            agree7 = st.checkbox('SVR', key='checkBoxModel7', on_change=clearOtherOption, args=[7])
+        with colOption23:
+            agree5 = st.checkbox('PLSR', key='checkBoxModel5', on_change=clearOtherOption, args=[5])
+        with colOption4:
+            pass
+        # st.markdown("###### 机理模型")
+        # colOption31, colOption32, = st.columns(2)
+        # with colOption31:
+        #     agree4 = st.checkbox('SEIR机理模型', key='checkBoxModel4', on_change=clearOtherOption, args=[4])
+        # with colOption32:
+        #     pass
 
-    # st.info('当前时间分辨率为:1天')
-    # temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)
-    btn = st.columns([4, 1])[1].button('添加模型', on_click=onAddModel)
-    if btn:
-        # =======================准备任务清单内容=======================
-        new_dataTT = {
-            "编号": pages_utils.generateID(),
-            "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
-            "模型参数": st.session_state["modelParamName"],
-            "特征": result1 + result2,
-            "标签": resultLabel,
-            "评价指标": onPrecision(getModelName(st.session_state["modelName"]['checkBoxModel'])),
-            "数据集划分比例": option,
-            "时间": datetime.datetime.now().time(),
-            "处理状态": False}
-        print('======================模型构建-添加模型======================')
-        print(new_dataTT)
-        pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_dataTT
-    # 自动添加
-    if not st.session_state.pageMBIsInit:
-        st.session_state.pageMBIsInit += 1
-        # 通过判断预测目标变量在0-5内判断分类模型(未添加代码)
-        for modelNameTemp1 in ['SVM', 'RF', 'FLDA', 'KNN']:
+        # st.markdown('---')
+
+        # ===============显示和处理右中各个模型参数(主要添加模型时加入checkbox名称)===============
+        if agree or agree1 or agree2 or agree2 or agree3 or agree5 or agree6 or agree7:
+            model = getModelName1().pop()
+            formatted_data = []
+
+            # Loop through model_params to find the desired model and extract its details
+            for entry in model_params:
+                if entry.get("模型名称") == model:
+                    # Unpack the parameters and remarks together
+                    for param_name, param_value in entry["模型参数"].items():
+                        remark = entry["备注"].pop(0)  # Get the corresponding remark for each parameter
+                        formatted_data.append({
+                            # "模型名称": model,
+                            "参数名": param_name,
+                            "参数值": param_value,
+                            "备注": remark
+                        })
+            df = pd.DataFrame(formatted_data)
+            # st.table(df)
+            with st.expander('高级设置'):
+                edited_df = st.data_editor(df, height=190, width=900,
+                                           disabled=["参数名", "备注"])
+                # 删除 '备注' 列
+                edited_df_no_remark = edited_df.drop(columns=["备注"])
+            st.session_state["modelParamName"] = edited_df_no_remark.to_dict()
+
+        # st.info('当前时间分辨率为:1天')
+        # temporaResolutionNum = st.text_input("统一时间分辨率(天)", value=1)
+        btn = st.columns([4, 1])[1].button('添加模型', on_click=onAddModel)
+        if btn:
             # =======================准备任务清单内容=======================
-            new_dataT = {
+            new_dataTT = {
                 "编号": pages_utils.generateID(),
-                "模型": modelNameTemp1,
-                "模型参数": getModelParam(modelNameTemp1),  # getModelParam(modelNameTemp1)
-                "特征": filterUnique(st.session_state.preferenceFeature, []),  # result1 + result2
-                "标签": filterUnique(plantNameT0, pages_utils.reservedField)[0],
-                "评价指标": onPrecision(modelNameTemp1),
-                "时间": datetime.datetime.now().time(),
+                "模型": getModelName(st.session_state["modelName"]['checkBoxModel']),
+                "模型参数": st.session_state["modelParamName"],
+                "特征": result1 + result2,
+                "标签": resultLabel,
+                "评价指标": onPrecision(getModelName(st.session_state["modelName"]['checkBoxModel'])),
                 "数据集划分比例": option,
+                "时间": datetime.datetime.now().time(),
                 "处理状态": False}
-            # print('======================模型构建-自动添加模型======================')
-            # print(new_dataT)
-            pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_dataT
+            print('======================模型构建-添加模型======================')
+            print(new_dataTT)
+            pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_dataTT
+        # 自动添加
+        if not st.session_state.pageMBIsInit:
+            st.session_state.pageMBIsInit += 1
+            # 通过判断预测目标变量在0-5内判断分类模型(未添加代码)
+            for modelNameTemp1 in ['SVM', 'RF', 'FLDA', 'KNN']:
+                # =======================准备任务清单内容=======================
+                new_dataT = {
+                    "编号": pages_utils.generateID(),
+                    "模型": modelNameTemp1,
+                    "模型参数": getModelParam(modelNameTemp1),  # getModelParam(modelNameTemp1)
+                    "特征": filterUnique(st.session_state.preferenceFeature, []),  # result1 + result2
+                    "标签": filterUnique(plantNameT0, pages_utils.reservedField)[0],
+                    "评价指标": onPrecision(modelNameTemp1),
+                    "时间": datetime.datetime.now().time(),
+                    "数据集划分比例": option,
+                    "处理状态": False}
+                # print('======================模型构建-自动添加模型======================')
+                # print(new_dataT)
+                pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_dataT
 
 with modelACM:
     # ph = st.empty()
@@ -731,24 +733,23 @@ with modelACM:
     # if st.session_state.page15 == 0:
     # =======================显示右下任务清单表格=======================
     # with placeholder.container():
+    with st.container(border=True):
+        st.markdown('##### 任务清单')
+        # st.info('本环节已默认勾选上一环节优选的特征及可训练的模型，用户也可以自行选用其他特征建模', icon="ℹ️")
 
-    st.markdown('##### 任务清单')
-    # st.info('本环节已默认勾选上一环节优选的特征及可训练的模型，用户也可以自行选用其他特征建模', icon="ℹ️")
+        pages_utils.TempDataSetField[4] = st.data_editor(
+            pages_utils.TempDataSetField[4], height=274, width=1200,
+            column_order=["模型", "标签", "特征", "评价指标", "数据集划分比例", "时间", '处理状态'],
+            disabled=["时间", '处理状态'], num_rows="dynamic", )
 
-    pages_utils.TempDataSetField[4] = st.data_editor(
-        pages_utils.TempDataSetField[4], height=274, width=1200,
-        column_order=["模型", "标签", "特征", "评价指标", "数据集划分比例", "时间", '处理状态'],
-        disabled=["时间", '处理状态'], num_rows="dynamic", )
-
-    btn2 = st.columns([5, 1])[1].button('运行', on_click=onTrain)
-    # placeholder1 = st.empty()
+        btn2 = st.columns([5, 1])[1].button('运行', on_click=onTrain)
     placeholder = st.empty()
 
     # =======================显示右下可视化图表=======================
     # elif st.session_state.page15 == 1:
     if st.session_state.page15 >= 1:
-        with placeholder.container():
-            st.markdown('---')
+        with placeholder.container(border=True, height=365):
+            # st.markdown('---')
             st.write('##### 建模结果')
             evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
             for item in evaluationIndex:
@@ -758,7 +759,7 @@ with modelACM:
                     formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in eval(item).items()])
             models = pages_utils.TempDataSetField[4]["模型"].tolist()
             # 创建一个新的 DataFrame，组合精度评价和模型
-            st.toast(formatted)
+            # st.toast(formatted)
             tempResult = pd.DataFrame({
                 '模型': models,
                 '精度': formatted
@@ -917,6 +918,8 @@ with modelACM:
             #             # st.toast('运行出错,点击返回上一步', icon="⚠️")
             #         finally:
             #             st.session_state.page = 0
+            for _ in range(3):
+                st.markdown('')
             interval_col34, interval_col33 = st.columns([5, 1])
             btn3 = interval_col33.button('下一步')
             if btn3:

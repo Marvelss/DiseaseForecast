@@ -517,146 +517,146 @@ with dataPCV:
     #         else:
     #             weatherNameList.append(a)
     # 按照数据类型显示左侧字段或特征
+    with st.container(border=True):
+        colSelect1, colSelect2, colSelect3 = st.columns(3)
+        with colSelect1:
+            st.markdown("##### 输入特征")
+            result5 = pages_utils.multiselect_all(
+                st, '全选-旬均值特征', filterUnique(weatherNameT2Decade, pages_utils.reservedField),
+                'dekad', 'collapsed')
+        with colSelect2:
+            st.markdown("##### ")
+            result6 = pages_utils.multiselect_all(
+                st, '全选-月均值特征', filterUnique(weatherNameT2Month, pages_utils.reservedField),
+                'month', 'collapsed')
+        with st.columns(2)[0]:
+            result1 = pages_utils.multiselect_all(
+                st, '全选-其他特征', filterUnique(weatherNameT2Other, pages_utils.reservedField),
+                'tempTemperature', 'collapsed')
 
-    colSelect1, colSelect2, colSelect3 = st.columns(3)
-    with colSelect1:
-        st.markdown("##### 输入特征")
-        result5 = pages_utils.multiselect_all(
-            st, '全选-旬均值特征', filterUnique(weatherNameT2Decade, pages_utils.reservedField),
-            'dekad', 'collapsed')
-    with colSelect2:
-        st.markdown("##### ")
-        result6 = pages_utils.multiselect_all(
-            st, '全选-月均值特征', filterUnique(weatherNameT2Month, pages_utils.reservedField),
-            'month', 'collapsed')
-    with st.columns(2)[0]:
-        result1 = pages_utils.multiselect_all(
-            st, '全选-其他特征', filterUnique(weatherNameT2Other, pages_utils.reservedField),
-            'tempTemperature', 'collapsed')
-
-    # result2 = pages_utils.multiselect_all(
-    #     st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
-    #     'tempPlant', 'collapsed')
-    result2 = filterUnique(plantNameList, pages_utils.reservedField)
-    # result3 = pages_utils.multiselect_all(
-    #     st, '全选-地理遥感特征', filterUnique(agricultureNameList, pages_utils.reservedField),
-    #     'tempAgriculture', 'collapsed')
-    result3 = filterUnique(agricultureNameList, pages_utils.reservedField)
-    # result4 = pages_utils.multiselect_all(
-    #     st, '全选-优选特征', set(st.session_state.preferenceFeature),
-    #     'tempOptimal', 'collapsed')
-    with colSelect3:
-        st.markdown("##### 响应特征")
-        responseFeature = st.selectbox('目标变量-植保数据', result2)
-
-    st.markdown('---')
-    st.markdown("##### 优选方法")
-
-    # ===============显示右上处理方法选项===============
-    tab1, tab2 = st.tabs(["离散变量预测（如病虫等级）", "连续变量预测（如发生面积）"])
-
-    # with tab1:
-    #     genre = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other, args=[0])
-    #     genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1], disabled=True,
-    #                          help='该功能开发中')
-    # with tab2:
-    #     genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other, args=[2])
-    with tab1:
-        genre = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other,
-                            help='Pearson相关性分析', args=[0])
-        genre1 = st.checkbox("t检验", key='checkbox1', args=[1], disabled=True, on_change=clear_other,
-                             help='该功能开发中')
-    with tab2:
-        # genre3 = st.checkbox("Pearson相关性分析-连续变量", key='checkbox2', on_change=clear_other,
-        #                      help='Pearson相关性分析', args=[0])
-
-        genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other,
-                             help='Relief-F互相关分析', args=[2])
-    # st.markdown('---')
-    paramPlaceHolder = st.empty()
-
-    # ===============显示和处理右中各个处理方法设置参数===============
-    if genre:
-        with paramPlaceHolder.container():
-            with st.expander("高级设置"):
-                # option1122 = st.selectbox('目标变量-植保数据', result2)
-                # option1132 = pages_utils.multiselect_all(
-                #     st, '全选-被比较变量', mergeExcludeArray(
-                #         result1, result2, result3, [option1122]),
-                #     'tempFiled', 'collapsed')
-                option1132 = result1 + result5 + result6
-                # option1132 = mergeExcludeArray(result1, result2, result3, pages_utils.reservedField)
-                number33 = st.number_input("优选相关系数阈值(R)",
-                                           value=0.8,
-                                           min_value=0.1,
-                                           max_value=0.9,
-                                           step=0.1)
-                st.session_state["OptimizationMethodName"]['param1'] = responseFeature
-                st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1132)
-                st.session_state["OptimizationMethodName"]['param3'] = str(number33)
-                st.session_state.inputFeatureList = option1132
-    if genre1:
-        # option112 = st.selectbox(
-        #     '目标变量',
-        #     filterUnique(result2, pages_utils.reservedField))
-        option1122 = pages_utils.multiselect_all(
-            st, '全选-被比较变量', mergeExcludeArray(
-                result1, result3, [], pages_utils.reservedField),
-            'tempFiled', 'collapsed')
-        number112 = st.number_input("提取敏感性阈值(p-value)",
-                                    value=0.01,
-                                    min_value=0.01,
-                                    max_value=0.05,
-                                    step=0.01)
-        st.session_state["OptimizationMethodName"]['param1'] = responseFeature
-        st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1122)
-        st.session_state["OptimizationMethodName"]['param3'] = str(number112)
-        st.session_state.inputFeatureList = option1122
+        # result2 = pages_utils.multiselect_all(
+        #     st, '全选-植保特征', filterUnique(plantNameList, pages_utils.reservedField),
+        #     'tempPlant', 'collapsed')
+        result2 = filterUnique(plantNameList, pages_utils.reservedField)
+        # result3 = pages_utils.multiselect_all(
+        #     st, '全选-地理遥感特征', filterUnique(agricultureNameList, pages_utils.reservedField),
+        #     'tempAgriculture', 'collapsed')
+        result3 = filterUnique(agricultureNameList, pages_utils.reservedField)
+        # result4 = pages_utils.multiselect_all(
+        #     st, '全选-优选特征', set(st.session_state.preferenceFeature),
+        #     'tempOptimal', 'collapsed')
+        with colSelect3:
+            st.markdown("##### 响应特征")
+            responseFeature = st.selectbox('目标变量-植保数据', result2)
 
     # st.markdown('---')
-    # if genre3:
-    #     with paramPlaceHolder.container():
-    #         with st.expander("高级设置"):
-    #             st.warning('注意：Relief - F算法只针对植保数据为离散变量(如病情等级)情形', icon="⚠️")
-    #             option111 = st.selectbox('目标变量', result2)
-    #
-    #             option11122 = result1 + result5 + result6
-    #             st.session_state["OptimizationMethodName"]['param1'] = option111
-    #             st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option11122)
-    #             st.session_state.inputFeatureList = option11122
-    #
-    #             option = st.selectbox(
-    #                 '优选条件',
-    #                 '按百分比选取')  # , '按权重值选取'
-    #             if option == '按百分比选取':
-    #                 st.session_state["OptimizationMethodName"]['param3'] = option
-    #                 number1 = st.number_input("TOP(%)", value=30, min_value=5, step=5)
-    #                 st.session_state["OptimizationMethodName"]['param4'] = str(number1)
-    #             if option == '按权重值选取':
-    #                 st.session_state["OptimizationMethodName"]['param3'] = option
-    #                 number2 = st.number_input("权重阈值", value=10, min_value=10)
-    #                 st.session_state["OptimizationMethodName"]['param4'] = str(number2)
+    with st.container(border=True):
+        st.markdown("##### 优选方法")
+        # ===============显示右上处理方法选项===============
+        tab1, tab2 = st.tabs(["离散变量预测（如病虫等级）", "连续变量预测（如发生面积）"])
 
-    # =======================添加处理至任务清单=======================
-    interval_col34, interval_col33 = st.columns([5, 1])
-    btn2 = interval_col33.button('添加处理', on_click=clear_all)
-    if btn2:
-        # print(st.session_state.expectedRetentionFeature)
-        new_data = {
-            "编号": pages_utils.generateID(),
-            # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
-            "输入特征": st.session_state.inputFeatureList,
-            "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
-            "方法参数":
-                [value for key, value in st.session_state["OptimizationMethodName"].items() if
-                 key != 'checkBox'],
-            "优选特征": ','.join(st.session_state.expectedRetentionFeature),
-            "时间": datetime.datetime.now().time(),
-            "处理状态": True}
-        print('======================特征优选-添加任务清单记录======================')
-        print(new_data)
-        pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
-        st.rerun()
+        # with tab1:
+        #     genre = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other, args=[0])
+        #     genre1 = st.checkbox("t检验", key='checkbox1', on_change=clear_other, args=[1], disabled=True,
+        #                          help='该功能开发中')
+        # with tab2:
+        #     genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other, args=[2])
+        with tab1:
+            genre = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other,
+                                help='Pearson相关性分析', args=[0])
+            genre1 = st.checkbox("t检验", key='checkbox1', args=[1], disabled=True, on_change=clear_other,
+                                 help='该功能开发中')
+        with tab2:
+            # genre3 = st.checkbox("Pearson相关性分析-连续变量", key='checkbox2', on_change=clear_other,
+            #                      help='Pearson相关性分析', args=[0])
+
+            genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other,
+                                 help='Relief-F互相关分析', args=[2])
+        # st.markdown('---')
+        paramPlaceHolder = st.empty()
+
+        # ===============显示和处理右中各个处理方法设置参数===============
+        if genre:
+            with paramPlaceHolder.container():
+                with st.expander("高级设置"):
+                    # option1122 = st.selectbox('目标变量-植保数据', result2)
+                    # option1132 = pages_utils.multiselect_all(
+                    #     st, '全选-被比较变量', mergeExcludeArray(
+                    #         result1, result2, result3, [option1122]),
+                    #     'tempFiled', 'collapsed')
+                    option1132 = result1 + result5 + result6
+                    # option1132 = mergeExcludeArray(result1, result2, result3, pages_utils.reservedField)
+                    number33 = st.number_input("优选相关系数阈值(R)",
+                                               value=0.8,
+                                               min_value=0.1,
+                                               max_value=0.9,
+                                               step=0.1)
+                    st.session_state["OptimizationMethodName"]['param1'] = responseFeature
+                    st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1132)
+                    st.session_state["OptimizationMethodName"]['param3'] = str(number33)
+                    st.session_state.inputFeatureList = option1132
+        if genre1:
+            # option112 = st.selectbox(
+            #     '目标变量',
+            #     filterUnique(result2, pages_utils.reservedField))
+            option1122 = pages_utils.multiselect_all(
+                st, '全选-被比较变量', mergeExcludeArray(
+                    result1, result3, [], pages_utils.reservedField),
+                'tempFiled', 'collapsed')
+            number112 = st.number_input("提取敏感性阈值(p-value)",
+                                        value=0.01,
+                                        min_value=0.01,
+                                        max_value=0.05,
+                                        step=0.01)
+            st.session_state["OptimizationMethodName"]['param1'] = responseFeature
+            st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1122)
+            st.session_state["OptimizationMethodName"]['param3'] = str(number112)
+            st.session_state.inputFeatureList = option1122
+
+        # st.markdown('---')
+        # if genre3:
+        #     with paramPlaceHolder.container():
+        #         with st.expander("高级设置"):
+        #             st.warning('注意：Relief - F算法只针对植保数据为离散变量(如病情等级)情形', icon="⚠️")
+        #             option111 = st.selectbox('目标变量', result2)
+        #
+        #             option11122 = result1 + result5 + result6
+        #             st.session_state["OptimizationMethodName"]['param1'] = option111
+        #             st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option11122)
+        #             st.session_state.inputFeatureList = option11122
+        #
+        #             option = st.selectbox(
+        #                 '优选条件',
+        #                 '按百分比选取')  # , '按权重值选取'
+        #             if option == '按百分比选取':
+        #                 st.session_state["OptimizationMethodName"]['param3'] = option
+        #                 number1 = st.number_input("TOP(%)", value=30, min_value=5, step=5)
+        #                 st.session_state["OptimizationMethodName"]['param4'] = str(number1)
+        #             if option == '按权重值选取':
+        #                 st.session_state["OptimizationMethodName"]['param3'] = option
+        #                 number2 = st.number_input("权重阈值", value=10, min_value=10)
+        #                 st.session_state["OptimizationMethodName"]['param4'] = str(number2)
+
+        # =======================添加处理至任务清单=======================
+        interval_col34, interval_col33 = st.columns([5, 1])
+        btn2 = interval_col33.button('添加处理', on_click=clear_all)
+        if btn2:
+            # print(st.session_state.expectedRetentionFeature)
+            new_data = {
+                "编号": pages_utils.generateID(),
+                # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
+                "输入特征": st.session_state.inputFeatureList,
+                "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
+                "方法参数":
+                    [value for key, value in st.session_state["OptimizationMethodName"].items() if
+                     key != 'checkBox'],
+                "优选特征": ','.join(st.session_state.expectedRetentionFeature),
+                "时间": datetime.datetime.now().time(),
+                "处理状态": True}
+            print('======================特征优选-添加任务清单记录======================')
+            print(new_data)
+            pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
+            st.rerun()
 
     # interval_col1, interval_col2 = st.columns([4, 1])
     # with interval_col2:
@@ -744,23 +744,27 @@ with dataPCM:
         pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
         # print('======================特征优选-添加任务清单记录-R======================')
         # print(new_data)
+    with st.container(border=True):
+        st.markdown('##### 任务清单')
+        # st.info('本环节已默认勾选上一环节计算的所有特征及相应的优选方法', icon="ℹ️")
 
-    st.markdown('##### 任务清单')
-    # st.info('本环节已默认勾选上一环节计算的所有特征及相应的优选方法', icon="ℹ️")
+        pages_utils.TempDataSetField[3] = st.data_editor(
+            pages_utils.TempDataSetField[3], height=145, width=1200,
+            column_order=["编号", "输入特征", "优选特征", "特征优选方法", '时间', '处理状态'],
+            disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
 
-    pages_utils.TempDataSetField[3] = st.data_editor(
-        pages_utils.TempDataSetField[3], height=190, width=1200,
-        column_order=["编号", "输入特征", "优选特征", "特征优选方法", '时间', '处理状态'],
-        disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
-
-    btn2 = st.columns([5, 1])[1].button('运行', on_click=onRun)
+        btn2 = st.columns([5, 1])[1].button('运行', on_click=onRun)
     # elif st.session_state.page14 == 1:
     placeholder = st.empty()
     # =======================显示右下可视化图表=======================
     if st.session_state.page14 >= 1:
-        with placeholder.container():
+        with placeholder.container(border=True, height=250):
             st.markdown('##### 结果')
-            st.markdown(f"###### 优选特征({len(st.session_state.preferenceFeature)}个)：{'、'.join(st.session_state.preferenceFeature)}")
+            st.markdown(
+                f"###### 优选特征({len(st.session_state.preferenceFeature)}个)：{'、'.join(st.session_state.preferenceFeature)}")
+            for _ in range(6):
+                st.markdown('')
+
             # plt.rc("font", family='Microsoft YaHei')
             # idFMethods = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()
             # # 若无方法处理,则直接跳过该环节
