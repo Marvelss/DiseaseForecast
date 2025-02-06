@@ -82,6 +82,14 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+st.markdown("""
+    <style>
+        div [data-baseweb=select]  {
+            max-height: 150px;
+            overflow: auto;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 # 隐藏markdown锚点链接
 st.markdown("""
     <style>
@@ -572,7 +580,7 @@ with modelACV:
     _, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
     # st.markdown("##### 特征与预测目标变量")
     with st.container(border=True):
-        modelACVCol1, modelACVCol2 = st.columns([0.7, 0.4])
+        modelACVCol1, modelACVCol2 = st.columns([0.6, 0.3])
         with modelACVCol1:
             st.markdown("##### 特征选择")
             # 按照数据类型显示左侧字段或特征
@@ -738,7 +746,7 @@ with modelACM:
         # st.info('本环节已默认勾选上一环节优选的特征及可训练的模型，用户也可以自行选用其他特征建模', icon="ℹ️")
 
         pages_utils.TempDataSetField[4] = st.data_editor(
-            pages_utils.TempDataSetField[4], height=274, width=1200,
+            pages_utils.TempDataSetField[4], height=310, width=1200,
             column_order=["模型", "标签", "特征", "评价指标", "数据集划分比例", "时间", '处理状态'],
             disabled=["时间", '处理状态'], num_rows="dynamic", )
 
