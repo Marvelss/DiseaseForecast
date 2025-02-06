@@ -4,6 +4,7 @@
 @File : FeatureOptimizationMethod.py
 @Description : 特征优化方法
 """
+import pandas as pd
 from scipy.stats import stats
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -253,3 +254,75 @@ class FeatureOptimizationMethod:
         #     self.dataFrame[new_column_name] = self.dataFrame[feature]
         #     newColumnsList.append(new_column_name)
         return correlation_matrix, selected_features_list
+
+    # t检验与pearson相关性分析
+    def tTestAndPearson(self, methodParam):
+        # param:['年 DayOfYear 经度 纬度', '0.9']
+        # param1:所有变量
+        # param2:提取条件
+        # print('============测试============')
+        # print(methodParam)
+        # 1.T检验 - p < 0.05, p < 0.01, p < 0.001
+        # 2.三档（取都敏感特征）+Pearson - R2 > 0.8（优先取敏感性高的特征）
+        labelField = methodParam[0]
+        fieldList = methodParam[1].split(' ')
+        tCondition = methodParam[2].split('<')[1]
+        pCondition = methodParam[3]
+        # 复制新的变量
+        newDataFrame = self.dataFrame.copy()
+        # ==================计算t检验==================
+        comparedVariableList = fieldList
+        tempResult = {}
+        # t检验并获取每个变量p-value结果
+        for feature in comparedVariableList:
+            rainfall = np.array(newDataFrame[feature].tolist())
+            disease = np.array(newDataFrame[labelField].tolist())
+            t_stat, p_value = stats.ttest_ind(
+                rainfall,
+                disease)
+            tempResult[feature] = p_value
+        # 筛选p-value符合条件的特征
+        filtered_data = {key: value for key, value in tempResult.items() if value <= float(tCondition)}
+        # print('======p-value========')
+        # print(tempResult)
+        # 获取优选特征集
+        optimalFeatureList = list(filtered_data.keys())
+        print('=========t检验后优选特征集=========')
+        print(optimalFeatureList)
+        # 使用t检验后的特征进行pearson分析
+        fieldList = optimalFeatureList
+        # ==================计算相关性矩阵==================
+        data = newDataFrame[fieldList]
+        # 计算特征之间的Pearson相关性系数
+        correlation_matrix = data.corr(method='pearson')
+        # 将相关性系数存储到字典tempResultP中
+        tempResultP = {}
+        for i in range(len(fieldList)):
+            for j in range(i + 1, len(fieldList)):
+                feature1 = fieldList[i]
+                feature2 = fieldList[j]
+                correlation = correlation_matrix.loc[feature1, feature2]
+                tempResultP[(feature1, feature2)] = correlation
+        # 打印相关性系数
+        # print("Correlation coefficients:")
+        # for (feature1, feature2), correlation in tempResultP.items():
+        #     print(f"{feature1} vs {feature2}: {correlation:.4f}")
+        # 初始化选中的特征
+        selected_features = set(fieldList)
+        # 对特征对进行遍历
+        for (feature1, feature2), correlation in tempResultP.items():
+            if abs(correlation) > float(pCondition):
+                # 获取两个特征的p值
+                p1 = tempResult[feature1]
+                p2 = tempResult[feature2]
+
+                # 比较p值，剔除p值较低的特征
+                if p1 < p2:
+                    if feature2 in selected_features:
+                        selected_features.discard(feature2)
+                else:
+                    if feature1 in selected_features:
+                        selected_features.discard(feature1)
+        print('=========Pearson相关性分析后的最优特征集=========')
+        print(selected_features)
+        return '', list(selected_features)

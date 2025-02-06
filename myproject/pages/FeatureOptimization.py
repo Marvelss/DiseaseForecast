@@ -70,7 +70,7 @@ if 'pageFOIsInit' not in st.session_state:
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
 
-checkBoxNum = 3
+checkBoxNum = 2
 # 预期保留特征
 if "expectedRetentionFeature" not in st.session_state:
     st.session_state.expectedRetentionFeature = []
@@ -134,9 +134,11 @@ def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
         return 'Pearson相关性分析'
     elif checkbox == 'checkbox1':
-        return 't检验'
+        return 't检验+Pearson相关性分析'
     elif checkbox == 'checkbox2':
         return 'Relief-F互相关分析'
+    elif checkbox == 'checkbox3':
+        return 't检验'
 
 
 # 取消所有选项按钮
@@ -162,189 +164,189 @@ def clear_other(key):
 def firstPage(): st.session_state.page14 = 0
 
 
-@st.dialog("预览", width='large')
-# 预览运行结果
-def onPreviewResults():
-    afterHandleData, tempResultP, optimalFeatureList = None, None, None
-    tempMethod = getCheckboxName(st.session_state.nowMethodName)
-    tempMethod = 'Pearson相关性分析'
-    methodParam = [value for key, value in st.session_state["OptimizationMethodName"].items() if
-                   key != 'checkBox']
-
-    print('-------------优选特征(参数)-----------')
-    # 默认先使用Pearson相关性分析剔除冗余特征
-    print(methodParam)
-    # 后用Relief-F筛选最优特征
-
-    # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
-    if pages_utils.TempDataSet[3].shape[0] == 0:
-        dataFrameTempT = pages_utils.TempDataSet[2]
-    else:
-        dataFrameTempT = pages_utils.TempDataSet[3]
-    if tempMethod == 't检验':
-        tempResult, optimalFeatureListT = FeatureOptimizationMethod(
-            dataFrameTempT.copy()).tTest(
-            methodParam)
-
-        # 可视化
-        keys = list(tempResult.keys())
-        values = [list(np.atleast_1d(v)) for v in tempResult.values()]  # 保证每个元素都是列表
-        # 格式化 values
-        formatted_values = []
-        for row in values:
-            formatted_row = []
-            for value in row:
-                if value < 0.001:
-                    formatted_row.append("***")
-                elif value < 0.01:
-                    formatted_row.append("**")
-                elif value < 0.05:
-                    formatted_row.append("*")
-                else:
-                    formatted_row.append("")
-            formatted_values.append(formatted_row)
-        # print('-----测试t检验可视化-----')
-        # print(keys)
-        # print(values)
-        # 将 keys 作为列名，values 转置为 DataFrame
-        dfTT = pd.DataFrame(formatted_values, index=keys).T
-        st.columns(3)[1].markdown('###### 各特征t检验敏感性分析结果')
-
-        st.table(dfTT)
-        st.caption('注：*表示p值<0.05，**表示p值<0.01，***表示p值<0.001')
-        st.session_state.expectedRetentionFeature = st.multiselect(
-            '预期保留特征:',
-            options=optimalFeatureListT,
-            default=optimalFeatureListT)
-    elif tempMethod == 'Pearson相关性分析':
-        tempResultP, optimalFeatureList = FeatureOptimizationMethod(
-            dataFrameTempT.copy()).Pearson(
-            methodParam)
-
-        # 可视化
-        # 使用Seaborn绘制热图
-        plt.figure(figsize=(10, 8))
-        sns.heatmap(tempResultP, annot=True, cmap='coolwarm', center=0)
-        plt.figtext(0.5, -0.13,
-                    f'图{st.session_state.IMAGECOUNT} Pearson互相关分析矩阵图',
-                    ha='center', fontsize=16)
-        # st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
-        st.pyplot(plt)
-
-        st.session_state.expectedRetentionFeature = st.multiselect(
-            '预期保留特征:',
-            options=optimalFeatureList,
-            default=optimalFeatureList)
-
-    elif tempMethod == 'Relief-F互相关分析':
-        tempResultR, optimalFeatureListR = FeatureOptimizationMethod(
-            dataFrameTempT.copy()).ReliefF(
-            methodParam)
-        # 可视化
-        keys = list(tempResultR.keys())
-        values = list(tempResultR.values())
-        # 创建柱状图
-        plt.figure(figsize=(10, 6))
-        plt.bar(keys, values, color='blue')
-        # 添加标题和标签
-        plt.title('基于Relief-F特征因子权值排序图')
-        plt.xlabel('特征')
-        plt.ylabel('特征权值')
-
-        standard = 0.5
-        if methodParam[2] == '按百分比选取':
-            # 计算TOP元素的数量,向上取整
-            num_top_percent = int(np.ceil(len(values) * float(methodParam[3]) * 0.01))
-            # 提取TOP的元素值
-            top_percent_values = values[:num_top_percent + 1]
-            # 获取前40%元素的最大值
-            threshold_value = top_percent_values[-1]
-            # print(num_top_percent)
-            # print(threshold_value)
-            standard = threshold_value
-        if methodParam[2] == '按权重值选取':
-            standard = float(methodParam[3])
-        # 基准线
-        plt.axhline(y=standard, color='red', linestyle='--', linewidth=1, label='基准线')
-        # 显示图表
-        plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
-        plt.tight_layout()  # 调整布局以防止标签重叠
-        # st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
-        st.pyplot(plt)
-
-        st.session_state.expectedRetentionFeature = st.multiselect(
-            '预期保留特征:',
-            options=optimalFeatureListR,
-            default=optimalFeatureListR)
-    if tempMethod == 't检验':
-        FOVisualInformationTemp = {
-            'before': None,
-            'after': tempResult,
-            'name': tempMethod,
-            'column': list(tempResult.keys()),
-            'value': values,
-            'standard': float(methodParam[2])}
-    elif tempMethod == 'Pearson相关性分析':
-        FOVisualInformationTemp = {
-            'before': None,
-            'name': tempMethod,
-            'column': tempResultP,
-            'after': tempResultP}
-    elif tempMethod == 'Relief-F互相关分析':
-        standard = 0.5
-        valuesT = list(tempResultR.values())
-        if methodParam[2] == '按百分比选取':
-            # 计算TOP元素的数量,向上取整
-            num_top_percent = int(np.ceil(len(valuesT) * float(methodParam[3]) * 0.01))
-            # 提取TOP的元素值
-            top_percent_values = valuesT[:num_top_percent + 1]
-            # 获取前40%元素的最大值
-            threshold_value = top_percent_values[-1]
-            # print(num_top_percent)
-            # print(threshold_value)
-            standard = threshold_value
-        if methodParam[2] == '按权重值选取':
-            standard = float(methodParam[3])
-        FOVisualInformationTemp = {
-            'before': None,
-            'after': tempResultR,
-            'column': list(tempResultR.keys()),
-            'value': list(tempResultR.values()),
-            'standard': standard}
-    # 可视化信息添加
-    st.session_state["FOVisualInformation"].append(FOVisualInformationTemp)
-
-    # 选择后变化
-    if st.button("保留优选特征至下一环节", on_click=clear_all):
-        st.session_state.preferenceFeature += st.session_state.expectedRetentionFeature
-
-        # print(st.session_state.expectedRetentionFeature)
-        new_data = {
-            "编号": pages_utils.generateID(),
-            # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
-            "输入特征": st.session_state.inputFeatureList,
-            "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
-            "方法参数":
-                [value for key, value in st.session_state["OptimizationMethodName"].items() if
-                 key != 'checkBox'],
-            "优选特征": ','.join(st.session_state.expectedRetentionFeature),
-            "时间": datetime.datetime.now().time(),
-            "处理状态": True}
-        print('======================特征优选-添加任务清单记录======================')
-        print(new_data)
-        pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
-        st.rerun()
+# @st.dialog("预览", width='large')
+# # 预览运行结果
+# def onPreviewResults():
+#     afterHandleData, tempResultP, optimalFeatureList = None, None, None
+#     tempMethod = getCheckboxName(st.session_state.nowMethodName)
+#     tempMethod = 'Pearson相关性分析'
+#     methodParam = [value for key, value in st.session_state["OptimizationMethodName"].items() if
+#                    key != 'checkBox']
+#
+#     print('-------------优选特征(参数)-----------')
+#     # 默认先使用Pearson相关性分析剔除冗余特征
+#     print(methodParam)
+#     # 后用Relief-F筛选最优特征
+#
+#     # 第一次使用特征计算数据集,而后基于特征优选数据集多次处理
+#     if pages_utils.TempDataSet[3].shape[0] == 0:
+#         dataFrameTempT = pages_utils.TempDataSet[2]
+#     else:
+#         dataFrameTempT = pages_utils.TempDataSet[3]
+#     if tempMethod == 't检验':
+#         tempResult, optimalFeatureListT = FeatureOptimizationMethod(
+#             dataFrameTempT.copy()).tTest(
+#             methodParam)
+#
+#         # 可视化
+#         keys = list(tempResult.keys())
+#         values = [list(np.atleast_1d(v)) for v in tempResult.values()]  # 保证每个元素都是列表
+#         # 格式化 values
+#         formatted_values = []
+#         for row in values:
+#             formatted_row = []
+#             for value in row:
+#                 if value < 0.001:
+#                     formatted_row.append("***")
+#                 elif value < 0.01:
+#                     formatted_row.append("**")
+#                 elif value < 0.05:
+#                     formatted_row.append("*")
+#                 else:
+#                     formatted_row.append("")
+#             formatted_values.append(formatted_row)
+#         # print('-----测试t检验可视化-----')
+#         # print(keys)
+#         # print(values)
+#         # 将 keys 作为列名，values 转置为 DataFrame
+#         dfTT = pd.DataFrame(formatted_values, index=keys).T
+#         st.columns(3)[1].markdown('###### 各特征t检验敏感性分析结果')
+#
+#         st.table(dfTT)
+#         st.caption('注：*表示p值<0.05，**表示p值<0.01，***表示p值<0.001')
+#         st.session_state.expectedRetentionFeature = st.multiselect(
+#             '预期保留特征:',
+#             options=optimalFeatureListT,
+#             default=optimalFeatureListT)
+#     elif tempMethod == 'Pearson相关性分析':
+#         tempResultP, optimalFeatureList = FeatureOptimizationMethod(
+#             dataFrameTempT.copy()).Pearson(
+#             methodParam)
+#
+#         # 可视化
+#         # 使用Seaborn绘制热图
+#         plt.figure(figsize=(10, 8))
+#         sns.heatmap(tempResultP, annot=True, cmap='coolwarm', center=0)
+#         plt.figtext(0.5, -0.13,
+#                     f'图{st.session_state.IMAGECOUNT} Pearson互相关分析矩阵图',
+#                     ha='center', fontsize=16)
+#         # st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+#         st.pyplot(plt)
+#
+#         st.session_state.expectedRetentionFeature = st.multiselect(
+#             '预期保留特征:',
+#             options=optimalFeatureList,
+#             default=optimalFeatureList)
+#
+#     elif tempMethod == 'Relief-F互相关分析':
+#         tempResultR, optimalFeatureListR = FeatureOptimizationMethod(
+#             dataFrameTempT.copy()).ReliefF(
+#             methodParam)
+#         # 可视化
+#         keys = list(tempResultR.keys())
+#         values = list(tempResultR.values())
+#         # 创建柱状图
+#         plt.figure(figsize=(10, 6))
+#         plt.bar(keys, values, color='blue')
+#         # 添加标题和标签
+#         plt.title('基于Relief-F特征因子权值排序图')
+#         plt.xlabel('特征')
+#         plt.ylabel('特征权值')
+#
+#         standard = 0.5
+#         if methodParam[2] == '按百分比选取':
+#             # 计算TOP元素的数量,向上取整
+#             num_top_percent = int(np.ceil(len(values) * float(methodParam[3]) * 0.01))
+#             # 提取TOP的元素值
+#             top_percent_values = values[:num_top_percent + 1]
+#             # 获取前40%元素的最大值
+#             threshold_value = top_percent_values[-1]
+#             # print(num_top_percent)
+#             # print(threshold_value)
+#             standard = threshold_value
+#         if methodParam[2] == '按权重值选取':
+#             standard = float(methodParam[3])
+#         # 基准线
+#         plt.axhline(y=standard, color='red', linestyle='--', linewidth=1, label='基准线')
+#         # 显示图表
+#         plt.xticks(rotation=45, ha='right')  # 旋转x轴标签
+#         plt.tight_layout()  # 调整布局以防止标签重叠
+#         # st.columns([0.3, 0.6, 0.4])[1].pyplot(plt)
+#         st.pyplot(plt)
+#
+#         st.session_state.expectedRetentionFeature = st.multiselect(
+#             '预期保留特征:',
+#             options=optimalFeatureListR,
+#             default=optimalFeatureListR)
+#     if tempMethod == 't检验':
+#         FOVisualInformationTemp = {
+#             'before': None,
+#             'after': tempResult,
+#             'name': tempMethod,
+#             'column': list(tempResult.keys()),
+#             'value': values,
+#             'standard': float(methodParam[2])}
+#     elif tempMethod == 'Pearson相关性分析':
+#         FOVisualInformationTemp = {
+#             'before': None,
+#             'name': tempMethod,
+#             'column': tempResultP,
+#             'after': tempResultP}
+#     elif tempMethod == 'Relief-F互相关分析':
+#         standard = 0.5
+#         valuesT = list(tempResultR.values())
+#         if methodParam[2] == '按百分比选取':
+#             # 计算TOP元素的数量,向上取整
+#             num_top_percent = int(np.ceil(len(valuesT) * float(methodParam[3]) * 0.01))
+#             # 提取TOP的元素值
+#             top_percent_values = valuesT[:num_top_percent + 1]
+#             # 获取前40%元素的最大值
+#             threshold_value = top_percent_values[-1]
+#             # print(num_top_percent)
+#             # print(threshold_value)
+#             standard = threshold_value
+#         if methodParam[2] == '按权重值选取':
+#             standard = float(methodParam[3])
+#         FOVisualInformationTemp = {
+#             'before': None,
+#             'after': tempResultR,
+#             'column': list(tempResultR.keys()),
+#             'value': list(tempResultR.values()),
+#             'standard': standard}
+#     # 可视化信息添加
+#     st.session_state["FOVisualInformation"].append(FOVisualInformationTemp)
+#
+#     # 选择后变化
+#     if st.button("保留优选特征至下一环节", on_click=clear_all):
+#         st.session_state.preferenceFeature += st.session_state.expectedRetentionFeature
+#
+#         # print(st.session_state.expectedRetentionFeature)
+#         new_data = {
+#             "编号": pages_utils.generateID(),
+#             # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
+#             "输入特征": st.session_state.inputFeatureList,
+#             "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
+#             "方法参数":
+#                 [value for key, value in st.session_state["OptimizationMethodName"].items() if
+#                  key != 'checkBox'],
+#             "优选特征": ','.join(st.session_state.expectedRetentionFeature),
+#             "时间": datetime.datetime.now().time(),
+#             "处理状态": True}
+#         print('======================特征优选-添加任务清单记录======================')
+#         print(new_data)
+#         pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
+#         st.rerun()
 
 
 def onRunAutomatic():
     methodParam = None
-    if genre:
-        methodParamP = [option1122, ' '.join(option1132), str(number33)]
-        methodParam = methodParamP
-        tempResultP, optimalFeatureListT = FeatureOptimizationMethod(
-            dataFrameTempT.copy()).Pearson(
-            methodParam)
-        st.session_state.preferenceFeature = optimalFeatureListT
+    # if genre:
+    #     methodParamP = [option1122, ' '.join(option1132), str(number33)]
+    #     methodParam = methodParamP
+    #     tempResultP, optimalFeatureListT = FeatureOptimizationMethod(
+    #         dataFrameTempT.copy()).Pearson(
+    #         methodParam)
+    #     st.session_state.preferenceFeature = optimalFeatureListT
     # elif genre3:
     #     methodParamR = [option111, ' '.join(option1132), option, str(number1)]
     #     methodParam = methodParamR
@@ -401,6 +403,12 @@ def onRun():
                     # print(methodParam[indexT])
                     _, newColumns = FeatureOptimizationMethod(
                         dataFrameTempT1).ReliefF(methodParam[indexT])
+                elif tempMethod == 't检验+Pearson相关性分析':
+                    # print('-------t检验+Pearson相关性分析-------')
+                    # print(fields[0])
+                    # print(methodParam[indexT])
+                    _, newColumns = FeatureOptimizationMethod(
+                        dataFrameTempT1).tTestAndPearson(methodParam[indexT])
                 # print('=============返回数据=============')
                 # print(afterHandleData)
                 # ===============合并处理后数据集===============
@@ -415,10 +423,12 @@ def onRun():
 
                 # print(newColumns)
                 # ===============更新左侧显示内容===============
+                st.session_state.preferenceFeature = newColumns
                 update_values = {
                     # "数据类型": "气象数据", "输入特征": fields[0],
                     # "大小": '1*' + str(row_size),
                     # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
+                    "优选特征": ','.join(st.session_state.preferenceFeature),
                     "时间": datetime.datetime.now().time(),
                     "处理状态": True}
                 # 查找要更新的数据记录
@@ -435,7 +445,7 @@ def onRun():
 # 界面名称+布局+布局内容
 # dataPreparation + column + variables
 dataPCV, dataPCM = st.columns([0.7, 0.5])
-with dataPCV:
+with (dataPCV):
     # st.markdown("##### 数据与特征")
     # ===============显示左侧数据与特征表格===============
     # placeholder1 = st.empty()
@@ -562,16 +572,16 @@ with dataPCV:
         # with tab2:
         #     genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other, args=[2])
         with tab1:
-            genre = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other,
-                                help='Pearson相关性分析', args=[0])
-            genre1 = st.checkbox("t检验", key='checkbox1', args=[1], disabled=True, on_change=clear_other,
-                                 help='该功能开发中')
+            genre = st.checkbox("t检验+Pearson相关性分析", key='checkbox1', on_change=clear_other,
+                                help='t检验+Pearson相关性分析', args=[1])
+            # genre1 = st.checkbox("", key='checkbox1', args=[1], disabled=True, on_change=clear_other,
+            #                      help='该功能开发中')
         with tab2:
             # genre3 = st.checkbox("Pearson相关性分析-连续变量", key='checkbox2', on_change=clear_other,
             #                      help='Pearson相关性分析', args=[0])
 
-            genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other,
-                                 help='Relief-F互相关分析', args=[2])
+            genre3 = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other,
+                                 help='Pearson相关性分析', args=[0])
         # st.markdown('---')
         paramPlaceHolder = st.empty()
 
@@ -586,6 +596,9 @@ with dataPCV:
                     #     'tempFiled', 'collapsed')
                     option1132 = result1 + result5 + result6
                     # option1132 = mergeExcludeArray(result1, result2, result3, pages_utils.reservedField)
+                    number334 = st.selectbox(
+                        label='优选敏感性程度(p-value)',
+                        options=['p<0.001', 'p<0.05', 'p<0.01'])
                     number33 = st.number_input("优选相关系数阈值(R)",
                                                value=0.8,
                                                min_value=0.1,
@@ -593,25 +606,26 @@ with dataPCV:
                                                step=0.1)
                     st.session_state["OptimizationMethodName"]['param1'] = responseFeature
                     st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1132)
-                    st.session_state["OptimizationMethodName"]['param3'] = str(number33)
+                    st.session_state["OptimizationMethodName"]['param3'] = str(number334)
+                    st.session_state["OptimizationMethodName"]['param4'] = str(number33)
                     st.session_state.inputFeatureList = option1132
-        if genre1:
-            # option112 = st.selectbox(
-            #     '目标变量',
-            #     filterUnique(result2, pages_utils.reservedField))
-            option1122 = pages_utils.multiselect_all(
-                st, '全选-被比较变量', mergeExcludeArray(
-                    result1, result3, [], pages_utils.reservedField),
-                'tempFiled', 'collapsed')
-            number112 = st.number_input("提取敏感性阈值(p-value)",
-                                        value=0.01,
-                                        min_value=0.01,
-                                        max_value=0.05,
-                                        step=0.01)
-            st.session_state["OptimizationMethodName"]['param1'] = responseFeature
-            st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1122)
-            st.session_state["OptimizationMethodName"]['param3'] = str(number112)
-            st.session_state.inputFeatureList = option1122
+        # if genre1:
+        #     # option112 = st.selectbox(
+        #     #     '目标变量',
+        #     #     filterUnique(result2, pages_utils.reservedField))
+        #     option1122 = pages_utils.multiselect_all(
+        #         st, '全选-被比较变量', mergeExcludeArray(
+        #             result1, result3, [], pages_utils.reservedField),
+        #         'tempFiled', 'collapsed')
+        #     number112 = st.number_input("提取敏感性阈值(p-value)",
+        #                                 value=0.01,
+        #                                 min_value=0.01,
+        #                                 max_value=0.05,
+        #                                 step=0.01)
+        #     st.session_state["OptimizationMethodName"]['param1'] = responseFeature
+        #     st.session_state["OptimizationMethodName"]['param2'] = ' '.join(option1122)
+        #     st.session_state["OptimizationMethodName"]['param3'] = str(number112)
+        #     st.session_state.inputFeatureList = option1122
 
         # st.markdown('---')
         # if genre3:
@@ -650,9 +664,8 @@ with dataPCV:
                 "方法参数":
                     [value for key, value in st.session_state["OptimizationMethodName"].items() if
                      key != 'checkBox'],
-                "优选特征": ','.join(st.session_state.expectedRetentionFeature),
                 "时间": datetime.datetime.now().time(),
-                "处理状态": True}
+                "处理状态": False}
             print('======================特征优选-添加任务清单记录======================')
             print(new_data)
             pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
@@ -686,62 +699,75 @@ with dataPCM:
     # 自动执行，先Pearson后Relief-F
     if not st.session_state.pageFOIsInit:
         st.session_state.pageFOIsInit += 1
+        autoInputFeature = filterUnique(weatherNameT2Decade + weatherNameT2Month + weatherNameT2Other,
+                                        pages_utils.reservedField)
+        new_dataT = {
+            "编号": pages_utils.generateID(),
+            # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
+            "输入特征": autoInputFeature,
+            "特征优选方法": 't检验+Pearson相关性分析',
+            "方法参数": [filterUnique(plantNameList, pages_utils.reservedField)[0],
+                         ' '.join(autoInputFeature), 'p<0.001', '0.8'],
+            "优选特征": ','.join(st.session_state.preferenceFeature),
+            "时间": datetime.datetime.now().time(),
+            "处理状态": False}
+        print(new_dataT)
+        pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_dataT
         # 使用特征计算数据集
-
-        dataFrameTempT = pages_utils.TempDataSet[2]
-
-        # print('-------------优选特征(参数)-----------')
-        # 默认先使用Pearson相关性分析剔除冗余特征
-        # 先Pearson相关性分析,后Relief-F
-        # 全选特征计算环节的特征
-        allFeatureList = filterUnique(weatherNameT2Decade +
-                                      weatherNameT2Month +
-                                      weatherNameT2Other,
-                                      pages_utils.reservedField
-                                      )
-        methodParamPMain = [
-            filterUnique(plantNameList, pages_utils.reservedField)[0],
-            ' '.join(allFeatureList),
-            str(0.8)]
-
-        tempResultPMain, optimalFeatureList = FeatureOptimizationMethod(
-            dataFrameTempT.copy()).Pearson(
-            methodParamPMain)
-        st.session_state.preferenceFeature = optimalFeatureList
-        new_data = {
-            "编号": pages_utils.generateID(),
-            # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
-            "输入特征": allFeatureList,
-            "特征优选方法": 'Pearson相关性分析',
-            "方法参数": methodParamPMain,
-            "优选特征": ','.join(st.session_state.preferenceFeature),
-            "时间": datetime.datetime.now().time(),
-            "处理状态": True}
-        pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
-        print('======================特征优选-添加任务清单记录-P======================')
-        print(new_data)
-        print('==================优选特征=============')
-        print(optimalFeatureList)
-        # ==============Relief - F互相关分析===================
-        methodParamRMain = [
-            filterUnique(plantNameList, pages_utils.reservedField)[0],
-            ' '.join(st.session_state.preferenceFeature),
-            '按百分比选取', str(30)]
-        tempResultRMain, optimalFeatureListR = FeatureOptimizationMethod(
-            dataFrameTempT.copy()).ReliefF(
-            methodParamRMain)
-        st.session_state.preferenceFeature = optimalFeatureListR
-
-        new_data = {
-            "编号": pages_utils.generateID(),
-            # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
-            "输入特征": optimalFeatureList,
-            "特征优选方法": 'Relief-F互相关分析',
-            "方法参数": methodParamRMain,
-            "优选特征": ','.join(st.session_state.preferenceFeature),
-            "时间": datetime.datetime.now().time(),
-            "处理状态": True}
-        pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
+        # dataFrameTempT = pages_utils.TempDataSet[2]
+        #
+        # # print('-------------优选特征(参数)-----------')
+        # # 默认先使用Pearson相关性分析剔除冗余特征
+        # # 先Pearson相关性分析,后Relief-F
+        # # 全选特征计算环节的特征
+        # allFeatureList = filterUnique(weatherNameT2Decade +
+        #                               weatherNameT2Month +
+        #                               weatherNameT2Other,
+        #                               pages_utils.reservedField
+        #                               )
+        # methodParamPMain = [
+        #     filterUnique(plantNameList, pages_utils.reservedField)[0],
+        #     ' '.join(allFeatureList),
+        #     str(0.8)]
+        #
+        # tempResultPMain, optimalFeatureList = FeatureOptimizationMethod(
+        #     dataFrameTempT.copy()).Pearson(
+        #     methodParamPMain)
+        # st.session_state.preferenceFeature = optimalFeatureList
+        # new_data = {
+        #     "编号": pages_utils.generateID(),
+        #     # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
+        #     "输入特征": allFeatureList,
+        #     "特征优选方法": 'Pearson相关性分析',
+        #     "方法参数": methodParamPMain,
+        #     "优选特征": ','.join(st.session_state.preferenceFeature),
+        #     "时间": datetime.datetime.now().time(),
+        #     "处理状态": True}
+        # pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
+        # print('======================特征优选-添加任务清单记录-P======================')
+        # print(new_data)
+        # print('==================优选特征=============')
+        # print(optimalFeatureList)
+        # # ==============Relief - F互相关分析===================
+        # methodParamRMain = [
+        #     filterUnique(plantNameList, pages_utils.reservedField)[0],
+        #     ' '.join(st.session_state.preferenceFeature),
+        #     '按百分比选取', str(30)]
+        # tempResultRMain, optimalFeatureListR = FeatureOptimizationMethod(
+        #     dataFrameTempT.copy()).ReliefF(
+        #     methodParamRMain)
+        # st.session_state.preferenceFeature = optimalFeatureListR
+        #
+        # new_data = {
+        #     "编号": pages_utils.generateID(),
+        #     # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
+        #     "输入特征": optimalFeatureList,
+        #     "特征优选方法": 'Relief-F互相关分析',
+        #     "方法参数": methodParamRMain,
+        #     "优选特征": ','.join(st.session_state.preferenceFeature),
+        #     "时间": datetime.datetime.now().time(),
+        #     "处理状态": True}
+        # pages_utils.TempDataSetField[3].loc[len(pages_utils.TempDataSetField[3])] = new_data
         # print('======================特征优选-添加任务清单记录-R======================')
         # print(new_data)
     with st.container(border=True):
