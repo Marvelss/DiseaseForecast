@@ -667,7 +667,10 @@ with featureCCM:
             # st.markdown('##### 预处理后数据集')
             # st.markdown("##### 原始建模")
             st.data_editor(
-                data=pages_utils.TempDataSet[2],
+                data=pd.DataFrame(
+                    filterUnique(pages_utils.TempDataSet[2].columns.tolist(),
+                                 pages_utils.TempDataSet[1].columns.tolist()),
+                    columns=["特征"]).sort_values(by="特征", ascending=True),
                 height=218, width=800, )
 
             # idFMethods = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()

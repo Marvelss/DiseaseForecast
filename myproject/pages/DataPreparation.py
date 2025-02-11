@@ -617,7 +617,7 @@ with dataPCM:
             st.markdown('##### 预处理后数据集')
             # st.markdown("##### 原始建模")
             st.data_editor(
-                data=pages_utils.TempDataSet[1],
+                data=pd.DataFrame(pages_utils.TempDataSet[1].columns.tolist(), columns=["预处理后数据字段"]),
                 height=192, width=800, )
 
             # idPreMethods = pages_utils.TempDataSetField[1]["预处理方法"].tolist()
