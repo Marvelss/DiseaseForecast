@@ -557,7 +557,8 @@ with (dataPCV):
         #     'tempOptimal', 'collapsed')
         with colSelect3:
             st.markdown("##### 响应特征")
-            responseFeature = st.selectbox('目标变量-植保数据', result2)
+            responseFeature = st.selectbox('目标变量-植保数据', result2,
+                                           label_visibility='collapsed')
 
     # st.markdown('---')
     with st.container(border=True):
