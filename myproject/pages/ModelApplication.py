@@ -1,11 +1,12 @@
 import os.path
 import tempfile
+import time
 
 import joblib
 import streamlit as st
 import pandas as pd
 from st_pages import hide_pages
-from lib.share import RESOURCE_MODELRESULT_PATH
+from lib.share import RESOURCE_MODELRESULT_PATH, RESOURCE_TEMPLATE_PATH
 from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 import streamlit_antd_components as sac
 from pages import pages_utils
@@ -46,6 +47,10 @@ st.markdown("""
     .css-jn99sy {display: none}
     </style>
     """, unsafe_allow_html=True)
+# 控制自动处理步骤中的进度条位置
+if "progressIndex" not in st.session_state:
+    st.session_state.progressIndex = 0
+
 st.header('模型应用',
           help='应用模型进行作物病虫害预测', divider='grey', anchor=False)
 
@@ -68,42 +73,57 @@ sac.steps(
 # with colTemp2:
 col2, col3 = st.columns([0.6, 0.4])
 with col2:
-    with st.container(border=True):
-        col211, col311 = st.columns(2)
+    with st.container(border=True, height=520):
+        col211, col311 = st.columns([0.6, 0.3])
         with col211:
             # 默认获取最优模型进行应用
-            st.markdown("##### 加载本轮模型(已默认选用精度最优模型)")
-            best_model = None
-            best_oa = -float('inf')
-            best_kappa = -float('inf')
-            if pages_utils.TempDataSetField[4]['模型'].tolist():
-                for idx, row in pages_utils.TempDataSetField[4].iterrows():
-                    metrics = row['评价指标']  # 提取评价指标
-                    if not isinstance(metrics, dict):  # 确保是字典
-                        metrics = eval(metrics)
-                    oa = metrics.get('OA', 0)
-                    kappa = metrics.get('Kappa', 0)
+            st.markdown("##### 加载本轮模型(每次只能勾选一个模型)")
 
-                    # 优先比较 OA
-                    if oa > best_oa or (oa == best_oa and kappa > best_kappa):
-                        best_oa = oa
-                        best_kappa = kappa
-                        best_model = row['模型']  # 假设模型列存在
+            # best_model = None
+            # best_oa = -float('inf')
+            # best_kappa = -float('inf')
+            # if pages_utils.TempDataSetField[4]['模型'].tolist():
+            #     for idx, row in pages_utils.TempDataSetField[4].iterrows():
+            #         metrics = row['评价指标']  # 提取评价指标
+            #         if not isinstance(metrics, dict):  # 确保是字典
+            #             metrics = eval(metrics)
+            #         oa = metrics.get('OA', 0)
+            #         kappa = metrics.get('Kappa', 0)
+            #
+            #         # 优先比较 OA
+            #         if oa > best_oa or (oa == best_oa and kappa > best_kappa):
+            #             best_oa = oa
+            #             best_kappa = kappa
+            #             best_model = row['模型']  # 假设模型列存在
             # 输出最优精度和对应的模型
-            print("最优模型:", best_model)
-            print("最优OA:", best_oa)
-            print("最优KAPPA:", best_kappa)
+            # print("最优模型:", best_model)
+            # print("最优OA:", best_oa)
+            # print("最优KAPPA:", best_kappa)
             tempModels = pages_utils.TempDataSetField[4]['模型'].tolist()
-            tempModels.remove(best_model)
-            tempModels.insert(0, best_model)
-            # 默认最优模型放置第一个
-            st.selectbox(
-                '加载模型',
-                options=tempModels,
-                label_visibility='collapsed')
-            model = joblib.load(
-                os.path.join(RESOURCE_MODELRESULT_PATH, 'structure',
-                             f'{best_model}_structure.pkl'))
+            # tempModels.remove(best_model)
+            # tempModels.insert(0, best_model)
+            pages_utils.TempDataSetField[4]["选用"] = False
+            edited_df = st.data_editor(
+                pages_utils.TempDataSetField[4], height=274, width=1200, use_container_width=True,
+                column_order=["选用", "模型", "评价指标", "标签", "特征", "数据集划分比例", "时间"],
+                disabled=["时间", '处理状态'], num_rows="fixed", )
+            # 获取 edited_df 中 '选用' 列为 True 的索引
+            selected_indices = edited_df[edited_df['选用'] == True].index.tolist()
+
+            # 根据索引从 tempModels 中提取对应的元素
+            selected_models = [tempModels[i] for i in selected_indices]
+
+            # 显示结果
+            # st.toast(f"选中的模型: {selected_models}")
+
+            if len(selected_models):
+                selected_model = selected_models[0]
+                model = joblib.load(
+                    os.path.join(RESOURCE_MODELRESULT_PATH, 'structure',
+                                 f'{selected_model}_structure.pkl'))
+            else:
+                model = 0
+                st.toast('请选择一个模型进行应用', icon="ℹ️")
         with col311:
             # 默认获取最优模型进行应用
             st.markdown("##### 加载以往模型")
@@ -111,15 +131,15 @@ with col2:
                 "加载以往模型",
                 accept_multiple_files=False,
                 label_visibility='collapsed')
-        st.markdown('---')
-        st.markdown("##### 清单列表")
-        st.data_editor(
-            pages_utils.TempDataSetField[4], height=274, width=1200, use_container_width=True,
-            column_order=["模型", "标签", "特征", "评价指标", "数据集划分比例", "时间"],
-            disabled=["时间", '处理状态'], num_rows="fixed", )
+        # st.markdown('---')
+        # st.markdown("##### 清单列表")
+        # st.data_editor(
+        #     pages_utils.TempDataSetField[4], height=274, width=1200, use_container_width=True,
+        #     column_order=["模型", "标签", "特征", "评价指标", "数据集划分比例", "时间"],
+        #     disabled=["时间", '处理状态'], num_rows="fixed", )
 
 with col3:
-    with st.container(border=True, height=550):
+    with st.container(border=True, height=520):
         st.markdown("##### 上传数据")
         uploaded_dataSet = st.file_uploader(
             "输入原始字段",
@@ -136,8 +156,10 @@ with col3:
         2. 上传内容应为未来数据，其中气象数据量至少一年以上，并确保无缺失值
         '''
 
+        file_path = os.path.join(RESOURCE_TEMPLATE_PATH, '模型应用数据模板.xlsx')  # 文件路径可以根据需要调整
         # 下载模板
         if model:
+            # 将 DataFrame 保存为 Excel 文件
             # 创建一个 DataFrame，其中包含特征字段作为表头
             # 创建一个 DataFrame，其中包含特征字段作为表头
             weatherNameT0, plantNameT0, agricultureNameT0 = pages_utils.getDataFiled(0, pages_utils.TempDataSetField[0])
@@ -146,20 +168,16 @@ with col3:
                 plantNameT0 + ['DayOfYear'])
             df = pd.DataFrame(columns=tempColumns)
 
-            # 将 DataFrame 保存为 Excel 文件
-            file_path = "features.xlsx"  # 文件路径可以根据需要调整
-            # df.to_excel(file_path, index=False)
-        # 创建一个临时文件
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp:
-            # 将 DataFrame 保存到临时文件中
-            df.to_excel(tmp.name, index=False)
-            # 获取临时文件的路径
-            file_path = tmp.name
-
+            df.to_excel(file_path, index=False)
+            # 创建一个临时文件
+            # with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp:
+            #     # 将 DataFrame 保存到临时文件中
+            #     df.to_excel(tmp.name, index=False)
+            #     # 获取临时文件的路径
+            #     file_path = tmp.name
         # 使用 Streamlit 提供下载按钮
         st.markdown("##### 模型应用数据模板下载")
         st.warning(warningInfo1, icon="⚠️")
-
         with open(file_path, "rb") as file:
             st.download_button(
                 label="下载",
@@ -184,8 +202,27 @@ with col3:
 # m.add_geojson(geoJsonPredict, layer_name="模型应用结果")
 # m.to_streamlit()
 with st.container(border=True):
+    st.markdown("##### 预测结果")
+    progressPlace = st.empty()
     if uploaded_dataSet:
-        st.markdown("##### 预测结果")
+        js_code = """
+        <script>
+            window.scrollTo(0, document.body.scrollHeight);
+        </script>
+        """
+        st.markdown(js_code, unsafe_allow_html=True)
+
+        # 初始化进度条
+        progress_items = [
+            sac.StepsItem(title='加载模型应用数据', disabled=True),
+            sac.StepsItem(title='执行预处理', disabled=True),
+            sac.StepsItem(title='执行特征计算', disabled=True),
+            sac.StepsItem(title='执行模型预测', disabled=True),
+        ]
+        with progressPlace:
+            # 显示初始进度条
+            sac.steps(items=progress_items,
+                      index=0, color='#800080')
         bytes_data = uploaded_dataSet.read()
         modelApplicationData = pd.read_excel(bytes_data)
 
@@ -194,7 +231,13 @@ with st.container(border=True):
         dataFrameTemp = modelApplicationData
         # dataFrameTemp.to_excel('原始书.xlsx', index=False)
         # print(dataFrameTemp)
-        # 自动计算特征
+        # 自动计算预处理
+        time.sleep(1)
+
+        with progressPlace:
+            # 显示初始进度条
+            sac.steps(items=progress_items,
+                      index=1, color='#800080')
         # ===============计算月、旬===============
         # 计算旬、月、年内日期和日期字段
         dataFrameTemp['日期'] = pd.to_datetime(
@@ -204,7 +247,13 @@ with st.container(border=True):
         dataFrameTemp['月'] = dataFrameTemp['日期'].dt.month
         # 计算每天所在的旬，假设1-10日为第一旬，11-20日为第二旬，21日至月末为第三旬
         dataFrameTemp['旬'] = dataFrameTemp['日期'].dt.day.apply(FeatureCalculationMethod.get_decade)
+        time.sleep(1)
 
+        # 更新进度条
+        with progressPlace:
+            # 显示初始进度条
+            sac.steps(items=progress_items,
+                      index=2, color='#800080')
         # ===============获取特征计算任务清单内容===============
 
         predictDF = None
@@ -256,8 +305,13 @@ with st.container(border=True):
                     dataFrameTemp = pd.merge(
                         afterHandleData, dataFrameTemp,
                         on=intersection_cols, how="left")
-                    st.toast(f"完成{tempMethod}计算", icon="ℹ️️")
-
+                    # st.toast(f"完成{tempMethod}计算", icon="ℹ️️")
+        time.sleep(1)
+        # 更新进度条
+        with progressPlace:
+            # 显示初始进度条
+            sac.steps(items=progress_items,
+                      index=3, color='#800080')
         # 保留优选特征
         # dataFrameTemp.to_excel('计算完特征.xlsx')
         dataFrameTemp = dataFrameTemp[['经度', '纬度', '年'] + st.session_state.preferenceFeature]
@@ -274,6 +328,11 @@ with st.container(border=True):
         predictions = model.predict(predictDF)
         dataFrameTemp['预测结果'] = predictions
         st.toast(f"模型应用完成", icon="ℹ️️")
+        # 更新进度条
+        with progressPlace:
+            # 显示初始进度条
+            sac.steps(items=progress_items,
+                      index=4, color='#800080')
         st.dataframe(dataFrameTemp, use_container_width=True)
 
         # dem = r'E:\a_python\program\diseaseForecastStreamlit\myproject\resource\tempdir\CHN_Wheat_2010.tif'
