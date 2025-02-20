@@ -51,7 +51,7 @@ if 'page' not in st.session_state:
     st.session_state.page = 0
 if 'page15' not in st.session_state:
     st.session_state.page15 = 0
-    st.toast('已根据默认配置添加任务至清单', icon="ℹ️")
+    # st.toast('已根据默认设置勾选特征与建模方法', icon="ℹ️")
 
 if 'pageMBIsInit' not in st.session_state:
     st.session_state.pageMBIsInit = 0
@@ -711,7 +711,8 @@ with modelACV:
             print(new_dataTT)
             pages_utils.TempDataSetField[4].loc[len(pages_utils.TempDataSetField[4])] = new_dataTT
         # 自动添加
-        if not st.session_state.pageMBIsInit:
+        # if not st.session_state.pageMBIsInit:
+        if 1 == 0:
             st.session_state.pageMBIsInit += 1
             # 通过判断预测目标变量在0-5内判断分类模型(未添加代码)
             for modelNameTemp1 in ['SVM', 'RF', 'FLDA', 'KNN']:
@@ -760,17 +761,18 @@ with modelACM:
             # st.markdown('---')
             st.write('##### 建模结果')
             evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
-            for item in evaluationIndex:
+            for i in range(len(evaluationIndex)):
+                item = evaluationIndex[i]
                 if isinstance(item, dict):
-                    formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in item.items()])
+                    evaluationIndex[i] = '、'.join([f'{key}={round(value, 3)}' for key, value in item.items()])
                 else:
-                    formatted = '、'.join([f'{key}={round(value, 3)}' for key, value in eval(item).items()])
+                    evaluationIndex[i] = '、'.join([f'{key}={round(value, 3)}' for key, value in eval(item).items()])
             models = pages_utils.TempDataSetField[4]["模型"].tolist()
             # 创建一个新的 DataFrame，组合精度评价和模型
-            # st.toast(formatted)
+            # st.toast(evaluationIndex)
             tempResult = pd.DataFrame({
                 '模型': models,
-                '精度': formatted
+                '精度': evaluationIndex
             })
             st.table(tempResult)
             # targets = pages_utils.TempDataSetField[4]["标签"].tolist()

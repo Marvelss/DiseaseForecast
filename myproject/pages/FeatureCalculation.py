@@ -46,7 +46,7 @@ div.stButton button {
 """), unsafe_allow_html=True)
 if 'page13' not in st.session_state:
     st.session_state.page13 = 0
-    st.toast('已根据默认配置添加任务至清单', icon="ℹ️")
+    # st.toast('已根据默认配置添加任务至清单', icon="ℹ️")
 
 if 'page12' not in st.session_state:
     st.toast('请先跳转至主页进行系统初始化', icon="⚠️")
@@ -520,7 +520,8 @@ with featureCCV:
             # st.session_state["featureMethodName"]['param4'] = str(growthPeriodNumber)
 
         # =======================添加处理至任务清单=======================
-        if not st.session_state.initFlagNum:
+        # if not st.session_state.initFlagNum:
+        if 1 == 0:
             st.session_state.initFlagNum += 1
             # 一键自动添加方法
             # 降雨日数

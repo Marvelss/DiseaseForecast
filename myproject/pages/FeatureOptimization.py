@@ -54,7 +54,7 @@ div.stButton button {
 """), unsafe_allow_html=True)
 if 'page14' not in st.session_state:
     st.session_state.page14 = 0
-    st.toast('已根据默认配置添加任务至清单', icon="ℹ️")
+    # st.toast('已根据默认配置添加任务至清单', icon="ℹ️")
 
     # 数据集统一分辨率
     if st.session_state.timeResolution == '':
@@ -134,7 +134,7 @@ def getCheckboxName(checkbox):
     if checkbox == 'checkbox0':
         return 'Pearson相关性分析'
     elif checkbox == 'checkbox1':
-        return 't检验+Pearson相关性分析'
+        return 't检验+互相关分析'
     elif checkbox == 'checkbox2':
         return 'Relief-F互相关分析'
     elif checkbox == 'checkbox3':
@@ -403,7 +403,7 @@ def onRun():
                     # print(methodParam[indexT])
                     _, newColumns = FeatureOptimizationMethod(
                         dataFrameTempT1).ReliefF(methodParam[indexT])
-                elif tempMethod == 't检验+Pearson相关性分析':
+                elif tempMethod == 't检验+互相关分析':
                     # print('-------t检验+Pearson相关性分析-------')
                     # print(fields[0])
                     # print(methodParam[indexT])
@@ -573,16 +573,17 @@ with (dataPCV):
         # with tab2:
         #     genre3 = st.checkbox("Relief-F互相关分析", key='checkbox2', on_change=clear_other, args=[2])
         with tab1:
-            genre = st.checkbox("t检验+Pearson相关性分析", key='checkbox1', on_change=clear_other,
-                                help='t检验+Pearson相关性分析', args=[1])
+            genre = st.checkbox("t检验+互相关分析", key='checkbox1', on_change=clear_other,
+                                help='t检验+互相关分析', args=[1])
             # genre1 = st.checkbox("", key='checkbox1', args=[1], disabled=True, on_change=clear_other,
             #                      help='该功能开发中')
         with tab2:
             # genre3 = st.checkbox("Pearson相关性分析-连续变量", key='checkbox2', on_change=clear_other,
             #                      help='Pearson相关性分析', args=[0])
 
-            genre3 = st.checkbox("Pearson相关性分析", key='checkbox0', on_change=clear_other,
-                                 help='Pearson相关性分析', args=[0])
+            genre3 = st.checkbox("Pearson相关+互相关分析", key='checkbox0', on_change=clear_other,
+                                 help='互相关分析用于检查两个时间序列之间的滞后相关性，特别是考虑'
+                                      '温度变化对未来病害发生的影响。', args=[0])
         # st.markdown('---')
         paramPlaceHolder = st.empty()
 
@@ -698,7 +699,8 @@ with dataPCM:
     # with placeholder.container():
 
     # 自动执行，先Pearson后Relief-F
-    if not st.session_state.pageFOIsInit:
+    # if not st.session_state.pageFOIsInit:
+    if 1 == 0:
         st.session_state.pageFOIsInit += 1
         autoInputFeature = filterUnique(weatherNameT2Decade + weatherNameT2Month + weatherNameT2Other,
                                         pages_utils.reservedField)
@@ -706,7 +708,7 @@ with dataPCM:
             "编号": pages_utils.generateID(),
             # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
             "输入特征": autoInputFeature,
-            "特征优选方法": 't检验+Pearson相关性分析',
+            "特征优选方法": 't检验+互相关分析',
             "方法参数": [filterUnique(plantNameList, pages_utils.reservedField)[0],
                          ' '.join(autoInputFeature), 'p<0.001', '0.8'],
             "优选特征": ','.join(st.session_state.preferenceFeature),
