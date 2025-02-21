@@ -388,7 +388,8 @@ with featureCCV:
     with st.container(border=True):
         st.markdown("##### 预处理后数据集")
         st.data_editor(
-            pages_utils.TempDataSet[1],
+            pages_utils.TempDataSetField[1],
+            column_order=["数据类型", '预处理后字段', '大小', '预处理方法', '时间'],
             height=247, width=800)
         # st.markdown('---')
     with st.container(border=True):
@@ -520,8 +521,8 @@ with featureCCV:
             # st.session_state["featureMethodName"]['param4'] = str(growthPeriodNumber)
 
         # =======================添加处理至任务清单=======================
-        # if not st.session_state.initFlagNum:
-        if 1 == 0:
+        if not st.session_state.initFlagNum:
+        # if 1 == 0:
             st.session_state.initFlagNum += 1
             # 一键自动添加方法
             # 降雨日数
@@ -667,11 +668,21 @@ with featureCCM:
             st.markdown('##### 特征计算结果')
             # st.markdown('##### 预处理后数据集')
             # st.markdown("##### 原始建模")
+            # 添加特征类型字段
+            dfFCR = pages_utils.TempDataSetField[2]
+            # 初始化新的字段 '特征类型'
+            dfFCR['特征类型'] = '其他特征'
+            # 遍历 DataFrame 的 '方法参数' 字段
+            for index, row in dfFCR.iterrows():
+                method_param = row['方法参数']
+                if '旬均值' in method_param:
+                    dfFCR.at[index, '特征类型'] = '旬均值特征'
+                elif '月均值' in method_param:
+                    dfFCR.at[index, '特征类型'] = '月均值特征'
+                # 其他情况默认为 '其他特征'（已在初始化时设置）
             st.data_editor(
-                data=pd.DataFrame(
-                    filterUnique(pages_utils.TempDataSet[2].columns.tolist(),
-                                 pages_utils.TempDataSet[1].columns.tolist()),
-                    columns=["特征"]).sort_values(by="特征", ascending=True),
+                dfFCR,
+                column_order=['数据类型', '特征类型', '备选特征', '大小', '时间'],
                 height=218, width=800, )
 
             # idFMethods = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()

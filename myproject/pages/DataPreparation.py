@@ -345,8 +345,11 @@ with dataPCV:
         # result1 = pages_utils.multiselect_all(
         #     st, '全选-', filterUnique(weatherNameList, pages_utils.reservedField),
         #     'tempTemperature', 'collapsed')
-        st.markdown("##### 原始建模数据集")
-        st.data_editor(pages_utils.TempDataSet[0], height=247, width=800, )
+        st.markdown("##### 原始建模上传数据")
+        st.data_editor(
+            pages_utils.TempDataSetField[0],
+            column_order=["数据类型", "文件名称", "字段", "上传时间"],
+            height=247, width=800, )
         # st.markdown('---')
     with st.container(border=True):
         st.markdown("##### 气象数据字段选择")
@@ -483,10 +486,12 @@ with dataPCV:
                         detectUp, detectLow = 1500, 0
                     number2 = st.text_input("大于以下数值外的值", value=detectUp)
                     number3 = st.text_input("小于以下数值外的值", value=detectLow)
-                    infoT1Low, infoT1Up = PretreatmentMethod.detectGeneralScope(dataFrameTemp, result1[0], float(number2),
+                    infoT1Low, infoT1Up = PretreatmentMethod.detectGeneralScope(dataFrameTemp, result1[0],
+                                                                                float(number2),
                                                                                 float(number3))
                     if infoT1Low or infoT1Up:
-                        st.warning(f"存在异常数据:  \n超过上限数据:{infoT1Up}条  \n超过下限数据:{infoT1Low}条", icon="⚠️")
+                        st.warning(f"存在异常数据:  \n超过上限数据:{infoT1Up}条  \n超过下限数据:{infoT1Low}条",
+                                   icon="⚠️")
                     else:
                         st.info(f"无异常数据\n", icon="ℹ️️")
                     option = st.selectbox(
@@ -618,7 +623,8 @@ with dataPCM:
             st.markdown('##### 预处理后数据集')
             # st.markdown("##### 原始建模")
             st.data_editor(
-                data=pd.DataFrame(pages_utils.TempDataSet[1].columns.tolist(), columns=["预处理后数据字段"]),
+                    pages_utils.TempDataSetField[1],
+                column_order=["数据类型", '预处理后字段', '大小', '预处理方法', '时间'],
                 height=192, width=800, )
 
             # idPreMethods = pages_utils.TempDataSetField[1]["预处理方法"].tolist()

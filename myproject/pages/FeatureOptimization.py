@@ -425,7 +425,8 @@ def onRun():
                 # ===============更新左侧显示内容===============
                 st.session_state.preferenceFeature = newColumns
                 update_values = {
-                    # "数据类型": "气象数据", "输入特征": fields[0],
+                    # "数据类型": "气象数据",
+                    # "输入特征": fields[0],
                     # "大小": '1*' + str(row_size),
                     # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
                     "优选特征": ','.join(st.session_state.preferenceFeature),
@@ -528,6 +529,21 @@ with (dataPCV):
     #             weatherNameList.append(a)
     # 按照数据类型显示左侧字段或特征
     with st.container(border=True):
+        dfFCR = pages_utils.TempDataSetField[2]
+        # 初始化新的字段 '特征类型'
+        dfFCR['特征类型'] = '其他特征'
+        # 遍历 DataFrame 的 '方法参数' 字段
+        for index, row in dfFCR.iterrows():
+            method_param = row['方法参数']
+            if '旬均值' in method_param:
+                dfFCR.at[index, '特征类型'] = '旬均值特征'
+            elif '月均值' in method_param:
+                dfFCR.at[index, '特征类型'] = '月均值特征'
+            # 其他情况默认为 '其他特征'（已在初始化时设置）
+        st.data_editor(
+            dfFCR,
+            column_order=['数据类型', '特征类型', '备选特征', '大小', '时间'],
+            height=218, width=800, )
         colSelect1, colSelect2, colSelect3 = st.columns(3)
         with colSelect1:
             st.markdown("##### 输入特征")
@@ -660,7 +676,7 @@ with (dataPCV):
             # print(st.session_state.expectedRetentionFeature)
             new_data = {
                 "编号": pages_utils.generateID(),
-                # "数据类型": pages_utils.getDataType(st.session_state.expectedRetentionFeature),
+                "数据类型": "气象数据",
                 "输入特征": st.session_state.inputFeatureList,
                 "特征优选方法": getCheckboxName(st.session_state["OptimizationMethodName"]['checkBox']),
                 "方法参数":
@@ -779,7 +795,7 @@ with dataPCM:
 
         pages_utils.TempDataSetField[3] = st.data_editor(
             pages_utils.TempDataSetField[3], height=145, width=1200,
-            column_order=["编号", "输入特征", "优选特征", "特征优选方法", '时间', '处理状态'],
+            column_order=["编号", "输入特征", "特征优选方法", '时间', '处理状态'],
             disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
 
         btn2 = st.columns([5, 1])[1].button('运行', on_click=onRun)
@@ -787,12 +803,12 @@ with dataPCM:
     placeholder = st.empty()
     # =======================显示右下可视化图表=======================
     if st.session_state.page14 >= 1:
-        with placeholder.container(border=True, height=250):
+        with placeholder.container(border=True, height=450):
             st.markdown('##### 结果')
-            st.markdown(
-                f"###### 优选特征({len(st.session_state.preferenceFeature)}个)：{'、'.join(st.session_state.preferenceFeature)}")
-            for _ in range(6):
-                st.markdown('')
+            st.data_editor(
+                pages_utils.TempDataSetField[3], height=145, width=1200,
+                column_order=["数据类型", "优选特征", "特征优选方法", '时间', ],
+                disabled=["数据类型", "时间", '处理状态'], num_rows="dynamic", )
 
             # plt.rc("font", family='Microsoft YaHei')
             # idFMethods = pages_utils.TempDataSetField[3]["特征优选方法"].tolist()

@@ -610,6 +610,8 @@ with modelACV:
     # =======================添加验证与训练数据集划分=======================
     with st.container(border=True):
         st.markdown("##### 训练与验证数据集划分")
+        st.info(f'建模数据样本量:{pages_utils.TempDataSet[2].shape[0]}条', icon="ℹ️️")
+
         colOP1, colOP2 = st.columns(2)
         with colOP1:
             option1 = st.selectbox(
