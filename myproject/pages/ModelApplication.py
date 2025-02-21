@@ -12,6 +12,8 @@ import streamlit_antd_components as sac
 from pages import pages_utils
 import leafmap.foliumap as leafmap
 from lib.utils import excelToJson, filterUnique
+import random
+import streamlit.components.v1 as components
 
 st.set_page_config(
     layout="wide",
@@ -47,10 +49,17 @@ st.markdown("""
     .css-jn99sy {display: none}
     </style>
     """, unsafe_allow_html=True)
-# 控制自动处理步骤中的进度条位置
-if "progressIndex" not in st.session_state:
-    st.session_state.progressIndex = 0
-
+# 滚到到页面底部
+html_code = f"""
+      <div id="scroll-to-me" style='background: cyan; height=20px;'>hi</div>
+      <script id="{random.randint(1000, 9999)}">
+         var e = document.getElementById("scroll-to-me");
+         if (e) {{
+           e.scrollIntoView({{behavior: "smooth"}});
+           e.remove();
+         }}
+      </script>
+      """
 st.header('模型应用',
           help='应用模型进行作物病虫害预测', divider='grey', anchor=False)
 
@@ -74,63 +83,64 @@ sac.steps(
 col2, col3 = st.columns([0.6, 0.4])
 with col2:
     with st.container(border=True, height=520):
-        col211, col311 = st.columns([0.6, 0.3])
-        with col211:
-            # 默认获取最优模型进行应用
-            st.markdown("##### 加载本轮模型(每次只能勾选一个模型)")
+        # col211, col311 = st.columns([0.6, 0.3])
+        # with col211:
+        # 默认获取最优模型进行应用
+        st.markdown("##### 加载本轮模型(每次只能勾选一个模型)")
 
-            # best_model = None
-            # best_oa = -float('inf')
-            # best_kappa = -float('inf')
-            # if pages_utils.TempDataSetField[4]['模型'].tolist():
-            #     for idx, row in pages_utils.TempDataSetField[4].iterrows():
-            #         metrics = row['评价指标']  # 提取评价指标
-            #         if not isinstance(metrics, dict):  # 确保是字典
-            #             metrics = eval(metrics)
-            #         oa = metrics.get('OA', 0)
-            #         kappa = metrics.get('Kappa', 0)
-            #
-            #         # 优先比较 OA
-            #         if oa > best_oa or (oa == best_oa and kappa > best_kappa):
-            #             best_oa = oa
-            #             best_kappa = kappa
-            #             best_model = row['模型']  # 假设模型列存在
-            # 输出最优精度和对应的模型
-            # print("最优模型:", best_model)
-            # print("最优OA:", best_oa)
-            # print("最优KAPPA:", best_kappa)
-            tempModels = pages_utils.TempDataSetField[4]['模型'].tolist()
-            # tempModels.remove(best_model)
-            # tempModels.insert(0, best_model)
-            pages_utils.TempDataSetField[4]["选用"] = False
-            edited_df = st.data_editor(
-                pages_utils.TempDataSetField[4], height=274, width=1200, use_container_width=True,
-                column_order=["选用", "模型", "评价指标", "标签", "特征", "数据集划分比例", "时间"],
-                disabled=["时间", '处理状态'], num_rows="fixed", )
-            # 获取 edited_df 中 '选用' 列为 True 的索引
-            selected_indices = edited_df[edited_df['选用'] == True].index.tolist()
+        # best_model = None
+        # best_oa = -float('inf')
+        # best_kappa = -float('inf')
+        # if pages_utils.TempDataSetField[4]['模型'].tolist():
+        #     for idx, row in pages_utils.TempDataSetField[4].iterrows():
+        #         metrics = row['评价指标']  # 提取评价指标
+        #         if not isinstance(metrics, dict):  # 确保是字典
+        #             metrics = eval(metrics)
+        #         oa = metrics.get('OA', 0)
+        #         kappa = metrics.get('Kappa', 0)
+        #
+        #         # 优先比较 OA
+        #         if oa > best_oa or (oa == best_oa and kappa > best_kappa):
+        #             best_oa = oa
+        #             best_kappa = kappa
+        #             best_model = row['模型']  # 假设模型列存在
+        # 输出最优精度和对应的模型
+        # print("最优模型:", best_model)
+        # print("最优OA:", best_oa)
+        # print("最优KAPPA:", best_kappa)
+        tempModels = pages_utils.TempDataSetField[4]['模型'].tolist()
+        # tempModels.remove(best_model)
+        # tempModels.insert(0, best_model)
+        pages_utils.TempDataSetField[4]["选用"] = False
+        edited_df = st.data_editor(
+            pages_utils.TempDataSetField[4], height=274, width=1200, use_container_width=True,
+            column_order=["选用", "模型", "评价指标", "标签", "特征", "数据集划分比例", "时间"],
+            disabled=["时间", '处理状态'], num_rows="fixed", )
+        # 获取 edited_df 中 '选用' 列为 True 的索引
+        selected_indices = edited_df[edited_df['选用'] == True].index.tolist()
 
-            # 根据索引从 tempModels 中提取对应的元素
-            selected_models = [tempModels[i] for i in selected_indices]
+        # 根据索引从 tempModels 中提取对应的元素
+        selected_models = [tempModels[i] for i in selected_indices]
 
-            # 显示结果
-            # st.toast(f"选中的模型: {selected_models}")
+        # 显示结果
+        # st.toast(f"选中的模型: {selected_models}")
 
-            if len(selected_models):
-                selected_model = selected_models[0]
-                model = joblib.load(
-                    os.path.join(RESOURCE_MODELRESULT_PATH, 'structure',
-                                 f'{selected_model}_structure.pkl'))
-            else:
-                model = 0
-                st.toast('请选择一个模型进行应用', icon="ℹ️")
-        with col311:
-            # 默认获取最优模型进行应用
-            st.markdown("##### 加载以往模型")
-            uploaded_dataSet1 = st.file_uploader(
-                "加载以往模型",
-                accept_multiple_files=False,
-                label_visibility='collapsed')
+        if len(selected_models):
+            selected_model = selected_models[0]
+            model = joblib.load(
+                os.path.join(RESOURCE_MODELRESULT_PATH, 'structure',
+                             f'{selected_model}_structure.pkl'))
+        else:
+            model = 0
+            st.toast('请选择一个模型进行应用', icon="ℹ️")
+        # with col311:
+        # 默认获取最优模型进行应用
+        st.markdown("##### 加载以往模型")
+        uploaded_dataSet1 = st.file_uploader(
+            "加载以往模型",
+            accept_multiple_files=False,
+            label_visibility='collapsed')
+
         # st.markdown('---')
         # st.markdown("##### 清单列表")
         # st.data_editor(
@@ -205,12 +215,8 @@ with st.container(border=True):
     st.markdown("##### 预测结果")
     progressPlace = st.empty()
     if uploaded_dataSet:
-        js_code = """
-        <script>
-            window.scrollTo(0, document.body.scrollHeight);
-        </script>
-        """
-        st.markdown(js_code, unsafe_allow_html=True)
+
+        components.html(html_code, height=0)
 
         # 初始化进度条
         progress_items = [
@@ -334,6 +340,7 @@ with st.container(border=True):
             sac.steps(items=progress_items,
                       index=4, color='#800080')
         st.dataframe(dataFrameTemp, use_container_width=True)
+        # components.html(html_code)
 
         # dem = r'E:\a_python\program\diseaseForecastStreamlit\myproject\resource\tempdir\CHN_Wheat_2010.tif'
         # m = leafmap.Map(zoom_start=16)
