@@ -529,6 +529,7 @@ with (dataPCV):
     #             weatherNameList.append(a)
     # 按照数据类型显示左侧字段或特征
     with st.container(border=True):
+        st.markdown('##### 备选特征')
         dfFCR = pages_utils.TempDataSetField[2]
         # 初始化新的字段 '特征类型'
         dfFCR['特征类型'] = '其他特征'
