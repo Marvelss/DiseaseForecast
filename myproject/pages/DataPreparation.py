@@ -276,7 +276,7 @@ def onRun():
                     # print(st.session_state["DPVisualInformation"])
                     update_values = {
                         "预处理后字段": newDataColumn,
-                        "大小": '1*' + str(len(afterHandleData[fields[indexT]])),
+                        "数据量": str(len(afterHandleData[fields[indexT]])),
                         "时间": datetime.datetime.now().time(),
                         "处理状态": True
                     }
@@ -624,7 +624,7 @@ with dataPCM:
 
             st.data_editor(
                 pages_utils.TempDataSetField[1],
-                column_order=["数据类型", '预处理后字段', '大小', '预处理方法', '时间'],
+                column_order=["数据类型", '预处理后字段', '数据量', '预处理方法', '时间'],
                 height=192, width=800, )
 
             # idPreMethods = pages_utils.TempDataSetField[1]["预处理方法"].tolist()

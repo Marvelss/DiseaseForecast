@@ -513,17 +513,17 @@ with modelACV:
     #         #                     pages_utils.TempDataSet[0],
     #         #                     height=220, width=800, )
     #         #             elif st.session_state["leftTabs"][i] == '预处理后数据集':
-    #         #                 column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
+    #         #                 column = ["数据类型", "预处理后字段", "数据量", "预处理方法", '时间']
     #         #                 st.data_editor(
     #         #                     pages_utils.TempDataSet[1],
     #         #                     height=220, width=800, )
     #         #             elif st.session_state["leftTabs"][i] == '备选特征':
-    #         #                 column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+    #         #                 column = ["数据类型", "备选特征", "数据量", "特征计算方法", '时间']
     #         #                 st.data_editor(
     #         #                     pages_utils.TempDataSet[2],
     #         #                     height=220, width=800, )
     #         #             elif st.session_state["leftTabs"][i] == '优选特征':
-    #         #                 column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+    #         #                 column = ["数据类型", "优选特征", "数据量", "特征优选方法", '时间']
     #         #                 st.data_editor(
     #         #                     pages_utils.TempDataSet[3],
     #         #                     height=220, width=800, )

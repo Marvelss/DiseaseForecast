@@ -427,7 +427,7 @@ def onRun():
                 update_values = {
                     # "数据类型": "气象数据",
                     # "输入特征": fields[0],
-                    # "大小": '1*' + str(row_size),
+                    # "数据量": '1*' + str(row_size),
                     # "特征计算方法": st.session_state["OptimizationMethodName"]['checkBox'],
                     "优选特征": ','.join(st.session_state.preferenceFeature),
                     "时间": datetime.datetime.now().time(),
@@ -461,9 +461,9 @@ with (dataPCV):
     #     # for i in range(len(tempLeftTabs)):
     #     with tt1[0]:
     #         # if tempLeftTabs[i] == '备选特征':
-    #         #     column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+    #         #     column = ["数据类型", "备选特征", "数据量", "特征计算方法", '时间']
     #         # elif tempLeftTabs[i] == '优选特征':
-    #         #     column = ["数据类型", "优选特征", "大小", "特征优选方法", '时间']
+    #         #     column = ["数据类型", "优选特征", "数据量", "特征优选方法", '时间']
     #         st.data_editor(
     #             pages_utils.TempDataSet[2],
     #             height=220, width=800, )
@@ -542,7 +542,7 @@ with (dataPCV):
             # 其他情况默认为 '其他特征'（已在初始化时设置）
         st.data_editor(
             dfFCR,
-            column_order=['数据类型', '特征类型', '备选特征', '大小', '时间'],
+            column_order=['数据类型', '特征类型', '备选特征', '数据量', '时间'],
             height=218, width=800, )
         colSelect1, colSelect2, colSelect3 = st.columns(3)
         with colSelect1:

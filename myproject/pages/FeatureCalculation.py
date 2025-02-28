@@ -267,7 +267,7 @@ def onRun():
                 st.session_state["FCVisualInformation"].append(FCVisualInformationTemp)
                 # print(st.session_state["FCVisualInformation"])
                 update_values = {
-                    "大小": '1*' + str(row_size),
+                    "数据量": str(len(newColumn.split(','))) + '*' + str(row_size),
                     "备选特征": newColumn,
                     "时间": datetime.datetime.now().time(),
                     "处理状态": True}
@@ -288,7 +288,7 @@ def onRun():
                 #         st.session_state["FCVisualInformation"].append(FCVisualInformationTemp)
                 #         # print(st.session_state["FCVisualInformation"])
                 #         update_values = {
-                #             "大小": '1*' + str(row_size),
+                #             "数据量": '1*' + str(row_size),
                 #             "备选特征": tempNewColumn,
                 #             "时间": datetime.datetime.now().time(),
                 #             "处理状态": True}
@@ -323,7 +323,7 @@ with featureCCV:
     #         else:
     #             tt = st.tabs(['预处理后数据集', '备选特征'])
     #             with tt[0]:
-    #                 # column = ["数据类型", "预处理后字段", "大小", "预处理方法", '时间']
+    #                 # column = ["数据类型", "预处理后字段", "数据量", "预处理方法", '时间']
     #                 st.data_editor(
     #                     pages_utils.TempDataSet[1],
     #                     height=220, width=800, )
@@ -337,7 +337,7 @@ with featureCCV:
     #         #     if tempLefTabs[i] == '预处理后数据集':
     #         #
     #         #     elif tempLefTabs[i] == '备选特征':
-    #         #         column = ["数据类型", "备选特征", "大小", "特征计算方法", '时间']
+    #         #         column = ["数据类型", "备选特征", "数据量", "特征计算方法", '时间']
     #         #     st.data_editor(
     #         #         pages_utils.TempDataSet[i],
     #         #         height=220, width=800, )
@@ -389,7 +389,7 @@ with featureCCV:
         st.markdown("##### 预处理后数据集")
         st.data_editor(
             pages_utils.TempDataSetField[1],
-            column_order=["数据类型", '预处理后字段', '大小', '预处理方法', '时间'],
+            column_order=["数据类型", '预处理后字段', '数据量', '预处理方法', '时间'],
             height=247, width=800)
         # st.markdown('---')
     with st.container(border=True):
@@ -522,7 +522,7 @@ with featureCCV:
 
         # =======================添加处理至任务清单=======================
         if not st.session_state.initFlagNum:
-        # if 1 == 0:
+            # if 1 == 0:
             st.session_state.initFlagNum += 1
             # 一键自动添加方法
             # 降雨日数
@@ -680,7 +680,7 @@ with featureCCM:
                 # 其他情况默认为 '其他特征'（已在初始化时设置）
             st.data_editor(
                 dfFCR,
-                column_order=['数据类型', '特征类型', '备选特征', '大小', '时间'],
+                column_order=['数据类型', '特征类型', '备选特征', '数据量', '时间'],
                 height=218, width=800, )
 
             # idFMethods = pages_utils.TempDataSetField[2]["特征计算方法"].tolist()
