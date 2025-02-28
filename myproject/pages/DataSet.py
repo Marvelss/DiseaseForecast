@@ -61,11 +61,12 @@ warningInfo = '''
 注意事项
 1. 先上传气象数据，后上传植保等其他数据
 
-2. 建议建模数据中植保数据量大于50条，以免影响模型的稳定性
-3. 请将数据中的文字描述转为数字，如病害发生程度，若为健康输入0，轻度输入1，重度输入2
-4. 模版中表头行不可删除，且字段名称不能包含 '-' , '_' 和数字字符;
-5. 删除示例数据后,按需填充或删减字段与数据.
-6. 完成数据添加后，删除注意事项两行单元格，并对数据检查，保证无大面积缺失和异常情况，以免影响建模.
+2. 上传的气象数据年份必须与植保数据的年份完全一致
+3. 建议建模数据中植保数据量大于50条，以免影响模型的稳定性
+4. 请将数据中的文字描述转为数字，如病害发生程度，若为健康输入0，轻度输入1，重度输入2
+5. 模版中表头行不可删除，且字段名称不能包含 '-' , '_' 和数字字符;
+6. 删除示例数据后,按需填充或删减字段与数据.
+7. 完成数据添加后，删除注意事项两行单元格，并对数据检查，保证无大面积缺失和异常情况，以免影响建模.
 '''
 
 st.markdown(
@@ -195,24 +196,30 @@ with dataSCM:
                         # 检测非数值型输入
                         # 取前10行
                         subset = data33.head(10)
-
                         # 检测每一列是否包含非数值型数据，并显示对应的列名
                         non_numeric_columns = []
-
                         for column in subset.columns:
                             non_null_data = subset[column].dropna()
                             if not pd.to_numeric(non_null_data, errors='coerce').notna().all():
                                 non_numeric_columns.append(column)
+
                         # 去除经度、纬度(固定)
                         tempT1 = [col for col in non_numeric_columns if col not in ['经度', '纬度']]
-
+                        years = list(set(data33['年'].tolist()))
                         # 防止重复添加
                         if (pages_utils.TempDataSetField[0]['文件名称'] == uploaded_files.name).any():
                             pass
+                            # st.toast('已上传过该文件', icon="⚠️")
                         # 存在非数值型输入
                         elif len(tempT1):
+                            st.toast(tempT1)
                             tempT2 = ' '.join(tempT1)
                             st.toast(f'以下列存在非数值型数据,请转换为数值后重新上传  \n字段:{tempT2}', icon="⚠️")
+                        # 气象数据与植保数据不匹配
+                        elif not years == list(set(pages_utils.TempDataSet[0]['年'].tolist())) and not \
+                                pages_utils.TempDataSet[0].empty:
+                            tempT2 = ' '.join(tempT1)
+                            st.toast('气象数据年份与植保数据不匹配', icon="⚠️")
                         # 正确情况
                         else:
                             new_data = {
