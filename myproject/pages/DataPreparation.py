@@ -618,12 +618,12 @@ with dataPCM:
     # elif st.session_state.page12 == 1:
     # 运行一次就一直显示结果
 
-    if st.session_state.page12 >= 1:
-        with placeholder.container(border=True):
-            st.markdown('##### 预处理后数据集')
-            # st.markdown("##### 原始建模")
+    with placeholder.container(border=True, height=330):
+        st.markdown('##### 预处理后数据集')
+        if st.session_state.page12 >= 1:
+
             st.data_editor(
-                    pages_utils.TempDataSetField[1],
+                pages_utils.TempDataSetField[1],
                 column_order=["数据类型", '预处理后字段', '大小', '预处理方法', '时间'],
                 height=192, width=800, )
 

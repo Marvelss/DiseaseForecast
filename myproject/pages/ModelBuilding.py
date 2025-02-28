@@ -758,10 +758,10 @@ with modelACM:
 
     # =======================显示右下可视化图表=======================
     # elif st.session_state.page15 == 1:
-    if st.session_state.page15 >= 1:
-        with placeholder.container(border=True, height=365):
-            # st.markdown('---')
-            st.write('##### 建模结果')
+    with placeholder.container(border=True, height=435):
+        # st.markdown('---')
+        st.write('##### 建模结果')
+        if st.session_state.page15 >= 1:
             evaluationIndex = pages_utils.TempDataSetField[4]["评价指标"].tolist()
             for i in range(len(evaluationIndex)):
                 item = evaluationIndex[i]

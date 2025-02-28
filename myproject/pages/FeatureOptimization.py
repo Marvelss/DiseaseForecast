@@ -802,9 +802,9 @@ with dataPCM:
     # elif st.session_state.page14 == 1:
     placeholder = st.empty()
     # =======================显示右下可视化图表=======================
-    if st.session_state.page14 >= 1:
-        with placeholder.container(border=True, height=450):
-            st.markdown('##### 结果')
+    with placeholder.container(border=True, height=450):
+        st.markdown('##### 结果')
+        if st.session_state.page14 >= 1:
             st.data_editor(
                 pages_utils.TempDataSetField[3], height=145, width=1200,
                 column_order=["数据类型", "优选特征", "特征优选方法", '时间', ],

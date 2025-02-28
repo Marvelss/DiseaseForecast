@@ -663,11 +663,9 @@ with featureCCM:
     # =======================显示右下可视化图表=======================
     placeholder = st.empty()
     # 运行一次就一直显示结果
-    if st.session_state.page13 >= 1:
-        with placeholder.container(border=True):
-            st.markdown('##### 特征计算结果')
-            # st.markdown('##### 预处理后数据集')
-            # st.markdown("##### 原始建模")
+    with placeholder.container(border=True, height=350):
+        st.markdown('##### 特征计算结果')
+        if st.session_state.page13 >= 1:
             # 添加特征类型字段
             dfFCR = pages_utils.TempDataSetField[2]
             # 初始化新的字段 '特征类型'
