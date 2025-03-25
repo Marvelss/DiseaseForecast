@@ -5,7 +5,7 @@
 @Description : 特征优化方法
 """
 import pandas as pd
-from scipy.stats import stats
+from scipy.stats import stats, ttest_ind
 import numpy as np
 from sklearn.model_selection import train_test_split
 from skrebate import ReliefF
@@ -268,61 +268,70 @@ class FeatureOptimizationMethod:
         fieldList = methodParam[1].split(' ')
         tCondition = methodParam[2].split('<')[1]
         pCondition = methodParam[3]
+
+        # 确保 tCondition 是 numpy.float64 类型
+        tCondition = np.float64(tCondition)
+        pCondition = np.float64(pCondition)
+
         # 复制新的变量
         newDataFrame = self.dataFrame.copy()
         # ==================计算t检验==================
-        comparedVariableList = fieldList
-        tempResult = {}
-        # t检验并获取每个变量p-value结果
-        for feature in comparedVariableList:
-            rainfall = np.array(newDataFrame[feature].tolist())
-            disease = np.array(newDataFrame[labelField].tolist())
-            t_stat, p_value = stats.ttest_ind(
-                rainfall,
-                disease)
-            tempResult[feature] = p_value
-        # 筛选p-value符合条件的特征
-        filtered_data = {key: value for key, value in tempResult.items() if value <= float(tCondition)}
-        # print('======p-value========')
-        # print(tempResult)
-        # 获取优选特征集
-        optimalFeatureList = list(filtered_data.keys())
+        # 提取病害发生程度和气象字段
+        disease_levels = newDataFrame[labelField].unique()
+        meteorological_fields = fieldList + [labelField]
+        # print(f"比较数组{meteorological_fields}")
+        left_field = []
+
+        t_test_results = {}  # 用于存储每个特征的 t 检验结果
+        # 进行 t 检验，筛选显著性高的特征
+        for field in meteorological_fields:
+            if field == labelField:
+                continue
+            p_values = []
+            for i in range(len(disease_levels)):
+                for j in range(i + 1, len(disease_levels)):
+                    group_i = newDataFrame[newDataFrame[labelField] == disease_levels[i]][field]
+                    group_j = newDataFrame[newDataFrame[labelField] == disease_levels[j]][field]
+                    _, p_value = ttest_ind(group_i, group_j, equal_var=False)  # 独立样本 t 检验
+                    p_values.append(p_value)
+
+            # print(f"字段 {field} 与病害发生程度类别的 p 值: {p_values}")
+            # 若所有 p 值都 < 0.05，则保留该字段
+            if all(p < tCondition for p in p_values):
+                left_field.append(field)
+                t_test_results[field] = p_values  # 保存 t 检验结果
+                # print(f"字段 {field} 被保留，因为所有 t 检验的 p 值都 < {tCondition}")
+            else:
+                pass
+                # print(f"字段 {field} 可能影响病害发生，被考虑去除")
+        # 筛选 t 检验后符合条件的特征
+        optimalFeatureList = left_field
         print('=========t检验后优选特征集=========')
         print(optimalFeatureList)
-        # 使用t检验后的特征进行pearson分析
-        fieldList = optimalFeatureList
-        # ==================计算相关性矩阵==================
-        data = newDataFrame[fieldList]
-        # 计算特征之间的Pearson相关性系数
-        correlation_matrix = data.corr(method='pearson')
-        # 将相关性系数存储到字典tempResultP中
-        tempResultP = {}
-        for i in range(len(fieldList)):
-            for j in range(i + 1, len(fieldList)):
-                feature1 = fieldList[i]
-                feature2 = fieldList[j]
-                correlation = correlation_matrix.loc[feature1, feature2]
-                tempResultP[(feature1, feature2)] = correlation
-        # 打印相关性系数
-        # print("Correlation coefficients:")
-        # for (feature1, feature2), correlation in tempResultP.items():
-        #     print(f"{feature1} vs {feature2}: {correlation:.4f}")
-        # 初始化选中的特征
-        selected_features = set(fieldList)
-        # 对特征对进行遍历
-        for (feature1, feature2), correlation in tempResultP.items():
-            if abs(correlation) > float(pCondition):
-                # 获取两个特征的p值
-                p1 = tempResult[feature1]
-                p2 = tempResult[feature2]
 
-                # 比较p值，剔除p值较低的特征
-                if p1 < p2:
-                    if feature2 in selected_features:
+        # 使用 t 检验后的特征进行 Pearson 相关性分析
+        if not optimalFeatureList:
+            print("没有特征通过 t 检验，无法进行 Pearson 相关性分析。")
+            return '', []
+        # 计算特征之间的 Pearson 相关性系数
+        correlation_matrix = newDataFrame[optimalFeatureList].corr(method='pearson')
+        selected_features = set(optimalFeatureList)
+        print(correlation_matrix)
+        # 遍历特征对，根据相关性系数和显著性水平筛选特征
+        for i in range(len(optimalFeatureList)):
+            for j in range(i + 1, len(optimalFeatureList)):
+                feature1 = optimalFeatureList[i]
+                feature2 = optimalFeatureList[j]
+                correlation = correlation_matrix.loc[feature1, feature2]
+                if abs(correlation) > pCondition:
+                    p1 = min(t_test_results[feature1])
+                    p2 = min(t_test_results[feature2])
+                    # 比较 p 值，剔除显著性较低的特征
+                    if p1 < p2:
                         selected_features.discard(feature2)
-                else:
-                    if feature1 in selected_features:
+                    else:
                         selected_features.discard(feature1)
+
         print('=========Pearson相关性分析后的最优特征集=========')
         print(selected_features)
         return '', list(selected_features)
