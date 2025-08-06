@@ -9,7 +9,7 @@ from streamlit import switch_page
 
 import itertools
 
-from lib.share import PROJECT_PATH, PAGES_PATH, RESOURCE_IMAGES_PATH, IMAGECOUNT, RESOURCE_PROCESS_PATH
+from lib.share import PROJECT_PATH, PAGES_PATH, RESOURCE_IMAGES_PATH, IMAGECOUNT, RESOURCE_PROCESS_PATH, RESOURCE_PATH
 from pages import ui, pages_utils
 from pages.modelandmethod.FeatureCalculationMethod import FeatureCalculationMethod
 
@@ -223,10 +223,11 @@ def emptyValue():
 
 
 category("✨ 系统介绍")
-video_file = open(r"E:\a_python\program\diseaseForecastStreamlit\myproject\resource\vedioIntroduction.mp4", "rb")
+video_file = open("./resource/videoIntroduction.mp4", "rb")
 video_bytes = video_file.read()
 
 st.video(video_bytes)
+
 
 # category("🌈 初始化建模数据")
 # colDPF21col1, colDPF21col2 = st.columns([8, 10])
