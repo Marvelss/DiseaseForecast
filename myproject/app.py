@@ -44,7 +44,7 @@ ICON_BLUE = os.path.join(RESOURCE_IMAGES_PATH, 'HDU_Logo.png')
 sidebar_logo = ICON_BLUE
 main_body_logo = HORIZONTAL_BLUE
 
-st.logo(sidebar_logo, icon_image=main_body_logo)
+st.logo(sidebar_logo, size='large', icon_image=main_body_logo)
 
 # 控制界面显示
 show_pages(
@@ -58,41 +58,41 @@ show_pages(
         Page(os.path.join(PAGES_PATH, 'ModelApplication.py'), "模型应用"),
         Page(os.path.join(PAGES_PATH, 'ModelingReport.py'), "建模报告"),
         Page(os.path.join(PAGES_PATH, 'Visualization.py'), "数据下载中心"),
-        # Page(os.path.join(PAGES_PATH, 'WeatherGenerator.py'), "基于天气情景生成器的模型评价"),
-        #
-        # Page(os.path.join(PAGES_PATH, 'DataSetFacet.py'), "原始数据-面状"),
-        # Page(os.path.join(PAGES_PATH, 'DataPreparationFacet.py'), "数据预处理-面状"),
-        # Page(os.path.join(PAGES_PATH, 'FeatureCalculationFacet.py'), "特征计算-面状"),
-        # Page(os.path.join(PAGES_PATH, 'FeatureOptimizationFacet.py'), "特征优选-面状"),
-        # Page(os.path.join(PAGES_PATH, 'ModelBuildingFacet.py'), "模型构建-面状"),
-        # Page(os.path.join(PAGES_PATH, 'WeatherGeneratorFacet.py'), "基于天气情景生成器的模型评价-面状"),
-        # Page(os.path.join(PAGES_PATH, 'ModelingReportFacet.py'), "建模报告-面状"),
-        # Page(os.path.join(PAGES_PATH, 'ModelApplicationFacet.py'), "模型应用-面状"),
-        # Page(os.path.join(PAGES_PATH, 'VisualizationFacet.py'), "数据下载中心-面状"),
-        # Page(os.path.join(PAGES_PATH, 'ModelEvaluation.py'), "testInterface"),
+        Page(os.path.join(PAGES_PATH, 'WeatherGenerator.py'), "基于天气情景生成器的模型评价"),
+
+        Page(os.path.join(PAGES_PATH, 'DataSetFacet.py'), "原始数据-面状"),
+        Page(os.path.join(PAGES_PATH, 'DataPreparationFacet.py'), "数据预处理-面状"),
+        Page(os.path.join(PAGES_PATH, 'FeatureCalculationFacet.py'), "特征计算-面状"),
+        Page(os.path.join(PAGES_PATH, 'FeatureOptimizationFacet.py'), "特征优选-面状"),
+        Page(os.path.join(PAGES_PATH, 'ModelBuildingFacet.py'), "模型构建-面状"),
+        Page(os.path.join(PAGES_PATH, 'WeatherGeneratorFacet.py'), "基于天气情景生成器的模型评价-面状"),
+        Page(os.path.join(PAGES_PATH, 'ModelingReportFacet.py'), "建模报告-面状"),
+        Page(os.path.join(PAGES_PATH, 'ModelApplicationFacet.py'), "模型应用-面状"),
+        Page(os.path.join(PAGES_PATH, 'VisualizationFacet.py'), "数据下载中心-面状"),
+        Page(os.path.join(PAGES_PATH, 'ModelEvaluation.py'), "testInterface"),
 
     ]
 )
 
 # 隐藏页面
-# hide_pages(
-#     ["原始数据", "气象数据预处理", "特征计算",
-#      "特征优选", "模型构建", "基于天气情景生成器的模型评价", "基于天气情景生成器的模型评价-面状",
-#      "模型应用", "模型应用-面状",
-#      "原始数据-面状",
-#      "数据预处理-面状",
-#      "特征计算-面状",
-#      "特征优选-面状",
-#      "模型构建-面状",
-#      "建模报告", "建模报告-面状",
-#      "数据下载中心", "数据下载中心-面状",
-#      ]
-# )
+hide_pages(
+    ["原始数据", "气象数据预处理", "特征计算",
+     "特征优选", "模型构建", "基于天气情景生成器的模型评价", "基于天气情景生成器的模型评价-面状",
+     "模型应用", "模型应用-面状",
+     "原始数据-面状",
+     "数据预处理-面状",
+     "特征计算-面状",
+     "特征优选-面状",
+     "模型构建-面状",
+     "建模报告", "建模报告-面状",
+     "数据下载中心", "数据下载中心-面状",
+     ]
+)
 # 隐藏页面
 hide_pages(
     ["原始建模数据", "气象数据预处理", "特征计算",
-     "特征优选", "模型构建",
-     "建模报告", '基于天气情景生成器的模型评价', '模型应用', "数据下载中心",
+     "特征优选", "模型构建", "数据下载中心",
+     "建模报告", '基于天气情景生成器的模型评价', '模型应用',
      ]
 )
 
@@ -115,7 +115,17 @@ if "IMAGECOUNT" not in st.session_state:
 if "areaCenter" not in st.session_state:
     st.session_state.areaCenter = [30.314207, 120.343200]
 # 设置网页标题
+st.markdown("""
+    <style>
+        .block-container {
+            padding-top: 0rem;  /* 默认约为 3.5rem，你可以调小为 1rem 或 0rem */
+        }
+    </style>
+    """, unsafe_allow_html=True)
 st.title('多场景作物病虫害快速预测建模系统')
+st.markdown('')
+st.markdown('')
+st.markdown('')
 
 category_colors_cycle = itertools.cycle(
     [
@@ -150,13 +160,13 @@ def emptyValue():
         pd.DataFrame(
             columns=["编号", "数据类型", "文件名称", "字段", "传输状态", "上传时间"]),
         pd.DataFrame(
-            columns=["编号", "数据类型", "输入字段", "预处理后字段", "大小", "预处理方法", "方法参数", '时间',
+            columns=["编号", "数据类型", "输入字段", "预处理后字段", "数据量", "预处理方法", "方法参数", '时间',
                      "处理状态"]),
         pd.DataFrame(
-            columns=["编号", "数据类型", "输入特征", "备选特征", "大小", "特征计算方法", "方法参数", "时间",
+            columns=["编号", "数据类型", "输入特征", "备选特征", "数据量", "特征计算方法", "方法参数", "时间",
                      "处理状态"]),
         pd.DataFrame(
-            columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间",
+            columns=["编号", "数据类型", "输入特征", "优选特征", "数据量", "特征优选方法", "方法参数", "时间",
                      "处理状态"]),
         pd.DataFrame(
             columns=["编号", "模型", "模型参数", "特征", "标签", "评价指标", "数据集划分比例", "时间", "实际和预测值",
@@ -179,7 +189,7 @@ def emptyValue():
                                             "数据格式": [], "根节点": [], "子节点": [], "字段": [],
                                             "特征计算方法": [], "方法参数": [], "时间": [], "处理状态": []}
     pages_utils.OptimalFeatureDataSetFieldFacet = pd.DataFrame(
-        columns=["编号", "数据类型", "输入特征", "优选特征", "大小", "特征优选方法", "方法参数", "时间", "处理状态"])
+        columns=["编号", "数据类型", "输入特征", "优选特征", "数据量", "特征优选方法", "方法参数", "时间", "处理状态"])
     pages_utils.UltimateFeatureDataSetFacet = pd.DataFrame(
         columns=["编号", "模型", "模型参数", "特征", "标签", "评价指标", "数据集划分比例", "模型结构", "模型训练结果",
                  "时间",
@@ -212,13 +222,19 @@ def emptyValue():
     # st.session_state.page12 = 0
 
 
-category("🌈 初始化建模数据")
-colDPF21col1, colDPF21col2 = st.columns([8, 10])
-with colDPF21col1:
-    pass
-with colDPF21col2:
-    if st.button('↩️初始化各环节数据', on_click=emptyValue):
-        st.toast("初始化完毕", icon="ℹ️️")
+category("✨ 系统介绍")
+video_file = open(r"E:\a_python\program\diseaseForecastStreamlit\myproject\resource\vedioIntroduction.mp4", "rb")
+video_bytes = video_file.read()
+
+st.video(video_bytes)
+
+# category("🌈 初始化建模数据")
+# colDPF21col1, colDPF21col2 = st.columns([8, 10])
+# with colDPF21col1:
+#     pass
+# with colDPF21col2:
+#     if st.button('↩️初始化各环节数据', on_click=emptyValue):
+#         st.toast("初始化完毕", icon="ℹ️️")
 
 
 # st.markdown("""
@@ -274,7 +290,7 @@ with colAppImg2:
     st.image(os.path.join(RESOURCE_IMAGES_PATH, 'facetBtn.png'))
     _, colAppBtn3, = st.columns([0.4, 0.6])
     with colAppBtn3:
-        if st.button('面状数据建模', disabled=True):
+        if st.button('面状数据建模'):
             if not st.session_state.modelingName:
                 inputName('面状数据建模')
             else:
@@ -643,8 +659,8 @@ col31, col32, col33 = st.columns(3)
 with col31:
     app(os.path.join(RESOURCE_IMAGES_PATH, 'modelSIER.png'),
         '#',
-        " 水稻纹枯病SEIR机理模型",
-        "基于SEIR基本模型框架,耦合气象和峰值数据,实现水稻纹枯病株率预测",
+        " SEIR模型",
+        "团队自行构建的SEIR与遗传算法(GA)耦合的机理性建模方法",
         "杭电数字农业团队",
         "https://github.com/Marvelss",
         )
