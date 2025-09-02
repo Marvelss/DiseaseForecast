@@ -69,7 +69,7 @@ show_pages(
         Page(os.path.join(PAGES_PATH, 'ModelingReportFacet.py'), "建模报告-面状"),
         Page(os.path.join(PAGES_PATH, 'ModelApplicationFacet.py'), "模型应用-面状"),
         Page(os.path.join(PAGES_PATH, 'VisualizationFacet.py'), "数据下载中心-面状"),
-        Page(os.path.join(PAGES_PATH, 'ModelEvaluation.py'), "testInterface"),
+        # Page(os.path.join(PAGES_PATH, 'ModelEvaluation.py'), "testInterface"),
 
     ]
 )
@@ -291,7 +291,7 @@ with colAppImg2:
     st.image(os.path.join(RESOURCE_IMAGES_PATH, 'facetBtn.png'))
     _, colAppBtn3, = st.columns([0.4, 0.6])
     with colAppBtn3:
-        if st.button('面状数据建模'):
+        if st.button('面状数据建模',disabled=True):
             if not st.session_state.modelingName:
                 inputName('面状数据建模')
             else:
