@@ -138,9 +138,9 @@ echo 'streamlit run ./myproject/app.py'
 
 ## Contributing
 
-- **💬 [Join the Discussions](https://LOCAL/myproject/pages/discussions)**: Share your insights, provide feedback, or ask questions.
-- **🐛 [Report Issues](https://LOCAL/myproject/pages/issues)**: Submit bugs found or log feature requests for the `pages` project.
-- **💡 [Submit Pull Requests](https://LOCAL/myproject/pages/blob/main/CONTRIBUTING.md)**: Review open PRs, and submit your own PRs.
+- **💬 [Join the Discussions](https://github.com/Marvelss)**: Share your insights, provide feedback, or ask questions.
+- **🐛 [Report Issues](https://github.com/Marvelss)**: Submit bugs found or log feature requests for the `pages` project.
+- **💡 [Submit Pull Requests](https://github.com/Marvelss)**: Review open PRs, and submit your own PRs.
 
 
 ---
@@ -148,6 +148,7 @@ echo 'streamlit run ./myproject/app.py'
 ## License
 
 Copyright © 2023-2025 [Marvelss](https://github.com/Marvelss).
+
 Protected under the [MIT](https://github.com/Marvelss/DiseaseForecast?tab=readme-ov-file#MIT-1-ov-file) License. 
 
 ---
