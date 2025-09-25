@@ -37,16 +37,13 @@
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
     - [Usage](#usage)
-    - [Testing](#testing)
-- [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
-- [Acknowledgments](#acknowledgments)
 
 ---
 
 ## Overview
-Frequent outbreaks of crop diseases threaten global food security, yet user-friendly tools for developing data-driven forecasting models remain limited. We present an open-source multi-scenario crop disease forecasting modeling system that offers, for the first time, an end-to-end solution supporting four scenarios: static point-based, static grid-based, dynamic point-based, and dynamic grid-based. The system adopts a modular architecture with standardized interfaces to seamlessly integrate data ingestion, preprocessing, feature engineering, training, and evaluation, while providing parameter-tuning utilities and interactive visualization. A distinctive feature is the embedded weather scenario generator, which enables rigorous testing of model adaptability under extreme climatic conditions. Case studies demonstrate overall accuracies ranging from 73% to 93%. By lowering technical barriers, the system is designed to serve plant protection managers and agricultural producers without advanced programming expertise, providing a practical modeling tool that supports the construction of smart plant protection systems.
+   Frequent outbreaks of crop diseases threaten global food security, yet user-friendly tools for developing data-driven forecasting models remain limited. We present an open-source multi-scenario crop disease forecasting modeling system that offers, for the first time, an end-to-end solution supporting four scenarios: static point-based, static grid-based, dynamic point-based, and dynamic grid-based. The system adopts a modular architecture with standardized interfaces to seamlessly integrate data ingestion, preprocessing, feature engineering, training, and evaluation, while providing parameter-tuning utilities and interactive visualization. A distinctive feature is the embedded weather scenario generator, which enables rigorous testing of model adaptability under extreme climatic conditions. Case studies demonstrate overall accuracies ranging from 73% to 93%. By lowering technical barriers, the system is designed to serve plant protection managers and agricultural producers without advanced programming expertise, providing a practical modeling tool that supports the construction of smart plant protection systems.
 
 
 ---
@@ -137,11 +134,6 @@ Run the project with:
 
 echo 'streamlit run ./myproject/app.py'
 
-### Testing
-
-Pages uses the {__test_framework__} test framework. Run the test suite with:
-
-echo 'INSERT-TEST-COMMAND-HERE'
 
 
 ## Contributing
