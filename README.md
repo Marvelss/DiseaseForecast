@@ -147,7 +147,8 @@ echo 'streamlit run ./myproject/app.py'
 
 ## License
 
-Pages is protected under the [LICENSE](https://choosealicense.com/licenses) License. For more details, refer to the [LICENSE](https://choosealicense.com/licenses/) file.
+Copyright © 2023-2025 [Marvelss](https://github.com/Marvelss).
+Protected under the [MIT](https://github.com/Marvelss/DiseaseForecast?tab=readme-ov-file#MIT-1-ov-file) License. 
 
 ---
 
