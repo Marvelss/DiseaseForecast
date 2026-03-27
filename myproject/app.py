@@ -229,13 +229,13 @@ video_bytes = video_file.read()
 st.video(video_bytes)
 
 
-# category("🌈 初始化建模数据")
-# colDPF21col1, colDPF21col2 = st.columns([8, 10])
-# with colDPF21col1:
-#     pass
-# with colDPF21col2:
-#     if st.button('↩️初始化各环节数据', on_click=emptyValue):
-#         st.toast("初始化完毕", icon="ℹ️️")
+category("🌈 初始化建模数据")
+colDPF21col1, colDPF21col2 = st.columns([8, 10])
+with colDPF21col1:
+    pass
+with colDPF21col2:
+    if st.button('↩️初始化各环节数据', on_click=emptyValue):
+        st.toast("初始化完毕", icon="ℹ️️")
 
 
 # st.markdown("""
